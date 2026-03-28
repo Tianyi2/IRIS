@@ -1,0 +1,16 @@
+# Copyright IBM Corp. 2020, 2024
+# SPDX-License-Identifier: MPL-2.0
+
+resource "tls_private_key" "main" {
+  algorithm = "RSA"
+}
+
+resource "null_resource" "main" {
+  provisioner "local-exec" {
+    command = "echo \"${tls_private_key.main.private_key_pem}\" > azure-hashistack.pem"
+  }
+
+  provisioner "local-exec" {
+    command = "chmod 600 azure-hashistack.pem"
+  }
+}

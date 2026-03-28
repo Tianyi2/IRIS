@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "AllowedLocations",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "northeurope",
+      "identity": {
+        "principalId": "3906bab4-2e81-4032-a89e-4d79dce68188",
+        "tenantId": "dbbc60b0-7054-4f16-a0af-724750c58153",
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "description": "Policy to ringfence Azure regions.",
+        "displayName": "Policy to ringfence Azure regions.",
+        "enforcementMode": "DoNotEnforce",
+        "metadata": {},
+        "parameters": {
+          "listOfAllowedLocations": {
+            "value": [
+              "westeurope",
+              "northeurope"
+            ]
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4c",
+        "scope": "/providers/Microsoft.Management/managementGroups/contoso-online"
+      }
+    }
+  ],
+  "outputs": {}
+}

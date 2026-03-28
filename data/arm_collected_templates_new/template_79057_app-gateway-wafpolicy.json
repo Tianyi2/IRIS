@@ -1,0 +1,88 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "WafPolicyName": {
+            "defaultValue": "WAFPolicyName",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('WafPolicyName')]",
+            "location": "westeurope",
+            "properties": {
+                "customRules": [
+                    {
+                        "name": "DenyList",
+                        "priority": 1,
+                        "ruleType": "MatchRule",
+                        "action": "Block",
+                        "matchConditions": [
+                            {
+                                "matchVariables": [
+                                    {
+                                        "variableName": "RemoteAddr"
+                                    }
+                                ],
+                                "operator": "IPMatch",
+                                "negationConditon": false,
+                                "matchValues": [
+                                    "195.206.107.118"
+                                ],
+                                "transforms": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "DisallowUserAgents",
+                        "priority": 2,
+                        "ruleType": "MatchRule",
+                        "action": "Block",
+                        "matchConditions": [
+                            {
+                                "matchVariables": [
+                                    {
+                                        "variableName": "RequestHeaders",
+                                        "selector": "user-agent"
+                                    }
+                                ],
+                                "operator": "Contains",
+                                "negationConditon": false,
+                                "matchValues": [
+                                    "${jndi:ldap"
+                                ],
+                                "transforms": []
+                            }
+                        ]
+                    }
+                ],
+                "policySettings": {
+                    "requestBodyCheck": true,
+                    "maxRequestBodySizeInKb": 128,
+                    "fileUploadLimitInMb": 100,
+                    "state": "Enabled",
+                    "mode": "Detection"
+                },
+                "managedRules": {
+                    "managedRuleSets": [
+                        {
+                            "ruleSetType": "OWASP",
+                            "ruleSetVersion": "3.2",
+                            "ruleGroupOverrides": []
+                        },
+                        {
+                            "ruleSetType": "Microsoft_BotManagerRuleSet",
+                            "ruleSetVersion": "0.1",
+                            "ruleGroupOverrides": []
+                        }
+                    ],
+                    "exclusions": []
+                }
+            }
+        }
+    ]
+}

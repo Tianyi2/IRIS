@@ -1,0 +1,323 @@
+resource "kubernetes_secret" "onp_minecraft_debug_secrets" {
+  depends_on = [kubernetes_namespace.onp_seichi_debug_minecraft]
+
+  metadata {
+    name      = "mcserver--common--config-secrets"
+    namespace = "seichi-debug-minecraft"
+  }
+
+  data = {
+    DISCORDSRV_TOKEN      = var.minecraft__discordsrv_bot_token
+    PROD_GAME_DB_PASSWORD = var.minecraft__prod_game_db__password
+  }
+
+  type = "Opaque"
+}
+
+resource "kubernetes_secret" "onp_minecraft_debug_seichiassist_webhook_secrets" {
+  depends_on = [kubernetes_namespace.onp_seichi_minecraft]
+
+  metadata {
+    name      = "mcserver--seichiassist-webhook--config-secrets"
+    namespace = "seichi-debug-minecraft"
+  }
+
+  data = {
+    SEICHIASSIST_DEBUG_S1_WEBHOOK_URL = var.minecraft__debug_s1_seichiassist_webhook_url
+    SEICHIASSIST_DEBUG_S2_WEBHOOK_URL = var.minecraft__debug_s2_seichiassist_webhook_url
+  }
+
+  type = "Opaque"
+}
+
+
+resource "kubernetes_secret" "onp_minecraft_prod_secrets" {
+  depends_on = [kubernetes_namespace.onp_seichi_minecraft]
+
+  metadata {
+    name      = "mcserver--common--config-secrets"
+    namespace = "seichi-minecraft"
+  }
+
+  data = {
+    DISCORDSRV_TOKEN           = var.minecraft__gt_seichi_discordsrv_bot_token
+    GAME_DB_PASSWORD           = var.minecraft__prod_game_db__password
+    VOTELISTENER_DEFUALT_TOKEN = var.minecraft__prod_votelistener_default_token
+  }
+
+  type = "Opaque"
+}
+
+resource "kubernetes_secret" "onp_minecraft_prod_lobby_secrets" {
+  depends_on = [kubernetes_namespace.onp_seichi_minecraft]
+
+  metadata {
+    name      = "mcserver--lobby--config-secrets"
+    namespace = "seichi-minecraft"
+  }
+
+  data = {
+    ANTI_PROXY_API_KEY = var.minecraft__prod_lobby_anti_proxy_api_key
+  }
+
+  type = "Opaque"
+}
+
+resource "kubernetes_secret" "onp_minecraft_prod_seichiassist_webhook_secrets" {
+  depends_on = [kubernetes_namespace.onp_seichi_minecraft]
+
+  metadata {
+    name      = "mcserver--seichiassist-webhook--config-secrets"
+    namespace = "seichi-minecraft"
+  }
+
+  data = {
+    SEICHIASSIST_S1_WEBHOOK_URL = var.minecraft__prod_s1_seichiassist_webhook_url
+    SEICHIASSIST_S2_WEBHOOK_URL = var.minecraft__prod_s2_seichiassist_webhook_url
+    SEICHIASSIST_S3_WEBHOOK_URL = var.minecraft__prod_s3_seichiassist_webhook_url
+    SEICHIASSIST_S5_WEBHOOK_URL = var.minecraft__prod_s5_seichiassist_webhook_url
+    SEICHIASSIST_S7_WEBHOOK_URL = var.minecraft__prod_s7_seichiassist_webhook_url
+  }
+
+  type = "Opaque"
+}
+
+resource "kubernetes_secret" "onp_minecraft_prod_one_day_to_reset_secrets" {
+  depends_on = [kubernetes_namespace.onp_seichi_minecraft]
+
+  metadata {
+    name      = "mcserver--one-day-to-reset--config-secrets"
+    namespace = "seichi-minecraft"
+  }
+
+  data = {
+    MORNING_GLORY_SEEDS_WEBHOOK_URL = var.minecraft__prod_one_day_to_reset__morning_glory_seed_webhook_url
+  }
+
+  type = "Opaque"
+}
+
+resource "kubernetes_secret" "onp_minecraft_prod_kagawa_secrets" {
+  depends_on = [kubernetes_namespace.onp_seichi_minecraft]
+
+  metadata {
+    name      = "mcserver--kagawa--config-secrets"
+    namespace = "seichi-minecraft"
+  }
+
+  data = {
+    MORNING_GLORY_SEEDS_WEBHOOK_URL = var.minecraft__prod_kagawa__morning_glory_seed_webhook_url
+  }
+
+  type = "Opaque"
+}
+
+resource "kubernetes_secret" "argo_events_github_access_token" {
+  depends_on = [kubernetes_namespace.onp_seichi_minecraft]
+
+  metadata {
+    name      = "argo-events-github-access-token"
+    namespace = "seichi-minecraft"
+  }
+
+  data = {
+    # ref: https://github.com/argoproj/argo-events/blob/4636435578ae2396fa637e4ed44c2d2edbbec58b/examples/event-sources/github.yaml#L54
+    ARGO_EVENTS_GITHUB_ACCESS_TOKEN = base64encode(var.argo_events_github_access_token)
+  }
+
+  type = "Opaque"
+}
+
+resource "kubernetes_secret" "seichiassist_downloader_develop_release_notify_webhook" {
+  depends_on = [kubernetes_namespace.onp_seichi_minecraft]
+
+  metadata {
+    name      = "seichiassist-downloader-develop-release-notify-webhook"
+    namespace = "seichi-minecraft"
+  }
+
+  data = {
+    DISCORD_WEBHOOK_URL = var.seichiassist_downloader_develop_release_notify_webhook_url
+  }
+
+  type = "Opaque"
+}
+
+resource "kubernetes_secret" "seichiassist_downloader_master_release_notify_webhook" {
+  depends_on = [kubernetes_namespace.onp_seichi_minecraft]
+
+  metadata {
+    name      = "seichiassist-downloader-master-release-notify-webhook"
+    namespace = "seichi-minecraft"
+  }
+
+  data = {
+    DISCORD_WEBHOOK_URL = var.seichiassist_downloader_master_release_notify_webhook_url
+  }
+
+  type = "Opaque"
+}
+
+resource "kubernetes_secret" "onp_minecraft_prod_bugsink_admin_password" {
+  depends_on = [kubernetes_namespace.onp_seichi_minecraft]
+
+  metadata {
+    name      = "bugsink-admin-password"
+    namespace = "seichi-minecraft"
+  }
+
+  data = {
+    ADMIN_PASSWORD = var.bugsink_admin_password
+  }
+
+  type = "Opaque"
+}
+
+resource "random_password" "minecraft__prod_mariadb_root_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "random_password" "minecraft__prod_mariadb_mcserver_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "random_password" "minecraft__prod_mariadb_luckperms_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "random_password" "minecraft__prod_mariadb_coreprotect_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "random_password" "minecraft__prod_mariadb_litebans_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "kubernetes_secret" "onp_minecraft_prod_mariadb_root_password" {
+  depends_on = [kubernetes_namespace.onp_seichi_minecraft]
+
+  metadata {
+    name      = "mariadb"
+    namespace = "seichi-minecraft"
+  }
+
+  data = {
+    "root-password"        = random_password.minecraft__prod_mariadb_root_password.result
+    "mcserver-password"    = random_password.minecraft__prod_mariadb_mcserver_password.result
+    "luckperms-password"   = random_password.minecraft__prod_mariadb_luckperms_password.result
+    "coreprotect-password" = random_password.minecraft__prod_mariadb_coreprotect_password.result
+    "litebans-password"    = random_password.minecraft__prod_mariadb_litebans_password.result
+  }
+
+  type = "Opaque"
+}
+
+resource "random_password" "minecraft__debug_mariadb_root_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "random_password" "minecraft__debug_mariadb_mcserver_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "random_password" "minecraft__debug_mariadb_coreprotect_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "random_password" "minecraft__debug_mariadb_luckperms_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "kubernetes_secret" "onp_minecraft_debug_mariadb_root_password" {
+  depends_on = [kubernetes_namespace.onp_seichi_debug_minecraft]
+
+  metadata {
+    name      = "mariadb"
+    namespace = "seichi-debug-minecraft"
+  }
+
+  data = {
+    "root-password"        = random_password.minecraft__debug_mariadb_root_password.result
+    "mcserver-password"    = random_password.minecraft__debug_mariadb_mcserver_password.result
+    "coreprotect-password" = random_password.minecraft__debug_mariadb_coreprotect_password.result
+    "luckperms-password"   = random_password.minecraft__debug_mariadb_luckperms_password.result
+  }
+
+  type = "Opaque"
+}
+
+
+resource "kubernetes_secret" "tailscale_approval_bot_secrets" {
+  depends_on = [kubernetes_namespace.onp_seichi_minecraft]
+
+  metadata {
+    name      = "tailscale-approval-bot-secrets"
+    namespace = "seichi-minecraft"
+  }
+
+  data = {
+    TAILSCALE_TAILNET  = var.tailscale_approval_bot__tailnet
+    TAILSCALE_API_KEY  = var.tailscale_approval_bot__api_key
+    DISCORD_BOT_TOKEN  = var.tailscale_approval_bot__discord_bot_token
+    DISCORD_GUILD_ID   = var.tailscale_approval_bot__discord_guild_id
+    DISCORD_CHANNEL_ID = var.tailscale_approval_bot__discord_channel_id
+  }
+
+  type = "Opaque"
+}
+
+resource "kubernetes_secret" "backup_failure_notify_webhook" {
+  depends_on = [kubernetes_namespace.onp_seichi_minecraft]
+
+  metadata {
+    name      = "backup-failure-notify-webhook"
+    namespace = "seichi-minecraft"
+  }
+
+  data = {
+    DISCORD_WEBHOOK_URL = var.backup_failure_notify_webhook_url
+  }
+
+  type = "Opaque"
+}
+
+# pbs-credentials: seichi-minecraft に配置し、seichi-debug-minecraft と garage に複製
+resource "kubernetes_secret" "pbs_credentials" {
+  depends_on = [kubernetes_namespace.onp_seichi_minecraft]
+
+  metadata {
+    name      = "pbs-credentials"
+    namespace = "seichi-minecraft"
+    annotations = {
+      "replicator.v1.mittwald.de/replicate-to" = "seichi-debug-minecraft,garage"
+    }
+  }
+
+  data = {
+    "user"        = var.proxmox_backup_client__user
+    "host"        = var.proxmox_backup_client__host
+    "datastore"   = var.proxmox_backup_client__datastore
+    "password"    = var.proxmox_backup_client__password
+    "fingerprint" = var.proxmox_backup_client__fingerprint
+  }
+
+  type = "Opaque"
+}

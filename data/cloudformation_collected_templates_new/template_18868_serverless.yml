@@ -1,0 +1,275 @@
+# Socless core infrastructure and functions
+service: socless
+unresolvedVariablesNotificationMode: error
+
+provider:
+  name: aws
+  runtime: python3.9
+  variableSyntax: "\\${{([ ~:a-zA-Z0-9._\\'\",\\-\\/\\(\\)]+?)}}"
+  stage: ${{opt:stage}}
+  region: ${{opt:region}}
+  role:
+    Fn::GetAtt: [LambdaExecutionRole, "Arn"]
+  versionFunctions: false
+  memorySize: 128
+  timeout: 10
+  environment:
+    SOCLESS_VAULT:
+      Ref: SoclessVault
+    SOCLESS_RESULTS_TABLE:
+      Ref: ExecutionResultsTable
+    SOCLESS_DEDUP_TABLE:
+      Ref: DedupTable
+    SOCLESS_EVENTS_TABLE:
+      Ref: EventsTable
+  vpc:
+    securityGroupIds:
+      - Fn::Sub: ${SoclessLambdaVpcSG.GroupId}
+    subnetIds:
+      - Ref: SoclessPrivateFunctionSubnet
+  stackPolicy:
+    - Effect: Allow
+      NotAction: Update:Delete
+      Principal: "*"
+      Resource : "*"
+    - Effect: Deny
+      Action: Update:Replace
+      Principal : "*"
+      Resource: LogicalResourceId/SoclessEIP
+
+
+plugins:
+  - sls-apb
+
+custom:
+  playbooksLogGroupName: /socless/playbook-execution-logs
+  # This is an example of an Integration Test playbook.
+  # The integration test can be used to ensure that deployed functions will work correctly in a playbook environment
+  playbooks:
+    - socless_core_integration_test
+
+resources:
+  - ${{file(resources/dynamodb.yml)}} # DynamoDB Tables
+  - ${{file(resources/iam.yml)}} # IAM Resources
+  - ${{file(resources/sfn.yml)}} # Step Functions Resources
+  - ${{file(resources/s3.yml)}} # S3 Resources
+  - ${{file(resources/kms.yml)}} # KMS Resources
+  - ${{file(resources/vpc.yml)}} # VPC Resources
+  - ${{file(resources/sg.yml)}} # Security Group resources
+  - ${{file(resources/apigateway.yml)}} # API Gateway
+  - ${{file(resources/playbook_logs.yml)}} # API Gateway
+  - Resources:
+      # This is an example of how you can keep a static input inside SSM for your integration test playbook.
+      # To run an integration test, supply this testcase to create_events which will start the integration test playbook.
+      SoclessIntegrationPlaybookTestcase:
+        Type: "AWS::SSM::Parameter"
+        Properties:
+          Description:
+            Fn::Sub: "Input for ${{self:service}}'s integration test playbook"
+          Name: /socless/integration_test_input
+          Type: String # test case is stored in plaintext in github, so not using a securestring here. Do not use secrets in the test case
+          # The test case must be valid JSON, but in order for serverless framework to read and upload to ssm the file needs to be .txt
+          Value: ${{file(playbooks/socless_core_integration_test/test_case_json.txt)}}
+  - Outputs:
+      MergeParallelOutput:
+        Description: Merges the output from a parallel state into a unified object
+        Value:
+          Fn::Sub: ${MergeParallelOutputLambdaFunction.Arn}
+
+      SaveMessageResponseToken:
+        Description: Save the task token created when the Socless Messages Response Activity state is used
+        Value:
+          Fn::Sub: ${SaveMessageResponseTokenLambdaFunction.Arn}
+
+      Counter:
+        Description: Simple counter functionality
+        Value:
+          Fn::Sub: ${CounterLambdaFunction.Arn}
+
+      SetInvestigationStatus:
+        Description: Set the internal status of an Socless investigation
+        Value:
+          Fn::Sub: ${SetInvestigationStatusLambdaFunction.Arn}
+
+      AddCustomMapping:
+        Description: Add a custom mapping to the CustomMappings Table
+        Value:
+          Fn::Sub: ${AddCustomMappingLambdaFunction.Arn}
+
+      QueryCustomMapping:
+        Description: Retrieve a custom mapping from the CustomMappings Table
+        Value:
+          Fn::Sub: ${QueryCustomMappingLambdaFunction.Arn}
+
+      CreateEvents:
+        Description: Create events from within a playbook
+        Value:
+          Fn::Sub: ${CreateEventsLambdaFunction.Arn}
+
+      HTTPRequest:
+        Description: Make an http request with the Python Requests library
+        Value:
+          Fn::Sub: ${HTTPRequestLambdaFunction.Arn}
+
+      CacheResults:
+        Description: Cache returned results
+        Value:
+          Fn::Sub: ${CacheResultsLambdaFunction.Arn}
+      SoclessLogFindings:
+        Description: Generate and upload SOCless log findings to a logging bucket
+        Value:
+          Fn::Sub: ${SoclessLogFindingsLambdaFunction.Arn}
+      SavePlaybookExecutionLogs:
+        Description: Ships SOCless Playbook executions logs from the log group to S3
+        Value:
+          Fn::Sub: ${SavePlaybookExecutionLogsLambdaFunction.Arn}
+      AWSRequest:
+        Description: Make requests against AWS APIs
+        Value:
+          Fn::Sub: ${AWSRequestLambdaFunction.Arn}
+
+      SetupGlobalStateForDirectInvokedPlaybook:
+        Description: Make requests against AWS APIs
+        Value:
+          Fn::Sub: ${SetupGlobalStateForDirectInvokedPlaybookLambdaFunction.Arn}
+
+package:
+  individually: true
+
+functions:
+  HTTPRequest:
+    handler: lambda_function.lambda_handler
+    name: socless_http_request
+    description: Make an http request with the Python Requests library
+    package:
+      artifact: .archives/functions/http_request.zip
+
+  MergeParallelOutput:
+    handler: lambda_function.lambda_handler
+    name: _socless_merge_parallel_output
+    description: Merges the output from a Parallel state into a unified object
+    package:
+      artifact: .archives/functions/_merge_parallel_output.zip
+
+  SaveMessageResponseToken:
+    handler: lambda_function.lambda_handler
+    name: _socless_save_msg_resp_token
+    description: Save the task token created when the Socless Messages Response Activity state is used
+    environment:
+      AWAIT_MESSAGE_RESPONSE_ARN:
+        Ref: AwaitMessageResponseActivity
+      MESSAGE_RESPONSES_TABLE:
+        Ref: MessageResponsesTable
+    package:
+      artifact: .archives/functions/_save_msg_resp_token.zip
+
+  Counter:
+    handler: lambda_function.lambda_handler
+    name: _socless_counter
+    description: Simple counter functionality
+    package:
+      artifact: .archives/functions/counter.zip
+
+  SetInvestigationStatus:
+    handler: lambda_function.lambda_handler
+    name: socless_set_investigation_status
+    environment:
+      SOCLESS_EVENTS_TABLE:
+        Ref: EventsTable
+    description: Socless integration to set an investigations status
+    package:
+      artifact: .archives/functions/set_investigation_status.zip
+
+  Playground:
+    handler: lambda_function.lambda_handler
+    name: _socless_playground
+    description: Function for playing around with Socless' Configuration
+    package:
+      artifact: .archives/functions/playground.zip
+
+  AddCustomMapping:
+    handler: lambda_function.lambda_handler
+    name: socless_add_custom_mapping
+    description: Add a custom mapping to the CustomMappings Table
+    environment:
+      SOCLESS_CUSTOM_MAPPINGS_TABLE:
+        Ref: CustomMappingsTable
+    package:
+      artifact: .archives/functions/add_custom_mapping.zip
+
+  QueryCustomMapping:
+    handler: lambda_function.lambda_handler
+    name: socless_query_custom_mapping
+    description: Retrieve a custom mapping from the CustomMappings Table
+    environment:
+      SOCLESS_CUSTOM_MAPPINGS_TABLE:
+        Ref: CustomMappingsTable
+    package:
+      artifact: .archives/functions/query_custom_mapping.zip
+
+  CreateEvents:
+    handler: lambda_function.lambda_handler
+    name: socless_create_events
+    description: Create events from within a playbook
+    memorySize: 512
+    timeout: 300
+    environment:
+      SOCLESS_EVENTS_TABLE:
+        Ref: EventsTable
+      SOCLESS_PLAYBOOKS_TABLE:
+        Ref: PlaybooksTable
+    package:
+      artifact: .archives/functions/create_events.zip
+
+  SetupGlobalStateForDirectInvokedPlaybook:
+    handler: lambda_function.lambda_handler
+    name: _socless_setup_global_state_for_direct_invoked_playbook
+    description: "PRIVATE USAGE FOR SOCLESS INTERNAL API: used by sls-apb to support directly invoking playbooks without create_events."
+    memorySize: 128
+    timeout: 120
+    package:
+      artifact: .archives/functions/_setup_global_state_for_direct_invoked_playbook.zip
+
+  CacheResults:
+    handler: lambda_function.lambda_handler
+    name: socless_cache_results
+    description: Cache return results
+    package:
+      artifact: .archives/functions/cache_results.zip
+
+  SavePlaybookExecutionLogs:
+    handler: lambda_function.lambda_handler
+    name: _socless_ship_playbook_logs
+    description: Ships SOCless Playbook executions logs from the log group to S3
+    memorySize: 1024
+    timeout: 120
+    environment:
+      SOCLESS_LOGS:
+        Ref: SoclessLogs
+    package:
+      artifact: .archives/functions/_ship_playbook_logs.zip
+    events:
+      - cloudwatchLog:
+          logGroup: ${{self:custom.playbooksLogGroupName}}
+
+  SoclessLogFindings:
+    handler: lambda_function.lambda_handler
+    name: socless_log_findings
+    description: Generate and upload SOCless log findings to a logging bucket
+    memorySize: 512
+    timeout: 60
+    environment:
+      SOCLESS_Logs:
+        Ref: SoclessLogs
+    package:
+      artifact: .archives/functions/socless_log_findings.zip
+
+  AWSRequest:
+    handler: lambda_function.lambda_handler
+    name: socless_aws_request
+    description: Make requests against AWS APIs
+    environment:
+      SOCLESS_Logs:
+        Ref: SoclessLogs
+    package:
+      artifact: .archives/functions/aws_request.zip

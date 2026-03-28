@@ -1,0 +1,241 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.EventGrid/namespaces to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.EventGrid/namespaces to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "failedhttpdataplaneoperationsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "FailedHttpDataPlaneOperations",
+        "description": "Enable or disable log category FailedHttpDataPlaneOperations"
+      },
+      "defaultValue": true
+    },
+    "failedmqttconnectionsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "FailedMqttConnections",
+        "description": "Enable or disable log category FailedMqttConnections"
+      },
+      "defaultValue": true
+    },
+    "failedmqttpublishedmessagesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "FailedMqttPublishedMessages",
+        "description": "Enable or disable log category FailedMqttPublishedMessages"
+      },
+      "defaultValue": true
+    },
+    "failedmqttsubscriptionoperationsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "FailedMqttSubscriptionOperations",
+        "description": "Enable or disable log category FailedMqttSubscriptionOperations"
+      },
+      "defaultValue": true
+    },
+    "mqttdisconnectionsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "MqttDisconnections",
+        "description": "Enable or disable log category MqttDisconnections"
+      },
+      "defaultValue": true
+    },
+    "successfulhttpdataplaneoperationsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SuccessfulHttpDataPlaneOperations",
+        "description": "Enable or disable log category SuccessfulHttpDataPlaneOperations"
+      },
+      "defaultValue": true
+    },
+    "successfulmqttconnectionsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SuccessfulMqttConnections",
+        "description": "Enable or disable log category SuccessfulMqttConnections"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.EventGrid/namespaces"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.EventGrid/namespaces/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.EventGrid/namespaces, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "FailedHttpDataPlaneOperations",
+                    "enabled": "[parameters('failedhttpdataplaneoperationsEnabled')]"
+                  },
+                  {
+                    "category": "FailedMqttConnections",
+                    "enabled": "[parameters('failedmqttconnectionsEnabled')]"
+                  },
+                  {
+                    "category": "FailedMqttPublishedMessages",
+                    "enabled": "[parameters('failedmqttpublishedmessagesEnabled')]"
+                  },
+                  {
+                    "category": "FailedMqttSubscriptionOperations",
+                    "enabled": "[parameters('failedmqttsubscriptionoperationsEnabled')]"
+                  },
+                  {
+                    "category": "MqttDisconnections",
+                    "enabled": "[parameters('mqttdisconnectionsEnabled')]"
+                  },
+                  {
+                    "category": "SuccessfulHttpDataPlaneOperations",
+                    "enabled": "[parameters('successfulhttpdataplaneoperationsEnabled')]"
+                  },
+                  {
+                    "category": "SuccessfulMqttConnections",
+                    "enabled": "[parameters('successfulmqttconnectionsEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

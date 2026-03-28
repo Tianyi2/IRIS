@@ -1,0 +1,101 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "saIdentifiersVar": {
+      "type": "object",
+      "defaultValue": {
+        "vmResourceGroupName": {
+          "type": "string",
+          "value": "tpt-algoR-vms-rg"
+        },
+        "vmNames": {
+          "type": "array",
+          "value": [
+            { "name": "tpt-ar-20" },
+            { "name": "tpt-ar-21" }
+          ]
+        },
+        "providerVmExtensionNames": {
+          "type": "array",
+          "value": ["antiMalware", "bgInfo"]
+        }
+      }
+    },
+    "assetLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "The location of resources such as templates and DSC modules that the script is dependent"
+      },
+      "defaultValue": "https://kdyalgorigsops10strgacc.blob.core.windows.net/prjtplatesandscripts"
+    },
+    "containerSasToken": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "saIdentifiers": "[parameters('saIdentifiersVar')]",
+    "vmNames": "[variables('saIdentifiers').vmNames.value]",
+    "vmNamesCount": "[length(variables('vmNames'))]", 
+    "pVmExtNames": "[variables('saIdentifiers').providerVmExtensionNames.value]",
+    "pVmExtNamesIsEmpty": "[if(empty(variables('pVmExtNames')), json('true'), json('false'))]"
+  },
+  "resources": [
+    {
+      "condition": "[not(variables('pVmExtNamesIsEmpty'))]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-02-01",
+      "name":  "[concat('Install-providerVmExts-ForVm-', variables('vmNames')[copyIndex()].name)]",
+      "copy": {
+        "name": "installVmExtLoop",
+        "count": "[variables('vmNamesCount')]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(uri(parameters('assetLocation'), concat('prjtplatesandscripts/toolsAzure/nested-iterations/install-0toN-pVmExts.json')), parameters('containerSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "debugSetting": {
+          "detailLevel": "requestContent, responseContent"
+       },
+        "parameters": {
+          "saIdentifiersVar": {
+            "value": "[parameters('saIdentifiersVar')]"
+          },
+          "assetLocation": {
+            "value": "[parameters('assetLocation')]"
+          },
+          "containerSasToken": {
+            "value": "[parameters('containerSasToken')]"
+          },
+          "vmName": { 
+            "value": "[variables('vmNames')[copyIndex()].name]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "vmNamesOut": {
+      "type": "array",
+      "value": "[variables('vmNames')]"
+    },
+    "vmNamesCountOut": {
+      "type": "int",
+      "value": "[variables('vmNamesCount')]"
+    },
+    "pVmExtNamesOut": {
+      "type": "array",
+      "value": "[variables('pVmExtNames')]"
+    },
+    "pVmExtNamesCountOut": {
+      "type": "int",
+      "value": "[length(variables('pVmExtNames'))]"
+    },
+    "pVmExtNamesIsEmptyOut": {
+      "type": "bool",
+      "value": "[variables('pVmExtNamesIsEmpty')]"
+    }
+  }
+}

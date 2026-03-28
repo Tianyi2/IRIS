@@ -1,0 +1,41 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "String"
+        },
+        "type": {
+            "type": "String"
+        },
+        "regionId": {
+            "type": "String"
+        },
+        "tagsArray": {
+            "type": "Object"
+        },
+        "requestSource": {
+            "type": "String"
+        },
+        "workspaceResourceId": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "type": "microsoft.insights/components",
+            "apiVersion": "2020-02-02-preview",
+            "name": "[parameters('name')]",
+            "location": "[parameters('regionId')]",
+            "dependsOn": [],
+            "tags": "[parameters('tagsArray')]",
+            "properties": {
+                "ApplicationId": "[parameters('name')]",
+                "Application_Type": "[parameters('type')]",
+                "Flow_Type": "Redfield",
+                "Request_Source": "[parameters('requestSource')]",
+                "WorkspaceResourceId": "[parameters('workspaceResourceId')]"
+            }
+        }
+    ]
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "c40d8fa7dd2d4f64a0c39941",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "global",
+      "properties": {
+        "displayName": "principalType",
+        "enforcementMode": "Default",
+        "metadata": {
+          "parameterScopes": {}
+        },
+        "nonComplianceMessages": [],
+        "notScopes": [],
+        "parameters": {},
+        "policyDefinitionId": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/providers/Microsoft.Authorization/policyDefinitions/8821b801-fc08-4583-b58d-d9d33679a68e",
+        "scope": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad"
+      }
+    }
+  ],
+  "outputs": {}
+}

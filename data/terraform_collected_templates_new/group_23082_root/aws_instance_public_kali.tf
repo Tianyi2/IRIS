@@ -1,0 +1,105 @@
+#EC2 Instances : Kali Linux
+
+# Create key-pair
+resource "tls_private_key" "kali-rsa-key" {
+  algorithm = "RSA"
+}
+
+resource "aws_key_pair" "kali-key-pair" {
+  key_name   = "kali"
+  public_key = tls_private_key.kali-rsa-key.public_key_openssh
+
+  depends_on = [ tls_private_key.kali-rsa-key ]
+}
+
+
+data "aws_ami" "kali-ami" {
+  most_recent = true
+  owners = ["aws-marketplace"]  # 679593333241 = Kali Linux
+
+  filter {
+    name   = "name"
+    values = ["kali-last*"]
+  }
+
+  # aws cli check
+  # aws ec2 describe-images \
+  #  --region us-east-1 \
+  #  --image-ids ami-000db6736082f3ee9
+  # aws ec2 describe-images --filters "Name=name,Values=kali-last*"
+}
+
+resource "aws_instance" "kali" {
+  ami                         = data.aws_ami.kali-ami.id
+  instance_type               = var.instance_type
+  key_name                    = aws_key_pair.kali-key-pair.key_name
+  private_ip                  = "10.0.0.5"
+  associate_public_ip_address = true
+  subnet_id                   = aws_subnet.publicSubnet.id
+  vpc_security_group_ids      = [aws_security_group.SecurityGroup-Kali.id]
+  user_data                   = base64gzip(templatefile("${path.module}/user_data/payload-kali.sh", {
+                                              SERVER_WG_PRIV = local.server_wireguard_private
+                                              SERVER_WG_PUB = local.server_wireguard_public
+                                              NUM_USERS = length(local.usernames)
+                                              USERS = join(" ", local.usernames)
+                                              PASSWORDS = join(" ", local.passwords)
+                                              SSH_PUB =   join(" ", [for s in local.ssh_public : "\"${s}\"" ])
+                                              WG_PRIV = join(" ", local.wireguard_private)
+                                              WG_PUB = join(" ", local.wireguard_public)
+                                              DUCKDNS_DOMAIN = var.duckdns_domain
+                                              DUCKDNS_TOKEN = var.duckdns_token
+                                            }))
+  monitoring                  = true    // for debug
+
+  root_block_device {
+    volume_size = var.volume_size
+  }
+  tags = {
+    Name = "KaliInstance"
+  }
+
+  # Clean local keys
+  provisioner "local-exec" {
+    when        = destroy
+    command     = "rm client_vpn*.wg user_*.key || :"
+  }
+
+
+  depends_on = [
+    aws_vpc.VPC,
+    aws_subnet.publicSubnet, 
+    aws_route_table.PublicRouteTable, 
+    aws_security_group.SecurityGroup-Kali,
+    aws_key_pair.kali-key-pair
+  ]
+}
+
+# sleep 180 to allow infraestructure creation 
+resource "null_resource" "sleep" {  
+  # Wait 180 for instance creation
+  provisioner "local-exec" {
+    command     = "sleep 180"
+  }
+  depends_on = [aws_instance.kali]
+}
+
+# Download wireguard client file using scp
+resource "null_resource" "retrieve_keys" {  
+  provisioner "local-exec" {   
+    command = "scp -i kali.pem -o StrictHostKeyChecking=no -o IdentitiesOnly=yes 'kali@${aws_instance.kali.public_ip}:/home/kali/{client_vpn*.wg,user_*.key}' . || echo 'error getting user keys and wg files,\nif fails, please try manually.'"
+  }
+  depends_on = [aws_instance.kali, null_resource.sleep]
+}
+
+# Set key file as default one for login to vulnerable instances
+resource "null_resource" "set_key" {  
+  provisioner "local-exec" {   
+    command = "scp -i kali.pem -o StrictHostKeyChecking=no -o IdentitiesOnly=yes kali.pem kali@${aws_instance.kali.public_ip}:/home/kali/.ssh/id_rsa || echo 'error setting kali.pem as default key in kali machine,\nf fails, please try manually.'"
+  }
+  depends_on = [aws_instance.kali, null_resource.retrieve_keys]
+}
+
+
+
+
+  

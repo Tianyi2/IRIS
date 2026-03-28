@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "0f7664732a0641e0b3870c7b",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "global",
+      "properties": {
+        "displayName": "Enforce Customer Managed Keys for PostgreSQL Flexible database",
+        "enforcementMode": "Default",
+        "metadata": {
+          "parameterScopes": {}
+        },
+        "nonComplianceMessages": [
+          {
+            "message": "me no likey no cmk"
+          }
+        ],
+        "notScopes": [],
+        "overrides": [],
+        "parameters": {},
+        "policyDefinitionId": "/subscriptions/c97123d8-7b72-4517-b2c7-3cf81f7569e0/providers/Microsoft.Authorization/policyDefinitions/6118c939-7607-4991-9fa0-80811312ab36",
+        "resourceSelectors": [],
+        "scope": "/subscriptions/c97123d8-7b72-4517-b2c7-3cf81f7569e0"
+      }
+    }
+  ],
+  "outputs": {}
+}

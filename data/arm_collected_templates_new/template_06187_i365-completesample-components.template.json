@@ -1,0 +1,810 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resgrp-loc": {
+      "type": "string"
+    },
+    "sql-name": {
+      "type": "string"
+    },
+    "sql-admin": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sql-pwd": {
+      "type": "securestring"
+    },
+    "appsvcplan-name": {
+      "type": "string",
+      "metadata": {
+        "description": "The App Service plan Name."
+      }
+    },
+    "appsvcplan-tier": {
+      "type": "string",
+      "defaultValue": "F1",
+      "allowedValues": [
+        "F1",
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "metadata": {
+        "description": "The App Service Plan tier."
+      }
+    },
+    "appsvcplan-numwrkrs": {
+      "type": "int",
+      "minValue": 1,
+      "maxValue": 10,
+      "defaultValue": 1,
+      "metadata": {
+        "description": "The number of instances to run for each App Service."
+      }
+    },
+    "api-appsvc-name": {
+      "type": "string",
+      "metadata": {
+        "description": "The Api App Service Name."
+      }
+    },
+    "api-appsvc-loglevel": {
+      "type": "string",
+      "defaultValue": "Error",
+      "metadata": {
+        "description": "The Api App Service Logging Error Level."
+      }
+    },
+    "api-appsvc-logsize": {
+      "type": "int",
+      "defaultValue": 35,
+      "metadata": {
+        "description": "The Api App Service Max Log retention size."
+      }
+    },
+    "api-appsvc-logdays": {
+      "type": "int",
+      "defaultValue": 30,
+      "metadata": {
+        "description": "The Api App Service log retention days."
+      }
+    },
+    "api-appsvc-alwayson": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable always on for Api App Service."
+      }
+    },
+    "ui-appsvc-name": {
+      "type": "string",
+      "metadata": {
+        "description": "The User Interface App Service Name."
+      }
+    },
+    "ui-appsvc-loglevel": {
+      "type": "string",
+      "defaultValue": "Error",
+      "metadata": {
+        "description": "The User Interface App Service Logging Error Level."
+      }
+    },
+    "ui-appsvc-logsize": {
+      "type": "int",
+      "defaultValue": 35,
+      "metadata": {
+        "description": "The User Interface App Service Max Log retention size."
+      }
+    },
+    "ui-appsvc-logdays": {
+      "type": "int",
+      "defaultValue": 30,
+      "metadata": {
+        "description": "The User Interface App Service log retention days."
+      }
+    },
+    "ui-appsvc-alwayson": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable always on for User Interface App Service."
+      }
+    },
+    "jobproc-appsvc-name": {
+      "type": "string",
+      "metadata": {
+        "description": "The Job Processors App Service Name."
+      }
+    },
+    "jobproc-appsvcplan-name": {
+      "type": "string",
+      "metadata": {
+        "description": "The App Service Plan to use for the Job Processors App Service."
+      }
+    },
+    "jobproc-appsvc-loglevel": {
+      "type": "string",
+      "defaultValue": "Error",
+      "metadata": {
+        "description": "The Job Processors App Service Logging Error Level."
+      }
+    },
+    "jobproc-appsvc-logsize": {
+      "type": "int",
+      "defaultValue": 35,
+      "metadata": {
+        "description": "The Job Processors App Service Max Log retention size."
+      }
+    },
+    "jobproc-appsvc-logdays": {
+      "type": "int",
+      "defaultValue": 30,
+      "metadata": {
+        "description": "The Job Processors App Service log retention days."
+      }
+    },
+    "jobproc-appsvc-alwayson": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "The Job Processors App Service Always On property."
+      }
+    },
+    "functions-appsvc-name": {
+      "type": "string",
+      "metadata": {
+        "description": "The Azure Functions App Service Name."
+      }
+    },
+    "functions-appsvc-loglevel": {
+      "type": "string",
+      "defaultValue": "Error",
+      "metadata": {
+        "description": "The Azure Functions App Service Logging Error Level."
+      }
+    },
+    "functions-appsvc-logsize": {
+      "type": "int",
+      "defaultValue": 35,
+      "metadata": {
+        "description": "The Azure Functions App Service Max Log retention size."
+      }
+    },
+    "functions-appsvc-logdays": {
+      "type": "int",
+      "defaultValue": 30,
+      "metadata": {
+        "description": "The Azure Functions App Service log retention days."
+      }
+    },
+    "functions-appsvc-alwayson": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "The Azure Functions App Service Always On property."
+      }
+    },
+    "functions-storage-name": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Azure Functions Storage account"
+      }
+    },
+    "functions-storage-tier": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    "appinsights-name": {
+      "type": "string",
+      "metadata": {
+        "description": "Application Insights name."
+      }
+    },
+    "appinsights-loc": {
+      "type": "string"
+    },
+    "servicebus-name": {
+      "type": "string",
+      "metadata": {
+        "description": "Name for the Service Bus namespace"
+      }
+    },
+    "servicebus-queue-name": {
+      "type": "string",
+      "defaultValue": "jobqueue",
+      "metadata": {
+        "description": "Name of the Service Bus Queue"
+      }
+    },
+    "proc-storage-name": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Processor Storage Account"
+      }
+    },
+    "proc-storage-tier": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    "media-storage-name": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Media Services Storage Account"
+      }
+    },
+    "media-storage-tier": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    "search-service-name": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Search Service account"
+      }
+    },
+    "media-service-name": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Media Service account"
+      }
+    }
+  },
+  "variables": {
+    "defaultSASKeyName": "RootManageSharedAccessKey",
+    "authRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('servicebus-name'), variables('defaultSASKeyName'))]",
+    "sbVersion": "2017-04-01"
+  },
+  "resources": [
+    {
+      "name": "[parameters('sql-name')]",
+      "type": "Microsoft.Sql/servers",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "[parameters('sql-name')]"
+      },
+      "properties": {
+        "administratorLogin": "[parameters('sql-admin')]",
+        "administratorLoginPassword": "[parameters('sql-pwd')]"
+      },
+      "resources": [
+        {
+          "name": "AllowAllWindowsAzureIps",
+          "type": "firewallrules",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Sql/servers', parameters('sql-name'))]"
+          ],
+          "properties": {
+            "startIpAddress": "0.0.0.0",
+            "endIpAddress": "0.0.0.0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "[parameters('appsvcplan-name')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "sku": {
+        "name": "[parameters('appsvcplan-tier')]"
+      },
+      "dependsOn": [],
+      "tags": {
+        "displayName": "[parameters('appsvcplan-name')]"
+      },
+      "properties": {
+        "name": "[parameters('appsvcplan-name')]",
+        "numberOfWorkers": "[parameters('appsvcplan-numwrkrs')]"
+      }
+    },
+    {
+      "name": "[parameters('api-appsvc-name')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('appsvcplan-name'))]",
+        "[resourceId('Microsoft.Insights/components', parameters('appinsights-name'))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceId('Microsoft.Web/serverfarms', parameters('appsvcplan-name')))]": "Resource",
+        "displayName": "[parameters('api-appsvc-name')]"
+      },
+      "properties": {
+        "name": "[parameters('api-appsvc-name')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appsvcplan-name'))]",
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(parameters('appinsights-name')).InstrumentationKey]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "name": "logs",
+          "type": "config",
+          "apiVersion": "2015-08-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('api-appsvc-name'))]"
+          ],
+          "properties": {
+            "applicationLogs": {
+              "fileSystem": {
+                "level": "[parameters('api-appsvc-loglevel')]"
+              }
+            },
+            "detailedErrorMessages": {
+              "enabled": true
+            },
+            "failedRequestsTracing": {
+              "enabled": true
+            },
+            "httpLoggingEnabled": true,
+            "httpLogs": {
+              "fileSystem": {
+                "retentionInMb": "[parameters('api-appsvc-logsize')]",
+                "retentionInDays": "[parameters('api-appsvc-logdays')]",
+                "enabled": true
+              }
+            }
+          }
+        },
+        {
+          "name": "web",
+          "type": "config",
+          "apiVersion": "2015-08-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('api-appsvc-name'))]"
+          ],
+          "properties": {
+            "alwaysOn": "[parameters('api-appsvc-alwayson')]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "[parameters('ui-appsvc-name')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('appsvcplan-name'))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceId('Microsoft.Web/serverfarms', parameters('appsvcplan-name')))]": "Resource",
+        "displayName": "[parameters('ui-appsvc-name')]"
+      },
+      "properties": {
+        "name": "[parameters('ui-appsvc-name')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appsvcplan-name'))]"
+      },
+      "resources": [
+        {
+          "name": "logs",
+          "type": "config",
+          "apiVersion": "2015-08-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('ui-appsvc-name'))]"
+          ],
+          "properties": {
+            "applicationLogs": {
+              "fileSystem": {
+                "level": "[parameters('ui-appsvc-loglevel')]"
+              }
+            },
+            "detailedErrorMessages": {
+              "enabled": true
+            },
+            "failedRequestsTracing": {
+              "enabled": true
+            },
+            "httpLoggingEnabled": true,
+            "httpLogs": {
+              "fileSystem": {
+                "retentionInMb": "[parameters('ui-appsvc-logsize')]",
+                "retentionInDays": "[parameters('ui-appsvc-logdays')]",
+                "enabled": true
+              }
+            }
+          }
+        },
+        {
+          "name": "web",
+          "type": "config",
+          "apiVersion": "2015-08-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('ui-appsvc-name'))]"
+          ],
+          "properties": {
+            "alwaysOn": "[parameters('ui-appsvc-alwayson')]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "[parameters('jobproc-appsvc-name')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('jobproc-appsvcplan-name'))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceId('Microsoft.Web/serverfarms', parameters('jobproc-appsvcplan-name')))]": "Resource",
+        "displayName": "[parameters('jobproc-appsvc-name')]"
+      },
+      "properties": {
+        "name": "[parameters('jobproc-appsvc-name')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('jobproc-appsvcplan-name'))]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('jobproc-appsvc-name'))]"
+          ],
+          "name": "logs",
+          "type": "config",
+          "properties": {
+            "httpLoggingEnabled": true,
+            "applicationLogs": {
+              "fileSystem": {
+                "level": "[parameters('jobproc-appsvc-loglevel')]"
+              }
+            },
+            "failedRequestsTracing": {
+              "enabled": true
+            },
+            "detailedErrorMessages": {
+              "enabled": true
+            },
+            "httpLogs": {
+              "fileSystem": {
+                "retentionInMb": "[parameters('jobproc-appsvc-logsize')]",
+                "retentionInDays": "[parameters('jobproc-appsvc-logdays')]",
+                "enabled": true
+              }
+            }
+          }
+        },
+        {
+          "name": "web",
+          "type": "config",
+          "apiVersion": "2015-08-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('jobproc-appsvc-name'))]"
+          ],
+          "properties": {
+            "alwaysOn": "[parameters('jobproc-appsvc-alwayson')]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "[parameters('functions-appsvc-name')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "kind": "functionapp",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('jobproc-appsvcplan-name'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('functions-storage-name'))]",
+        "[resourceId('Microsoft.Insights/components', parameters('appinsights-name'))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceId('Microsoft.Web/serverfarms', parameters('jobproc-appsvcplan-name')))]": "Resource",
+        "displayName": "[parameters('functions-appsvc-name')]"
+      },
+      "properties": {
+        "name": "[parameters('functions-appsvc-name')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('jobproc-appsvcplan-name'))]",
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "AzureWebJobsDashboard",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('functions-storage-name'), ';AccountKey=', listKeys(parameters('functions-storage-name'),'2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('functions-storage-name'), ';AccountKey=', listKeys(parameters('functions-storage-name'),'2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('functions-storage-name'), ';AccountKey=', listKeys(parameters('functions-storage-name'),'2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[toLower(parameters('functions-appsvc-name'))]"
+            },
+            {
+              "name": "WEBSITE_RUN_FROM_PACKAGE",
+              "value": "1"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~2"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "dotnet"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('functions-appsvc-name'))]"
+          ],
+          "name": "logs",
+          "type": "config",
+          "properties": {
+            "httpLoggingEnabled": true,
+            "applicationLogs": {
+              "fileSystem": {
+                "level": "[parameters('functions-appsvc-loglevel')]"
+              }
+            },
+            "failedRequestsTracing": {
+              "enabled": true
+            },
+            "detailedErrorMessages": {
+              "enabled": true
+            },
+            "httpLogs": {
+              "fileSystem": {
+                "retentionInMb": "[parameters('functions-appsvc-logsize')]",
+                "retentionInDays": "[parameters('functions-appsvc-logdays')]",
+                "enabled": true
+              }
+            }
+          }
+        },
+        {
+          "name": "web",
+          "type": "config",
+          "apiVersion": "2015-08-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('functions-appsvc-name'))]"
+          ],
+          "properties": {
+            "alwaysOn": "[parameters('functions-appsvc-alwayson')]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "[parameters('appinsights-name')]",
+      "type": "Microsoft.Insights/components",
+      "location": "[parameters('appinsights-loc')]",
+      "apiVersion": "2014-04-01",
+      "tags": {
+        "displayName": "[parameters('appinsights-name')]"
+      },
+      "properties": {
+        
+      }
+    },
+    {
+      "apiVersion": "[variables('sbVersion')]",
+      "name": "[parameters('servicebus-name')]",
+      "kind": "Messaging",
+      "type": "Microsoft.ServiceBus/Namespaces",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard"
+      },
+      "resources": [
+        {
+          "apiVersion": "[variables('sbVersion')]",
+          "name": "[parameters('servicebus-queue-name')]",
+          "type": "Queues",
+          "dependsOn": [
+            "[concat('Microsoft.ServiceBus/namespaces/', parameters('servicebus-name'))]"
+          ],
+          "properties": {
+            "path": "[parameters('servicebus-queue-name')]"
+          }
+        }
+      ],
+      "properties": {
+        "lockDuration": "PT5M",
+        "maxSizeInMegabytes": "1024",
+        "requiresDuplicateDetection": "false",
+        "requiresSession": "false",
+        "defaultMessageTimeToLive": "P10675199DT2H48M5.4775807S",
+        "deadLetteringOnMessageExpiration": "false",
+        "duplicateDetectionHistoryTimeWindow": "PT10M",
+        "maxDeliveryCount": "10",
+        "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S",
+        "enablePartitioning": "false",
+        "enableExpress": "false"
+      }
+    },
+    {
+      "name": "[parameters('proc-storage-name')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "kind": "Storage",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2018-07-01",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "[parameters('proc-storage-name')]"
+      },
+      "sku": {
+        "name": "[parameters('proc-storage-tier')]"
+      }
+    },
+    {
+        "type": "Microsoft.Search/searchServices",
+        "sku": {
+            "name": "basic"
+        },
+        "name": "[parameters('search-service-name')]",
+        "apiVersion": "2015-08-19",
+        "location": "[resourceGroup().location]",
+        "scale": null,
+        "properties": {
+            "replicaCount": 1,
+            "partitionCount": 1,
+            "hostingMode": "Default"
+        },
+        "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "sku": {
+          "name": "[parameters('media-storage-tier')]"
+      },
+      "kind": "Storage",
+      "name": "[parameters('media-storage-name')]",
+      "apiVersion": "2018-07-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+          "displayName": "[parameters('media-storage-name')]"
+      },
+      "scale": null,
+      "properties": {
+          "networkAcls": {
+              "bypass": "AzureServices",
+              "virtualNetworkRules": [],
+              "ipRules": [],
+              "defaultAction": "Allow"
+          },
+          "supportsHttpsTrafficOnly": true,
+          "encryption": {
+              "services": {
+                  "file": {
+                      "enabled": true
+                  },
+                  "blob": {
+                      "enabled": true
+                  }
+              },
+              "keySource": "Microsoft.Storage"
+          }
+      },
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "sku": {
+          "name": "[parameters('functions-storage-tier')]"
+      },
+      "kind": "Storage",
+      "name": "[parameters('functions-storage-name')]",
+      "apiVersion": "2018-07-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+          "displayName": "[parameters('functions-storage-name')]"
+      },
+      "scale": null,
+      "properties": {
+          "networkAcls": {
+              "bypass": "AzureServices",
+              "virtualNetworkRules": [],
+              "ipRules": [],
+              "defaultAction": "Allow"
+          },
+          "supportsHttpsTrafficOnly": true,
+          "encryption": {
+              "services": {
+                  "blob": {
+                      "enabled": true
+                  }
+              },
+              "keySource": "Microsoft.Storage"
+          }
+      },
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Media/mediaservices",
+      "name": "[parameters('media-service-name')]",
+      "apiVersion": "2015-10-01",
+      "location": "[resourceGroup().location]",
+      "scale": null,
+      "properties": {
+          "storageAccounts": [
+              {
+                  "id": "[resourceId('Microsoft.Storage/storageAccounts', parameters('media-storage-name'))]",
+                  "isPrimary": true
+              },
+              {
+                  "id": "[resourceId('Microsoft.Storage/storageAccounts', parameters('proc-storage-name'))]",
+                  "isPrimary": false
+              },
+              {
+                "id":"[resourceId('Microsoft.Storage/storageAccounts', parameters('functions-storage-name'))]",
+                "isPrimary": false
+              }
+          ]
+      },
+      "dependsOn": [
+          "[resourceId('Microsoft.Storage/storageAccounts', parameters('media-storage-name'))]",
+          "[resourceId('Microsoft.Storage/storageAccounts', parameters('proc-storage-name'))]",
+          "[resourceId('Microsoft.Storage/storageAccounts', parameters('functions-storage-name'))]"
+      ]
+  }
+  ],
+  "outputs": {
+    "appinsights-key": {
+      "type": "string",
+      "value": "[reference(parameters('appinsights-name')).InstrumentationKey]"
+    },
+    "servicebus-connectionstring": {
+      "type": "string",
+      "value": "[listkeys(variables('authRuleResourceId'), variables('sbVersion')).primaryConnectionString]"
+    },
+    "servicebus-sharedaccesspolicy-primarykey": {
+      "type": "string",
+      "value": "[listkeys(variables('authRuleResourceId'), variables('sbVersion')).primaryKey]"
+    },
+    "proc-storage-connstr": {
+      "type": "string",
+      "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',  parameters('proc-storage-name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('proc-storage-name')), '2016-01-01').keys[0].value)]"
+    },
+    "function-storage-connstr": {
+      "type": "string",
+      "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',  parameters('functions-storage-name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('functions-storage-name')), '2016-01-01').keys[0].value)]"
+    }
+  }
+}

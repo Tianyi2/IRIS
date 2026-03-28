@@ -1,0 +1,38 @@
+ontology_id,ontology_name,category,language,source
+arm_1,$schema,template attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax
+arm_2,contentVersion,template attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax
+arm_3,apiProfile,template attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax
+arm_4,metadata,section,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax
+arm_5,parameters,section,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax
+arm_6,variables,section,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax
+arm_7,functions,section,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax
+arm_8,resources,section,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax
+arm_9,outputs,section,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax
+arm_10,parameter.name,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/parameters
+arm_11,parameters.type,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/parameters
+arm_12,parameters.defaultValue,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/parameters
+arm_13,parameters.allowedValues,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/parameters
+arm_14,parameters.minValue,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/parameters
+arm_15,parameters.maxValue,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/parameters
+arm_16,parameters.minLength,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/parameters
+arm_17,parameters.maxLength,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/parameters
+arm_18,parameters.metadata,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/parameters
+arm_19,resources.type,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/resource-declaration
+arm_20,resources.apiVersion,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/resource-declaration
+arm_21,resources.name,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/resource-declaration
+arm_22,resources.location,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/resource-declaration
+arm_23,resources.dependsOn,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/resource-dependency
+arm_24,resources.condition,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/conditional-resource-deployment
+arm_25,resources.copy,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/copy-resources
+arm_26,resources.properties,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/resource-declaration
+arm_27,outputs.type,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/outputs
+arm_28,outputs.value,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/outputs
+arm_29,outputs.condition,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/outputs
+arm_30,outputs.copy,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/outputs
+arm_31,output.name,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/outputs
+arm_32,functions.namespace,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/user-defined-functions
+arm_33,functions.members,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/user-defined-functions
+arm_34,variables.name,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax
+arm_35,definition,section,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax
+arm_36,definition.nullable,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax#definitions
+arm_37,defintiion.additionalProperties,section attribute,ARM,https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/syntax#definitions

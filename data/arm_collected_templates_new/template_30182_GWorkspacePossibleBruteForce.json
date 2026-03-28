@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/8f6cd9a4-5e57-11ec-bf63-0242ac130002')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/8f6cd9a4-5e57-11ec-bf63-0242ac130002')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "GWorkspace - Possible brute force attack",
+        "description": "'Detects possible brute force attack.'\n",
+        "query": "let threshold = 5;\nGWorkspaceActivityReports\n| where EventMessage has \"login_failure\"\n| summarize login_attempts = count() by ActorEmail, bin(TimeGenerated, 5m)\n| where login_attempts > threshold\n| extend AccountCustomEntity = ActorEmail\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "AccountCustomEntity",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "CredentialAccess"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

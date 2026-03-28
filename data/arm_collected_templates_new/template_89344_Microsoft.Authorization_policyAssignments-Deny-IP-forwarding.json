@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deny-IP-forwarding",
+      "apiVersion": "2020-09-01",
+      "location": "[deployment().location]",
+      "properties": {
+        "Scope": "/providers/Microsoft.Management/managementGroups/bugbash-landingzones",
+        "NotScopes": null,
+        "DisplayName": "Deny-IP-Forwarding",
+        "Description": "Deny-IP-Forwarding",
+        "EnforcementMode": 0,
+        "PolicyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/88c0b9da-ce96-4b03-9635-f29a937e2900",
+        "Parameters": null
+      }
+    }
+  ],
+  "outputs": {}
+}

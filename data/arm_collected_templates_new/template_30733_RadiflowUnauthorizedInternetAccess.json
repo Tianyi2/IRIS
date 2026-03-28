@@ -1,0 +1,117 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/cc33e1a9-e167-460b-93e6-f14af652dbd3')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/cc33e1a9-e167-460b-93e6-f14af652dbd3')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "lookbackDuration": "1h",
+            "groupByCustomDetails": [],
+            "matchingMethod": "AllEntities",
+            "enabled": true,
+            "reopenClosedIncident": false,
+            "groupByEntities": [],
+            "groupByAlertDetails": []
+          },
+          "createIncident": true
+        },
+        "severity": "Medium",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Unauthorized Internet Access",
+          "alertDynamicProperties": [],
+          "alertDescriptionFormat": "An external connection to the network has been detected. Please check whether this activity is legitimate and the external device is authorized to connect.\n\nMessage: {{EventMessage}}\nSource device: {{SourceIP}} \nDestination device (if any): {{DestinationIP}} ",
+          "alertSeverityColumnName": "EventSeverity"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Radiflow - Unauthorized Internet Access",
+        "description": "Generates an incident when an unauthorized link between the network and the Internet is detected by Radiflow's iSID.",
+        "suppressionDuration": "5h",
+        "query": "RadiflowEvent\n| where DeviceProduct =~ 'iSID'\n| where EventClassID in (55, 147, 193, 194)\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SourceHostName",
+                "identifier": "HostName"
+              },
+              {
+                "columnName": "SourceHostName",
+                "identifier": "NetBiosName"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DestinationHostName",
+                "identifier": "HostName"
+              },
+              {
+                "columnName": "DestinationHostName",
+                "identifier": "NetBiosName"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SourceIP",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DestinationIP",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "suppressionEnabled": false,
+        "triggerOperator": "gt",
+        "tactics": [
+          "InitialAccess",
+          "Impact"
+        ],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "SourceHostName": "SourceHostName",
+          "DestinationType": "DestinationType",
+          "DestinationVendor": "DestinationVendor",
+          "SourceVendor": "SourceVendor",
+          "DestinationIP": "DestinationIP",
+          "DestinationHostName": "DestinationHostName",
+          "Protocol": "Protocol",
+          "SourceVLAN": "SourceVLAN",
+          "DestinationMAC": "DestinationMACAddress",
+          "SourceIP": "SourceIP",
+          "SourceType": "SourceType",
+          "Port": "Port",
+          "SourceMAC": "SourceMACAddress"
+        },
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

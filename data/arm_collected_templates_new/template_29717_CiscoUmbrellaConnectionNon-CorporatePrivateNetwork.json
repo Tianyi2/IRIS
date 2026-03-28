@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/c9b6d281-b96b-4763-b728-9a04b9fe1246')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/c9b6d281-b96b-4763-b728-9a04b9fe1246')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "Cisco Cloud Security - Connection to non-corporate private network",
+        "description": "'IP addresses of broadband links that usually indicates users attempting to access their home network, for example for a remote session to a home computer.'\n",
+        "query": "Cisco_Umbrella\n| where EventType == 'proxylogs'\n| where DvcAction =~ 'Allowed'\n| where UrlCategory has_any ('Dynamic and Residential', 'Personal VPN')\n| project TimeGenerated, SrcIpAddr, DstIpAddr, Identities \n",
+        "status": "Available",
+        "queryFrequency": "10m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SrcIpAddr",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "CommandAndControl",
+          "Exfiltration"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "10m"
+      }
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namingPrefix": {
+      "defaultValue": "contoso",
+      "type": "string"
+    },
+    "omsWorkspaceTier": {
+      "defaultValue": "PerNode",
+      "type": "string",
+      "allowedValues": [
+        "Free",
+        "Standalone",
+        "PerNode"
+      ]
+    }
+  },
+  "variables": {
+    "saVmDiagnosticsName": "[concat(parameters('namingPrefix'), 'vmdiagnostics')]",
+    "omsWorkspaceName": "[concat(parameters('namingPrefix'), '-loganalytics')]",
+    "AntiMalware": {
+      "Name": "[concat('AntiMalware', '(', variables('omsWorkspaceName'), ')')]",
+      "GalleryName": "AntiMalware"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2017-06-01",
+      "comments": "",
+      "type": "Microsoft.Storage/storageAccounts",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "kind": "Storage",
+      "name": "[variables('saVmDiagnosticsName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {},
+      "properties": {},
+      "dependsOn": []
+    },
+    {
+      "name": "[variables('omsWorkspaceName')]",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2015-11-01-preview",
+      "location": "[resourceGroup().location]",
+      "tags": {},
+      "properties": {
+        "sku": {
+          "name": "[parameters('omsWorkspaceTier')]"
+        },
+        "retention": "90"
+      },
+      "resources": []
+    },
+    {
+      "apiVersion": "2015-11-01-preview",
+      "location": "[resourceGroup().location]",
+      "name": "[variables('AntiMalware').Name]",
+      "type": "Microsoft.OperationsManagement/solutions",
+      "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.OperationsManagement/solutions/', variables('AntiMalware').Name)]",
+      "dependsOn": [
+        "[concat('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
+      ],
+      "properties": {
+        "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('omsWorkspaceName'))]"
+      },
+      "plan": {
+        "name": "[variables('AntiMalware').Name]",
+        "publisher": "Microsoft",
+        "product": "[concat('OMSGallery/', variables('AntiMalware').GalleryName)]",
+        "promotionCode": ""
+      }
+    }
+  ]
+}

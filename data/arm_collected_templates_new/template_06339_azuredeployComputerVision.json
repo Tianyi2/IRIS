@@ -1,0 +1,71 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "cognitiveServicesName": {
+            "metadata": {
+                "description": "Display name of Computer Vision API account"
+            },
+            "type": "string"
+        },
+        "cognitiveServicesSKU": {
+            "type": "string",
+            "metadata": {
+                "description": "SKU for Computer Vision API"
+            },
+            "defaultValue": "F0",
+            "allowedValues": [
+                "F0",
+                "S1"
+            ]
+        },
+        "cognitiveServicesLocation": {
+            "metadata": {
+                "description": "The location for the Computer Vision API"
+            },
+            "type": "string",
+            "minLength": 1,
+            "allowedValues": [
+                "eastus2",
+                "centralus",
+                "westus"
+            ],
+            "defaultValue": "eastus2"
+        }
+    },
+    "variables": {
+        "cognitiveservicesid": "[concat(resourceGroup().id,'/providers/','Microsoft.CognitiveServices/accounts/', parameters('cognitiveServicesName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.CognitiveServices/accounts",
+            "sku": {
+                "name": "[parameters('cognitiveServicesSKU')]"
+            },
+            "kind": "ComputerVision",
+            "name": "[parameters('cognitiveServicesName')]",
+            "apiVersion": "2016-02-01-preview",
+            "location": "[parameters('cognitiveServicesLocation')]",
+            "properties": {},
+            "dependsOn": []
+        }
+    ],
+    "outputs": {
+        "cognitivekeys": {
+            "type": "object",
+            "value": "[listKeys(variables('cognitiveservicesid'),'2016-02-01-preview')]"
+        },
+        "cognitivekey1": {
+            "type": "string",
+            "value": "[listKeys(variables('cognitiveservicesid'),'2016-02-01-preview').key1]"
+        },
+        "cognitivekey2": {
+            "type": "string",
+            "value": "[listKeys(variables('cognitiveservicesid'),'2016-02-01-preview').key2]"
+        },
+        "endpoint": {
+            "type": "string",
+            "value": "[reference(variables('cognitiveservicesid'),'2016-02-01-preview').endpoint]"
+        }
+    }
+}

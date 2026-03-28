@@ -1,0 +1,129 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "wafpolicyname": {
+            "defaultValue": "WebAppWAFPolicy",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/frontdoorwebapplicationfirewallpolicies",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('wafpolicyname')]",
+            "location": "Global",
+            "sku": {
+                "name": "Classic_AzureFrontDoor"
+            },
+            "properties": {
+                "policySettings": {
+                    "enabledState": "Enabled",
+                    "mode": "Detection",
+                    "customBlockResponseStatusCode": 200,
+                    "customBlockResponseBody": "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgICA8dGl0bGU+UmVxdWVzdCBCbG9ja2VkPC90aXRsZT4KICAgIDxzY3JpcHQgc3JjPSJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvZ2gvRGpvbmdvdi9jQ2xpcGJvYXJkQHYyLjEvY0NsaXBib2FyZC5taW4uanMiIGRlZmVyPjwvc2NyaXB0PgogICAgPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xLjAiPgogICAgPG1ldGEgY2hhcnNldD0idXRmLTgiLz4KICAgIDxzdHlsZT4KICAgICAgICBodG1sIHsKICAgICAgICAgICAgZm9udC1zaXplOiAxNnB4OwogICAgICAgIH0KICAgICAgICBib2R5IHsKICAgICAgICAgICAgdGV4dC1hbGlnbjogY2VudGVyOwogICAgICAgICAgICBiYWNrZ3JvdW5kOiB3aGl0ZTsKICAgICAgICB9CiAgICAgICAgcCB7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS4ycmVtOwogICAgICAgIH0KICAgICAgICAuYzBweSB7CiAgICAgICAgICAgIG1heC13aWR0aDogbWF4LWNvbnRlbnQ7CiAgICAgICAgICAgIGJhY2tncm91bmQ6IGRpbWdyYXk7CiAgICAgICAgICAgIG1hcmdpbjogMTBweCBhdXRvOwogICAgICAgICAgICBwYWRkaW5nOiAxcmVtOwogICAgICAgICAgICBjb2xvcjogd2hpdGU7CiAgICAgICAgICAgIGJvcmRlcjogMnB4IHNvbGlkICNmZmE1MDA7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS4ycmVtOwogICAgICAgICAgICBmb250LWZhbWlseTogJ0NvdXJpZXIgTmV3JywgQ291cmllciwgbW9ub3NwYWNlOwogICAgICAgICAgICBib3gtc2hhZG93OiAwIDMuMnB4IDcuMnB4IDAgcmdiKDAgMCAwIC8gNTUlKSwgMCAwLjZweCAxLjhweCAwIHJnYigwIDAgMCAvIDU1JSk7CiAgICAgICAgICAgIHdvcmQtd3JhcDogYnJlYWstd29yZDsKICAgICAgICB9CiAgICA8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5PgogICAgPGgxPllvdXIgcmVxdWVzdCBoYXMgYmVlbiBibG9ja2VkPC9oMT4KICAgIDxwPklmIHlvdSBiZWxpZXZlIHRoYXQgdGhpcyByZXF1ZXN0IHdhcyBibG9ja2VkIGluIGVycm9yLCBwbGVhc2UgY29udGFjdCB0aGUgc3VwcG9ydCB3aXRoIHRoaXMgcmVmZXJlbmNlIGluIGhhbmQ6PC9wPgogICAgPGRpdiBjbGFzcz0iYzBweSIgZGF0YS1jbGlwYm9hcmQtaWNvbi1zdHJva2U9IiNmZmE1MDAiIGRhdGEtY2xpcGJvYXJkLWljb24tc3Ryb2tlLXdpZHRoPSIxLjUiPnt7YXp1cmUtcmVmfX08L2Rpdj4KPC9ib2R5Pgo8L2h0bWw+",
+                    "requestBodyCheck": "Enabled"
+                },
+                "customRules": {
+                    "rules": [
+                        {
+                            "name": "DenyList",
+                            "enabledState": "Enabled",
+                            "priority": 1,
+                            "ruleType": "MatchRule",
+                            "rateLimitDurationInMinutes": 1,
+                            "matchConditions": [
+                                {
+                                    "matchVariable": "RemoteAddr",
+                                    "operator": "IPMatch",
+                                    "negateCondition": false,
+                                    "matchValue": [
+                                        "1.209.47.241"
+                                    ],
+                                    "transforms": []
+                                }
+                            ],
+                            "action": "Block"
+                        },
+                        {
+                            "name": "RateLimit",
+                            "enabledState": "Enabled",
+                            "priority": 2,
+                            "ruleType": "RateLimitRule",
+                            "rateLimitDurationInMinutes": 1,
+                            "rateLimitThreshold": 1000,
+                            "matchConditions": [
+                                {
+                                    "matchVariable": "RequestUri",
+                                    "operator": "Any",
+                                    "negateCondition": false,
+                                    "matchValue": [],
+                                    "transforms": []
+                                }
+                            ],
+                            "action": "Block"
+                        },
+                        {
+                            "name": "AllowOnlyCertainIps",
+                            "enabledState": "Disabled",
+                            "priority": 3,
+                            "ruleType": "MatchRule",
+                            "rateLimitDurationInMinutes": 1,
+                            "rateLimitThreshold": 100,
+                            "matchConditions": [
+                                {
+                                    "matchVariable": "RemoteAddr",
+                                    "operator": "IPMatch",
+                                    "negateCondition": true,
+                                    "matchValue": [
+                                        "185.138.63.1/32"
+                                    ],
+                                    "transforms": []
+                                }
+                            ],
+                            "action": "Block"
+                        },
+                        {
+                            "name": "DisallowUserAgents",
+                            "enabledState": "Enabled",
+                            "priority": 4,
+                            "ruleType": "MatchRule",
+                            "rateLimitDurationInMinutes": 1,
+                            "rateLimitThreshold": 100,
+                            "matchConditions": [
+                                {
+                                    "matchVariable": "RequestHeader",
+                                    "selector": "user-agent",
+                                    "operator": "Contains",
+                                    "negateCondition": false,
+                                    "matchValue": [
+                                        "${jndi:ldap"
+                                    ],
+                                    "transforms": []
+                                }
+                            ],
+                            "action": "Block"
+                        }
+                    ]
+                },
+                "managedRules": {
+                    "managedRuleSets": [
+                        {
+                            "ruleSetType": "Microsoft_DefaultRuleSet",
+                            "ruleSetVersion": "1.1",
+                            "ruleGroupOverrides": [],
+                            "exclusions": []
+                        },
+                        {
+                            "ruleSetType": "Microsoft_BotManagerRuleSet",
+                            "ruleSetVersion": "1.0",
+                            "ruleGroupOverrides": [],
+                            "exclusions": []
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

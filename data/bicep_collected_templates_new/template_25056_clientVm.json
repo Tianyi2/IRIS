@@ -1,0 +1,260 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "7752272854725068144"
+    }
+  },
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "defaultValue": "AKS-EE-Full-VM",
+      "metadata": {
+        "description": "The name of your Virtual Machine"
+      }
+    },
+    "windowsAdminUsername": {
+      "type": "string",
+      "defaultValue": "arcdemo",
+      "metadata": {
+        "description": "Username for the Virtual Machine"
+      }
+    },
+    "windowsAdminPassword": {
+      "type": "securestring",
+      "minLength": 12,
+      "maxLength": 123,
+      "metadata": {
+        "description": "Password for Windows account. Password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character. The value must be between 12 and 123 characters long"
+      }
+    },
+    "windowsOSVersion": {
+      "type": "string",
+      "defaultValue": "2022-datacenter-g2",
+      "metadata": {
+        "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources"
+      }
+    },
+    "resourceTags": {
+      "type": "object",
+      "defaultValue": {
+        "Project": "Jumpstart"
+      },
+      "metadata": {
+        "description": "Resource tag for Jumpstart AKS-EE-Full"
+      }
+    },
+    "subnetId": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource Id of the subnet in the virtual network"
+      }
+    },
+    "kubernetesDistribution": {
+      "type": "string",
+      "metadata": {
+        "description": "AKS Edge Essentials Kubernetes distribution"
+      }
+    },
+    "spnClientId": {
+      "type": "string",
+      "metadata": {
+        "description": "Client id of the service principal"
+      }
+    },
+    "spnClientSecret": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Client secret of the service principal"
+      }
+    },
+    "spnAuthority": {
+      "type": "string",
+      "defaultValue": "[environment().authentication.loginEndpoint]"
+    },
+    "spnTenantId": {
+      "type": "string",
+      "metadata": {
+        "description": "Tenant id of the service principal"
+      }
+    },
+    "templateBaseUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "The base URL used for accessing artifacts and automation artifacts."
+      }
+    },
+    "deployBastion": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Choice to deploy Bastion to connect to the client VM"
+      }
+    },
+    "githubAccount": {
+      "type": "string",
+      "defaultValue": "microsoft",
+      "metadata": {
+        "description": "Target GitHub account"
+      }
+    },
+    "githubBranch": {
+      "type": "string",
+      "defaultValue": "main",
+      "metadata": {
+        "description": "Target GitHub branch"
+      }
+    },
+    "AKSEEPinnedSchemaVersion": {
+      "type": "string",
+      "defaultValue": "useLatest",
+      "metadata": {
+        "description": "The AKS Edge Essentials schema version to be used. This is only used to pin the AKS Edge Essentials schema version for testing."
+      }
+    }
+  },
+  "variables": {
+    "encodedPassword": "[base64(parameters('windowsAdminPassword'))]",
+    "bastionName": "AKS-EE-Full-Bastion",
+    "publicIpAddressName": "[if(equals(parameters('deployBastion'), false()), format('{0}-PIP', parameters('vmName')), format('{0}-PIP', variables('bastionName')))]",
+    "networkInterfaceName": "[format('{0}-NIC', parameters('vmName'))]",
+    "osDiskType": "Premium_LRS",
+    "PublicIPNoBastion": {
+      "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpAddressName'))]"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2022-01-01",
+      "name": "[variables('networkInterfaceName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('resourceTags')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[parameters('subnetId')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": "[if(equals(parameters('deployBastion'), false()), variables('PublicIPNoBastion'), null())]"
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpAddressName'))]"
+      ]
+    },
+    {
+      "condition": "[equals(parameters('deployBastion'), false())]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2022-01-01",
+      "name": "[variables('publicIpAddressName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('resourceTags')]",
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "publicIPAddressVersion": "IPv4",
+        "idleTimeoutInMinutes": 4
+      },
+      "sku": {
+        "name": "Standard"
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2022-03-01",
+      "name": "[parameters('vmName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('resourceTags')]",
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "Standard_E32s_v5"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "name": "[format('{0}-OSDisk', parameters('vmName'))]",
+            "caching": "ReadWrite",
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "[variables('osDiskType')]"
+            },
+            "diskSizeGB": 1024
+          },
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "[parameters('windowsOSVersion')]",
+            "version": "latest"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[parameters('windowsAdminUsername')]",
+          "adminPassword": "[parameters('windowsAdminPassword')]",
+          "windowsConfiguration": {
+            "provisionVMAgent": true,
+            "enableAutomaticUpdates": false
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2022-03-01",
+      "name": "[format('{0}/{1}', parameters('vmName'), 'Bootstrap')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "config-choco"
+      },
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.10",
+        "autoUpgradeMinorVersion": true,
+        "protectedSettings": {
+          "fileUris": [
+            "[uri(parameters('templateBaseUrl'), 'artifacts/Bootstrap.ps1')]"
+          ],
+          "commandToExecute": "[format('powershell.exe -ExecutionPolicy Bypass -File Bootstrap.ps1 -adminUsername {0} -adminPassword {1} -spnClientId {2} -spnClientSecret {3} -spnTenantId {4} -spnAuthority {5} -subscriptionId {6} -resourceGroup {7} -azureLocation {8} -templateBaseUrl {9} -githubAccount {10} -githubBranch {11} -kubernetesDistribution {12} -AKSEEPinnedSchemaVersion {13}', parameters('windowsAdminUsername'), variables('encodedPassword'), parameters('spnClientId'), parameters('spnClientSecret'), parameters('spnTenantId'), parameters('spnAuthority'), subscription().subscriptionId, resourceGroup().name, parameters('location'), parameters('templateBaseUrl'), parameters('githubAccount'), parameters('githubBranch'), parameters('kubernetesDistribution'), parameters('AKSEEPinnedSchemaVersion'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "adminUsername": {
+      "type": "string",
+      "value": "[parameters('windowsAdminUsername')]"
+    },
+    "publicIP": {
+      "type": "string",
+      "value": "[if(equals(parameters('deployBastion'), false()), concat(reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpAddressName')), '2022-01-01').ipAddress), '')]"
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "12034001482848669925"
+    }
+  },
+  "parameters": {
+    "name": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "cdnProfileName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The name of the CDN profile resource"
+      }
+    },
+    "deliveryPolicyRules": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Delivery policy rules"
+      }
+    },
+    "originUrl": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The origin URL for the endpoint"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Cdn/profiles/endpoints",
+      "apiVersion": "2022-05-01-preview",
+      "name": "[format('{0}/{1}', parameters('cdnProfileName'), parameters('name'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "originHostHeader": "[parameters('originUrl')]",
+        "isHttpAllowed": false,
+        "isHttpsAllowed": true,
+        "queryStringCachingBehavior": "UseQueryString",
+        "optimizationType": "GeneralWebDelivery",
+        "origins": [
+          {
+            "name": "[replace(parameters('originUrl'), '.', '-')]",
+            "properties": {
+              "hostName": "[parameters('originUrl')]",
+              "originHostHeader": "[parameters('originUrl')]",
+              "priority": 1,
+              "weight": 1000,
+              "enabled": true
+            }
+          }
+        ],
+        "deliveryPolicy": {
+          "rules": "[parameters('deliveryPolicyRules')]"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "id": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Cdn/profiles/endpoints', parameters('cdnProfileName'), parameters('name'))]"
+    },
+    "name": {
+      "type": "string",
+      "value": "[parameters('name')]"
+    },
+    "uri": {
+      "type": "string",
+      "value": "[format('https://{0}', reference(resourceId('Microsoft.Cdn/profiles/endpoints', parameters('cdnProfileName'), parameters('name')), '2022-05-01-preview').hostName)]"
+    }
+  }
+}

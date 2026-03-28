@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deploy-Log-Analytics",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "westeurope",
+      "identity": {
+        "principalId": "3e43a09a-04d1-4d55-afe2-fab02026da2a",
+        "tenantId": "dbbc60b0-7054-4f16-a0af-724750c58153",
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "description": "Deploy resource group containing Log Analytics workspace and linked automation account to centralize logs and monitoring. The automation account is aprerequisite for solutions like Updates and Change Tracking.",
+        "displayName": "Configure Log Analytics workspace and automation account to centralize logs and monitoring",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "nonComplianceMessages": [
+          {
+            "message": "Log Analytics workspace and automation account must be configured to centralize logs and monitoring."
+          }
+        ],
+        "parameters": {
+          "automationAccountName": {
+            "value": "contoso-aauto"
+          },
+          "automationRegion": {
+            "value": "westeurope"
+          },
+          "dataRetention": {
+            "value": "30"
+          },
+          "rgName": {
+            "value": "contoso-mgmt"
+          },
+          "workspaceName": {
+            "value": "contoso-law"
+          },
+          "workspaceRegion": {
+            "value": "westeurope"
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/8e3e61b3-0b32-22d5-4edf-55f87fdb5955",
+        "scope": "/providers/Microsoft.Management/managementGroups/contoso-platform"
+      }
+    }
+  ],
+  "outputs": {}
+}

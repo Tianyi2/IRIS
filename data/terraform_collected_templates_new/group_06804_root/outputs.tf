@@ -1,0 +1,410 @@
+#
+# Locals for efficient data processing
+#
+locals {
+  # Single-pass analysis of region settings (avoids redundant loops in outputs)
+  region_settings_analysis = var.enable_region_settings && var.region_settings != null ? {
+    # Process enabled services list once
+    enabled_services = [
+      for service, enabled in var.region_settings.resource_type_opt_in_preference :
+      service if enabled
+    ]
+
+    # Process disabled services list once
+    disabled_services = [
+      for service, enabled in var.region_settings.resource_type_opt_in_preference :
+      service if !enabled
+    ]
+
+    # Process managed services list once
+    managed_services = var.region_settings.resource_type_management_preference != null ? [
+      for service, enabled in var.region_settings.resource_type_management_preference :
+      service if enabled
+    ] : []
+
+    # Pre-compute all service counts in a single pass
+    service_counts = {
+      total    = length(var.region_settings.resource_type_opt_in_preference)
+      enabled  = length([for service, enabled in var.region_settings.resource_type_opt_in_preference : service if enabled])
+      disabled = length([for service, enabled in var.region_settings.resource_type_opt_in_preference : service if !enabled])
+      managed  = var.region_settings.resource_type_management_preference != null ? length([for service, enabled in var.region_settings.resource_type_management_preference : service if enabled]) : 0
+    }
+  } : null
+}
+
+#
+# Vault
+#
+output "vault_id" {
+  description = "The name of the vault"
+  value       = var.vault_type == "standard" ? try(aws_backup_vault.ab_vault[0].id, null) : try(aws_backup_logically_air_gapped_vault.ab_airgapped_vault[0].id, null)
+}
+
+output "vault_arn" {
+  description = "The ARN of the vault"
+  value       = var.vault_type == "standard" ? try(aws_backup_vault.ab_vault[0].arn, null) : try(aws_backup_logically_air_gapped_vault.ab_airgapped_vault[0].arn, null)
+}
+
+output "vault_type" {
+  description = "The type of vault created"
+  value       = var.vault_type
+}
+
+# Air Gapped Vault specific outputs
+output "airgapped_vault_id" {
+  description = "The name of the air gapped vault"
+  value       = try(aws_backup_logically_air_gapped_vault.ab_airgapped_vault[0].id, null)
+}
+
+output "airgapped_vault_arn" {
+  description = "The ARN of the air gapped vault"
+  value       = try(aws_backup_logically_air_gapped_vault.ab_airgapped_vault[0].arn, null)
+}
+
+# Note: recovery_points attribute may not be available in all provider versions
+# output "airgapped_vault_recovery_points" {
+#   description = "The number of recovery points stored in the air gapped vault (sensitive for security)"
+#   value       = try(aws_backup_logically_air_gapped_vault.ab_airgapped_vault[0].recovery_points, null)
+#   sensitive   = true
+# }
+
+# Vault Policy
+output "vault_policy_attached" {
+  description = "Whether a vault access policy is attached to the backup vault"
+  value       = length(aws_backup_vault_policy.ab_vault_policy) > 0
+}
+
+output "vault_policy_details" {
+  description = "Vault policy configuration details and management information"
+  value = length(aws_backup_vault_policy.ab_vault_policy) > 0 ? {
+    vault_name    = try(aws_backup_vault_policy.ab_vault_policy[0].backup_vault_name, null)
+    policy_length = try(length(aws_backup_vault_policy.ab_vault_policy[0].policy), 0)
+
+    # Management information
+    management_commands = {
+      describe_policy = "aws backup get-backup-vault-access-policy --backup-vault-name ${try(aws_backup_vault_policy.ab_vault_policy[0].backup_vault_name, "VAULT_NAME")}"
+      delete_policy   = "aws backup delete-backup-vault-access-policy --backup-vault-name ${try(aws_backup_vault_policy.ab_vault_policy[0].backup_vault_name, "VAULT_NAME")}"
+      list_vaults     = "aws backup list-backup-vaults"
+    }
+
+    # Security and usage notes
+    security_notes = {
+      purpose = "Controls access to backup vault for cross-account scenarios and compliance"
+      scope   = "Applied to backup vault: ${try(aws_backup_vault_policy.ab_vault_policy[0].backup_vault_name, "unknown")}"
+      use_cases = [
+        "Cross-account backup copy operations",
+        "Centralized backup management",
+        "Compliance and audit requirements",
+        "Resource-specific access control"
+      ]
+    }
+
+    # Console URL for policy management
+    console_url = "https://console.aws.amazon.com/backup/home#/backupvaults/details/${try(aws_backup_vault_policy.ab_vault_policy[0].backup_vault_name, "VAULT_NAME")}"
+  } : null
+}
+
+# Legacy Plan
+output "plan_id" {
+  description = "The id of the backup plan"
+  value       = try(aws_backup_plan.ab_plan[0].id, null)
+}
+
+output "plan_arn" {
+  description = "The ARN of the backup plan"
+  value       = try(aws_backup_plan.ab_plan[0].arn, null)
+}
+
+output "plan_version" {
+  description = "Unique, randomly generated, Unicode, UTF-8 encoded string that serves as the version ID of the backup plan"
+  value       = try(aws_backup_plan.ab_plan[0].version, null)
+}
+
+# Multiple Plans
+output "plans" {
+  description = "Map of plans created and their attributes"
+  value = {
+    for k, v in aws_backup_plan.ab_plans : k => {
+      id      = v.id
+      arn     = v.arn
+      version = v.version
+      name    = v.name
+    }
+  }
+}
+
+output "plan_role" {
+  description = "The service role of the backup plan"
+  value       = var.iam_role_arn == null ? try(aws_iam_role.ab_role[0].arn, null) : var.iam_role_arn
+}
+
+# Framework
+output "framework_arn" {
+  description = "The ARN of the backup framework"
+  value       = try(aws_backup_framework.ab_framework[0].arn, null)
+}
+
+output "framework_id" {
+  description = "The unique identifier of the backup framework"
+  value       = try(aws_backup_framework.ab_framework[0].id, null)
+}
+
+output "framework_status" {
+  description = "The deployment status of the backup framework"
+  value       = try(aws_backup_framework.ab_framework[0].status, null)
+}
+
+output "framework_creation_time" {
+  description = "The date and time that the backup framework was created"
+  value       = try(aws_backup_framework.ab_framework[0].creation_time, null)
+}
+
+#
+# Restore Testing Plans
+#
+output "restore_testing_plans" {
+  description = "Map of restore testing plans created and their attributes"
+  value = {
+    for k, v in aws_backup_restore_testing_plan.this : k => {
+      arn                          = v.arn
+      name                         = v.name
+      schedule_expression          = v.schedule_expression
+      schedule_expression_timezone = v.schedule_expression_timezone
+      start_window_hours           = v.start_window_hours
+      recovery_point_selection     = v.recovery_point_selection
+
+      # Actionable URLs for operations
+      console_url = "https://console.aws.amazon.com/backup/home?region=${data.aws_partition.current.dns_suffix == "amazonaws.com" ? "us-east-1" : "us-gov-east-1"}#/restoretesting/plans/${v.name}"
+
+      # CLI examples for common operations
+      cli_examples = {
+        describe_plan   = "aws backup describe-restore-testing-plan --restore-testing-plan-name ${v.name}"
+        list_selections = "aws backup list-restore-testing-selections --restore-testing-plan-name ${v.name}"
+        start_test      = "aws backup start-restore-testing-job --restore-testing-plan-name ${v.name}"
+      }
+    }
+  }
+}
+
+#
+# Restore Testing Selections
+#
+output "restore_testing_selections" {
+  description = "Map of restore testing selections created and their attributes"
+  value = {
+    for k, v in aws_backup_restore_testing_selection.this : k => {
+      name                          = v.name
+      restore_testing_plan_name     = v.restore_testing_plan_name
+      protected_resource_type       = v.protected_resource_type
+      iam_role_arn                  = v.iam_role_arn
+      protected_resource_arns       = v.protected_resource_arns
+      protected_resource_conditions = v.protected_resource_conditions
+      restore_metadata_overrides    = v.restore_metadata_overrides
+      validation_window_hours       = v.validation_window_hours
+
+      # Actionable URLs and CLI examples
+      console_url = "https://console.aws.amazon.com/backup/home?region=${data.aws_partition.current.dns_suffix == "amazonaws.com" ? "us-east-1" : "us-gov-east-1"}#/restoretesting/plans/${v.restore_testing_plan_name}/selections/${v.name}"
+
+      cli_examples = {
+        describe_selection = "aws backup describe-restore-testing-selection --restore-testing-plan-name ${v.restore_testing_plan_name} --restore-testing-selection-name ${v.name}"
+        start_validation   = "aws backup start-restore-testing-job --restore-testing-plan-name ${v.restore_testing_plan_name} --restore-testing-selection-name ${v.name}"
+      }
+    }
+  }
+}
+
+#
+# Restore Testing IAM Role
+#
+output "restore_testing_role_arn" {
+  description = "The ARN of the restore testing IAM role"
+  value       = var.restore_testing_iam_role_arn == null ? try(aws_iam_role.restore_testing_role[0].arn, null) : var.restore_testing_iam_role_arn
+}
+
+output "restore_testing_role_name" {
+  description = "The name of the restore testing IAM role"
+  value       = var.restore_testing_iam_role_arn == null ? try(aws_iam_role.restore_testing_role[0].name, null) : null
+}
+
+#
+# Restore Testing Summary
+#
+output "restore_testing_summary" {
+  description = "Summary of restore testing configuration and quick reference"
+  value = length(aws_backup_restore_testing_plan.this) > 0 ? {
+    plans_count      = length(aws_backup_restore_testing_plan.this)
+    selections_count = length(aws_backup_restore_testing_selection.this)
+    iam_role_created = local.create_restore_testing_iam_resources
+
+    # Quick reference for next steps
+    next_steps = {
+      "1" = "Monitor restore test executions in AWS Console"
+      "2" = "Review CloudWatch logs for detailed test results"
+      "3" = "Set up SNS notifications for test completion alerts"
+      "4" = "Consider adding more resource types to testing selections"
+    }
+
+    # Monitoring and troubleshooting
+    monitoring = {
+      cloudwatch_log_group = "/aws/backup/restore-testing"
+      console_link         = "https://console.aws.amazon.com/backup/home#/restoretesting"
+
+      common_cli_commands = {
+        list_all_plans   = "aws backup list-restore-testing-plans"
+        list_recent_jobs = "aws backup list-restore-jobs --by-creation-date-after $(date -d '7 days ago' -u +%Y-%m-%dT%H:%M:%SZ)"
+        describe_job     = "aws backup describe-restore-job --restore-job-id JOB_ID"
+      }
+    }
+  } : null
+}
+
+#
+# Global Settings
+#
+output "global_settings_id" {
+  description = "AWS Account ID where global settings are applied"
+  value       = try(aws_backup_global_settings.ab_global_settings[0].id, null)
+}
+
+output "global_settings" {
+  description = "AWS Backup global settings configuration"
+  value       = try(aws_backup_global_settings.ab_global_settings[0].global_settings, null)
+}
+
+output "cross_account_backup_enabled" {
+  description = "Whether cross-account backup is enabled for centralized governance"
+  value       = try(aws_backup_global_settings.ab_global_settings[0].global_settings["isCrossAccountBackupEnabled"], null) == "true"
+}
+
+#
+# Global Settings Summary
+#
+output "global_settings_summary" {
+  description = "Summary of global settings configuration and governance capabilities"
+  value = var.enable_global_settings ? {
+    enabled                      = true
+    cross_account_backup_enabled = try(aws_backup_global_settings.ab_global_settings[0].global_settings["isCrossAccountBackupEnabled"], "false") == "true"
+    account_id                   = try(aws_backup_global_settings.ab_global_settings[0].id, null)
+    configured_settings          = var.global_settings
+
+    # Governance and compliance information
+    governance_impact = {
+      "cross_account_backup" = try(aws_backup_global_settings.ab_global_settings[0].global_settings["isCrossAccountBackupEnabled"], "false") == "true" ? "Enabled - centralized backup governance active" : "Disabled - account-level backup management"
+      "enterprise_ready"     = try(aws_backup_global_settings.ab_global_settings[0].global_settings["isCrossAccountBackupEnabled"], "false") == "true"
+    }
+
+    # Next steps and recommendations
+    next_steps = {
+      "1" = "Configure AWS Organizations backup policies for centralized governance"
+      "2" = "Set up cross-account IAM roles for backup operations"
+      "3" = "Implement backup compliance frameworks across accounts"
+      "4" = "Monitor backup activities through AWS CloudTrail and CloudWatch"
+    }
+
+    # CLI commands for management
+    management_commands = {
+      describe_settings    = "aws backup describe-global-settings"
+      list_backup_policies = "aws organizations list-policies --filter BACKUP_POLICY"
+      check_compliance     = "aws backup list-backup-jobs --by-account-id ${try(aws_backup_global_settings.ab_global_settings[0].id, "ACCOUNT_ID")}"
+    }
+  } : null
+}
+
+#
+# Region Settings
+#
+output "region_settings_id" {
+  description = "AWS Region where region settings are applied (same as AWS account ID)"
+  value       = try(aws_backup_region_settings.this[0].id, null)
+}
+
+output "region_settings_resource_type_opt_in_preference" {
+  description = "Resource types enabled for backup in this region"
+  value       = try(aws_backup_region_settings.this[0].resource_type_opt_in_preference, null)
+}
+
+output "region_settings_resource_type_management_preference" {
+  description = "Resource type management preferences configured for this region"
+  value       = try(aws_backup_region_settings.this[0].resource_type_management_preference, null)
+}
+
+#
+# Region Settings Summary (Non-Sensitive)
+#
+output "region_settings_summary" {
+  description = "Summary of region settings configuration and enabled services (non-sensitive aggregate data)"
+  value = var.enable_region_settings && var.region_settings != null ? {
+    enabled   = true
+    region_id = try(aws_backup_region_settings.this[0].id, null)
+
+    # Use pre-computed lists from locals (single-pass processing)
+    enabled_services  = local.region_settings_analysis.enabled_services
+    disabled_services = local.region_settings_analysis.disabled_services
+    managed_services  = local.region_settings_analysis.managed_services
+
+    # Use pre-computed counts from locals
+    service_count = local.region_settings_analysis.service_counts
+
+    # Next steps and recommendations
+    next_steps = {
+      "1" = "Verify backup plans are configured for enabled resource types"
+      "2" = "Test backup operations for newly enabled services"
+      "3" = "Configure selection criteria for automatic resource discovery"
+      "4" = "Review AWS Backup documentation for service-specific requirements"
+    }
+
+    # CLI commands for management
+    management_commands = {
+      describe_settings         = "aws backup describe-region-settings"
+      list_supported_types      = "aws backup get-supported-resource-types"
+      verify_backup_selections  = "aws backup list-backup-selections --backup-plan-id PLAN_ID"
+      check_protected_resources = "aws backup list-protected-resources"
+    }
+
+    # Important notes
+    notes = {
+      scope               = "Region-level configuration - applies to current AWS region only"
+      multi_region_setup  = "For multi-region deployments, configure region settings in each region separately using provider aliases"
+      service_enablement  = "Enabling a service type allows AWS Backup to discover and protect resources of that type"
+      management_vs_optin = "resource_type_opt_in_preference enables backup, resource_type_management_preference enables advanced management features"
+    }
+  } : null
+}
+
+#
+# Region Settings Details (Sensitive)
+#
+output "region_settings_details" {
+  description = "Detailed region settings configuration including full preferences (sensitive - use terraform output -json to view)"
+  sensitive   = true
+  value = var.enable_region_settings && var.region_settings != null ? {
+    configured_preferences = var.region_settings
+    enabled_services       = local.region_settings_analysis.enabled_services
+    disabled_services      = local.region_settings_analysis.disabled_services
+    managed_services       = local.region_settings_analysis.managed_services
+    service_count          = local.region_settings_analysis.service_counts
+  } : null
+}
+
+#
+# Region Settings Configuration Hash
+#
+output "region_settings_hash" {
+  description = "SHA256 hash of region settings configuration for change tracking and integrity verification"
+  value       = var.enable_region_settings && var.region_settings != null ? sha256(jsonencode(var.region_settings)) : null
+}
+
+#
+# Configuration Health Check
+#
+output "configuration_health_check" {
+  description = "Configuration health check and validation status for region settings"
+  value = var.enable_region_settings ? {
+    provider_region     = try(data.aws_region.current[0].id, "unknown")
+    expected_region     = var.expected_region
+    strict_validation   = var.enable_strict_region_validation
+    is_region_validated = var.expected_region == null ? null : try(data.aws_region.current[0].id, "") == var.expected_region
+    validation_status   = var.expected_region == null ? "No expected region configured - validation skipped" : (try(data.aws_region.current[0].id, "") == var.expected_region ? "✓ Region validated successfully" : "⚠ WARNING: Region mismatch detected")
+    recommendation      = var.expected_region == null ? "Consider setting expected_region for multi-region deployments" : (try(data.aws_region.current[0].id, "") == var.expected_region ? "Configuration is correctly applied to the expected region" : "ATTENTION: Settings may be applied to the wrong region. Review your provider configuration or enable strict validation.")
+  } : null
+}

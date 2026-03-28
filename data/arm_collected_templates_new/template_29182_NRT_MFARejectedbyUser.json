@@ -1,0 +1,56 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/3617d76d-b15e-4c6f-985e-a1dac73c592d')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/3617d76d-b15e-4c6f-985e-a1dac73c592d')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "status": "Available",
+        "query": "SigninLogs\n| where ResultType == 500121\n| extend additionalDetails_ = tostring(Status.additionalDetails)\n| where additionalDetails_ =~ \"MFA denied; user declined the authentication\"\n| summarize StartTime = min(TimeGenerated), EndTIme = max(TimeGenerated) by UserPrincipalName, UserId, AADTenantId, IPAddress\n| extend Name = tostring(split(UserPrincipalName,'@',0)[0]), UPNSuffix = tostring(split(UserPrincipalName,'@',1)[0])\n",
+        "description": "'Identifies occurrences where a user has rejected an MFA prompt. This could be an indicator that a threat actor has compromised the username and password of this user account and is using it to try and log into the account.\nRef : https://docs.microsoft.com/azure/active-directory/fundamentals/security-operations-user-accounts#monitoring-for-failed-unusual-sign-ins'\n",
+        "name": "NRT MFA Rejected by User",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "identifier": "Name",
+                "columnName": "Name"
+              },
+              {
+                "identifier": "UPNSuffix",
+                "columnName": "UPNSuffix"
+              },
+              {
+                "identifier": "AadUserId",
+                "columnName": "UserId"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "IPAddress"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "tactics": [
+          "InitialAccess"
+        ]
+      }
+    }
+  ]
+}

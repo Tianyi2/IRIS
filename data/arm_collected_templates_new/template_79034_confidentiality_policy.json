@@ -1,0 +1,131 @@
+{
+    "properties": {
+      "mode": "All",
+      "parameters": {
+        "effect": {
+          "type": "String",
+          "metadata": {
+            "displayName": "Effect",
+            "description": "Enable or disable the execution of the policy"
+          },
+          "allowedValues": [
+            "DeployIfNotExists",
+            "Disabled"
+          ],
+          "defaultValue": "DeployIfNotExists"
+        },
+        "tagName": {
+          "type": "String",
+          "metadata": {
+            "displayName": "tagName",
+            "description": null
+          }
+        }
+      },
+      "policyRule": {
+        "if": {
+          "allOf": [
+            {
+              "field": "type",
+              "equals": "Microsoft.Resources/subscriptions/resourceGroups"
+            },
+            {
+              "field": "[concat('tags[', parameters('tagName'), ']')]",
+              "exists": "true"
+            },
+            {
+              "value": "[resourceGroup().tags[parameters('tagName')]]",
+              "notEquals": ""
+            }
+          ]
+        },
+        "then": {
+          "effect": "[parameters('effect')]",
+          "details": {
+            "type": "Microsoft.Authorization/policyAssignments",
+            "roleDefinitionIds": [
+              "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+              "/providers/Microsoft.Authorization/roleDefinitions/fb1c8493-542b-48eb-b624-b4c8fea62acd",
+              "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+            ],
+            "existenceScope": "subscription",
+            "deploymentScope": "subscription",
+            "existenceCondition": {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Authorization/policyAssignments"
+                },
+                {
+                  "field": "name",
+                  "equals": "[concat(field('name'),'-assignment')]"
+                }
+              ]
+            },
+            "evaluationDelay": "AfterProvisioning",
+            "deployment": {
+              "location": "eastus",
+              "properties": {
+                "mode": "incremental",
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "parameters": {
+                    "tagName": {
+                      "type": "String"
+                    },
+                    "tagValue": {
+                      "type": "String"
+                    },
+                    "location": {
+                      "type": "String"
+                    },
+                    "uniqueName": {
+                      "type": "String"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Authorization/policyAssignments",
+                      "apiVersion": "2018-05-01",
+                      "name": "[parameters('uniqueName')]",
+                      "identity": {
+                        "type": "SystemAssigned"
+                      },
+                      "location": "[parameters('location')]",
+                      "properties": {
+                        "scope": "[subscription().id]",
+                        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2a0e14a6-b0a6-4fab-991a-187a4f81c498",
+                        "parameters": {
+                          "tagName": {
+                            "value": "[parameters('tagName')]"
+                          },
+                          "tagValue": {
+                            "value": "[parameters('tagValue')]"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "parameters": {
+                  "tagName": {
+                    "value": "[parameters('tagName')]"
+                  },
+                  "tagValue": {
+                    "value": "[resourceGroup().tags[parameters('tagName')]]"
+                  },
+                  "location": {
+                    "value": "[resourceGroup().location]"
+                  },
+                  "uniqueName": {
+                    "value": "[concat('crodriguez-', uniqueString(resourceGroup().id))]"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }

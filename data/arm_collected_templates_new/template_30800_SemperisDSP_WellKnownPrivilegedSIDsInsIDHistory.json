@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/ddd75d93-5b8b-4349-babe-c4e15343c5a3')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/ddd75d93-5b8b-4349-babe-c4e15343c5a3')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "Semperis DSP Well-known privileged SIDs in sIDHistory",
+        "description": "'This indicator looks for security principals that contain specific SIDs of accounts from built-in privileged groups within their sIDHistory attribute. This would allow those security principals to have the same privileges as those privileged accounts, but in a way that is not obvious to monitor (e.g. through group membership).'\n",
+        "query": "dsp_parser\n| where EventID == 9212\n| where SecurityIndicatorName == \"Well-known privileged SIDs in sIDHistory\"\n| extend HostName = tostring(split(Computer, '.', 0)[0]), DnsDomain = tostring(strcat_array(array_slice(split(Computer, '.'), 1, -1), '.'))\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "HostName",
+                "identifier": "HostName"
+              },
+              {
+                "columnName": "DnsDomain",
+                "identifier": "DnsDomain"
+              }
+            ],
+            "entityType": "Host"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "PrivilegeEscalation",
+          "DefenseEvasion"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

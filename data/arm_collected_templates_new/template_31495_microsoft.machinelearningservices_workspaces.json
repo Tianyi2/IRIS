@@ -1,0 +1,469 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.MachineLearningServices/workspaces to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.MachineLearningServices/workspaces to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "amlcomputeclustereventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AmlComputeClusterEvent",
+        "description": "Enable or disable log category AmlComputeClusterEvent"
+      },
+      "defaultValue": true
+    },
+    "amlcomputeclusternodeeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AmlComputeClusterNodeEvent",
+        "description": "Enable or disable log category AmlComputeClusterNodeEvent"
+      },
+      "defaultValue": true
+    },
+    "amlcomputecpugpuutilizationEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AmlComputeCpuGpuUtilization",
+        "description": "Enable or disable log category AmlComputeCpuGpuUtilization"
+      },
+      "defaultValue": true
+    },
+    "amlcomputejobeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AmlComputeJobEvent",
+        "description": "Enable or disable log category AmlComputeJobEvent"
+      },
+      "defaultValue": true
+    },
+    "amlrunstatuschangedeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AmlRunStatusChangedEvent",
+        "description": "Enable or disable log category AmlRunStatusChangedEvent"
+      },
+      "defaultValue": true
+    },
+    "computeinstanceeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "ComputeInstanceEvent",
+        "description": "Enable or disable log category ComputeInstanceEvent"
+      },
+      "defaultValue": true
+    },
+    "datalabelchangeeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DataLabelChangeEvent",
+        "description": "Enable or disable log category DataLabelChangeEvent"
+      },
+      "defaultValue": true
+    },
+    "datalabelreadeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DataLabelReadEvent",
+        "description": "Enable or disable log category DataLabelReadEvent"
+      },
+      "defaultValue": true
+    },
+    "datasetchangeeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DataSetChangeEvent",
+        "description": "Enable or disable log category DataSetChangeEvent"
+      },
+      "defaultValue": true
+    },
+    "datasetreadeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DataSetReadEvent",
+        "description": "Enable or disable log category DataSetReadEvent"
+      },
+      "defaultValue": true
+    },
+    "datastorechangeeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DataStoreChangeEvent",
+        "description": "Enable or disable log category DataStoreChangeEvent"
+      },
+      "defaultValue": true
+    },
+    "datastorereadeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DataStoreReadEvent",
+        "description": "Enable or disable log category DataStoreReadEvent"
+      },
+      "defaultValue": true
+    },
+    "deploymenteventaciEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DeploymentEventACI",
+        "description": "Enable or disable log category DeploymentEventACI"
+      },
+      "defaultValue": true
+    },
+    "deploymenteventaksEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DeploymentEventAKS",
+        "description": "Enable or disable log category DeploymentEventAKS"
+      },
+      "defaultValue": true
+    },
+    "deploymentreadeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DeploymentReadEvent",
+        "description": "Enable or disable log category DeploymentReadEvent"
+      },
+      "defaultValue": true
+    },
+    "environmentchangeeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "EnvironmentChangeEvent",
+        "description": "Enable or disable log category EnvironmentChangeEvent"
+      },
+      "defaultValue": true
+    },
+    "environmentreadeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "EnvironmentReadEvent",
+        "description": "Enable or disable log category EnvironmentReadEvent"
+      },
+      "defaultValue": true
+    },
+    "inferencingoperationaciEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "InferencingOperationACI",
+        "description": "Enable or disable log category InferencingOperationACI"
+      },
+      "defaultValue": true
+    },
+    "inferencingoperationaksEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "InferencingOperationAKS",
+        "description": "Enable or disable log category InferencingOperationAKS"
+      },
+      "defaultValue": true
+    },
+    "modelsactioneventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "ModelsActionEvent",
+        "description": "Enable or disable log category ModelsActionEvent"
+      },
+      "defaultValue": true
+    },
+    "modelschangeeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "ModelsChangeEvent",
+        "description": "Enable or disable log category ModelsChangeEvent"
+      },
+      "defaultValue": true
+    },
+    "modelsreadeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "ModelsReadEvent",
+        "description": "Enable or disable log category ModelsReadEvent"
+      },
+      "defaultValue": true
+    },
+    "pipelinechangeeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "PipelineChangeEvent",
+        "description": "Enable or disable log category PipelineChangeEvent"
+      },
+      "defaultValue": true
+    },
+    "pipelinereadeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "PipelineReadEvent",
+        "description": "Enable or disable log category PipelineReadEvent"
+      },
+      "defaultValue": true
+    },
+    "runeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "RunEvent",
+        "description": "Enable or disable log category RunEvent"
+      },
+      "defaultValue": true
+    },
+    "runreadeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "RunReadEvent",
+        "description": "Enable or disable log category RunReadEvent"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.MachineLearningServices/workspaces"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.MachineLearningServices/workspaces/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.MachineLearningServices/workspaces, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "AmlComputeClusterEvent",
+                    "enabled": "[parameters('amlcomputeclustereventEnabled')]"
+                  },
+                  {
+                    "category": "AmlComputeClusterNodeEvent",
+                    "enabled": "[parameters('amlcomputeclusternodeeventEnabled')]"
+                  },
+                  {
+                    "category": "AmlComputeCpuGpuUtilization",
+                    "enabled": "[parameters('amlcomputecpugpuutilizationEnabled')]"
+                  },
+                  {
+                    "category": "AmlComputeJobEvent",
+                    "enabled": "[parameters('amlcomputejobeventEnabled')]"
+                  },
+                  {
+                    "category": "AmlRunStatusChangedEvent",
+                    "enabled": "[parameters('amlrunstatuschangedeventEnabled')]"
+                  },
+                  {
+                    "category": "ComputeInstanceEvent",
+                    "enabled": "[parameters('computeinstanceeventEnabled')]"
+                  },
+                  {
+                    "category": "DataLabelChangeEvent",
+                    "enabled": "[parameters('datalabelchangeeventEnabled')]"
+                  },
+                  {
+                    "category": "DataLabelReadEvent",
+                    "enabled": "[parameters('datalabelreadeventEnabled')]"
+                  },
+                  {
+                    "category": "DataSetChangeEvent",
+                    "enabled": "[parameters('datasetchangeeventEnabled')]"
+                  },
+                  {
+                    "category": "DataSetReadEvent",
+                    "enabled": "[parameters('datasetreadeventEnabled')]"
+                  },
+                  {
+                    "category": "DataStoreChangeEvent",
+                    "enabled": "[parameters('datastorechangeeventEnabled')]"
+                  },
+                  {
+                    "category": "DataStoreReadEvent",
+                    "enabled": "[parameters('datastorereadeventEnabled')]"
+                  },
+                  {
+                    "category": "DeploymentEventACI",
+                    "enabled": "[parameters('deploymenteventaciEnabled')]"
+                  },
+                  {
+                    "category": "DeploymentEventAKS",
+                    "enabled": "[parameters('deploymenteventaksEnabled')]"
+                  },
+                  {
+                    "category": "DeploymentReadEvent",
+                    "enabled": "[parameters('deploymentreadeventEnabled')]"
+                  },
+                  {
+                    "category": "EnvironmentChangeEvent",
+                    "enabled": "[parameters('environmentchangeeventEnabled')]"
+                  },
+                  {
+                    "category": "EnvironmentReadEvent",
+                    "enabled": "[parameters('environmentreadeventEnabled')]"
+                  },
+                  {
+                    "category": "InferencingOperationACI",
+                    "enabled": "[parameters('inferencingoperationaciEnabled')]"
+                  },
+                  {
+                    "category": "InferencingOperationAKS",
+                    "enabled": "[parameters('inferencingoperationaksEnabled')]"
+                  },
+                  {
+                    "category": "ModelsActionEvent",
+                    "enabled": "[parameters('modelsactioneventEnabled')]"
+                  },
+                  {
+                    "category": "ModelsChangeEvent",
+                    "enabled": "[parameters('modelschangeeventEnabled')]"
+                  },
+                  {
+                    "category": "ModelsReadEvent",
+                    "enabled": "[parameters('modelsreadeventEnabled')]"
+                  },
+                  {
+                    "category": "PipelineChangeEvent",
+                    "enabled": "[parameters('pipelinechangeeventEnabled')]"
+                  },
+                  {
+                    "category": "PipelineReadEvent",
+                    "enabled": "[parameters('pipelinereadeventEnabled')]"
+                  },
+                  {
+                    "category": "RunEvent",
+                    "enabled": "[parameters('runeventEnabled')]"
+                  },
+                  {
+                    "category": "RunReadEvent",
+                    "enabled": "[parameters('runreadeventEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

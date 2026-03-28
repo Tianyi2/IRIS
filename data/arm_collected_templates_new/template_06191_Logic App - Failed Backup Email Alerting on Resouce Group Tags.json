@@ -1,0 +1,654 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "PlaybookName": {
+            "defaultValue": "la-resourcegroup-tag-alerts",
+            "type": "string"
+        },
+        "functionAppName": {
+            "type": "string"
+        },
+        "functionName": {
+            "type": "string"
+        },
+        "defaultEmailAddress": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "ArmConnectionName": "[concat('Arm-', parameters('PlaybookName'))]",
+        "Office365ConnectionName": "[concat('Office365-', parameters('PlaybookName'))]"
+    },
+    "resources": [
+        {
+            "properties": {
+                "provisioningState": "Succeeded",
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        },
+                        "Default Email Address": {
+                            "defaultValue": "[parameters('defaultEmailAddress')]",
+                            "type": "String"
+                        }
+                    },
+                    "triggers": {
+                        "manual": {
+                            "type": "Request",
+                            "kind": "Http",
+                            "inputs": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "actions": {
+                        "For_each": {
+                            "foreach": "@body('Parse_alert_JSON')?['data']?['alertContext']?['condition']?['allOf']",
+                            "actions": {
+                                "For_each_table": {
+                                    "foreach": "@body('Parse_Log_Analytics_results_JSON')?['tables']",
+                                    "actions": {
+                                        "For_each_row": {
+                                            "foreach": "@items('For_each_table')?['rows']",
+                                            "actions": {
+                                                "Condition_-_If_contact_email_tag_is_present,_update_email_variables": {
+                                                    "actions": {
+                                                        "Set_variable_email_address_present_to_true": {
+                                                            "runAfter": {
+                                                                "Set_variable_email_address_to_email_tag_value": [
+                                                                    "Succeeded"
+                                                                ]
+                                                            },
+                                                            "type": "SetVariable",
+                                                            "inputs": {
+                                                                "name": "Email Address Present",
+                                                                "value": true
+                                                            }
+                                                        },
+                                                        "Set_variable_email_address_to_email_tag_value": {
+                                                            "runAfter": {},
+                                                            "type": "SetVariable",
+                                                            "inputs": {
+                                                                "name": "Email Address",
+                                                                "value": "@body('Parse_RG_tags_JSON')?['ContactEmail']"
+                                                            }
+                                                        }
+                                                    },
+                                                    "runAfter": {
+                                                        "Parse_RG_tags_JSON": [
+                                                            "Succeeded"
+                                                        ]
+                                                    },
+                                                    "expression": {
+                                                        "and": [
+                                                            {
+                                                                "not": {
+                                                                    "equals": [
+                                                                        "@body('Parse_RG_tags_JSON')?['ContactEmail']",
+                                                                        ""
+                                                                    ]
+                                                                }
+                                                            }
+                                                        ]
+                                                    },
+                                                    "type": "If"
+                                                },
+                                                "Create_HTML_table": {
+                                                    "runAfter": {
+                                                        "Condition_-_If_contact_email_tag_is_present,_update_email_variables": [
+                                                            "Succeeded"
+                                                        ]
+                                                    },
+                                                    "type": "Table",
+                                                    "inputs": {
+                                                        "format": "HTML",
+                                                        "from": [
+                                                            "@body('Parse_function_output_JSON')"
+                                                        ]
+                                                    }
+                                                },
+                                                "Parse_RG_tags_JSON": {
+                                                    "runAfter": {
+                                                        "Read_a_resource_group": [
+                                                            "Succeeded"
+                                                        ]
+                                                    },
+                                                    "type": "ParseJson",
+                                                    "inputs": {
+                                                        "content": "@body('Read_a_resource_group')?['tags']",
+                                                        "schema": {
+                                                            "properties": {
+                                                                "ContactEmail": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "Parse_function_output_JSON": {
+                                                    "runAfter": {
+                                                        "Execute Function": [
+                                                            "Succeeded"
+                                                        ]
+                                                    },
+                                                    "type": "ParseJson",
+                                                    "inputs": {
+                                                        "content": "@body('Execute Function')",
+                                                        "schema": {
+                                                            "properties": {
+                                                                "AdHocOrScheduledJob": {
+                                                                    "type": "string"
+                                                                },
+                                                                "BackupItemFriendlyName": {
+                                                                    "type": "string"
+                                                                },
+                                                                "BackupItemLocation": {
+                                                                    "type": "string"
+                                                                },
+                                                                "BackupItemResourceGroup": {
+                                                                    "type": "string"
+                                                                },
+                                                                "BackupItemType": {
+                                                                    "type": "string"
+                                                                },
+                                                                "BackupItemUniqueId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "BackupItemVaultId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "BackupManagementType": {
+                                                                    "type": "string"
+                                                                },
+                                                                "Category": {
+                                                                    "type": "string"
+                                                                },
+                                                                "DataTransferredInMB": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "JobDurationInSecs": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "JobFailureCode": {
+                                                                    "type": "string"
+                                                                },
+                                                                "JobOperation": {
+                                                                    "type": "string"
+                                                                },
+                                                                "JobStartDateTime": {
+                                                                    "type": "string"
+                                                                },
+                                                                "JobStatus": {
+                                                                    "type": "string"
+                                                                },
+                                                                "JobUniqueId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "OperationName": {
+                                                                    "type": "string"
+                                                                },
+                                                                "ProtectedContainerUniqueId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "ResourceId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "SchemaVersion": {
+                                                                    "type": "string"
+                                                                },
+                                                                "SourceSystem": {
+                                                                    "type": "string"
+                                                                },
+                                                                "State": {
+                                                                    "type": "string"
+                                                                },
+                                                                "TenantId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "TimeGenerated": {
+                                                                    "type": "string"
+                                                                },
+                                                                "Type": {
+                                                                    "type": "string"
+                                                                },
+                                                                "VaultResourceGroup": {
+                                                                    "type": "string"
+                                                                },
+                                                                "VaultSubscriptionId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "VaultUniqueId": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "Read_a_resource_group": {
+                                                    "runAfter": {
+                                                        "Parse_function_output_JSON": [
+                                                            "Succeeded"
+                                                        ]
+                                                    },
+                                                    "type": "ApiConnection",
+                                                    "inputs": {
+                                                        "host": {
+                                                            "connection": {
+                                                                "name": "@parameters('$connections')['arm']['connectionId']"
+                                                            }
+                                                        },
+                                                        "method": "get",
+                                                        "path": "/subscriptions/@{encodeURIComponent(body('Parse_function_output_JSON')?['VaultSubscriptionId'])}/resourcegroups/@{encodeURIComponent(body('Parse_function_output_JSON')?['BackupItemResourceGroup'])}",
+                                                        "queries": {
+                                                            "x-ms-api-version": "2016-06-01"
+                                                        }
+                                                    }
+                                                },
+                                                "Send_an_email_(V2)": {
+                                                    "runAfter": {
+                                                        "Create_HTML_table": [
+                                                            "Succeeded"
+                                                        ]
+                                                    },
+                                                    "type": "ApiConnection",
+                                                    "inputs": {
+                                                        "body": {
+                                                            "Body": "<p>@{body('Parse_function_output_JSON')?['BackupItemFriendlyName']} in RG @{body('Parse_function_output_JSON')?['BackupItemResourceGroup']} had a failed backup of type @{body('Parse_function_output_JSON')?['BackupItemType']} which occurred at@{body('Parse_function_output_JSON')?['TimeGenerated']}.<br>\n<br>\nContactEmail tag present on RG: @{variables('Email Address Present')}<br>\n<br>\nOpen link to view Log Analytics search results:<br>\n@{items('For_each')?['linkToSearchResultsUI']}<br>\n<br>\nOpen link to view Backup Center Jobs:<br>\nhttps://portal.azure.com/#view/Microsoft_Azure_DataProtection/BackupCenterMenuBlade/~/jobs<br>\n<br>\nTable output from Function:<br>\n@{body('Create_HTML_table')}<br>\n<br>\nJSON output from Function:<br>\n@{body('Parse_function_output_JSON')}</p>",
+                                                            "Importance": "Normal",
+                                                            "Subject": "Backup item @{body('Parse_function_output_JSON')?['BackupItemFriendlyName']} has @{body('Parse_function_output_JSON')?['JobStatus']} in vault @{body('Parse_function_output_JSON')?['VaultUniqueId']}",
+                                                            "To": "@variables('Email Address')"
+                                                        },
+                                                        "host": {
+                                                            "connection": {
+                                                                "name": "@parameters('$connections')['office365']['connectionId']"
+                                                            }
+                                                        },
+                                                        "method": "post",
+                                                        "path": "/v2/Mail"
+                                                    }
+                                                },
+                                                "Execute Function": {
+                                                    "runAfter": {},
+                                                    "type": "Function",
+                                                    "inputs": {
+                                                        "body": "@items('For_each_row')",
+                                                        "function": {
+                                                            "id": "[resourceId('Microsoft.Web/sites/functions', parameters('functionAppName'), parameters('functionName'))]"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "runAfter": {},
+                                            "type": "Foreach"
+                                        }
+                                    },
+                                    "runAfter": {
+                                        "Parse_Log_Analytics_results_JSON": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "Foreach"
+                                },
+                                "HTTP_-_Log_Analytics_API_call": {
+                                    "runAfter": {},
+                                    "type": "Http",
+                                    "inputs": {
+                                        "authentication": {
+                                            "audience": "https://api.loganalytics.io",
+                                            "type": "ManagedServiceIdentity"
+                                        },
+                                        "method": "GET",
+                                        "uri": "@items('For_each')?['linkToFilteredSearchResultsAPI']"
+                                    }
+                                },
+                                "Parse_Log_Analytics_results_JSON": {
+                                    "runAfter": {
+                                        "HTTP_-_Log_Analytics_API_call": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "ParseJson",
+                                    "inputs": {
+                                        "content": "@body('HTTP_-_Log_Analytics_API_call')",
+                                        "schema": {
+                                            "properties": {
+                                                "tables": {
+                                                    "items": {
+                                                        "properties": {
+                                                            "columns": {
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "name": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "type": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "name",
+                                                                        "type"
+                                                                    ],
+                                                                    "type": "object"
+                                                                },
+                                                                "type": "array"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "rows": {
+                                                                "items": {
+                                                                    "type": "array"
+                                                                },
+                                                                "type": "array"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "name",
+                                                            "columns",
+                                                            "rows"
+                                                        ],
+                                                        "type": "object"
+                                                    },
+                                                    "type": "array"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "Initialize_variable_for_email_address_present_(boolean)": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Foreach"
+                        },
+                        "Initialize_variable_for_email_address_default_value": {
+                            "runAfter": {
+                                "Parse_alert_JSON": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "Email Address",
+                                        "type": "string",
+                                        "value": "@parameters('Default Email Address')"
+                                    }
+                                ]
+                            }
+                        },
+                        "Initialize_variable_for_email_address_present_(boolean)": {
+                            "runAfter": {
+                                "Initialize_variable_for_email_address_default_value": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "Email Address Present",
+                                        "type": "boolean",
+                                        "value": false
+                                    }
+                                ]
+                            }
+                        },
+                        "Parse_alert_JSON": {
+                            "runAfter": {},
+                            "type": "ParseJson",
+                            "inputs": {
+                                "content": "@triggerBody()",
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "alertContext": {
+                                                    "properties": {
+                                                        "condition": {
+                                                            "properties": {
+                                                                "allOf": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "dimensions": {
+                                                                                "items": {
+                                                                                    "properties": {
+                                                                                        "name": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "value": {
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    },
+                                                                                    "required": [
+                                                                                        "name",
+                                                                                        "value"
+                                                                                    ],
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "failingPeriods": {
+                                                                                "properties": {
+                                                                                    "minFailingPeriodsToAlert": {
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "numberOfEvaluationPeriods": {
+                                                                                        "type": "integer"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "linkToFilteredSearchResultsAPI": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "linkToFilteredSearchResultsUI": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "linkToSearchResultsAPI": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "linkToSearchResultsUI": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "metricMeasureColumn": {},
+                                                                            "metricValue": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "operator": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "searchQuery": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "targetResourceTypes": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "threshold": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "timeAggregation": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "searchQuery",
+                                                                            "metricMeasureColumn",
+                                                                            "targetResourceTypes",
+                                                                            "operator",
+                                                                            "threshold",
+                                                                            "timeAggregation",
+                                                                            "dimensions",
+                                                                            "metricValue",
+                                                                            "failingPeriods",
+                                                                            "linkToSearchResultsUI",
+                                                                            "linkToFilteredSearchResultsUI",
+                                                                            "linkToSearchResultsAPI",
+                                                                            "linkToFilteredSearchResultsAPI"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                },
+                                                                "windowEndTime": {
+                                                                    "type": "string"
+                                                                },
+                                                                "windowSize": {
+                                                                    "type": "string"
+                                                                },
+                                                                "windowStartTime": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        },
+                                                        "conditionType": {
+                                                            "type": "string"
+                                                        },
+                                                        "properties": {
+                                                            "properties": {},
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "customProperties": {
+                                                    "properties": {},
+                                                    "type": "object"
+                                                },
+                                                "essentials": {
+                                                    "properties": {
+                                                        "alertContextVersion": {
+                                                            "type": "string"
+                                                        },
+                                                        "alertId": {
+                                                            "type": "string"
+                                                        },
+                                                        "alertRule": {
+                                                            "type": "string"
+                                                        },
+                                                        "alertTargetIDs": {
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "type": "array"
+                                                        },
+                                                        "configurationItems": {
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "type": "array"
+                                                        },
+                                                        "description": {
+                                                            "type": "string"
+                                                        },
+                                                        "essentialsVersion": {
+                                                            "type": "string"
+                                                        },
+                                                        "firedDateTime": {
+                                                            "type": "string"
+                                                        },
+                                                        "monitorCondition": {
+                                                            "type": "string"
+                                                        },
+                                                        "monitoringService": {
+                                                            "type": "string"
+                                                        },
+                                                        "originAlertId": {
+                                                            "type": "string"
+                                                        },
+                                                        "severity": {
+                                                            "type": "string"
+                                                        },
+                                                        "signalType": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "schemaId": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "arm": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('ArmConnectionName'))]",
+                                "connectionName": "[variables('ArmConnectionName')]",
+                                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/Arm')]"
+                            },
+                            "office365": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('Office365ConnectionName'))]",
+                                "connectionName": "[variables('Office365ConnectionName')]",
+                                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/Office365')]"
+                            }
+                        }
+                    }
+                }
+            },
+            "name": "[parameters('PlaybookName')]",
+            "type": "Microsoft.Logic/workflows",
+            "location": "[resourceGroup().location]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "apiVersion": "2017-07-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/connections', variables('ArmConnectionName'))]",
+                "[resourceId('Microsoft.Web/connections', variables('Office365ConnectionName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "[variables('ArmConnectionName')]",
+            "location": "[resourceGroup().location]",
+            "kind": "V1",
+            "properties": {
+                "displayName": "[variables('ArmConnectionName')]",
+                "customParameterValues": {},
+                "api": {
+                    "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/Arm')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "[variables('Office365ConnectionName')]",
+            "location": "[resourceGroup().location]",
+            "kind": "V1",
+            "properties": {
+                "displayName": "[variables('Office365ConnectionName')]",
+                "customParameterValues": {},
+                "api": {
+                    "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/Office365')]"
+                }
+            }
+        }
+    ]
+}

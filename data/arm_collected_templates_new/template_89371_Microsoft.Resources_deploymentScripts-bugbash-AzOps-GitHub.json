@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "name": "bugbash-AzOps-GitHub",
+      "apiVersion": "2020-10-01",
+      "location": "[resourceGroup().location]",
+      "tags": null,
+      "properties": {
+        "provisioningState": "Failed",
+        "azPowerShellVersion": "5.5",
+        "arguments": "-KeyVault bugbash-AzOps-azpbaypcyf -NewRepositoryName bugbash -GitHubUserNameOrOrg uday31in -SPNSecretName SPNSecret -SpnAppId 60748a19-157c-41fa-92c8-416e28517321 -PATSecretName PATSecret -AzureTenantId 360d509d-82f2-42d5-9446-fbf417d9139c -EnterpriseScalePrefix bugbash -AzureSubscriptionId dddbadc2-9d31-43f4-a7e3-ae83c9da646a",
+        "primaryScriptUri": "https://raw.githubusercontent.com/krnese/ns/master/umiAzOpsSetup.ps1",
+        "retentionInterval": "P1D",
+        "timeout": "PT30M",
+        "containerSettings": {},
+        "status": {
+          "containerInstanceId": "/subscriptions/dddbadc2-9d31-43f4-a7e3-ae83c9da646a/resourceGroups/bugbash-AzOps/providers/Microsoft.ContainerInstance/containerGroups/rpyld3cohblnwazscripts",
+          "storageAccountId": "/subscriptions/dddbadc2-9d31-43f4-a7e3-ae83c9da646a/resourceGroups/bugbash-AzOps/providers/Microsoft.Storage/storageAccounts/rpyld3cohblnwazscripts",
+          "startTime": "2021-03-19T16:40:08.7473311Z",
+          "endTime": "2021-03-19T16:51:09.0715664Z",
+          "expirationTime": "2021-03-20T16:51:09.0715664Z",
+          "error": {
+            "code": "DeploymentScriptError",
+            "message": "The provided script failed with multiple errors. First error:\r\nMicrosoft.PowerShell.Commands.HttpResponseException: Response status code does not indicate success: 404 (Not Found).\n   at System.Management.Automation.MshCommandRuntime.ThrowTerminatingError(ErrorRecord errorRecord)\r\nat <ScriptBlock>, /mnt/azscripts/azscriptinput/umiAzOpsSetup.ps1: line 92\r\nat <ScriptBlock>, <No file>: line 1\r\nat <ScriptBlock>, /mnt/azscripts/azscriptinput/DeploymentScript.ps1: line 220. Please refer to https://aka.ms/DeploymentScriptsTroubleshoot for more deployment script information.",
+            "details": [
+              {
+                "code": "DeploymentScriptError",
+                "message": "Microsoft.PowerShell.Commands.HttpResponseException: Response status code does not indicate success: 404 (Not Found).\n   at System.Management.Automation.MshCommandRuntime.ThrowTerminatingError(ErrorRecord errorRecord)\r\nat <ScriptBlock>, /mnt/azscripts/azscriptinput/umiAzOpsSetup.ps1: line 92\r\nat <ScriptBlock>, <No file>: line 1\r\nat <ScriptBlock>, /mnt/azscripts/azscriptinput/DeploymentScript.ps1: line 220"
+              },
+              {
+                "code": "DeploymentScriptError",
+                "message": "Microsoft.PowerShell.Commands.HttpResponseException: Response status code does not indicate success: 403 (Forbidden).\n   at System.Management.Automation.MshCommandRuntime.ThrowTerminatingError(ErrorRecord errorRecord)\r\nat Invoke-GHRestMethod, /root/.local/share/powershell/Modules/PowerShellForGitHub/0.16.0/GitHubCore.ps1: line 301\r\nat Invoke-GHRestMethodMultipleResult, /root/.local/share/powershell/Modules/PowerShellForGitHub/0.16.0/GitHubCore.ps1: line 684\r\nat Get-GitHubRepository, /root/.local/share/powershell/Modules/PowerShellForGitHub/0.16.0/GitHubRepositories.ps1: line 860\r\nat <ScriptBlock>, /mnt/azscripts/azscriptinput/umiAzOpsSetup.ps1: line 101\r\nat <ScriptBlock>, <No file>: line 1\r\nat <ScriptBlock>, /mnt/azscripts/azscriptinput/DeploymentScript.ps1: line 220"
+              },
+              {
+                "code": "DeploymentScriptError",
+                "message": "Microsoft.PowerShell.Commands.WriteErrorException: \n\u001b[91mInvoke-WebRequest: \u001b[0m/root/.local/share/powershell/Modules/PowerShellForGitHub/0.16.0/GitHubCore.ps1:301\n\u001b[96mLine |\n\u001b[96m 301 | \u001b[0m             $result = \u001b[96mInvoke-WebRequest @params\u001b[0m\n\u001b[96m     | \u001b[91m                       ~~~~~~~~~~~~~~~~~~~~~~~~~\n\u001b[91m\u001b[96m     | \u001b[91m{\"message\":\"Resource protected by organization SAML\n\u001b[96m     | \u001b[91menforcement. You must grant your Personal Access token access\n\u001b[96m     | \u001b[91mto this\n\u001b[96m     | \u001b[91morganization.\",\"documentation_url\":\"https://docs.github.com/articles/authenticating-to-a-github-organization-with-saml-single-sign-on/\"}\n\u001b[0m\n\r\nat Write-Log<End>, /root/.local/share/powershell/Modules/PowerShellForGitHub/0.16.0/Helpers.ps1: line 221\r\nat Invoke-GHRestMethod, /root/.local/share/powershell/Modules/PowerShellForGitHub/0.16.0/GitHubCore.ps1: line 490\r\nat Invoke-GHRestMethodMultipleResult, /root/.local/share/powershell/Modules/PowerShellForGitHub/0.16.0/GitHubCore.ps1: line 684\r\nat Get-GitHubRepository, /root/.local/share/powershell/Modules/PowerShellForGitHub/0.16.0/GitHubRepositories.ps1: line 860\r\nat <ScriptBlock>, /mnt/azscripts/azscriptinput/umiAzOpsSetup.ps1: line 101\r\nat <ScriptBlock>, <No file>: line 1\r\nat <ScriptBlock>, /mnt/azscripts/azscriptinput/DeploymentScript.ps1: line 220"
+              },
+              {
+                "code": "DeploymentScriptError",
+                "message": "Microsoft.PowerShell.Commands.HttpResponseException: Response status code does not indicate success: 403 (Forbidden).\n   at System.Management.Automation.MshCommandRuntime.ThrowTerminatingError(ErrorRecord errorRecord)\r\nat Invoke-GHRestMethod, /root/.local/share/powershell/Modules/PowerShellForGitHub/0.16.0/GitHubCore.ps1: line 301\r\nat Invoke-GHRestMethodMultipleResult, /root/.local/share/powershell/Modules/PowerShellForGitHub/0.16.0/GitHubCore.ps1: line 684\r\nat Get-GitHubRepository, /root/.local/share/powershell/Modules/PowerShellForGitHub/0.16.0/GitHubRepositories.ps1: line 860\r\nat <ScriptBlock>, /mnt/azscripts/azscriptinput/umiAzOpsSetup.ps1: line 101\r\nat <ScriptBlock>, <No file>: line 1\r\nat <ScriptBlock>, /mnt/azscripts/azscriptinput/DeploymentScript.ps1: line 220"
+              },
+              {
+                "code": "DeploymentScriptError",
+                "message": "Microsoft.PowerShell.Commands.WriteErrorException: Failed to create Git repository for uday31in. \nError: {\"message\":\"Resource protected by organization SAML enforcement. You must grant your Personal Access token access to this organization.\",\"documentation_url\":\"https://docs.github.com/articles/authenticating-to-a-github-organization-with-saml-single-sign-on/\"}\r\nat <ScriptBlock>, /mnt/azscripts/azscriptinput/umiAzOpsSetup.ps1: line 112\r\nat <ScriptBlock>, <No file>: line 1\r\nat <ScriptBlock>, /mnt/azscripts/azscriptinput/DeploymentScript.ps1: line 220"
+              }
+            ]
+          }
+        },
+        "cleanupPreference": "OnSuccess"
+      }
+    }
+  ],
+  "outputs": {}
+}

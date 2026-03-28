@@ -1,0 +1,38 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "maxLength": 16,
+      "type": "string"
+    }
+  },
+  "variables": {
+    "workspaceName":  "[concat(parameters('namePrefix'), 'loganalytics')]"
+  },
+  "resources": [
+    {
+      "comments": "Generalized from resource: Log Analytics.",
+      "type": "microsoft.operationalinsights/workspaces",
+      "name": "[variables('workspaceName')]",
+      "apiVersion": "2017-04-26-preview",
+      "location": "eastus",
+      "scale": null,
+      "properties": {
+        "source": "Azure",
+        "portalUrl": "[concat('https://eus.mms.microsoft.com/Account?tenant=', subscription().tenantId, '&resource=%2fsubscriptions%2f', subscription().subscriptionId, '%2fresourcegroups%2f', resourceGroup().name ,'%2fproviders%2fmicrosoft.operationalinsights%2fworkspaces%2f', variables('workspaceName'))]",
+        "sku": {
+          "name": "pergb2018"
+        },
+        "retentionInDays": 30
+      },
+      "dependsOn": []
+    }
+  ],
+  "outputs": {
+      "logAnalyticsName": {
+          "value": "[variables('workspaceName')]",
+          "type": "string"
+      }
+  }
+}

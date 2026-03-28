@@ -1,0 +1,107 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.3",
+    "parameters": {
+        "location": {
+            "type": "string"
+        },
+        "templateUriBase": {
+            "type": "string"
+        },
+        "storageName": {
+            "type": "string"
+        },
+        "vnetName": {
+            "type": "string"
+        },
+        "publicIpName": {
+            "type": "string"
+        },
+        "nicName": {
+            "type": "string"
+        },
+        "vmName": {
+            "type": "string"
+        },
+        "vmOsSku": {
+            "type": "string"
+        },
+        "dnsPrefix": {
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        }
+    },
+    "variables": {
+        "vmSize": "Standard_D1",
+        "vmOsPublisher": "MicrosoftWindowsServer",
+        "vmOsOffer": "WindowsServer",
+        "storageName": "[concat('hdd', parameters('storageName'))]",
+        "storageType": "Standard_LRS"
+    },
+    "resources": [
+        {
+            "apiVersion": "2015-01-01",
+            "type": "Microsoft.Resources/deployments",
+            "name": "VM",
+            "properties": {
+                "mode": "[deployment().properties.mode]",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateUriBase'), '/01.03-VM.json')]",
+                    "contentVersion": "1.0.0.3"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "templateUriBase": {
+                        "value": "[parameters('templateUriBase')]"
+                    },
+                    "storageName": {
+                        "value": "[variables('storageName')]"
+                    },
+                    "storageType": {
+                        "value": "[variables('storageType')]"
+                    },
+                    "vnetName": {
+                        "value": "[parameters('vnetName')]"
+                    },
+                    "publicIpName": {
+                        "value": "[parameters('publicIpName')]"
+                    },
+                    "nicName": {
+                        "value": "[parameters('nicName')]"
+                    },
+                    "vmName": {
+                        "value": "[parameters('vmName')]"
+                    },
+                    "vmSize": {
+                        "value": "[variables('vmSize')]"
+                    },
+                    "vmOsPublisher": {
+                        "value": "[variables('vmOsPublisher')]"
+                    },
+                    "vmOsOffer": {
+                        "value": "[variables('vmOsOffer')]"
+                    },
+                    "vmOsSku": {
+                        "value": "[parameters('vmOsSku')]"
+                    },
+                    "dnsPrefix": {
+                        "value": "[parameters('dnsPrefix')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    }
+                }
+            }
+        }
+    ]
+}

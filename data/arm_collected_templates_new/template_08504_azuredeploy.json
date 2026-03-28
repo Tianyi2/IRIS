@@ -1,0 +1,435 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Username": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "Username to use with both Hortonworks and Oracle"
+            }
+        },
+        "Password": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for both Hortonworks and Oracle"
+            }
+        }
+    },
+    "variables": {
+        "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
+        "virtualMachineSize": "Standard_DS11_v2",
+        "virtualNetworkName": "[concat('vnet-', uniqueString(resourceGroup().id))]",
+        "subnetName": "default",
+        "location": "[resourceGroup().location]",
+        
+        "oracleVirtualMachineName": "[concat('orcl-vm-', resourceGroup().name)]",
+        "oracleNetworkInterfaceName": "[concat('orcl-nic-', uniqueString(concat(variables('oracleVirtualMachineName'), resourceGroup().id)))]",
+        "oracleNetworkSecurityGroupName": "[concat('orcl-nsg-', uniqueString(concat(variables('oracleVirtualMachineName'), resourceGroup().id)))]",
+        "oraclePublicIpAddressName": "[concat('orcl-ip-', uniqueString(concat(variables('oracleVirtualMachineName'), resourceGroup().id)))]",
+        "oracleAdminUsername": "oracle",
+
+        "hdpVirtualMachineName": "[concat('hdp-vm-', resourceGroup().name)]",
+        "hdpNetworkInterfaceName": "[concat('hdp-nic-', uniqueString(concat(variables('hdpVirtualMachineName'), resourceGroup().id)))]",
+        "hdpNetworkSecurityGroupName": "[concat('hdp-nsg-', uniqueString(concat(variables('hdpVirtualMachineName'), resourceGroup().id)))]",
+        "hdpPublicIpAddressName": "[concat('hdp-ip-', uniqueString(concat(variables('hdpVirtualMachineName'), resourceGroup().id)))]",
+
+        "singleQuote": "'"  
+    
+    },
+    "resources": [
+        {
+            "name": "[variables('oracleVirtualMachineName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('oracleNetworkInterfaceName'))]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[variables('oracleVirtualMachineName')]",
+                    "adminUsername": "[variables('oracleAdminUsername')]",
+                    "adminPassword": "[parameters('Password')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[variables('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Oracle",
+                        "offer": "Oracle-Database-Ee",
+                        "sku": "12.1.0.2",
+                        "version": "12.1.20170202"
+                    },
+                    "osDisk": {
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "dataDisks": []
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('oracleNetworkInterfaceName'))]"
+                        }
+                    ]
+                }
+            },
+            "resources": [
+
+                {
+                    "name": "oracle-startup-script",
+                    "type": "extensions",
+                    "location": "[resourceGroup().location]",
+                    "apiVersion": "2015-06-15",
+                    "dependsOn": [
+                        "[concat('Microsoft.Compute/virtualMachines/', variables('oracleVirtualMachineName'))]"
+                    ],
+                    "tags": {
+                        "displayName": "start-up-script"
+                    },
+                    "properties": {
+                        "publisher": "Microsoft.Azure.Extensions",
+                        "type": "CustomScript",
+                        "typeHandlerVersion": "2.0",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "fileUris": [
+                                "https://raw.githubusercontent.com/ezwiefel/dss-640-azure-deploy/master/scripts/create_db.sh"
+                            ]              
+                        },
+                        "protectedSettings": {
+                            "commandToExecute": "[concat('cp create_db.sh /etc/create_db.sh && chmod 755 /etc/create_db.sh && su -l oracle -c ', variables('singleQuote'), '/etc/create_db.sh ', parameters('Password'), ' ', parameters('Username'), variables('singleQuote'))]"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "[variables('virtualNetworkName')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2016-09-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.2.0.0/24"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "10.2.0.0/24"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('oracleNetworkInterfaceName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2016-09-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('oraclePublicIpAddressName'))]",
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('oracleNetworkSecurityGroupName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId(resourceGroup().name,'Microsoft.Network/publicIpAddresses', variables('oraclePublicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('oracleNetworkSecurityGroupName'))]"
+                }
+            }
+        },
+        {
+            "name": "[variables('oraclePublicIpAddressName')]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2016-09-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIpAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 30
+            }
+        },
+        {
+            "name": "[variables('oracleNetworkSecurityGroupName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2016-09-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "allow-oracle",
+                        "properties": {
+                            "priority": 1010,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "TCP",
+                            "destinationPortRange": "1521",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "default-allow-ssh",
+                        "properties": {
+                            "priority": 1000,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "TCP",
+                            "destinationPortRange": "22",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+           "type": "Microsoft.DevTestLab/schedules",
+           "name": "[concat('shutdown-computevm-', variables('oracleVirtualMachineName'))]",
+           "apiVersion": "2016-05-15",
+           "location": "[resourceGroup().location]",
+           "dependsOn": [
+               "[concat('Microsoft.Compute/virtualMachines/', variables('oracleVirtualMachineName'))]"
+           ],
+           "properties": {
+               "status": "Enabled",
+               "taskType": "ComputeVmShutdownTask",
+               "dailyRecurrence": {
+                   "time": "0200"
+               },
+               "timeZoneId": "Eastern Standard Time",
+               "notificationSettings": {
+                   "status": "Disabled"
+               },
+               "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines',variables('oracleVirtualMachineName'))]"
+           }
+        },
+        {
+            "name": "[variables('hdpVirtualMachineName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('hdpNetworkInterfaceName'))]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[variables('hdpVirtualMachineName')]",
+                    "adminUsername": "[parameters('Username')]",
+                    "adminPassword": "[parameters('Password')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[variables('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "hortonworks",
+                        "offer": "hortonworks-sandbox",
+                        "sku": "sandbox25",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "dataDisks": []
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('hdpNetworkInterfaceName'))]"
+                        }
+                    ]
+                }
+            },
+            "plan": {
+                "name": "sandbox25",
+                "publisher": "hortonworks",
+                "product": "hortonworks-sandbox"
+            }
+        },
+        {
+            "name": "[variables('hdpNetworkInterfaceName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2016-09-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('hdpPublicIpAddressName'))]",
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('hdpNetworkSecurityGroupName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId(resourceGroup().name,'Microsoft.Network/publicIpAddresses', variables('hdpPublicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('hdpNetworkSecurityGroupName'))]"
+                }
+            }
+        },
+        {
+            "name": "[variables('hdpPublicIpAddressName')]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2016-09-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIpAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 30
+            }
+        },
+        {
+            "name": "[variables('hdpNetworkSecurityGroupName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2016-09-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "allow-zeppelin",
+                        "properties": {
+                            "priority": 1010,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "*",
+                            "destinationPortRange": "9995",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "allow-ambari",
+                        "properties": {
+                            "priority": 1020,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "*",
+                            "destinationPortRange": "8080",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "allow-setup",
+                        "properties": {
+                            "priority": 1030,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "*",
+                            "destinationPortRange": "8888",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "allow-http",
+                        "properties": {
+                            "priority": 1040,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "TCP",
+                            "destinationPortRange": "80",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "allow-https",
+                        "properties": {
+                            "priority": 1050,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "TCP",
+                            "destinationPortRange": "443",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "default-allow-ssh",
+                        "properties": {
+                            "priority": 1000,
+                            "sourceAddressPrefix": "*",
+                            "protocol": "TCP",
+                            "destinationPortRange": "22",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+           "type": "Microsoft.DevTestLab/schedules",
+           "name": "[concat('shutdown-computevm-', variables('hdpVirtualMachineName'))]",
+           "apiVersion": "2016-05-15",
+           "location": "[variables('location')]",
+           "dependsOn": [
+               "[concat('Microsoft.Compute/virtualMachines/', variables('hdpVirtualMachineName'))]"
+           ],
+           "properties": {
+               "status": "Enabled",
+               "taskType": "ComputeVmShutdownTask",
+               "dailyRecurrence": {
+                   "time": "0200"
+               },
+               "timeZoneId": "Eastern Standard Time",
+               "notificationSettings": {
+                   "status": "Disabled"
+               },
+               "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines',variables('hdpVirtualMachineName'))]"
+           }
+        }
+    ],
+"outputs": {
+    "hdp-ip-address": {
+        "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('hdpPublicIPAddressName')), '2016-09-01').ipAddress]",
+        "type": "string"
+    },
+    "oracle-ip-address": {
+        "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('oraclePublicIPAddressName')), '2016-09-01').ipAddress]",
+        "type": "string"
+    }
+}
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Dine-Nsg-FlowLogs",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "westeurope",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-policy-identity/providers/Microsoft.ManagedIdentity/userAssignedIdentities/saturn-policy-identity": {
+            "clientId": "3af92696-7908-4732-bb6b-9f96fb6432f6",
+            "principalId": "bee3d72e-1c84-46a5-a0a5-79c0cd4a9ec7"
+          }
+        }
+      },
+      "properties": {
+        "description": "Deploys NSG flow logs and traffic analytics to Log Analytics with a specfied retention period for a single Azure region. To use across additional regions, assign the policy per region.",
+        "displayName": "Enforce NSG Flows are enabled to Storage and Log Analytics workspace",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "parameters": {
+          "networkWatcherName": {
+            "value": "NetworkWatcher_westeurope"
+          },
+          "networkWatcherRg": {
+            "value": "NetworkWatcherRG"
+          },
+          "nsgRegion": {
+            "value": "westeurope"
+          },
+          "storageId": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-nwlog-westeurope/providers/Microsoft.Storage/storageAccounts/saturnwesteuropeo5sy3wk"
+          },
+          "workspaceId": {
+            "value": "eeefb15b-7b15-4fa8-931b-c2319ef79217"
+          },
+          "workspaceRegion": {
+            "value": "westeurope"
+          },
+          "workspaceResourceId": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-mgmt/providers/Microsoft.OperationalInsights/workspaces/saturn-law"
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5e1cd26a-5090-4fdb-9d6a-84a90335e22d",
+        "scope": "/providers/Microsoft.Management/managementGroups/saturn-platform"
+      }
+    }
+  ],
+  "outputs": {}
+}

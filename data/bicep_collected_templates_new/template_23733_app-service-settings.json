@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "17717252732669198387"
+    }
+  },
+  "parameters": {
+    "appServiceName": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 60
+    },
+    "siteConfigProperties": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "appSettingsProperties": {
+      "type": "object",
+      "defaultValue": {}
+    }
+  },
+  "resources": [
+    {
+      "condition": "[not(empty(parameters('siteConfigProperties')))]",
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2022-03-01",
+      "name": "[format('{0}/{1}', parameters('appServiceName'), 'web')]",
+      "properties": "[union(reference(resourceId('Microsoft.Web/sites', parameters('appServiceName')), '2022-03-01').siteConfig, parameters('siteConfigProperties'))]"
+    },
+    {
+      "condition": "[not(empty(parameters('appSettingsProperties')))]",
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2022-03-01",
+      "name": "[format('{0}/{1}', parameters('appServiceName'), 'appsettings')]",
+      "properties": "[union(if(empty(reference(resourceId('Microsoft.Web/sites', parameters('appServiceName')), '2022-03-01').siteConfig.appSettings), createObject(), toObject(reference(resourceId('Microsoft.Web/sites', parameters('appServiceName')), '2022-03-01').siteConfig.appSettings, lambda('x', lambdaVariables('x').name), lambda('x', lambdaVariables('x').value))), parameters('appSettingsProperties'))]"
+    }
+  ]
+}

@@ -1,0 +1,463 @@
+service: bluesky-feeds
+
+provider:
+  name: aws
+  region: us-west-2
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'development'}
+  timeout: 28
+  memorySize: 1024
+  deploymentBucket:
+    name: ${ssm:deployment-artifacts-bucket}
+
+  environment:
+    DEPLOY_STAGE: ${self:provider.stage}
+    PUBLIC_HOSTNAME: ${self:custom.customDomain.http.domainName}
+    WEB_DOMAIN_NAME: ${ssm:/bluesky-feeds/${self:provider.stage}/console/web-domain-name}
+    # WEBSOCKET_HOSTNAME: ${self:custom.customDomain.websocket.domainName}
+    SYNC_SUBSCRIBER_QUEUE_TABLE: ${self:custom.syncSubscriberQueueTable}
+    SUBSCRIBER_FOLLOWING_TABLE: ${self:custom.subscriberFollowingTable}
+    FOLLOWED_BY_COUNT_TABLE: ${self:custom.followedByCountTable}
+    USER_SETTINGS_TABLE: ${self:custom.userSettingsTable}
+    APP_STATUS_TABLE: ${self:custom.appStatusTable}
+    POSTS_TABLE: ${self:custom.postsTable}
+    USER_FEED_TABLE: ${self:custom.userFeedTable}
+    CONSOLE_SESSIONS_TABLE: ${self:custom.consoleSessionsTable}
+    # WEBSOCKET_ENDPOINT: https://${self:custom.customDomain.websocket.domainName}
+    BLUESKY_SERVICE_IDENTIFIER: ${self:custom.blueskyAuth.identifier}
+    BLUESKY_SERVICE_USER_DID: ${ssm:/bluesky-feeds/${self:provider.stage}/service/user-did}
+
+
+custom:
+  static:
+    folder: ./public
+    port: 8080
+  logRetentionInDays: 90
+  prune:
+    automatic: true
+    number: 3
+  serverless-iam-roles-per-function:
+    defaultInherit: true
+  customDomain:
+    http:
+      domainName: ${ssm:/bluesky-feeds/${self:provider.stage}/domain-name}
+      certificateArn: ${ssm:/bluesky-feeds/${self:provider.stage}/certificate-arn}
+      endpointType: REGIONAL
+      securityPolicy: tls_1_2
+      apiType: http
+    # websocket:
+    #   domainName: ${ssm:/bluesky-feeds/${self:provider.stage}/console/ws-domain-name}
+    #   certificateArn: ${ssm:/bluesky-feeds/${self:provider.stage}/certificate-arn}
+    #   securityPolicy: tls_1_2
+    #   endpointType: regional
+  syncSubscriberQueueTable: ${self:service}-${self:provider.stage}-sync-subscriber-queue
+  subscriberFollowingTable: ${self:service}-${self:provider.stage}-subscriber-following
+  followedByCountTable: ${self:service}-${self:provider.stage}-followed-by-count
+  userSettingsTable: ${self:service}-${self:provider.stage}-user-settings
+  appStatusTable: ${self:service}-${self:provider.stage}-app-status
+  postsTable: ${self:service}-${self:provider.stage}-posts
+  userFeedTable: ${self:service}-${self:provider.stage}-user-feed
+  consoleSessionsTable: ${self:service}-${self:provider.stage}-console-sessions
+  blueskyAuth:
+    identifier: ${ssm:/bluesky-feeds/${self:provider.stage}/service/identifier}
+    password: ${ssm:/bluesky-feeds/${self:provider.stage}/service/password}
+  ssmEnvironmentBaseArn: 'arn:aws:ssm:${aws:region}:${aws:accountId}:parameter/bluesky-feeds/${self:provider.stage}'
+  enablePolling:
+    development: false
+    production: true
+
+	
+plugins:
+  - serverless-plugin-typescript
+  - serverless-domain-manager
+  - serverless-iam-roles-per-function
+  - serverless-prune-plugin
+  - serverless-plugin-log-retention
+  - serverless-plugin-static
+  - serverless-offline
+
+functions:
+  bff:
+    handler: ./src/endpoints/bff/web.handler
+    events:
+      - httpApi: GET /
+      - httpApi: GET /retweet-settings
+      - httpApi: POST /login/session
+      - httpApi: GET /login/session/auth-code
+      - httpApi: GET /login/session/approval
+      - httpApi: POST /logout
+      - httpApi: POST /mutewords
+      - httpApi: POST /followed-user
+    environment:
+      MUTEBOT_CSS_NAME: ${file('./resolveMutebotCss.js')}
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - kms:GenerateRandom
+        Resource: '*'
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+        Resource:
+          - !GetAtt ConsoleSessionsTable.Arn
+      - Effect: 'Allow'
+        Action:
+          - ssm:GetParameter
+        Resource:
+          - ${self:custom.ssmEnvironmentBaseArn}/access-token-signing-key/current
+      - Effect: 'Allow'
+        Action:
+          - ssm:GetParametersByPath
+        Resource: ${self:custom.ssmEnvironmentBaseArn}/access-token-signing-key/
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+        Resource:
+          - !GetAtt UserSettingsTable.Arn
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+        Resource:
+          - !GetAtt SubscriberFollowingTable.Arn
+
+  bff-approval-listener:
+    handler: ./src/endpoints/bff/approvalListener.handler
+    timeout: 300
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [ConsoleSessionsTable, StreamArn]
+          startingPosition: LATEST
+          batchSize: 1
+          maximumRetryAttempts: 1
+          filterPatterns:
+            - eventName: [INSERT]
+    environment:
+      BLUESKY_SERVICE_PASSWORD: ${self:custom.blueskyAuth.password}
+    iamRoleStatements:
+      # - Effect: Allow
+      #   Action:
+      #     - execute-api:ManageConnections
+      #   Resource:
+      #     - !Sub "arn:aws:execute-api:${aws:region}:${aws:accountId}:${WebsocketsApi}/${self:provider.stage}/POST/@connections/*"
+      - Effect: "Allow"
+        Action:
+          - kms:GenerateRandom
+        Resource: '*'
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+        Resource:
+          - !GetAtt ConsoleSessionsTable.Arn
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+        Resource:
+          - !GetAtt UserSettingsTable.Arn
+
+  rotate-signing-key:
+    handler: ./src/endpoints/rotate-signing-key/index.handler
+    iamRoleStatements:
+      - Effect: 'Allow'
+        Action:
+          - ssm:PutParameter
+          - ssm:GetParameter
+        Resource:
+          - ${self:custom.ssmEnvironmentBaseArn}/access-token-signing-key/*
+          - ${self:custom.ssmEnvironmentBaseArn}/resume-token-signing-key/*
+      - Effect: 'Allow'
+        Action:
+          - kms:GenerateRandom
+        Resource: '*'
+    maximumRetryAttempts: 0
+    events:
+      - schedule:
+          rate: rate(2 hours)
+          input:
+            keyName: access-token-signing-key
+      - schedule:
+          rate: rate(45 days)
+          input:
+            keyName: resume-token-signing-key
+
+  did:
+    handler: ./src/endpoints/did/index.handler
+    events:
+     - httpApi: GET /.well-known/did.json
+
+  getFeedSkeleton:
+    handler: ./src/endpoints/getFeedSkeleton/index.handler
+    events:
+     - httpApi: GET /xrpc/app.bsky.feed.getFeedSkeleton
+    environment:
+      FOLLOWING_FEED_URL: ${ssm:/bluesky-feeds/${self:provider.stage}/following-feed-url}
+      BETA_FOLLOWING_FEED_URL: ${ssm:/bluesky-feeds/${self:provider.stage}/beta-following-feed-url}
+      KIKORANGI_FEED_URL: ${ssm:/bluesky-feeds/${self:provider.stage}/kikorangi-feed-url}
+      DROPPED_POSTS_FEED_URL: ${ssm:/bluesky-feeds/${self:provider.stage}/dropped-posts-feed-url}
+      BLUESKY_SERVICE_PASSWORD: ${self:custom.blueskyAuth.password}
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+        Resource:
+          - !GetAtt SubscriberFollowingTable.Arn
+          - !GetAtt UserSettingsTable.Arn
+      - Effect: "Allow"
+        Action:
+          - dynamodb:BatchGetItem
+        Resource:
+          - !GetAtt PostsTable.Arn
+      - Effect: "Allow"
+        Action:
+          - dynamodb:Query
+        Resource:
+          - !Sub "${PostsTable.Arn}/*"
+          - !GetAtt UserFeedTable.Arn
+      - Effect: "Allow"
+        Action:
+          - dynamodb:PutItem
+        Resource:
+          - !GetAtt SyncSubscriberQueueTable.Arn
+
+  readFirehose:
+    handler: ./src/endpoints/readFirehose/index.handler
+    timeout: 240
+    memorySize: 1024
+    events:
+      - schedule:
+          rate: rate(5 minutes)
+          enabled: ${self:custom.enablePolling.${self:provider.stage}}
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+        Resource:
+          - !GetAtt AppStatusTable.Arn
+        Condition:
+          ForAllValues:StringEquals:
+            dynamodb:LeadingKeys:
+              - firehose-cursor
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:BatchGetItem
+        Resource:
+          - !GetAtt FollowedByCountTable.Arn
+      - Effect: "Allow"
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:BatchWriteItem
+        Resource:
+          - !GetAtt PostsTable.Arn
+          - !GetAtt UserFeedTable.Arn
+
+  syncSubscriberFollowing:
+    handler: ./src/endpoints/syncSubscriberFollowing/index.handler
+    events:	
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [SyncSubscriberQueueTable, StreamArn]
+          startingPosition: LATEST
+          batchSize: 1
+          maximumRetryAttempts: 5
+          filterPatterns:
+            - eventName: [INSERT, MODIFY]
+    environment:
+      BLUESKY_SERVICE_PASSWORD: ${self:custom.blueskyAuth.password}
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+        Resource:
+          - !GetAtt SubscriberFollowingTable.Arn
+          - !GetAtt FollowedByCountTable.Arn
+
+  syncSubscriberFollowing-cleanUp:
+    handler: ./src/endpoints/syncSubscriberFollowing/cleanUpOldSubscribers.handler
+    timeout: 900
+    events:
+      - schedule:
+          rate: rate(1 day)
+          enabled: ${self:custom.enablePolling.${self:provider.stage}}
+    iamRoleStatementsName: ${self:service}-${self:provider.stage}-syncSubscriber-cleanUp-${self:provider.region}
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:UpdateItem
+          - dynamodb:Scan
+        Resource:
+          - !GetAtt SyncSubscriberQueueTable.Arn
+
+resources:
+  Resources:
+    SyncSubscriberQueueTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.syncSubscriberQueueTable}
+        AttributeDefinitions:
+          - AttributeName: subscriberDid
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: subscriberDid
+            KeyType: HASH
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+        TimeToLiveSpecification:
+          AttributeName: expiresAt
+          Enabled: True
+
+    SubscriberFollowingTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.subscriberFollowingTable}
+        AttributeDefinitions:
+          - AttributeName: subscriberDid
+            AttributeType: S
+          - AttributeName: qualifier
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: subscriberDid
+            KeyType: HASH
+          - AttributeName: qualifier
+            KeyType: RANGE
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+        TimeToLiveSpecification:
+          AttributeName: expiresAt
+          Enabled: True
+
+    FollowedByCountTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.followedByCountTable}
+        AttributeDefinitions:
+          - AttributeName: didPrefix
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: didPrefix
+            KeyType: HASH
+
+    PostsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.postsTable}
+        AttributeDefinitions:
+          - AttributeName: uri
+            AttributeType: S
+          - AttributeName: resolvedStatus
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+          - AttributeName: author
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: uri
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: ByResolvedStatusAndCreatedAt
+            KeySchema:
+              - AttributeName: resolvedStatus
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: ByAuthorV2
+            KeySchema:
+              - AttributeName: author
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: INCLUDE
+              NonKeyAttributes:
+                - expiresAt
+                - type
+                - repostedPostUri
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+        TimeToLiveSpecification:
+          AttributeName: expiresAt
+          Enabled: True
+
+    UserFeedTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.userFeedTable}
+        AttributeDefinitions:
+          - AttributeName: subscriberDid
+            AttributeType: S
+          - AttributeName: indexedAt
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: subscriberDid
+            KeyType: HASH
+          - AttributeName: indexedAt
+            KeyType: RANGE
+        TimeToLiveSpecification:
+          AttributeName: expiresAt
+          Enabled: True
+
+    UserSettingsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.userSettingsTable}
+        AttributeDefinitions:
+          - AttributeName: subscriberDid
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: subscriberDid
+            KeyType: HASH
+
+    AppStatusTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.appStatusTable}
+        AttributeDefinitions:
+          - AttributeName: setting
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: setting
+            KeyType: HASH
+
+    ConsoleSessionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.consoleSessionsTable}
+        AttributeDefinitions:
+          - AttributeName: sessionId
+            AttributeType: S
+          - AttributeName: connectionId
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: sessionId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: ByConnectionId
+            KeySchema:
+              - AttributeName: connectionId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+        TimeToLiveSpecification:
+          AttributeName: expiresAt
+          Enabled: True

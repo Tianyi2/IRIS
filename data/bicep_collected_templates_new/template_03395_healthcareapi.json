@@ -1,0 +1,232 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "16101639064679479737"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "object"
+    },
+    "subnetId": {
+      "type": "string"
+    },
+    "healthcareapiName": {
+      "type": "string"
+    },
+    "privateDnsZoneIdHealthcareApi": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "healthcareapiFhirVersion": {
+      "type": "string",
+      "defaultValue": "fhir-R4",
+      "allowedValues": [
+        "fhir-Stu3",
+        "fhir-R4"
+      ]
+    },
+    "healthcareapiFhirStorageAccountName": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "healthcareapiFhirContainerRegistryLoginServers": {
+      "type": "array",
+      "defaultValue": []
+    },
+    "healthcareapiIotDeviceMapping": {
+      "type": "object"
+    },
+    "healthcareapiIotFhirMapping": {
+      "type": "object"
+    },
+    "healthcareapiIotEventhubNamespaceFqdn": {
+      "type": "string"
+    },
+    "healthcareapiIotEventhubName": {
+      "type": "string"
+    },
+    "healthcareapiIotEventhubConsumerGroupName": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "healthcareapiNameCleaned": "[toLower(replace(parameters('healthcareapiName'), '-', ''))]",
+    "healthcareapiFhirName": "[format('{0}fhir', variables('healthcareapiNameCleaned'))]",
+    "healthcareapiDicomName": "[format('{0}dicom', variables('healthcareapiNameCleaned'))]",
+    "healthcareapiIotName": "[format('{0}iot', variables('healthcareapiNameCleaned'))]",
+    "healthcareapiPrivateEndpointName": "[format('{0}-private-endpoint', variables('healthcareapiNameCleaned'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.HealthcareApis/workspaces",
+      "apiVersion": "2022-05-15",
+      "name": "[variables('healthcareapiNameCleaned')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {}
+    },
+    {
+      "condition": false,
+      "type": "Microsoft.Network/privateEndpoints",
+      "apiVersion": "2020-11-01",
+      "name": "[variables('healthcareapiPrivateEndpointName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "manualPrivateLinkServiceConnections": [],
+        "privateLinkServiceConnections": [
+          {
+            "name": "[variables('healthcareapiPrivateEndpointName')]",
+            "properties": {
+              "groupIds": [
+                "workspace"
+              ],
+              "privateLinkServiceId": "[resourceId('Microsoft.HealthcareApis/workspaces', variables('healthcareapiNameCleaned'))]",
+              "requestMessage": ""
+            }
+          }
+        ],
+        "subnet": {
+          "id": "[parameters('subnetId')]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.HealthcareApis/workspaces', variables('healthcareapiNameCleaned'))]"
+      ]
+    },
+    {
+      "condition": "[and(false(), not(empty(parameters('privateDnsZoneIdHealthcareApi'))))]",
+      "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+      "apiVersion": "2020-11-01",
+      "name": "[format('{0}/{1}', variables('healthcareapiPrivateEndpointName'), 'default')]",
+      "properties": {
+        "privateDnsZoneConfigs": [
+          {
+            "name": "[format('{0}-arecord', variables('healthcareapiPrivateEndpointName'))]",
+            "properties": {
+              "privateDnsZoneId": "[parameters('privateDnsZoneIdHealthcareApi')]"
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateEndpoints', variables('healthcareapiPrivateEndpointName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.HealthcareApis/workspaces/fhirservices",
+      "apiVersion": "2022-05-15",
+      "name": "[format('{0}/{1}', variables('healthcareapiNameCleaned'), variables('healthcareapiFhirName'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "kind": "[parameters('healthcareapiFhirVersion')]",
+      "properties": {
+        "accessPolicies": [],
+        "authenticationConfiguration": {
+          "audience": "[format('https://{0}-stu3.fhir.azurehealthcareapis.com', variables('healthcareapiNameCleaned'))]",
+          "authority": "[format('{0}{1}', environment().authentication.loginEndpoint, subscription().tenantId)]",
+          "smartProxyEnabled": false
+        },
+        "acrConfiguration": {
+          "loginServers": "[parameters('healthcareapiFhirContainerRegistryLoginServers')]"
+        },
+        "corsConfiguration": {
+          "allowCredentials": false,
+          "headers": [
+            "*"
+          ],
+          "maxAge": 1440,
+          "methods": [
+            "DELETE",
+            "GET",
+            "OPTIONS",
+            "PATCH",
+            "POST",
+            "PUT"
+          ],
+          "origins": [
+            "https://localhost:6001"
+          ]
+        },
+        "exportConfiguration": {
+          "storageAccountName": "[parameters('healthcareapiFhirStorageAccountName')]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.HealthcareApis/workspaces', variables('healthcareapiNameCleaned'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.HealthcareApis/workspaces/dicomservices",
+      "apiVersion": "2022-05-15",
+      "name": "[format('{0}/{1}', variables('healthcareapiNameCleaned'), variables('healthcareapiDicomName'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "authenticationConfiguration": {}
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.HealthcareApis/workspaces', variables('healthcareapiNameCleaned'))]"
+      ]
+    },
+    {
+      "condition": "[and(not(empty(parameters('healthcareapiIotDeviceMapping'))), not(empty(parameters('healthcareapiIotFhirMapping'))))]",
+      "type": "Microsoft.HealthcareApis/workspaces/iotconnectors",
+      "apiVersion": "2022-05-15",
+      "name": "[format('{0}/{1}', variables('healthcareapiNameCleaned'), variables('healthcareapiIotName'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "deviceMapping": {
+          "content": "[parameters('healthcareapiIotDeviceMapping')]"
+        },
+        "ingestionEndpointConfiguration": {
+          "fullyQualifiedEventHubNamespace": "[parameters('healthcareapiIotEventhubNamespaceFqdn')]",
+          "eventHubName": "[parameters('healthcareapiIotEventhubName')]",
+          "consumerGroup": "[parameters('healthcareapiIotEventhubConsumerGroupName')]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.HealthcareApis/workspaces', variables('healthcareapiNameCleaned'))]"
+      ]
+    },
+    {
+      "condition": "[and(not(empty(parameters('healthcareapiIotDeviceMapping'))), not(empty(parameters('healthcareapiIotFhirMapping'))))]",
+      "type": "Microsoft.HealthcareApis/workspaces/iotconnectors/fhirdestinations",
+      "apiVersion": "2022-05-15",
+      "name": "[format('{0}/{1}/{2}', variables('healthcareapiNameCleaned'), variables('healthcareapiIotName'), variables('healthcareapiFhirName'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "resourceIdentityResolutionType": "Create",
+        "fhirMapping": {
+          "content": "[parameters('healthcareapiIotFhirMapping')]"
+        },
+        "fhirServiceResourceId": "[resourceId('Microsoft.HealthcareApis/workspaces/fhirservices', variables('healthcareapiNameCleaned'), variables('healthcareapiFhirName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.HealthcareApis/workspaces/fhirservices', variables('healthcareapiNameCleaned'), variables('healthcareapiFhirName'))]",
+        "[resourceId('Microsoft.HealthcareApis/workspaces/iotconnectors', variables('healthcareapiNameCleaned'), variables('healthcareapiIotName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "healthcareapiFhirId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.HealthcareApis/workspaces/fhirservices', variables('healthcareapiNameCleaned'), variables('healthcareapiFhirName'))]"
+    }
+  }
+}

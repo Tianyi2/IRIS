@@ -1,0 +1,380 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {},
+  "variables": {
+    "defaultTags": {
+      "Author": "Simon Vedder",
+      "Contact": "info@simonvedder.com",
+      "Project": "DeallocateStoppedVM",
+      "ManagedBy": "ARM"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "azurerm_connection",
+      "tags": "[variables('defaultTags')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "displayName": "azurerm_connection",
+        "api": {
+          "id": "[format('{0}/providers/Microsoft.Web/locations/{1}/managedApis/azurevm', subscription().id, resourceGroup().location)]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/actionGroups",
+      "apiVersion": "2023-01-01",
+      "name": "TriggerLogicAppViaHealthAlert",
+      "tags": "[variables('defaultTags')]",
+      "location": "global",
+      "properties": {
+        "groupShortName": "HealthAlert",
+        "enabled": true,
+        "webhookReceivers": [
+          {
+            "name": "TriggerLogicApp",
+            "serviceUri": "[listCallbackUrl(resourceId('Microsoft.Logic/workflows', 'DeallocateStoppedVM'), '2019-05-01').value]",
+            "useCommonAlertSchema": true
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Logic/workflows', 'DeallocateStoppedVM')]"
+      ],
+      "metadata": {
+        "description": "Monitor Action Group to trigger Logic App"
+      }
+    },
+    {
+      "type": "Microsoft.Insights/activityLogAlerts",
+      "apiVersion": "2020-10-01",
+      "name": "TriggerLogicAppViaHealthAlert",
+      "tags": "[variables('defaultTags')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enabled": true,
+        "scopes": [
+          "[subscription().id]"
+        ],
+        "condition": {
+          "allOf": [
+            {
+              "field": "category",
+              "equals": "ResourceHealth"
+            },
+            {
+              "field": "resourceType",
+              "equals": "Microsoft.Compute/virtualMachines"
+            },
+            {
+              "field": "resourceHealthStatus",
+              "equals": "UserInitiated"
+            }
+          ]
+        },
+        "actions": {
+          "actionGroups": [
+            {
+              "actionGroupId": "[resourceId('Microsoft.Insights/actionGroups', 'TriggerLogicAppViaHealthAlert')]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/actionGroups', 'TriggerLogicAppViaHealthAlert')]"
+      ],
+      "metadata": {
+        "description": "Activity Log Alert for Resource Health - UserInitiated events on VMs"
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "DeallocateStoppedVM",
+      "tags": "[variables('defaultTags')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "When_a_HTTP_request_is_received": {
+              "type": "Request",
+              "kind": "Http",
+              "inputs": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "context": {
+                          "type": "object",
+                          "properties": {
+                            "activityLog": {
+                              "type": "object",
+                              "properties": {
+                                "channels": {
+                                  "type": "string"
+                                },
+                                "correlationId": {
+                                  "type": "string"
+                                },
+                                "description": {
+                                  "type": "string"
+                                },
+                                "eventDataId": {
+                                  "type": "string"
+                                },
+                                "eventSource": {
+                                  "type": "string"
+                                },
+                                "eventTimestamp": {
+                                  "type": "string"
+                                },
+                                "level": {
+                                  "type": "string"
+                                },
+                                "operationId": {
+                                  "type": "string"
+                                },
+                                "operationName": {
+                                  "type": "string"
+                                },
+                                "properties": {
+                                  "type": "object",
+                                  "properties": {
+                                    "cause": {
+                                      "type": "string"
+                                    },
+                                    "currentHealthStatus": {
+                                      "type": "string"
+                                    },
+                                    "details": {
+                                      "type": "string"
+                                    },
+                                    "previousHealthStatus": {
+                                      "type": "string"
+                                    },
+                                    "title": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "status": {
+                                  "type": "string"
+                                },
+                                "submissionTimestamp": {
+                                  "type": "string"
+                                },
+                                "subscriptionId": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "schemaId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "actions": {
+            "Variable_VMName": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "VMName",
+                    "type": "string",
+                    "value": "@{triggerBody()?['data']['essentials']['configurationItems'][0]}"
+                  }
+                ]
+              }
+            },
+            "Variable_LogDetails": {
+              "type": "InitializeVariable",
+              "runAfter": {
+                "Variable_VMName": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "Details",
+                    "type": "string",
+                    "value": "@{triggerBody()?['data']['alertContext']['properties']['details']}"
+                  }
+                ]
+              }
+            },
+            "Variable_ResourceGroup": {
+              "type": "InitializeVariable",
+              "runAfter": {
+                "Variable_LogDetails": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "RGName",
+                    "type": "string",
+                    "value": "@{triggerBody()?['data']['essentials']['targetResourceGroup']}"
+                  }
+                ]
+              }
+            },
+            "Variable_Subscription": {
+              "type": "InitializeVariable",
+              "runAfter": {
+                "Variable_ResourceGroup": [
+                  "Succeeded"
+                ]
+              },
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "SubId",
+                    "type": "string",
+                    "value": "@{split(triggerBody()?['data']['essentials']['alertId'], '/')[2]}"
+                  }
+                ]
+              }
+            },
+            "Condition": {
+              "type": "If",
+              "runAfter": {
+                "Variable_Subscription": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "and": [
+                  {
+                    "contains": [
+                      "@variables('Details')",
+                      "Virtual Machine is stopping"
+                    ]
+                  },
+                  {
+                    "contains": [
+                      "@variables('Details')",
+                      "due to a guest activity from within the Virtual Machine"
+                    ]
+                  }
+                ]
+              },
+              "actions": {
+                "Deallocate_VM": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azurevm']['connectionId']"
+                      }
+                    },
+                    "method": "post",
+                    "path": "/subscriptions/@{encodeURIComponent(variables('SubId'))}/resourcegroups/@{encodeURIComponent(variables('RGName'))}/providers/Microsoft.Compute/virtualMachines/@{encodeURIComponent(variables('VMName'))}/deallocate",
+                    "queries": {
+                      "api-version": "2019-12-01"
+                    }
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              }
+            }
+          }
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azurevm": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', 'azurerm_connection')]",
+                "connectionName": "azurerm_connection",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', resourceGroup().location, 'azurevm')]",
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', 'azurerm_connection')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "roleAssignment",
+      "subscriptionId": "[subscription().subscriptionId]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "logicAppIdentity": {
+            "value": "[reference(resourceId('Microsoft.Logic/workflows', 'DeallocateStoppedVM'), '2019-05-01', 'full').identity.principalId]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {},
+          "parameters": {
+            "logicAppIdentity": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "name": "[guid(subscription().id, '9980e02c-c2be-4d73-94e8-173b1dc7cf3c')]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '9980e02c-c2be-4d73-94e8-173b1dc7cf3c')]",
+                "principalId": "[parameters('logicAppIdentity')]",
+                "principalType": "ServicePrincipal"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Logic/workflows', 'DeallocateStoppedVM')]"
+      ]
+    }
+  ]
+}

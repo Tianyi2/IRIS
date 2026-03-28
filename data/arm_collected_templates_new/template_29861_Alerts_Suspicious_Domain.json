@@ -1,0 +1,79 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/c56fcb78-b708-4a92-bad4-d50b1e15c42c')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/c56fcb78-b708-4a92-bad4-d50b1e15c42c')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": false,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "PT5H",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "enabled": true,
+        "severity": "Low",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Suspicious Domain Detected {{Domain}}  {{Status}}",
+          "alertDescriptionFormat": "Suspicious Domain detected for {{Domain}} with {{Status}}\n",
+          "alertDynamicProperties": []
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Cyble Vision Alerts Suspicious Domain",
+        "description": "'This Rule generates Cyble Vision Alerts for Service - Suspicious Domain severity LOW'\n",
+        "suppressionDuration": "PT5H",
+        "query": "Alerts_suspicious_domains \n| where Service == \"suspicious_domain\" \n| extend MappedSeverity = Severity\n",
+        "status": "Available",
+        "queryFrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Domain",
+                "identifier": "DomainName"
+              }
+            ],
+            "entityType": "DNS"
+          }
+        ],
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "Reconnaissance"
+        ],
+        "triggerThreshold": 0,
+        "subTechniques": [],
+        "customDetails": {
+          "LastLiveCheck": "SD_LastLiveCheck",
+          "Score": "SD_Score",
+          "A_Records": "A_Records",
+          "Service": "Service",
+          "RegistrationDate": "SD_RegistrationDate",
+          "NS_Records": "NS_Records",
+          "Domain": "Domain",
+          "Status": "Status",
+          "AlertID": "AlertID",
+          "Screenshot": "SD_ScreenshotURL",
+          "Keyword": "KeywordName",
+          "LiveStatus": "SD_IsLive",
+          "MappedSeverity": "Severity",
+          "MX_Records": "MX_Records"
+        },
+        "queryPeriod": "30m"
+      }
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/d944d564-b6fa-470d-b5ab-a1a141878c5e')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/d944d564-b6fa-470d-b5ab-a1a141878c5e')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Valence Alert: {{alertType_name_s}}",
+          "alertDynamicProperties": [],
+          "alertDescriptionFormat": "{{alertType_description_s}}",
+          "alertSeverityColumnName": "alertType_severity_s"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "name": "Valence Security Alerts",
+        "description": "'Valence Security Alerts'\n",
+        "query": "ValenceAlert_CL\n",
+        "status": "Available",
+        "queryFrequency": "5m",
+        "severity": "High",
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "tactics": [],
+        "customDetails": {
+          "ValenceCreatedTS": "createdTimestamp_d",
+          "ValencePlatform": "alertType_platform_s",
+          "ValenceAlertSeverity": "alertType_severity_s",
+          "ValenceAlertName": "alertType_name_s",
+          "ValenceAlertDesc": "alertType_description_s",
+          "ValenceConnectorUids": "connectorUids_s"
+        },
+        "queryPeriod": "5m"
+      }
+    }
+  ]
+}

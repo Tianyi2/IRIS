@@ -1,0 +1,109 @@
+service: orders-source
+
+frameworkVersion: '3'
+
+configValidationMode: error
+
+provider:
+  name: aws
+  logRetentionInDays: 7
+  region: us-east-1
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  deploymentBucket:
+    name: com.reference-architecture.deploys
+    maxPreviousDeploymentArtifacts: 5
+    serverSideEncryption: AES256
+  environment:
+    TABLE_NAME: ${self:custom.tableName}
+  tags:
+    lumigo:auto-trace: 'true'
+
+custom:
+  esbuild:
+    minify: true
+  prune:
+    automatic: true
+    number: 1
+  tableName: ${self:service}
+
+appSync:
+  name: orders-source-api
+  schema: orders/schema.api.graphql
+  authentication:
+    type: API_KEY
+  apiKeys: 
+  - name: orders-api-key
+    description: The API key for Orders
+    expiresAfter: 300d
+  dataSources:
+    ListOrdersLambda:
+      type: AWS_LAMBDA
+      config:
+        function:
+          handler: orders/handlers.listOrders
+    GetOrderLambda:
+      type: AWS_LAMBDA
+      config:
+        function:
+          handler: orders/handlers.getOrder
+    CreateOrderLambda:
+      type: AWS_LAMBDA
+      config:
+        function:
+          handler: orders/handlers.createOrder
+  logging:
+    level: ALL
+    retentionInDays: 7
+  pipelineFunctions:
+    ListOrdersFunction:
+      dataSource: ListOrdersLambda
+    GetOrderFunction:
+      dataSource: GetOrderLambda
+    CreateOrderFunction:
+      dataSource: CreateOrderLambda
+  resolvers:
+    Query.listOrders:
+      functions:
+      - ListOrdersFunction
+    Query.getOrder:
+      functions:
+      - GetOrderFunction
+    Mutation.createOrder:
+      functions:
+      - CreateOrderFunction
+
+package:
+  individually: true
+
+plugins:
+- serverless-appsync-plugin
+- serverless-esbuild
+- serverless-iam-roles-per-function
+- serverless-deployment-bucket
+- serverless-prune-plugin
+
+resources:
+  Resources:
+    OrdersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:custom.tableName}
+        KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+  Outputs:
+    ApiUrl:
+      Value: ${appsync:url}
+    ApiKey:
+      Value: ${appsync:apiKey.orders-api-key}
+    ApiId:
+      Value: ${appsync:id}

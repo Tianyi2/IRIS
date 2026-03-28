@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "authorizationRuleName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Authorization Rule (shared access policy)"
+            }
+        },
+        "topicName": {
+            "type": "string",
+            "metadata": {
+                "description": "Topic to apply the rule (policy) to"
+            }
+        },
+        "rights": {
+            "type": "array",
+            "metadata": {
+                "description": "Array of rights to be assigned to the rule.  Rights are limited to Manage, Send, Listen"
+            }
+        },
+        "servicebusName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of Service Bus namespace the topic attached to"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.ServiceBus/namespaces/topics/authorizationRules",
+            "name": "[concat(parameters('servicebusName'),'/',parameters('topicName'), '/', parameters('authorizationRuleName'))]",
+            "apiVersion": "2021-11-01",
+            "location": "[parameters('location')]",
+            "tags": {},
+            "properties": {
+                "rights": "[parameters('rights')]"
+            }
+        }
+    ],
+    "outputs": {}
+}

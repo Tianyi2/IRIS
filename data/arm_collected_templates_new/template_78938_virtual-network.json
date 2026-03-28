@@ -1,0 +1,72 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentTag": {
+      "type": "string"
+    },
+    "parentBusinessTag": {
+      "type": "string"
+    },
+    "portfolioTag": {
+      "type": "string"
+    },
+    "productTag": {
+      "type": "string"
+    },
+    "serviceTag": {
+        "type": "string",
+        "defaultValue": "[parameters('productTag')]"
+    },
+    "serviceLineTag": {
+      "type": "string"
+    },
+    "serviceOfferingTag": {
+        "type": "string",
+        "defaultValue": "[parameters('productTag')]"
+    },
+    "armVnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the arm vnet"
+      }
+    },
+    "armVnetAddressSpaceCIDR": {
+      "type": "string",
+      "metadata": {
+        "description": "CIDR for the address space of the ARM Vnet"
+      }
+    },
+    "subnetConfiguration": {
+      "type": "array",
+      "metadata": {
+        "description": "Array of objects in the following schema: https://docs.microsoft.com/en-us/azure/templates/microsoft.network/2018-11-01/virtualnetworks#Subnet"
+      }
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[parameters('armVnetName')]",
+      "apiVersion": "2018-11-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "Environment": "[parameters('environmentTag')]",
+        "Parent Business": "[parameters('parentBusinessTag')]",
+        "Portfolio": "[parameters('portfolioTag')]",
+        "Product": "[parameters('productTag')]",
+        "Service": "[parameters('serviceTag')]",
+        "Service Line": "[parameters('serviceLineTag')]",
+        "Service Offering": "[parameters('serviceOfferingTag')]"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": ["[parameters('armVnetAddressSpaceCIDR')]"]
+        },
+        "subnets": "[parameters('subnetConfiguration')]"
+      }
+    }
+  ],
+  "outputs": {}
+}

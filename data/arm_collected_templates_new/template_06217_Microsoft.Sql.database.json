@@ -1,0 +1,116 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "serverName": {
+            "type": "string",
+            "metadata": {
+                "description": "Existing Sql server where to create the database."
+            }
+        },
+        "databaseName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the new database to create."
+            }
+        },
+        "tier": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "Standard",
+                "Premium"
+            ],
+            "metadata": {
+                "description": "The type of database to create."
+            }
+        },
+        "sku": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "S0",
+                "S1",
+                "S2",
+                "S3",
+                "S4",
+                "S6",
+                "S7",
+                "S9",
+                "S12",
+                "P1",
+                "P2",
+                "P4",
+                "P6",
+                "P11",
+                "P15"
+            ],
+            "metadata": {
+                "description": "Describes the performance level for Edition"
+            }
+        },
+        "maxSizeBytes": {
+            "type": "string",
+            "defaultValue": "2147483648",
+            "metadata": {
+                "description": "The maximum size, in bytes, for the database"
+            }
+        },
+        "collation": {
+            "type": "string",
+            "defaultValue": "SQL_Latin1_General_CP1_CI_AS",
+            "metadata": {
+                "description": "The database collation for governing the proper use of characters."
+            }
+        },
+        "tags": {
+          "type": "object",
+          "defaultValue" : {}
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "sku": {
+                "name": "[parameters('sku')]",
+                "tier": "[parameters('tier')]"
+            },
+            "name": "[concat(parameters('serverName'), '/', parameters('databaseName'))]",
+            "apiVersion": "2017-03-01-preview",
+            "location": "[resourceGroup().location]",
+            "tags": "[parameters('tags')]",
+            "properties": {
+                "collation": "[parameters('collation')]",
+                "maxSizeBytes": "[parameters('maxSizeBytes')]",
+                "zoneRedundant": false
+            },
+            "resources": [
+                {
+                    "condition": "[not(equals(parameters('tier'), 'Basic'))]",
+                    "name": "default",
+                    "type": "backupLongTermRetentionPolicies",
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', parameters('serverName'), '/', 'databases', '/', parameters('databaseName'))]"
+                    ],
+                    "apiVersion": "2017-03-01-preview",
+                    "properties": {
+                        "weeklyRetention": "P3W",
+                        "monthlyRetention": "P2M",
+                        "yearlyRetention": "P1Y",
+                        "weekOfYear": 1
+                    }
+                }
+            ]
+        }
+    ],
+    "outputs": {
+        "database": {
+            "type": "object",
+            "value": "[reference(parameters('databaseName'), '2017-10-01-preview', 'Full')]"
+        }
+    }
+}

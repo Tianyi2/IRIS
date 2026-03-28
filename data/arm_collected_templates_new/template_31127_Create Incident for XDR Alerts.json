@@ -1,0 +1,123 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/0febd8cc-1b8d-45ed-87b3-e1e8a57d14cd')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/0febd8cc-1b8d-45ed-87b3-e1e8a57d14cd')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "Selected",
+            "lookbackDuration": "5m",
+            "groupByCustomDetails": [
+              "WorkbenchID"
+            ],
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "severity": "High",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "{{workbenchName_s}}",
+          "alertDescriptionFormat": "{{description_s}}",
+          "alertSeverityColumnName": "Severity"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Create Incident for XDR Alerts",
+        "alertRuleTemplateName": null,
+        "description": "'This Query creates an incident based on Trend Vision One Workbench Alerts and maps the impacted entities for Microsoft Sentinel usage.'\n",
+        "suppressionDuration": "5h",
+        "query": "TrendMicro_XDR_WORKBENCH_CL\n| extend Severity = case(severity_s == \"low\", \"Informational\",\n                        severity_s == \"medium\", \"Low\",\n                        severity_s == \"high\", \"Medium\",\n                        \"High\"\n                        )\n| extend \n    UserAccountName_s = todynamic(column_ifexists(\"UserAccountName_s\", \"[]\")),\n    UserAccountNTDomain_s = todynamic(column_ifexists(\"UserAccountNTDomain_s\", \"[]\")),\n    FileName_s = todynamic(column_ifexists(\"FileName_s\", \"[]\")),\n    FileDirectory_s = todynamic(column_ifexists(\"FileDirectory_s\", \"[]\")),\n    ProcessCommandLine_s = todynamic(column_ifexists(\"ProcessCommandLine_s\", \"[]\")),\n    RegistryKey_s = todynamic(column_ifexists(\"RegistryKey_s\", \"[]\")),\n    RegistryValue_s = todynamic(column_ifexists(\"RegistryValue_s\", \"[]\")),\n    RegistryValueName_s = todynamic(column_ifexists(\"RegistryValueName_s\", \"[]\"))\n",
+        "status": "Available",
+        "queryFrequency": "5m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "UserAccountName_s",
+                "identifier": "Name"
+              },
+              {
+                "columnName": "UserAccountNTDomain_s",
+                "identifier": "NTDomain"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "FileName_s",
+                "identifier": "Name"
+              },
+              {
+                "columnName": "FileDirectory_s",
+                "identifier": "Directory"
+              }
+            ],
+            "entityType": "File"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "ProcessCommandLine_s",
+                "identifier": "CommandLine"
+              }
+            ],
+            "entityType": "Process"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "RegistryKey_s",
+                "identifier": "Key"
+              }
+            ],
+            "entityType": "RegistryKey"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "ProcessCommandLine_s",
+                "identifier": "Name"
+              },
+              {
+                "columnName": "RegistryValue_s",
+                "identifier": "Value"
+              }
+            ],
+            "entityType": "RegistryValue"
+          }
+        ],
+        "suppressionEnabled": false,
+        "triggerOperator": "gt",
+        "tactics": null,
+        "triggerThreshold": 0,
+        "customDetails": {
+          "WorkbenchLink": "workbenchLink_s",
+          "Severity": "severity_s",
+          "XDRCustomerID": "xdrCustomerID_g",
+          "CreatedAt": "createdTime_t",
+          "ImpactScopeSummary": "impactScope_Summary_s",
+          "WorkbenchID": "workbenchId_s",
+          "Provider": "alertProvider_s",
+          "PriorityScore": "priorityScore_d",
+          "WorkbenchName": "workbenchName_s"
+        },
+        "queryPeriod": "5m"
+      }
+    }
+  ]
+}

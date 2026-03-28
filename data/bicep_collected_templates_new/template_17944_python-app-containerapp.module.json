@@ -1,0 +1,110 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "13652506629250126615"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "The location for the resource(s) to be deployed."
+      }
+    },
+    "aca_env_outputs_azure_container_apps_environment_default_domain": {
+      "type": "string"
+    },
+    "aca_env_outputs_azure_container_apps_environment_id": {
+      "type": "string"
+    },
+    "python_app_containerimage": {
+      "type": "string"
+    },
+    "computeparam_value": {
+      "type": "string"
+    },
+    "secretparam_value": {
+      "type": "securestring"
+    },
+    "parameterwithdefault_value": {
+      "type": "string"
+    },
+    "aca_env_outputs_azure_container_registry_endpoint": {
+      "type": "string"
+    },
+    "aca_env_outputs_azure_container_registry_managed_identity_id": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2025-01-01",
+      "name": "python-app",
+      "location": "[parameters('location')]",
+      "properties": {
+        "configuration": {
+          "secrets": [
+            {
+              "name": "p1",
+              "value": "[parameters('secretparam_value')]"
+            }
+          ],
+          "activeRevisionsMode": "Single",
+          "ingress": {
+            "external": true,
+            "targetPort": 80,
+            "transport": "http"
+          },
+          "registries": [
+            {
+              "server": "[parameters('aca_env_outputs_azure_container_registry_endpoint')]",
+              "identity": "[parameters('aca_env_outputs_azure_container_registry_managed_identity_id')]"
+            }
+          ]
+        },
+        "environmentId": "[parameters('aca_env_outputs_azure_container_apps_environment_id')]",
+        "template": {
+          "containers": [
+            {
+              "image": "[parameters('python_app_containerimage')]",
+              "name": "python-app",
+              "env": [
+                {
+                  "name": "P0",
+                  "value": "[parameters('computeparam_value')]"
+                },
+                {
+                  "name": "P1",
+                  "secretRef": "p1"
+                },
+                {
+                  "name": "P3",
+                  "value": "[parameters('parameterwithdefault_value')]"
+                },
+                {
+                  "name": "TEST_SCENARIO",
+                  "value": "build-args-and-secrets"
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": 1
+          }
+        }
+      },
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[format('{0}', parameters('aca_env_outputs_azure_container_registry_managed_identity_id'))]": {}
+        }
+      }
+    }
+  ]
+}

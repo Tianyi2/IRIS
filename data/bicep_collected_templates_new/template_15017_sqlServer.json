@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "4970929058760052257"
+    }
+  },
+  "parameters": {
+    "existingSqlServerName": {
+      "type": "string"
+    },
+    "existingDatabaseName": {
+      "type": "string",
+      "metadata": {
+        "description": "The existing SQL Database name."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Sql/servers/firewallRules",
+      "apiVersion": "2022-05-01-preview",
+      "name": "[format('{0}/{1}', parameters('existingSqlServerName'), 'AllowAllWindowsAzureIps')]",
+      "properties": {
+        "endIpAddress": "0.0.0.0",
+        "startIpAddress": "0.0.0.0"
+      }
+    }
+  ],
+  "outputs": {
+    "sqlServerFullyQualifiedDomainName": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Sql/servers', parameters('existingSqlServerName')), '2021-11-01').fullyQualifiedDomainName]"
+    },
+    "sqlDatabaseName": {
+      "type": "string",
+      "value": "[parameters('existingDatabaseName')]"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/07bca129-e7d6-4421-b489-32abade0b6a7')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/07bca129-e7d6-4421-b489-32abade0b6a7')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "query": "DigitalGuardianDLPEvent\n| where isnotempty(IncidentStatus)\n| extend inc_act = split(IncidentStatus, ',')\n| where inc_act has 'New'\n| where inc_act !contains 'Block'\n| extend AccountCustomEntity = SrcUserName\n",
+        "name": "Digital Guardian - Incident with not blocked action",
+        "queryPeriod": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "identifier": "Name",
+                "columnName": "AccountCustomEntity"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "triggerOperator": "gt",
+        "description": "'Detects when incident has not block action.'\n",
+        "triggerThreshold": 0,
+        "severity": "High",
+        "queryFrequency": "1h",
+        "tactics": [
+          "Exfiltration"
+        ],
+        "status": "Available"
+      }
+    }
+  ]
+}

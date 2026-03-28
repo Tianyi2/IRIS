@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/72592618-fa57-45e1-9f01-ca8706a5e3f5')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/72592618-fa57-45e1-9f01-ca8706a5e3f5')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "Jira - Permission scheme updated",
+        "description": "'Detects when permission scheme was updated.'\n",
+        "query": "JiraAudit\n| where EventMessage =~ 'Permission scheme updated'\n| project EventCreationTime, ObjectItemName, UserName, SrcIpAddr, ChangedValues\n| extend AccountCustomEntity = UserName, IPCustomEntity = SrcIpAddr\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "AccountCustomEntity",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "IPCustomEntity",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "Impact"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

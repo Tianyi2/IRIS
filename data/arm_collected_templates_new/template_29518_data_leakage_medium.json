@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/57d1991c-29bc-4b15-b6b8-e753368be5b9')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/57d1991c-29bc-4b15-b6b8-e753368be5b9')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "triggerThreshold": 0,
+        "severity": "Medium",
+        "description": "New Data Leakage with severity Medium found",
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "PT5H",
+            "reopenClosedIncident": false,
+            "enabled": false
+          }
+        },
+        "query": "CBSLog_Azure_1_CL | where severity_s == \"Medium\" | where type_s == \"Data Leakage\" | where status_s != \"Closed\" or status_s != \"Resolved\"",
+        "name": "Data Leakage (Medium)",
+        "status": "Available",
+        "queryPeriod": "5m",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryFrequency": "5m",
+        "triggerOperator": "gt",
+        "tactics": [
+          "Exfiltration"
+        ],
+        "suppressionDuration": "5h",
+        "suppressionEnabled": false
+      }
+    }
+  ]
+}

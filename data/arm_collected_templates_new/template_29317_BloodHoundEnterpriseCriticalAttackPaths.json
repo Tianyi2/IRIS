@@ -1,0 +1,41 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/df292d06-f348-41ad-b780-0abb5acfe9ab')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/df292d06-f348-41ad-b780-0abb5acfe9ab')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "displayName": "domain_name",
+                "identifier": "DomainName"
+              }
+            ],
+            "entityType": "DNS"
+          }
+        ],
+        "description": "'The number of critical attack paths has increased over the past 7 days.'\n",
+        "query": "BloodHoundLogs_CL\n| where data_type == \"finding_export\"\n| where created_at > ago (7d)\n| summarize min_critical_risk_count = min(finding_count), arg_max(created_at, current_critical_risk_count = finding_count, domain_name) by domain_name\n| extend  difference = current_critical_risk_count - min_critical_risk_count\n| where difference > 0",
+        "queryFrequency": "7d",
+        "triggerOperator": "gt",
+        "name": "BloodHound Enterprise - Number of critical attack paths increase",
+        "tactics": [],
+        "triggerThreshold": 0,
+        "severity": "Medium",
+        "status": "Available",
+        "queryPeriod": "7d"
+      }
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+ontology_id,ontology_name,category,language,source
+bicep_1,targetScope,template attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/file#target-scope
+bicep_2,metadata,section,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/file#metadata
+bicep_3,type,section,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/user-defined-data-types
+bicep_4,param,section,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameters
+bicep_5,var,section,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/variables
+bicep_6,resource,section,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/resource-declaration
+bicep_7,module,section,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/modules
+bicep_8,output,section,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/outputs
+bicep_9,func,section,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/user-defined-functions
+bicep_10,param.name,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameters
+bicep_11,param.type,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameters
+bicep_12,param.default,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameters#default-value
+bicep_13,param.@description,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameters#decorators
+bicep_14,param.@secure,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameters#decorators
+bicep_15,param.@minLength,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameters#decorators
+bicep_16,param.@maxLength,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameters#decorators
+bicep_17,param.@minValue,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameters#decorators
+bicep_18,param.@maxValue,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameters#decorators
+bicep_19,param.@allowed,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameters#decorators
+bicep_20,param.@metadata,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameters#decorators
+bicep_21,resource.type,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/resource-declaration
+bicep_22,resource.symbolic-name,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/resource-declaration
+bicep_23,resource.dependsOn,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/resource-dependencies
+bicep_24,resource.condition,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/conditional-resource-deployment
+bicep_25,resource.existing,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/existing-resource
+bicep_26,resource.parent,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/child-resource-name-type
+bicep_27,resource.scope,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/scope-extension-resources
+bicep_28,resource.properties,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/resource-declaration
+bicep_29,resource.for,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/loops
+bicep_30,output.type,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/outputs
+bicep_31,output.value,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/outputs
+bicep_32,output.@description,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/outputs
+bicep_33,module.symbolic-name,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/modules
+bicep_34,module.path,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/modules
+bicep_35,module.params,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/modules
+bicep_36,module.scope,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/modules
+bicep_37,module.dependsOn,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/modules
+bicep_38,module.condition,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/conditional-resource-deployment
+bicep_39,module.for,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/loops
+bicep_40,var.name,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/variables
+bicep_41,var.value,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/variables
+bicep_42,output.name,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/outputs
+bicep_43,if,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/conditional-resource-deployment
+bicep_44,metadata.description,section attribute,Bicep,https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/file#metadata
+bicep_45,validate,section attribute,Bicep,https://newreleases.io/project/github/Azure/bicep/release/v0.38.3

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Defender for Containers provisioning Policy extension for Arc-e",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "centralus",
+      "identity": {
+        "principalId": "58646d83-54ca-4d68-9469-54a1f7df4fb9",
+        "tenantId": "5663f39e-feb1-4303-a1f9-cf20b702de61",
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "description": "This policy assignment was automatically created by Azure Security Center for agent installation as configured in Security Center auto provisioning.",
+        "displayName": "Defender for Containers provisioning Policy extension for Arc-e",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0adc5395-9169-4b9b-8687-af838d69410a",
+        "scope": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad"
+      }
+    }
+  ],
+  "outputs": {}
+}

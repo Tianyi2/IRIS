@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deploy-AzActivity-Log",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "westeurope",
+      "identity": {
+        "principalId": "cb5323cc-9054-44ff-b19a-01e3be31280c",
+        "tenantId": "dbbc60b0-7054-4f16-a0af-724750c58153",
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "description": "Deploys the diagnostic settings for Azure Activity to stream subscriptions audit logs to a Log Analytics workspace to monitor subscription-level events",
+        "displayName": "Configure Azure Activity logs to stream to specified Log Analytics workspace",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "nonComplianceMessages": [
+          {
+            "message": "Azure Activity logs must be configured to stream to specified Log Analytics workspace."
+          }
+        ],
+        "parameters": {
+          "logAnalytics": {
+            "value": "/subscriptions/30aca850-a275-4d1a-a24b-68f7605f12d2/resourceGroups/contoso-mgmt/providers/Microsoft.OperationalInsights/workspaces/contoso-law"
+          },
+          "logsEnabled": {
+            "value": "True"
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2465583e-4e78-4c15-b6be-a36cbc7c8b0f",
+        "scope": "/providers/Microsoft.Management/managementGroups/contoso"
+      }
+    }
+  ],
+  "outputs": {}
+}

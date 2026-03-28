@@ -1,0 +1,428 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "AdminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Administrator username"
+      },
+      "defaultValue": "sysadmin"
+    },
+    "AdminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Administrator password"
+      },
+      "defaultValue": "[[[VmPassword]]"
+    },
+    "WebSrvName": {
+      "type": "string",
+      "defaultValue": "vmweb01"
+    },
+    "SqlSrvName": {
+      "type": "string",
+      "defaultValue": "vmsql01"
+    }
+  },
+  "variables": {
+    "vNetName": "env-vnet",
+    "vNetPrefix": "10.0.0.0/16",
+    "vNetSubnet1Name": "Subnet-1",
+    "vNetSubnet1Prefix": "10.0.0.0/24",
+    "vNetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('vNetName'))]",
+    "subnetRef": "[concat(variables('vNetID'), '/subnets/', 'Subnet-1')]",
+    "nsgName": "env-nsg",
+    "ScriptsFolder": "scripts",
+    "ArtifactsLocation": "https://raw.githubusercontent.com/roberto-mardeni/devtest-arm-templates/master/environments/iis-plus-sql",
+    "ArtifactsLocationSasToken": "",
+    "WebSrvImagePublisher": "MicrosoftWindowsServer",
+    "WebSrvImageOffer": "WindowsServer",
+    "WebSrvVmSize": "Standard_D2_v2",
+    "WebSrvOSVersion": "2016-Datacenter",
+    "WebSrvNicName": "[concat(parameters('WebSrvName'), 'NetworkInterface')]",
+    "virtualNetworkLocation": "[resourceGroup().location]",
+    "WebSrvPubIpName": "[concat(parameters('WebSrvName'),'PubIp')]",
+    "WebSrvPubIpDnsName": "[toLower(concat(parameters('WebSrvName'),uniqueString(resourceGroup().id)))]",
+    "WebSrvDscConfigArchiveFileName": "WebSrvDscConfig.zip",
+    "WebSrvSetupScriptFileName": "WebSrvSetup.ps1",
+    "WebSrvHostName": "[concat(variables('WebSrvPubIpDnsName'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
+    "SqlSrvNicName": "[concat(parameters('SqlSrvName'), 'NetworkInterface')]",
+    "SqlSrvPubIpName": "[concat(parameters('SqlSrvName'),'PubIp')]",
+    "SqlSrvSize": "Standard_DS12_v2",
+    "SqlSrvStorageType": "Standard_LRS",
+    "SqlSrvPubIpDnsName": "[toLower(concat(parameters('SqlSrvName'),uniqueString(resourceGroup().id)))]",
+    "SqlSrvDscConfigArchiveFileName": "SqlSrvDscConfig.zip",
+    "SqlSrvSetupScriptFileName": "SqlSrvSetup.ps1",
+    "SqlSrvHostName": "[concat(variables('SqlSrvPubIpDnsName'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
+    "CertToolFileName": "makecert.exe",
+    "WinRmScriptFileName": "config-winrm.ps1"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('nsgName')]",
+      "apiVersion": "2017-10-01",
+      "location": "[resourceGroup().location]",
+      "scale": null,
+      "properties": {
+        "securityRules": [{
+            "name": "AllowRdp",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3389",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "AllowSql",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "1433",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "AllowHttp",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 300,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('vNetName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-03-30",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('vNetPrefix')]"
+          ]
+        },
+        "subnets": [{
+          "name": "[variables('vNetSubnet1Name')]",
+          "properties": {
+            "addressPrefix": "[variables('vNetSubnet1Prefix')]",
+            "networkSecurityGroup": {
+              "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+            }
+          }
+        }]
+      },
+      "dependsOn": [
+        "[variables('nsgName')]"
+      ]
+    },
+    {
+      "name": "[variables('WebSrvPubIpName')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "[variables('virtualNetworkLocation')]",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "WebSrvPubIp"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('WebSrvPubIpDnsName')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('WebSrvNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[variables('virtualNetworkLocation')]",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [
+        "[variables('vNetName')]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('WebSrvPubIpName'))]"
+      ],
+      "tags": {
+        "displayName": "WebSrvNic"
+      },
+      "properties": {
+        "ipConfigurations": [{
+          "name": "ipconfig1",
+          "properties": {
+            "privateIPAllocationMethod": "Dynamic",
+            "subnet": {
+              "id": "[variables('subnetRef')]"
+            },
+            "publicIPAddress": {
+              "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('WebSrvPubIpName'))]"
+            }
+          }
+        }]
+      }
+    },
+    {
+      "name": "[parameters('WebSrvName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-04-30-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('WebSrvNicName'))]"
+      ],
+      "tags": {
+        "displayName": "WebSrv"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('WebSrvVmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('WebSrvName')]",
+          "adminUsername": "[parameters('AdminUsername')]",
+          "adminPassword": "[parameters('AdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('WebSrvImagePublisher')]",
+            "offer": "[variables('WebSrvImageOffer')]",
+            "sku": "[variables('WebSrvOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            }
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [{
+            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('WebSrvNicName'))]"
+          }]
+        }
+      },
+      "resources": [
+        {
+          "name": "WebSrvSetup",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2016-04-30-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', parameters('WebSrvName'))]"
+          ],
+          "tags": {
+            "displayName": "WebSrvSetup"
+          },
+          "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "CustomScriptExtension",
+            "typeHandlerVersion": "1.9",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "fileUris": [
+                "[concat(variables('ArtifactsLocation'), '/', variables('ScriptsFolder'), '/', variables('WebSrvSetupScriptFileName'), variables('ArtifactsLocationSasToken'))]",
+                "[concat(variables('ArtifactsLocation'), '/', variables('ScriptsFolder'), '/', variables('WinRmScriptFileName'), variables('ArtifactsLocationSasToken'))]",
+                "[concat(variables('ArtifactsLocation'), '/', variables('ScriptsFolder'), '/', variables('CertToolFileName'), variables('ArtifactsLocationSasToken'))]"
+              ],
+              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('WebSrvSetupScriptFileName'), ' -HostName ', variables('WebSrvHostName'))]"
+            }
+          }
+        },
+        {
+        "name": "Microsoft.Powershell.DSC",
+        "type": "extensions",
+        "location": "[resourceGroup().location]",
+        "apiVersion": "2016-04-30-preview",
+        "dependsOn": [
+          "[resourceId('Microsoft.Compute/virtualMachines', parameters('WebSrvName'))]"
+        ],
+        "tags": {
+          "displayName": "WebSrvDscConfig"
+        },
+        "properties": {
+          "publisher": "Microsoft.Powershell",
+          "type": "DSC",
+          "typeHandlerVersion": "2.9",
+          "autoUpgradeMinorVersion": true,
+          "settings": {
+            "configuration": {
+              "url": "[concat(variables('ArtifactsLocation'), '/', variables('ScriptsFolder'), '/', variables('WebSrvDscConfigArchiveFileName'))]",
+              "script": "WebSrvDscConfig.ps1",
+              "function": "Main"
+            },
+            "configurationArguments": {
+              "nodeName": "[parameters('WebSrvName')]"
+            }
+          },
+          "protectedSettings": {
+            "configurationUrlSasToken": "[variables('ArtifactsLocationSasToken')]"
+          }
+        }
+      }]
+    },
+    {
+      "name": "[variables('SqlSrvPubIpName')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "[variables('virtualNetworkLocation')]",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "SqlSrvPubIpName"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('SqlSrvPubIpDnsName')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('SqlSrvNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[variables('virtualNetworkLocation')]",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [
+        "[variables('vNetName')]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('SqlSrvPubIpName'))]"
+      ],
+      "tags": {
+        "displayName": "SqlSrvNic"
+      },
+      "properties": {
+        "ipConfigurations": [{
+          "name": "ipconfig1",
+          "properties": {
+            "privateIPAllocationMethod": "Dynamic",
+            "subnet": {
+              "id": "[variables('subnetRef')]"
+            },
+            "publicIPAddress": {
+              "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('SqlSrvPubIpName'))]"
+            }
+          }
+        }]
+      }
+    },
+    {
+      "name": "[parameters('SqlSrvName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2016-04-30-preview",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('SqlSrvNicName'))]"
+      ],
+      "properties": {
+        "osProfile": {
+          "computerName": "[parameters('SqlSrvName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "windowsConfiguration": {
+            "provisionVmAgent": "true"
+          }
+        },
+        "hardwareProfile": {
+          "vmSize": "[variables('SqlSrvSize')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftSQLServer",
+            "offer": "SQL2016SP1-WS2016",
+            "sku": "SQLDEV",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "[variables('SqlSrvStorageType')]"
+            }
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('SqlSrvNicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "name": "SqlSrvSetup",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2016-04-30-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', parameters('SqlSrvName'))]"
+          ],
+          "tags": {
+            "displayName": "SqlSrvSetup"
+          },
+          "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "CustomScriptExtension",
+            "typeHandlerVersion": "1.9",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "fileUris": [
+                "[concat(variables('ArtifactsLocation'), '/', variables('ScriptsFolder'), '/', variables('SqlSrvSetupScriptFileName'), variables('ArtifactsLocationSasToken'))]",
+                "[concat(variables('ArtifactsLocation'), '/', variables('ScriptsFolder'), '/', variables('WinRmScriptFileName'), variables('ArtifactsLocationSasToken'))]",
+                "[concat(variables('ArtifactsLocation'), '/', variables('ScriptsFolder'), '/', variables('CertToolFileName'), variables('ArtifactsLocationSasToken'))]"
+              ],
+              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('SqlSrvSetupScriptFileName'), ' -HostName ', variables('SqlSrvHostName'))]"
+            }
+          }
+        },
+        {
+          "name": "Microsoft.Powershell.DSC",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2016-04-30-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', parameters('SqlSrvName'))]",
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('SqlSrvName'), 'SqlSrvSetup')]"
+          ],
+          "tags": {
+            "displayName": "SqlSrvDscConfig"
+          },
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.9",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "configuration": {
+                "url": "[concat(variables('ArtifactsLocation'), '/', variables('ScriptsFolder'), '/', variables('SqlSrvDscConfigArchiveFileName'))]",
+                "script": "SqlSrvDscConfig.ps1",
+                "function": "Main"
+              },
+              "configurationArguments": {
+                "nodeName": "[parameters('SqlSrvName')]"
+              }
+            },
+            "protectedSettings": {
+              "configurationUrlSasToken": "[variables('ArtifactsLocationSasToken')]"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+
+  }
+}

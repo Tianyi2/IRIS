@@ -1,0 +1,66 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/7bdc10d6-aa24-4ca9-9a93-802cd8761354')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/7bdc10d6-aa24-4ca9-9a93-802cd8761354')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "name": "API - Suspicious Login",
+        "description": "'42Crunch API protection against suspicious login'\n",
+        "query": "let firstRec = apifirewall_log_1_CL\n| where TimeGenerated >= ago(5m) \n| project-away Non_blocking_mode_b, Source_Port_d, Destination_Port_d, Query_s, API_ID_g, Request_Header_s, Response_Header_s, Errors_s, Type, UUID_g\n| where Instance_Name_s == \"Instance_6\" and URI_Path_s has \"/api/login?user=\" and Status_d in (200, 403);\nlet ipAddressCount = toscalar(firstRec | summarize by Source_IP_s | count);\nlet secondRec = firstRec | summarize arg_max(Source_IP_s, *) by Source_IP_s;\nlet recCount = iff((toscalar(secondRec | count) > 3), ipAddressCount, 0);\nsecondRec | take recCount\n",
+        "status": "Available",
+        "queryFrequency": "5m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Source_IP_s",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Hostname_s",
+                "identifier": "HostName"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Instance_Name_s",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "severity": "High",
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "tactics": [
+          "CredentialAccess",
+          "InitialAccess"
+        ],
+        "customDetails": null,
+        "queryPeriod": "5m"
+      }
+    }
+  ]
+}

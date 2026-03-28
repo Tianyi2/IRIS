@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/ab55aff7-7f23-43e8-a93c-6c417647f032')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/ab55aff7-7f23-43e8-a93c-6c417647f032')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "triggerThreshold": 0,
+        "severity": "Informational",
+        "description": "New Dark Web with severity Informational found",
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "PT5H",
+            "reopenClosedIncident": false,
+            "enabled": false
+          }
+        },
+        "query": "CBSLog_Azure_1_CL | where severity_s == \"Informational\" | where type_s == \"Dark Web\" | where status_s != \"Closed\" or status_s != \"Resolved\"",
+        "name": "Dark Web (Informational)",
+        "status": "Available",
+        "queryPeriod": "5m",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryFrequency": "5m",
+        "triggerOperator": "gt",
+        "tactics": [
+          "Reconnaissance"
+        ],
+        "suppressionDuration": "5h",
+        "suppressionEnabled": false
+      }
+    }
+  ]
+}

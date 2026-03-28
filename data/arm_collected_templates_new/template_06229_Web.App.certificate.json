@@ -1,0 +1,98 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "app": {
+            "type": "string"
+        },
+        "environment": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "deploymentMode": "Incremental",
+        "env": "[parameters('environment').Environment.environmentName]",
+        "isProd": "[equals(variables('env'),'prod')]",
+        "appName": "[concat(parameters('environment').Names.app, '-', parameters('app'))]",
+        "domain": "[parameters('environment').Environment.customDomain]",
+        "hostName": "[if(variables('isProd'), concat(parameters('app'), '.', variables('domain')), concat(variables('env'), '-', parameters('app'), '.', variables('domain')))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-10-01",
+            "name": "[concat('hostname-certificate-', parameters('app'))]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "[variables('deploymentMode')]",
+                "templateLink": {
+                    "uri": "[uri.templateLink(parameters('environment'), 'web/Microsoft.Web.hostName.certificate.json')]"
+                },
+                "parameters": {
+                    "app": {
+                        "value": "[variables('appName')]"
+                    },
+                    "hostingPlanName": {
+                        "value": "[parameters('environment').Names.serverFarmName]"
+                    },
+                    "hostName": {
+                        "value": "[variables('hostName')]"
+                    },
+                    "tags": {
+                        "value": "[parameters('environment').Tags]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[parameters('app')]"
+            ]
+        },
+        {
+            "apiVersion": "2019-10-01",
+            "name": "[concat('ssl-binding-', parameters('app'))]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "[variables('deploymentMode')]",
+                "templateLink": {
+                    "uri": "[uri.templateLink(parameters('environment'), 'web/Microsoft.Web.sslBinding.json')]"
+                },
+                "parameters": {
+                    "app": {
+                        "value": "[variables('appName')]"
+                    },
+                    "hostName": {
+                        "value": "[variables('hostName')]"
+                    },
+                    "thumbprint": {
+                        "value": "[reference(concat('hostname-certificate-', parameters('app'))).outputs.thumbprint.value]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat('hostname-certificate-', parameters('app'))]"
+            ]
+        }
+    ],
+    "functions": [
+        {
+            "namespace": "uri",
+            "members": {
+                "templateLink": {
+                    "parameters": [
+                        {
+                            "name": "env",
+                            "type": "object"
+                        },
+                        {
+                            "name": "file",
+                            "type": "string"
+                        }
+                    ],
+                    "output": {
+                        "type": "string",
+                        "value": "[concat(parameters('env').Environment.templateBaseUrl, parameters('file'), parameters('env').Environment.templateSasToken)]"
+                    }
+                }
+            }
+        }
+    ]
+}

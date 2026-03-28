@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/a374a933-f6c4-4200-8682-70402a9054dd')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/a374a933-f6c4-4200-8682-70402a9054dd')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "query": "DigitalGuardianDLPEvent\n| where NetworkApplicationProtocol =~ 'SMTP'\n| where DstPortNumber != 25\n| extend AccountCustomEntity = SrcUserName\n",
+        "name": "Digital Guardian - Possible SMTP protocol abuse",
+        "queryPeriod": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "identifier": "Name",
+                "columnName": "AccountCustomEntity"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "triggerOperator": "gt",
+        "description": "'Detects possible SMTP protocol abuse.'\n",
+        "triggerThreshold": 0,
+        "severity": "High",
+        "queryFrequency": "1h",
+        "tactics": [
+          "Exfiltration"
+        ],
+        "status": "Available"
+      }
+    }
+  ]
+}

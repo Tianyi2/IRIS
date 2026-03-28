@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique DNS name for the storage account"
+      }
+    },
+    "storageAccountType": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ],
+      "metadata": {
+        "description": "Storage account type"
+      }
+    }
+  },
+  "variables": {
+    "apiVersion": {
+      "storage": "2017-10-01"
+    },
+    "storageConfiguration": {
+      "storageAccountName": "[parameters('storageAccountName')]",
+      "storageAccountType": "[parameters('storageAccountType')]"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('apiVersion').storage]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[toLower(variables('storageConfiguration').storageAccountName)]",
+      "location": "[resourceGroup().location]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "[variables('storageConfiguration').storageAccountType]"
+      },
+      "properties": {
+        "encryption": {
+          "keySource": "Microsoft.Storage",
+          "services": {
+            "blob": {
+              "enabled": true
+            },
+            "file": {
+              "enabled": true
+            }
+          }
+        },
+        "supportsHttpsTrafficOnly": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+construct_id,construct_name,mapped_tf_id,ontology_id,ontology_name
+ir_1,metadata,"tf_1, tf_2",,terraform
+ir_2,parameters,"tf_4, tf_5, tf_7",,provider
+ir_3,conditions,"tf_17, tf_23, tf_40",,resource
+ir_4,resources,"tf_3, tf_8",,data
+ir_5,outputs,tf_6,,variable
+ir_8,metadata.cloud_service_provider,tf_11,,output
+ir_10,metadata.description,,,locals
+ir_11,metadata.additional_info,"tf_10, tf_11, tf_12, tf_13, tf_14",,module
+ir_13,parameters.name,"tf_45, tf_46, tf_47",,resource.name
+ir_14,parameters.type,"tf_21, tf_27",,terraform.required_version
+ir_15,parameters.param_type,"tf_4, tf_5, tf_7",,terraform.required_providers
+ir_16,parameters.default,tf_28,,terraform.backend
+ir_17,parameters.constraints,"tf_23, tf_24, tf_25, tf_26, tf_30, tf_31, tf_32",,terraform.cloud
+ir_18,parameters.description,tf_29,,provider.alias
+ir_23,conditions.name,,,resource.Type
+ir_24,conditions.condition,"tf_17, tf_23, tf_40",,resource.depends_on
+ir_25,conditions.ruled_para,tf_32,,resource.count
+ir_26,conditions.constraint,tf_32,,resource.for_each
+ir_27,conditions.description,,,resource.provider
+ir_31,resources.name,"tf_9, tf_48",,resource.lifecycle
+ir_32,resources.type,tf_15,,data.Type
+ir_34,resources.arguments.depends_on,"tf_16, tf_43",,data.depends_on
+ir_35,resources.arguments.condition,"tf_17,  tf_40",,data.count
+ir_40,resources.arguments.value,"tf_17, tf_18, tf_19, tf_20, tf_41, tf_42",,data.provider
+ir_43,resources.properties,"tf_38, tf_39, tf_42",,data.lifecycle
+ir_50,outputs.name,tf_44,,data.for_each
+ir_51,outputs.description,tf_34,,variable.type
+ir_53,outputs.value.value,tf_33,,variable.default
+ir_58,outputs.export_name.name,tf_44,,variable.description
+ir_62,outputs.depend_conditions,tf_36,,variable.sensitive
+,,,,variable.nullable
+,,,,variable.validation
+,,,,output.value
+,,,,output.description
+,,,tf_35,output.sensitive
+,,,,output.depends_on
+,,,,output.precondition
+,,,,module.source
+,,,,module.version
+,,,,module.count
+,,,,module.for_each
+,,,,module.providers
+,,,,module.depends_on
+,,,,output.name
+,,,,data.name
+,,,,variable.name
+,,,,locals.name
+,,,,module.name

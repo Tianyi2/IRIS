@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deny-Privileged-AKS",
+      "apiVersion": "2020-09-01",
+      "location": "[deployment().location]",
+      "properties": {
+        "Scope": "/providers/Microsoft.Management/managementGroups/bugbash-landingzones",
+        "NotScopes": null,
+        "DisplayName": "Deny-Privileged-Containers-AKS",
+        "Description": "Deny-Privileged-Containers-AKS",
+        "EnforcementMode": 0,
+        "PolicyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/95edb821-ddaf-4404-9732-666045e056b4",
+        "Parameters": {
+          "effect": {
+            "value": "deny"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

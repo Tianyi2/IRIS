@@ -1,0 +1,75 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "admin": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": ""
+            }
+        },
+        "adminId": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": ""
+            }
+        },
+        "devTestLabsName": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "storageAccountName": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "vaultId": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "vaultName": {
+            "type": "string",
+            "defaultValue": ""
+        }
+    },
+    "variables": {
+        "storageAccountUri": "[format('https://{0}.vault.azure.net/', parameters('storageAccountName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2016-10-01",
+            "name": "[concat(parameters('vaultName'), '/VmPassword')]",
+            "location": "japaneast",
+            "properties": {
+                "attributes": {
+                    "enabled": true
+                }
+            }
+        },
+        {
+            "type": "microsoft.devtestlab/labs/users",
+            "apiVersion": "2018-09-15",
+            "name": "[concat(parameters('devTestLabsName'), '/', parameters('adminId'))]",
+            "properties": {
+                "identity": {
+                    "principalName": "[parameters('admin')]",
+                    "tenantId": "[subscription().tenantId]",
+                    "objectId": "[parameters('adminId')]",
+                    "appId": "1a14be2a-e903-4cec-99cf-b2e209259a0f"
+                },
+                "secretStore": {
+                    "keyVaultUri": "[variables('storageAccountUri')]",
+                    "keyVaultId": "[parameters('vaultId')]"
+                }
+            }
+        },
+        {
+            "type": "microsoft.devtestlab/labs/users/secrets",
+            "apiVersion": "2018-09-15",
+            "name": "[concat(parameters('devTestLabsName'), '/', parameters('adminId'), '/vmpassword')]",
+            "properties": {}            
+        }
+    ]
+}

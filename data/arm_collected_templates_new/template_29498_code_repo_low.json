@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/40830b57-2d27-4010-9f0e-941fe4226cfc')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/40830b57-2d27-4010-9f0e-941fe4226cfc')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "triggerThreshold": 0,
+        "severity": "Low",
+        "description": "New Code Repo with severity Low found",
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "PT5H",
+            "reopenClosedIncident": false,
+            "enabled": false
+          }
+        },
+        "query": "CBSLog_Azure_1_CL | where severity_s == \"Low\" | where type_s == \"Code Repo\" | where status_s != \"Closed\" or status_s != \"Resolved\"",
+        "name": "Code Repo (Low)",
+        "status": "Available",
+        "queryPeriod": "5m",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryFrequency": "5m",
+        "triggerOperator": "gt",
+        "tactics": [
+          "Collection"
+        ],
+        "suppressionDuration": "5h",
+        "suppressionEnabled": false
+      }
+    }
+  ]
+}

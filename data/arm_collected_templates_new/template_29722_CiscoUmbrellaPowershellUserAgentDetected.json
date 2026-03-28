@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/b12b3dab-d973-45af-b07e-e29bb34d8db9')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/b12b3dab-d973-45af-b07e-e29bb34d8db9')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "Cisco Cloud Security - Windows PowerShell User-Agent Detected",
+        "description": "'Rule helps to detect Powershell user-agent activity by an unusual process other than a web browser.'\n",
+        "query": "Cisco_Umbrella\n| where EventType == \"proxylogs\"\n| where HttpUserAgentOriginal contains \"WindowsPowerShell\"\n| extend Message = \"Windows PowerShell User Agent\"\n| project TimeGenerated, Message, SrcIpAddr, DstIpAddr, UrlOriginal, HttpUserAgentOriginal\n",
+        "status": "Available",
+        "queryFrequency": "15m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "UrlOriginal",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SrcIpAddr",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "CommandAndControl",
+          "DefenseEvasion",
+          "Execution"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "15m"
+      }
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/056593d4-ca3b-47a7-be9d-d1d0884a1d36')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/056593d4-ca3b-47a7-be9d-d1d0884a1d36')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Allow Firewall Rule {{RegistryValueData}} added at registry key {{RegKey}} on {{HostName}}",
+          "alertDescriptionFormat": "An allow Firewall Rule {{RegistryValueData}} added at registry key {{RegKey}} by {{Username}}."
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "singleAlert"
+        },
+        "name": "Detect Windows Allow Firewall Rule Addition/Modification",
+        "description": "This analytic rule detects any registry value creation or modification of Windows firewall registry keys to allow network traffic. This could be an indication of defense evasion by an adversary to allow network traffic to/from a compromised host.\n",
+        "query": "// List of Windows Firewall registry keys to monitor\nlet firewallRegistryList = dynamic([\n      'HKEY_LOCAL_MACHINE\\\\SYSTEM\\\\CurrentControlSet\\\\Services\\\\SharedAccess\\\\Parameters\\\\FirewallPolicy\\\\RestrictedServices\\\\Static\\\\System',\n      'HKEY_LOCAL_MACHINE\\\\SYSTEM\\\\CurrentControlSet\\\\Services\\\\SharedAccess\\\\Parameters\\\\FirewallPolicy\\\\RestrictedServices\\\\Configurable\\\\System',\n      'HKEY_LOCAL_MACHINE\\\\SYSTEM\\\\CurrentControlSet\\\\Services\\\\SharedAccess\\\\Defaults\\\\FirewallPolicy\\\\FirewallRules',\n      'HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\WindowsFirewall'\n  ]);\n_ASim_RegistryEvent\n| where EventType in ('RegistryValueSet', 'RegistryKeyCreated') \n| where RegistryKey has_any (firewallRegistryList) and RegistryValueData has_all ('Action=Allow', 'Active=TRUE')\n| project\n    TimeGenerated,\n    DvcHostname,\n    ActorUsername,\n    ActorUsernameType,\n    ActingProcessId,\n    ActingProcessName,\n    ActingProcessCommandLine,\n    RegistryKey,\n    RegistryValue,\n    RegistryValueType,\n    RegistryValueData\n| extend HostName = tostring(split(DvcHostname, '.')[0])\n| extend DnsDomain = tostring(strcat_array(array_slice(split(DvcHostname, '.'), 1, -1), '.'))\n| extend Username = iff(tostring(ActorUsernameType) == 'Windows', tostring(split(ActorUsername, '\\\\')[1]), ActorUsername)\n| extend NTDomain = iff(tostring(ActorUsernameType) == 'Windows', tostring(split(ActorUsername, '\\\\')[0]), ActorUsername)\n| extend Username = iff(tostring(ActorUsernameType) == 'UPN', tostring(split(ActorUsername, '@')[0]), Username)\n| extend UPNSuffix = iff(tostring(ActorUsernameType) == 'UPN', tostring(split(ActorUsername, '@')[1]), '')\n| extend RegHive = tostring(split(RegistryKey, '\\\\')[0]), RegKey = tostring(strcat_array(array_slice(split(RegistryKey, '\\\\'), 1, -1), '\\\\')) \n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "HostName",
+                "identifier": "HostName"
+              },
+              {
+                "columnName": "DnsDomain",
+                "identifier": "DnsDomain"
+              },
+              {
+                "columnName": "NTDomain",
+                "identifier": "NTDomain"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Username",
+                "identifier": "Name"
+              },
+              {
+                "columnName": "UPNSuffix",
+                "identifier": "UPNSuffix"
+              },
+              {
+                "columnName": "NTDomain",
+                "identifier": "NTDomain"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "ActingProcessId",
+                "identifier": "ProcessId"
+              },
+              {
+                "columnName": "ActingProcessCommandLine",
+                "identifier": "CommandLine"
+              }
+            ],
+            "entityType": "Process"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "RegHive",
+                "identifier": "Hive"
+              },
+              {
+                "columnName": "RegKey",
+                "identifier": "Key"
+              }
+            ],
+            "entityType": "RegistryKey"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "RegistryValue",
+                "identifier": "Name"
+              },
+              {
+                "columnName": "RegistryValueData",
+                "identifier": "Value"
+              },
+              {
+                "columnName": "RegistryValueType",
+                "identifier": "ValueType"
+              }
+            ],
+            "entityType": "RegistryValue"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "DefenseEvasion"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

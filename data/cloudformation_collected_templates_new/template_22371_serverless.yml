@@ -1,0 +1,150 @@
+service: aws-node-twilio
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  config:
+    accountSid:
+    authToken:
+  environment:
+    TWILIO_ACCOUNT_SID: ${env:TWILIO_ACCOUNT_SID}
+    TWILIO_AUTH_TOKEN: ${env:TWILIO_AUTH_TOKEN}
+    TWILIO_PHONE_NUMBER: ${env:TWILIO_PHONE_NUMBER}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource: '*'
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-offline
+package:
+  exclude:
+    - '*.test.js'
+
+functions:
+  sendText:
+    handler: handler.sendText
+    events:
+      - http:
+          path: api/sendText
+          method: post
+          integration: lambda
+          cors: true
+          authorizer: aws_iam
+  updateTable:
+    handler: handler.updateStudents
+    events:
+      - http:
+          path: api/updateStudents
+          method: post
+          integration: lambda
+          cors: true
+          authorizer: aws_iam
+  getStudents:
+    handler: handler.getStudents
+    events:
+      - http:
+          path: api/getStudents
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    studentsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: studentsTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          # - AttributeName: guardian1FirstName
+          #   AttributeType: S
+          # - AttributeName: guardian1LastName
+          #   AttributeType: S
+          # - AttributeName: guardian1phoneNumber
+          #   AttributeType: S
+          # - AttributeName: guardian1Email
+          #   AttributeType: S
+          # - AttributeName: guardian1Relationship
+          #   AttributeType: S
+          # - AttributeName: guardian2FirstName
+          #   AttributeType: S
+          # - AttributeName: guardian2LastName
+          #   AttributeType: S
+          # - AttributeName: guardian2phoneNumber
+          #   AttributeType: S
+          # - AttributeName: guardian2Email
+          #   AttributeType: S
+          # - AttributeName: guardian2Relationship
+          #   AttributeType: S
+          # - AttributeName: guardian3FirstName
+          #   AttributeType: S
+          # - AttributeName: guardian3LastName
+          #   AttributeType: S
+          # - AttributeName: guardian3phoneNumber
+          #   AttributeType: S
+          # - AttributeName: guardian3Email
+          #   AttributeType: S
+          # - AttributeName: guardian3Relationship
+          #   AttributeType: S
+          # - AttributeName: studentFirstName
+          #   AttributeType: S
+          # - AttributeName: studentLastName
+          #   AttributeType: S
+          # - AttributeName: studentAddress1
+          #   AttributeType: S
+          # - AttributeName: studentAddress2
+          #   AttributeType: S
+          # - AttributeName: studentCity
+          #   AttributeType: S
+          # - AttributeName: studentState
+          #   AttributeType: S
+          # - AttributeName: studentZipcode
+          #   AttributeType: S
+          # - AttributeName: studentCurrentSchool
+          #   AttributeType: S
+          # - AttributeName: studentCurrentGrade
+          #   AttributeType: S
+          # - AttributeName: studentSummerSchool
+          #   AttributeType: S
+          # - AttributeName: studentMNPSId
+          #   AttributeType: S
+          # - AttributeName: studentBirthday
+          #   AttributeType: S
+          # - AttributeName: studentGender
+          #   AttributeType: S
+          # - AttributeName: studentRequestingTransportation
+          #   AttributeType: B
+          # - AttributeName: studentPrimaryLanguage
+          #   AttributeType: S
+          # - AttributeName: studentNeedMedication
+          #   AttributeType: B
+          # - AttributeName: studentMedicationCondition
+          #   AttributeType: S
+          # - AttributeName: hasAllergies
+          #   AttributeType: B
+          # - AttributeName: allergies
+          #   AttributeType: S
+          # - AttributeName: studentEmergencyContactName
+          #   AttributeType: S
+          # - AttributeName: studentEmergencyContactNumber
+          #   AttributeType: S
+          # - AttributeName: studentNumberInHousehold
+          #   AttributeType: S
+          # - AttributeName: studentAnnualIncome
+          #   AttributeType: S
+          # - AttributeName: studentEthnicity
+          #   AttributeType: S
+          # - AttributeName: studentPublicReleaseConsented
+          #   AttributeType: B
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

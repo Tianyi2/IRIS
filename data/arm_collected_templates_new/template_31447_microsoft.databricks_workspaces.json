@@ -1,0 +1,793 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.Databricks/workspaces to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.Databricks/workspaces to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "accountsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "accounts",
+        "description": "Enable or disable log category accounts"
+      },
+      "defaultValue": true
+    },
+    "appsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "Apps",
+        "description": "Enable or disable log category Apps"
+      },
+      "defaultValue": true
+    },
+    "brickstorehttpgatewayEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "BrickStoreHttpGateway",
+        "description": "Enable or disable log category BrickStoreHttpGateway"
+      },
+      "defaultValue": true
+    },
+    "budgetpolicycentralEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "BudgetPolicyCentral",
+        "description": "Enable or disable log category BudgetPolicyCentral"
+      },
+      "defaultValue": true
+    },
+    "capsule8dataplaneEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "capsule8Dataplane",
+        "description": "Enable or disable log category capsule8Dataplane"
+      },
+      "defaultValue": true
+    },
+    "clamavscanEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "clamAVScan",
+        "description": "Enable or disable log category clamAVScan"
+      },
+      "defaultValue": true
+    },
+    "cloudstoragemetadataEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CloudStorageMetadata",
+        "description": "Enable or disable log category CloudStorageMetadata"
+      },
+      "defaultValue": true
+    },
+    "clusterlibrariesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "clusterLibraries",
+        "description": "Enable or disable log category clusterLibraries"
+      },
+      "defaultValue": true
+    },
+    "clusterpoliciesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "ClusterPolicies",
+        "description": "Enable or disable log category ClusterPolicies"
+      },
+      "defaultValue": true
+    },
+    "clustersEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "clusters",
+        "description": "Enable or disable log category clusters"
+      },
+      "defaultValue": true
+    },
+    "dashboardsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "Dashboards",
+        "description": "Enable or disable log category Dashboards"
+      },
+      "defaultValue": true
+    },
+    "databrickssqlEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "databrickssql",
+        "description": "Enable or disable log category databrickssql"
+      },
+      "defaultValue": true
+    },
+    "datamonitoringEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DataMonitoring",
+        "description": "Enable or disable log category DataMonitoring"
+      },
+      "defaultValue": true
+    },
+    "dataroomsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DataRooms",
+        "description": "Enable or disable log category DataRooms"
+      },
+      "defaultValue": true
+    },
+    "dbfsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "dbfs",
+        "description": "Enable or disable log category dbfs"
+      },
+      "defaultValue": true
+    },
+    "deltapipelinesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "deltaPipelines",
+        "description": "Enable or disable log category deltaPipelines"
+      },
+      "defaultValue": true
+    },
+    "featurestoreEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "featureStore",
+        "description": "Enable or disable log category featureStore"
+      },
+      "defaultValue": true
+    },
+    "filesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "Files",
+        "description": "Enable or disable log category Files"
+      },
+      "defaultValue": true
+    },
+    "filesystemEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "Filesystem",
+        "description": "Enable or disable log category Filesystem"
+      },
+      "defaultValue": true
+    },
+    "genieEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "genie",
+        "description": "Enable or disable log category genie"
+      },
+      "defaultValue": true
+    },
+    "gitcredentialsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "gitCredentials",
+        "description": "Enable or disable log category gitCredentials"
+      },
+      "defaultValue": true
+    },
+    "globalinitscriptsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "globalInitScripts",
+        "description": "Enable or disable log category globalInitScripts"
+      },
+      "defaultValue": true
+    },
+    "groupsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "Groups",
+        "description": "Enable or disable log category Groups"
+      },
+      "defaultValue": true
+    },
+    "iamroleEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "iamRole",
+        "description": "Enable or disable log category iamRole"
+      },
+      "defaultValue": true
+    },
+    "ingestionEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "Ingestion",
+        "description": "Enable or disable log category Ingestion"
+      },
+      "defaultValue": true
+    },
+    "instancepoolsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "instancePools",
+        "description": "Enable or disable log category instancePools"
+      },
+      "defaultValue": true
+    },
+    "jobsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "jobs",
+        "description": "Enable or disable log category jobs"
+      },
+      "defaultValue": true
+    },
+    "lakeviewconfigEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "LakeviewConfig",
+        "description": "Enable or disable log category LakeviewConfig"
+      },
+      "defaultValue": true
+    },
+    "lineagetrackingEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "LineageTracking",
+        "description": "Enable or disable log category LineageTracking"
+      },
+      "defaultValue": true
+    },
+    "marketplaceconsumerEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "MarketplaceConsumer",
+        "description": "Enable or disable log category MarketplaceConsumer"
+      },
+      "defaultValue": true
+    },
+    "marketplaceproviderEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "MarketplaceProvider",
+        "description": "Enable or disable log category MarketplaceProvider"
+      },
+      "defaultValue": true
+    },
+    "mlflowacledartifactEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "mlflowAcledArtifact",
+        "description": "Enable or disable log category mlflowAcledArtifact"
+      },
+      "defaultValue": true
+    },
+    "mlflowexperimentEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "mlflowExperiment",
+        "description": "Enable or disable log category mlflowExperiment"
+      },
+      "defaultValue": true
+    },
+    "modelregistryEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "modelRegistry",
+        "description": "Enable or disable log category modelRegistry"
+      },
+      "defaultValue": true
+    },
+    "notebookEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "notebook",
+        "description": "Enable or disable log category notebook"
+      },
+      "defaultValue": true
+    },
+    "onlinetablesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "OnlineTables",
+        "description": "Enable or disable log category OnlineTables"
+      },
+      "defaultValue": true
+    },
+    "partnerhubEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "partnerHub",
+        "description": "Enable or disable log category partnerHub"
+      },
+      "defaultValue": true
+    },
+    "predictiveoptimizationEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "PredictiveOptimization",
+        "description": "Enable or disable log category PredictiveOptimization"
+      },
+      "defaultValue": true
+    },
+    "rbacEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "RBAC",
+        "description": "Enable or disable log category RBAC"
+      },
+      "defaultValue": true
+    },
+    "remotehistoryserviceEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "RemoteHistoryService",
+        "description": "Enable or disable log category RemoteHistoryService"
+      },
+      "defaultValue": true
+    },
+    "reposEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "repos",
+        "description": "Enable or disable log category repos"
+      },
+      "defaultValue": true
+    },
+    "rfaEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "RFA",
+        "description": "Enable or disable log category RFA"
+      },
+      "defaultValue": true
+    },
+    "secretsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "secrets",
+        "description": "Enable or disable log category secrets"
+      },
+      "defaultValue": true
+    },
+    "serverlessrealtimeinferenceEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "serverlessRealTimeInference",
+        "description": "Enable or disable log category serverlessRealTimeInference"
+      },
+      "defaultValue": true
+    },
+    "sqlanalyticsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "sqlanalytics",
+        "description": "Enable or disable log category sqlanalytics"
+      },
+      "defaultValue": true
+    },
+    "sqlpermissionsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "sqlPermissions",
+        "description": "Enable or disable log category sqlPermissions"
+      },
+      "defaultValue": true
+    },
+    "sshEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "ssh",
+        "description": "Enable or disable log category ssh"
+      },
+      "defaultValue": true
+    },
+    "unitycatalogEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "unityCatalog",
+        "description": "Enable or disable log category unityCatalog"
+      },
+      "defaultValue": true
+    },
+    "vectorsearchEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "VectorSearch",
+        "description": "Enable or disable log category VectorSearch"
+      },
+      "defaultValue": true
+    },
+    "webhooknotificationsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "WebhookNotifications",
+        "description": "Enable or disable log category WebhookNotifications"
+      },
+      "defaultValue": true
+    },
+    "webterminalEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "webTerminal",
+        "description": "Enable or disable log category webTerminal"
+      },
+      "defaultValue": true
+    },
+    "workspaceEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "workspace",
+        "description": "Enable or disable log category workspace"
+      },
+      "defaultValue": true
+    },
+    "workspacefilesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "WorkspaceFiles",
+        "description": "Enable or disable log category WorkspaceFiles"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.Databricks/workspaces"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.Databricks/workspaces/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.Databricks/workspaces, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "accounts",
+                    "enabled": "[parameters('accountsEnabled')]"
+                  },
+                  {
+                    "category": "Apps",
+                    "enabled": "[parameters('appsEnabled')]"
+                  },
+                  {
+                    "category": "BrickStoreHttpGateway",
+                    "enabled": "[parameters('brickstorehttpgatewayEnabled')]"
+                  },
+                  {
+                    "category": "BudgetPolicyCentral",
+                    "enabled": "[parameters('budgetpolicycentralEnabled')]"
+                  },
+                  {
+                    "category": "capsule8Dataplane",
+                    "enabled": "[parameters('capsule8dataplaneEnabled')]"
+                  },
+                  {
+                    "category": "clamAVScan",
+                    "enabled": "[parameters('clamavscanEnabled')]"
+                  },
+                  {
+                    "category": "CloudStorageMetadata",
+                    "enabled": "[parameters('cloudstoragemetadataEnabled')]"
+                  },
+                  {
+                    "category": "clusterLibraries",
+                    "enabled": "[parameters('clusterlibrariesEnabled')]"
+                  },
+                  {
+                    "category": "ClusterPolicies",
+                    "enabled": "[parameters('clusterpoliciesEnabled')]"
+                  },
+                  {
+                    "category": "clusters",
+                    "enabled": "[parameters('clustersEnabled')]"
+                  },
+                  {
+                    "category": "Dashboards",
+                    "enabled": "[parameters('dashboardsEnabled')]"
+                  },
+                  {
+                    "category": "databrickssql",
+                    "enabled": "[parameters('databrickssqlEnabled')]"
+                  },
+                  {
+                    "category": "DataMonitoring",
+                    "enabled": "[parameters('datamonitoringEnabled')]"
+                  },
+                  {
+                    "category": "DataRooms",
+                    "enabled": "[parameters('dataroomsEnabled')]"
+                  },
+                  {
+                    "category": "dbfs",
+                    "enabled": "[parameters('dbfsEnabled')]"
+                  },
+                  {
+                    "category": "deltaPipelines",
+                    "enabled": "[parameters('deltapipelinesEnabled')]"
+                  },
+                  {
+                    "category": "featureStore",
+                    "enabled": "[parameters('featurestoreEnabled')]"
+                  },
+                  {
+                    "category": "Files",
+                    "enabled": "[parameters('filesEnabled')]"
+                  },
+                  {
+                    "category": "Filesystem",
+                    "enabled": "[parameters('filesystemEnabled')]"
+                  },
+                  {
+                    "category": "genie",
+                    "enabled": "[parameters('genieEnabled')]"
+                  },
+                  {
+                    "category": "gitCredentials",
+                    "enabled": "[parameters('gitcredentialsEnabled')]"
+                  },
+                  {
+                    "category": "globalInitScripts",
+                    "enabled": "[parameters('globalinitscriptsEnabled')]"
+                  },
+                  {
+                    "category": "Groups",
+                    "enabled": "[parameters('groupsEnabled')]"
+                  },
+                  {
+                    "category": "iamRole",
+                    "enabled": "[parameters('iamroleEnabled')]"
+                  },
+                  {
+                    "category": "Ingestion",
+                    "enabled": "[parameters('ingestionEnabled')]"
+                  },
+                  {
+                    "category": "instancePools",
+                    "enabled": "[parameters('instancepoolsEnabled')]"
+                  },
+                  {
+                    "category": "jobs",
+                    "enabled": "[parameters('jobsEnabled')]"
+                  },
+                  {
+                    "category": "LakeviewConfig",
+                    "enabled": "[parameters('lakeviewconfigEnabled')]"
+                  },
+                  {
+                    "category": "LineageTracking",
+                    "enabled": "[parameters('lineagetrackingEnabled')]"
+                  },
+                  {
+                    "category": "MarketplaceConsumer",
+                    "enabled": "[parameters('marketplaceconsumerEnabled')]"
+                  },
+                  {
+                    "category": "MarketplaceProvider",
+                    "enabled": "[parameters('marketplaceproviderEnabled')]"
+                  },
+                  {
+                    "category": "mlflowAcledArtifact",
+                    "enabled": "[parameters('mlflowacledartifactEnabled')]"
+                  },
+                  {
+                    "category": "mlflowExperiment",
+                    "enabled": "[parameters('mlflowexperimentEnabled')]"
+                  },
+                  {
+                    "category": "modelRegistry",
+                    "enabled": "[parameters('modelregistryEnabled')]"
+                  },
+                  {
+                    "category": "notebook",
+                    "enabled": "[parameters('notebookEnabled')]"
+                  },
+                  {
+                    "category": "OnlineTables",
+                    "enabled": "[parameters('onlinetablesEnabled')]"
+                  },
+                  {
+                    "category": "partnerHub",
+                    "enabled": "[parameters('partnerhubEnabled')]"
+                  },
+                  {
+                    "category": "PredictiveOptimization",
+                    "enabled": "[parameters('predictiveoptimizationEnabled')]"
+                  },
+                  {
+                    "category": "RBAC",
+                    "enabled": "[parameters('rbacEnabled')]"
+                  },
+                  {
+                    "category": "RemoteHistoryService",
+                    "enabled": "[parameters('remotehistoryserviceEnabled')]"
+                  },
+                  {
+                    "category": "repos",
+                    "enabled": "[parameters('reposEnabled')]"
+                  },
+                  {
+                    "category": "RFA",
+                    "enabled": "[parameters('rfaEnabled')]"
+                  },
+                  {
+                    "category": "secrets",
+                    "enabled": "[parameters('secretsEnabled')]"
+                  },
+                  {
+                    "category": "serverlessRealTimeInference",
+                    "enabled": "[parameters('serverlessrealtimeinferenceEnabled')]"
+                  },
+                  {
+                    "category": "sqlanalytics",
+                    "enabled": "[parameters('sqlanalyticsEnabled')]"
+                  },
+                  {
+                    "category": "sqlPermissions",
+                    "enabled": "[parameters('sqlpermissionsEnabled')]"
+                  },
+                  {
+                    "category": "ssh",
+                    "enabled": "[parameters('sshEnabled')]"
+                  },
+                  {
+                    "category": "unityCatalog",
+                    "enabled": "[parameters('unitycatalogEnabled')]"
+                  },
+                  {
+                    "category": "VectorSearch",
+                    "enabled": "[parameters('vectorsearchEnabled')]"
+                  },
+                  {
+                    "category": "WebhookNotifications",
+                    "enabled": "[parameters('webhooknotificationsEnabled')]"
+                  },
+                  {
+                    "category": "webTerminal",
+                    "enabled": "[parameters('webterminalEnabled')]"
+                  },
+                  {
+                    "category": "workspace",
+                    "enabled": "[parameters('workspaceEnabled')]"
+                  },
+                  {
+                    "category": "WorkspaceFiles",
+                    "enabled": "[parameters('workspacefilesEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "privateDnsZoneName": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide the dns zone name."
+            }
+        },
+        "connectivityHubResourceId": {
+            "type": "string"
+        },
+        "connectivityHubResourceIdSecondary": {
+            "type": "string",
+            "defaultValue": "placeholder"
+          
+        },
+        "enablePrivateDnsZonesSecondary": {
+            "type": "string",
+            "defaultValue": "No"
+        },
+        "enableHubSecondary": {
+            "type": "string",
+            "defaultValue": "No"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/privateDnsZones",
+            "apiVersion": "2020-06-01",
+            "name": "[parameters('privateDnsZoneName')]",
+            "location": "global",
+            "properties": {
+                "maxNumberOfRecordSets": 25000,
+                "maxNumberOfVirtualNetworkLinks": 1000,
+                "maxNumberOfVirtualNetworkLinksWithRegistration": 100
+            },
+            "resources": [
+                {
+                    "type": "virtualNetworkLinks",
+                    "apiVersion": "2020-06-01",
+                    "name": "[concat('linkingOf', parameters('privateDnsZoneName'))]",
+                    "location": "global",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDnsZoneName'))]"
+                    ],
+                    "properties": {
+                        "registrationEnabled": false,
+                        "virtualNetwork": {
+                            "id": "[parameters('connectivityHubResourceId')]"
+                        }
+                    }
+                },
+                {
+                    "type": "virtualNetworkLinks",
+                    "apiVersion": "2020-06-01",
+                    "name": "[concat('linkingOf', parameters('privateDnsZoneName'),2)]",
+                    "location": "global",
+                    "condition": "[and(equals(parameters('enablePrivateDnsZonesSecondary'), 'No'), not(equals(parameters('enableHubSecondary'), 'No')))]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDnsZoneName'))]"
+                    ],
+                    "properties": {
+                        "registrationEnabled": false,
+                        "virtualNetwork": {
+                            "id": "[parameters('connectivityHubResourceIdSecondary')]"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

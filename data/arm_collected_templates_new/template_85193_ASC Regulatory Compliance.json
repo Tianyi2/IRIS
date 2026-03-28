@@ -1,0 +1,465 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "logicAppName": {
+      "type": "string",
+      "defaultValue": "ASC Regulatory Compliance",
+      "metadata": {
+        "description": "Name of the Logic App."
+      }
+    }
+  },
+  "variables": {
+    "HTTP_5-Secret": "@body('HTTP_3')['value']",
+    "HTTP_5-Authority": "AuthenticationAuthority",
+    "HTTP_5-ClientID": "ClientID",
+    "HTTP_5-TenantID": "TenantID",
+    "KeyVault-URI": "vaultBaseUrl/secrets/secret-name/secret-version?api-version=7.1",
+    "sql_name": "sqlname",
+    "sql_password": "passwordcredential"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2016-06-01",
+      "name": "[parameters('logicAppName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', variables('sql_name'))]"
+      ],
+      "properties": {
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "Recurrence": {
+              "recurrence": {
+                "frequency": "Week",
+                "interval": 1,
+                "startTime": "2020-03-13T21:00:00.0000000",
+                "timeZone": "India Standard Time"
+              },
+              "type": "Recurrence"
+            }
+          },
+          "actions": {
+            "Execute_a_SQL_query_(V2)_4": {
+              "runAfter": {
+                "Initialize_variable_5": [
+                  "Succeeded"
+                ]
+              },
+              "type": "ApiConnection",
+              "inputs": {
+                "body": {
+                  "query": "delete from RegulatoryCompliance"
+                },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['sql_1']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('default'))},@{encodeURIComponent(encodeURIComponent('default'))}/query/sql"
+              }
+            },
+            "For_each_2": {
+              "foreach": "@body('HTTP_6')['value']",
+              "actions": {
+                "Condition": {
+                  "actions": {
+                    "Condition_2": {
+                      "actions": {
+                        "For_each": {
+                          "foreach": "@body('HTTP')['value']",
+                          "actions": {
+                            "For_each_3": {
+                              "foreach": "@body('HTTP_2')['value']",
+                              "actions": {
+                                "Condition_3": {
+                                  "actions": {
+                                    "Execute_a_SQL_query_(V2)_9": {
+                                      "runAfter": {
+                                        "HTTP_8": [
+                                          "Succeeded"
+                                        ]
+                                      },
+                                      "type": "ApiConnection",
+                                      "inputs": {
+                                        "body": {
+                                          "query": "insert into RegulatoryCompliance values('@{items('For_each_2')['displayName']}','@{items('For_each_2')['subscriptionId']}','@{items('For_each')['name']}','@{items('For_each')['properties']['state']}','@{items('For_each')['properties']['passedControls']}','@{items('For_each')['properties']['failedControls']}','@{items('For_each')['properties']['skippedControls']}','@{items('For_each')['properties']['unsupportedControls']}','@{items('For_each_3')['name']}','@{replace(items('For_each_3')['properties']['description'],variables('colon'),variables('newcolon'))}','@{items('For_each_3')['properties']['state']}')"
+                                        },
+                                        "host": {
+                                          "connection": {
+                                            "name": "@parameters('$connections')['sql_1']['connectionId']"
+                                          }
+                                        },
+                                        "method": "post",
+                                        "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('default'))},@{encodeURIComponent(encodeURIComponent('default'))}/query/sql"
+                                      }
+                                    },
+                                    "HTTP_8": {
+                                      "runAfter": {},
+                                      "type": "Http",
+                                      "inputs": {
+                                        "authentication": {
+                                          "type": "ManagedServiceIdentity"
+                                        },
+                                        "method": "GET",
+                                        "uri": "https://management.azure.com/subscriptions/@{items('For_each_2')['subscriptionId']}/providers/Microsoft.Security/regulatoryComplianceStandards/@{items('For_each')['name']}/regulatoryComplianceControls/@{items('For_each_3')['name']}/regulatoryComplianceAssessments?api-version=2019-01-01-preview"
+                                      }
+                                    }
+                                  },
+                                  "runAfter": {
+                                    "Set_variable_2": [
+                                      "Succeeded"
+                                    ]
+                                  },
+                                  "expression": {
+                                    "and": [
+                                      {
+                                        "not": {
+                                          "equals": [
+                                            "@items('For_each_3')['properties']['state']",
+                                            "Unsupported"
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "type": "If"
+                                },
+                                "Set_variable_2": {
+                                  "runAfter": {},
+                                  "type": "SetVariable",
+                                  "inputs": {
+                                    "name": "tablename",
+                                    "value": "@{concat(split(items('For_each')['name'],'-')[0],split(items('For_each')['name'],'-')[1])}"
+                                  }
+                                }
+                              },
+                              "runAfter": {
+                                "HTTP_2": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "Foreach"
+                            },
+                            "HTTP_2": {
+                              "runAfter": {},
+                              "type": "Http",
+                              "inputs": {
+                                "authentication": {
+                                  "type": "ManagedServiceIdentity"
+                                },
+                                "method": "GET",
+                                "uri": "https://management.azure.com/subscriptions/@{items('For_each_2')['subscriptionId']}/providers/Microsoft.Security/regulatoryComplianceStandards/@{items('For_each')['name']}/regulatoryComplianceControls?api-version=2019-01-01-preview"
+                              }
+                            }
+                          },
+                          "runAfter": {},
+                          "type": "Foreach"
+                        }
+                      },
+                      "runAfter": {
+                        "HTTP": [
+                          "Succeeded",
+                          "Failed"
+                        ]
+                      },
+                      "else": {
+                        "actions": {
+                          "Execute_a_SQL_query_(V2)_2": {
+                            "runAfter": {
+                              "Set_variable": [
+                                "Failed"
+                              ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                              "body": {
+                                "query": "insert into RegulatoryCompliance values('@{items('For_each_2')['displayName']}','@{items('For_each_2')['subscriptionId']}','Non Standard Pricing','NA','NA','NA','NA','NA','NA','NA','NA')"
+                              },
+                              "host": {
+                                "connection": {
+                                  "name": "@parameters('$connections')['sql_1']['connectionId']"
+                                }
+                              },
+                              "method": "post",
+                              "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('default'))},@{encodeURIComponent(encodeURIComponent('default'))}/query/sql"
+                            }
+                          },
+                          "Set_variable": {
+                            "runAfter": {},
+                            "type": "SetVariable",
+                            "inputs": {
+                              "name": "status",
+                              "value": "@{body('HTTP')['error']['code']}"
+                            }
+                          }
+                        }
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "equals": [
+                              "@outputs('HTTP')['statusCode']",
+                              200
+                            ]
+                          }
+                        ]
+                      },
+                      "type": "If"
+                    },
+                    "HTTP": {
+                      "runAfter": {},
+                      "type": "Http",
+                      "inputs": {
+                        "authentication": {
+                          "type": "ManagedServiceIdentity"
+                        },
+                        "method": "GET",
+                        "uri": "https://management.azure.com/subscriptions/@{items('For_each_2')['subscriptionId']}/providers/Microsoft.Security/regulatoryComplianceStandards?api-version=2019-01-01-preview"
+                      }
+                    }
+                  },
+                  "runAfter": {},
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@items('For_each_2')['state']",
+                          "Enabled"
+                        ]
+                      },
+                      {
+                        "not": {
+                          "contains": [
+                            "@items('For_each_2')['displayName']",
+                            "Pay-As-You-Go"
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "contains": [
+                            "@items('For_each_2')['displayName']",
+                            "Azure Pass"
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "contains": [
+                            "@items('For_each_2')['displayName']",
+                            "Free trial"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "HTTP_6": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Foreach"
+            },
+            "HTTP_3": {
+              "runAfter": {
+                "Execute_a_SQL_query_(V2)_4": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "authentication": {
+                  "audience": "https://vault.azure.net",
+                  "type": "ManagedServiceIdentity"
+                },
+                "method": "GET",
+                "uri": "[variables('KeyVault-URI')]"
+              }
+            },
+            "HTTP_4": {
+              "runAfter": {
+                "HTTP_3": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "authentication": {
+                  "type": "ManagedServiceIdentity"
+                },
+                "method": "GET",
+                "uri": "https://management.azure.com/tenants?api-version=2019-11-01"
+              }
+            },
+            "HTTP_5": {
+              "runAfter": {
+                "HTTP_4": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "authentication": {
+                  "audience": "https://management.azure.com",
+                  "clientId": "[variables('HTTP_5-ClientID')]",
+                  "secret": "[variables('HTTP_5-Secret')]",
+                  "tenant": "[variables('HTTP_5-TenantID')]",
+                  "type": "ActiveDirectoryOAuth",
+                  "authority": "[variables('HTTP_5-Authority')]"
+                },
+                "method": "GET",
+                "uri": "https://management.azure.com/subscriptions?api-version=2019-11-01"
+              }
+            },
+            "HTTP_6": {
+              "runAfter": {
+                "Execute_a_SQL_query_(V2)_4": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "authentication": {
+                  "type": "ManagedServiceIdentity"
+                },
+                "method": "GET",
+                "uri": "https://management.azure.com/subscriptions?api-version=2019-11-01"
+              }
+            },
+            "Initialize_variable": {
+              "runAfter": {},
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "status",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "Initialize_variable_2": {
+              "runAfter": {
+                "Initialize_variable": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "tablename",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "Initialize_variable_3": {
+              "runAfter": {
+                "Initialize_variable_2": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "colon",
+                    "type": "string",
+                    "value": "'"
+                  }
+                ]
+              }
+            },
+            "Initialize_variable_4": {
+              "runAfter": {
+                "Initialize_variable_3": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "newcolon",
+                    "type": "string",
+                    "value": "''"
+                  }
+                ]
+              }
+            },
+            "Initialize_variable_5": {
+              "runAfter": {
+                "Initialize_variable_4": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "date",
+                    "type": "string",
+                    "value": "@{concat(utcNow('MMMM'),'-',utcNow('dd'),',',utcNow('yyyy'))}"
+                  }
+                ]
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "sql_1": {
+                "id": "[concat('/subscriptions/',subscription().subscriptionId,'/providers/Microsoft.Web/locations/',resourceGroup().location,'/managedApis/sql')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('sql_name'))]",
+                "connectionName": "[variables('sql_name')]"
+              }
+            }
+          }
+        }
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      }
+    },
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "location": "[resourceGroup().location]",
+      "name": "[variables('sql_name')]",
+      "properties": {
+        "api": {
+          "id": "[concat('/subscriptions/',subscription().subscriptionId,'/providers/Microsoft.Web/locations/',resourceGroup().location,'/managedApis/sql')]"
+        },
+        "displayName": "sql_displayName",
+        "parameterValues": {
+          "server": "sql_server",
+          "database": "sql_database",
+          "username": "sql_username",
+          "password": "[variables('sql_password')]",
+          "encryptConnection": true,
+          "privacySetting": "None",
+          "sqlConnectionString": "sql_sqlConnectionString"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

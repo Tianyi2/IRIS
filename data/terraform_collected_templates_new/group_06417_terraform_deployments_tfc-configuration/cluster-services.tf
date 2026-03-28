@@ -1,0 +1,112 @@
+module "cluster-services-integration" {
+  source = "github.com/alphagov/terraform-govuk-tfe-workspacer"
+
+  organization      = var.organization
+  workspace_name    = "cluster-services-integration"
+  workspace_desc    = "This module manages resources for services that run on top of the EKS cluster and are required by apps running on the cluster"
+  workspace_tags    = ["integration", "cluster-services", "eks", "aws"]
+  terraform_version = var.terraform_version
+  execution_mode    = "remote"
+  working_directory = "/terraform/deployments/cluster-services/"
+  trigger_patterns = [
+    "/terraform/deployments/cluster-services/**/*",
+    "/terraform/variables/integration/common.tfvars"
+  ]
+
+  project_name = "govuk-infrastructure"
+  vcs_repo = {
+    identifier     = "alphagov/govuk-infrastructure"
+    branch         = "main"
+    oauth_token_id = data.tfe_oauth_client.github.oauth_token_id
+  }
+
+  team_access = {
+    "GOV.UK Non-Production (r/o)" = "write"
+    "GOV.UK Production"           = "write"
+  }
+
+  tfvars_files = [
+    "integration/common.tfvars"
+  ]
+
+  variable_set_ids = [
+    local.aws_credentials["integration"]
+  ]
+
+  run_trigger_source_workspaces = ["govuk-user-management"]
+}
+
+module "cluster-services-staging" {
+  source = "github.com/alphagov/terraform-govuk-tfe-workspacer"
+
+  organization      = var.organization
+  workspace_name    = "cluster-services-staging"
+  workspace_desc    = "This module manages resources for services that run on top of the EKS cluster and are required by apps running on the cluster"
+  workspace_tags    = ["staging", "cluster-services", "eks", "aws"]
+  terraform_version = var.terraform_version
+  execution_mode    = "remote"
+  working_directory = "/terraform/deployments/cluster-services/"
+  trigger_patterns = [
+    "/terraform/deployments/cluster-services/**/*",
+    "/terraform/variables/staging/common.tfvars"
+  ]
+
+  project_name = "govuk-infrastructure"
+  vcs_repo = {
+    identifier     = "alphagov/govuk-infrastructure"
+    branch         = "main"
+    oauth_token_id = data.tfe_oauth_client.github.oauth_token_id
+  }
+
+  team_access = {
+    "GOV.UK Production" = "write"
+  }
+
+  tfvars_files = [
+    "staging/common.tfvars"
+  ]
+
+  variable_set_ids = [
+    local.aws_credentials["staging"]
+  ]
+
+  run_trigger_source_workspaces = ["govuk-user-management"]
+}
+
+module "cluster-services-production" {
+  source = "github.com/alphagov/terraform-govuk-tfe-workspacer"
+
+  organization      = var.organization
+  workspace_name    = "cluster-services-production"
+  workspace_desc    = "This module manages resources for services that run on top of the EKS cluster and are required by apps running on the cluster"
+  workspace_tags    = ["production", "cluster-services", "eks", "aws"]
+  terraform_version = var.terraform_version
+  execution_mode    = "remote"
+  working_directory = "/terraform/deployments/cluster-services/"
+  trigger_patterns = [
+    "/terraform/deployments/cluster-services/**/*",
+    "/terraform/variables/production/common.tfvars"
+  ]
+
+  project_name = "govuk-infrastructure"
+  vcs_repo = {
+    identifier     = "alphagov/govuk-infrastructure"
+    branch         = "main"
+    oauth_token_id = data.tfe_oauth_client.github.oauth_token_id
+  }
+
+  team_access = {
+    "GOV.UK Production" = "write"
+  }
+
+  tfvars_files = [
+    "production/common.tfvars"
+  ]
+
+  variable_set_ids = [
+    local.aws_credentials["production"]
+  ]
+
+  run_trigger_source_workspaces = ["cluster-services-staging"]
+}
+

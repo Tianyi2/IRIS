@@ -1,0 +1,624 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "logicAppName": {
+      "type": "string",
+      "defaultValue": "SecureStorageRemediation",
+      "metadata": {
+        "description": "Name of the Logic App."
+      }
+    }
+  },
+  "variables": {
+    "o365APIConnectionName" : "office365",
+    "AzDevOpsAPIConnectionName" : "azdevops",
+    "SenderAddress": "AddressToEstablishTheOffice365Connection",
+    "sql_name": "SQLName",
+    "sql_database": "SQLDatabaseName",
+    "sql_username": "UsernameCredential",
+    "sql_password": "PasswordCredential",
+    "sql_ConnectionString": "SQL Connection String"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2016-06-01",
+      "name": "[parameters('logicAppName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', variables('o365APIConnectionName'))]",
+        "[resourceId('Microsoft.Web/connections', variables('sql_name'))]",
+        "[resourceId('Microsoft.Web/connections', variables('AzDevOpsAPIConnectionName'))]"
+      ],
+      "properties": {
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "Recurrence": {
+              "recurrence": {
+                "frequency": "Week",
+                "interval": 1,
+                "schedule": {
+                  "hours": [
+                    "11"
+                  ],
+                  "weekDays": [
+                    "Monday"
+                  ]
+                },
+                "startTime": "2020-11-11T11:00:00.0000000",
+                "timeZone": "India Standard Time"
+              },
+              "type": "Recurrence"
+            }
+          },
+          "actions": {
+            "Create_a_work_item": {
+              "runAfter": {
+                "For_each": [
+                  "Succeeded"
+                ]
+              },
+              "type": "ApiConnection",
+              "inputs": {
+                "body": {
+                  "area": "Azure Operations Support Tickets",
+                  "description": "Successfully enabled 'supportsHttpsTrafficOnly' property for all storage accounts under tenant using SecureStorageRemediation",
+                  "iteration": "@{concat('Azure Operations Support Tickets',utcNow('MMMM'),' ',utcNow('yyyy'))}",
+                  "priority": 1,
+                  "title": "Secure Storage Remediation",
+                  "userEnteredFields": {
+                    "Resolution": "Fixed",
+                    "Resolution Type": "Request Complete",
+                    "Root Cause": "User Request",
+                    "Severity": "3 - Medium",
+                    "Text Environment": "Production"
+                  }
+                },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azdevops']['connectionId']"
+                  }
+                },
+                "method": "patch",
+                "path": "/@{encodeURIComponent('Azure_Operations_Support_Tickets')}/_apis/wit/workitems/$@{encodeURIComponent('Support')}",
+                "queries": {
+                  "account": "azureSupportAccount"
+                }
+              }
+            },
+            "Create_a_work_item_2": {
+              "runAfter": {
+                "For_each": [
+                  "Failed"
+                ]
+              },
+              "type": "ApiConnection",
+              "inputs": {
+                "body": {
+                  "area": "Azure Operations Support Tickets",
+                  "description": "Failed to enable 'supportsHttpsTrafficOnly' property for all storage accounts under tenant using LA-SecEng_SecureStorageRemediation",
+                  "iteration": "@{concat('Azure Operations Support Tickets',utcNow('MMMM'),' ',utcNow('yyyy'))}",
+                  "priority": 1,
+                  "title": "Secure Storage Remediation"
+                },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azdevops']['connectionId']"
+                  }
+                },
+                "method": "patch",
+                "path": "/@{encodeURIComponent('Azure_Operations_Support_Tickets')}/_apis/wit/workitems/$@{encodeURIComponent('Support')}",
+                "queries": {
+                  "account": "azureSupportAccount"
+                }
+              }
+            },
+            "For_each": {
+              "foreach": "@body('Parse_JSON')?['value']",
+              "actions": {
+                "Condition_2": {
+                  "actions": {
+                    "For_each_2": {
+                      "foreach": "@body('Parse_JSON_2')?['value']",
+                      "actions": {
+                        "Condition": {
+                          "actions": {
+                            "HTTP_3": {
+                              "runAfter": {},
+                              "type": "Http",
+                              "inputs": {
+                                "authentication": {
+                                  "type": "ManagedServiceIdentity"
+                                },
+                                "body": {
+                                  "properties": {
+                                    "supportsHttpsTrafficOnly": true
+                                  }
+                                },
+                                "method": "PATCH",
+                                "uri": "https://management.azure.com@{items('For_each_2')['id']}?api-version=2018-11-01"
+                              }
+                            },
+                            "Insert_row_(V2)": {
+                              "runAfter": {
+                                "HTTP_3": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "ApiConnection",
+                              "inputs": {
+                                "body": {
+                                  "ResourceGroup": "@{split(items('For_each_2')['id'],'/')[4]}",
+                                  "StorageAccountName": "@items('For_each_2')['name']",
+                                  "Subscription": "@items('For_each')['displayName']",
+                                  "SubscriptionId": "@{split(items('For_each_2')['id'],'/')[2]}",
+                                  "SupportsHttpsTrafficOnly": "@{items('For_each_2')['properties']['supportsHttpsTrafficOnly']}",
+                                  "kind": "@items('For_each_2')['kind']",
+                                  "location": "@items('For_each_2')[resourceGroup().location]"
+                                },
+                                "host": {
+                                  "connection": {
+                                    "name": "@parameters('$connections')['sql']['connectionId']"
+                                  }
+                                },
+                                "method": "post",
+                                "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('default'))},@{encodeURIComponent(encodeURIComponent('default'))}/tables/@{encodeURIComponent(encodeURIComponent('[dbo].[SecEng_SecureStorageRemediation]'))}/items"
+                              }
+                            }
+                          },
+                          "runAfter": {},
+                          "expression": {
+                            "and": [
+                              {
+                                "equals": [
+                                  "@items('For_each_2')?['properties']['supportsHttpsTrafficOnly']",
+                                  false
+                                ]
+                              }
+                            ]
+                          },
+                          "type": "If"
+                        }
+                      },
+                      "runAfter": {
+                        "Parse_JSON_2": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Foreach"
+                    },
+                    "HTTP_2": {
+                      "runAfter": {},
+                      "type": "Http",
+                      "inputs": {
+                        "authentication": {
+                          "type": "ManagedServiceIdentity"
+                        },
+                        "method": "GET",
+                        "uri": "https://management.azure.com@{items('For_each')?['id']}/providers/Microsoft.Storage/storageAccounts?api-version=2018-11-01"
+                      }
+                    },
+                    "Parse_JSON_2": {
+                      "runAfter": {
+                        "HTTP_2": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "ParseJson",
+                      "inputs": {
+                        "content": "@body('HTTP_2')",
+                        "schema": {
+                          "properties": {
+                            "value": {
+                              "items": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "kind": {
+                                    "type": "string"
+                                  },
+                                  "location": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "properties": {
+                                    "properties": {
+                                      "creationTime": {
+                                        "type": "string"
+                                      },
+                                      "encryption": {
+                                        "properties": {
+                                          "keySource": {
+                                            "type": "string"
+                                          },
+                                          "services": {
+                                            "properties": {
+                                              "blob": {
+                                                "properties": {
+                                                  "enabled": {
+                                                    "type": "boolean"
+                                                  },
+                                                  "lastEnabledTime": {
+                                                    "type": "string"
+                                                  }
+                                                },
+                                                "type": "object"
+                                              },
+                                              "file": {
+                                                "properties": {
+                                                  "enabled": {
+                                                    "type": "boolean"
+                                                  },
+                                                  "lastEnabledTime": {
+                                                    "type": "string"
+                                                  }
+                                                },
+                                                "type": "object"
+                                              }
+                                            },
+                                            "type": "object"
+                                          }
+                                        },
+                                        "type": "object"
+                                      },
+                                      "networkAcls": {
+                                        "properties": {
+                                          "bypass": {
+                                            "type": "string"
+                                          },
+                                          "defaultAction": {
+                                            "type": "string"
+                                          },
+                                          "ipRules": {
+                                            "type": "array"
+                                          },
+                                          "virtualNetworkRules": {
+                                            "type": "array"
+                                          }
+                                        },
+                                        "type": "object"
+                                      },
+                                      "primaryEndpoints": {
+                                        "properties": {
+                                          "blob": {
+                                            "type": "string"
+                                          },
+                                          "file": {
+                                            "type": "string"
+                                          },
+                                          "queue": {
+                                            "type": "string"
+                                          },
+                                          "table": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "type": "object"
+                                      },
+                                      "primaryLocation": {
+                                        "type": "string"
+                                      },
+                                      "provisioningState": {
+                                        "type": "string"
+                                      },
+                                      "statusOfPrimary": {
+                                        "type": "string"
+                                      },
+                                      "supportsHttpsTrafficOnly": {
+                                        "type": "boolean"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  "sku": {
+                                    "properties": {
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "tier": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  "tags": {
+                                    "properties": {},
+                                    "type": "object"
+                                  },
+                                  "type": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "sku",
+                                  "kind",
+                                  "id",
+                                  "name",
+                                  "type",
+                                  "location",
+                                  "tags",
+                                  "properties"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      }
+                    }
+                  },
+                  "runAfter": {},
+                  "expression": {
+                    "and": [
+                      {
+                        "not": {
+                          "contains": [
+                            "@items('For_each')['displayName']",
+                            "Pay-As-You-Go"
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "contains": [
+                            "@items('For_each')['displayName']",
+                            "Visual Studio"
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "contains": [
+                            "@items('For_each')['displayName']",
+                            "FreeTrial"
+                          ]
+                        }
+                      },
+                      {
+                        "equals": [
+                          "@items('For_each')['state']",
+                          "Enabled"
+                        ]
+                      }
+                    ]
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "Parse_JSON": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Foreach"
+            },
+            "HTTP": {
+              "runAfter": {
+                "Initialize_TodaysDate": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "authentication": {
+                  "type": "ManagedServiceIdentity"
+                },
+                "method": "GET",
+                "uri": "https://management.azure.com/subscriptions?api-version=2016-06-01"
+              }
+            },
+            "Initialize_MailBody": {
+              "runAfter": {},
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "MailBody",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "Initialize_TodaysDate": {
+              "runAfter": {
+                "Initialize_MailBody": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "TodaysDate",
+                    "type": "string",
+                    "value": "@{utcNow('D')}"
+                  }
+                ]
+              }
+            },
+            "Parse_JSON": {
+              "runAfter": {
+                "HTTP": [
+                  "Succeeded"
+                ]
+              },
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@body('HTTP')",
+                "schema": {
+                  "properties": {
+                    "value": {
+                      "items": {
+                        "properties": {
+                          "authorizationSource": {
+                            "type": "string"
+                          },
+                          "displayName": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "state": {
+                            "type": "string"
+                          },
+                          "subscriptionId": {
+                            "type": "string"
+                          },
+                          "subscriptionPolicies": {
+                            "properties": {
+                              "locationPlacementId": {
+                                "type": "string"
+                              },
+                              "quotaId": {
+                                "type": "string"
+                              },
+                              "spendingLimit": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "subscriptionId",
+                          "displayName",
+                          "state",
+                          "subscriptionPolicies",
+                          "authorizationSource"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "Send_an_email_(V2)": {
+              "runAfter": {
+                "Set_MailBody": [
+                  "Succeeded"
+                ]
+              },
+              "type": "ApiConnection",
+              "inputs": {
+                "body": {
+                  "Body": "<p>@{variables('MailBody')}</p>",
+                  "Subject": "Support task :  @{body('Create_a_work_item_2')?['id']} - Secure Storage Remediation",
+                  "To": "[variables('SenderAddress')]"
+                },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['office365']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/v2/Mail"
+              }
+            },
+            "Set_MailBody": {
+              "runAfter": {
+                "Create_a_work_item_2": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "MailBody",
+                "value": "<html>\n<head>\n</head>\n<body>\n              <HR WIDTH=\"100%\" COLOR=\"#94d506\" SIZE=\"3\">\n            <tr>\n                <td>\n                    <table width=\"100%\">\n                        <tbody>\n                            <tr>\n                                <td align=\"left\" style=\"text-align:start; font-family:Arial; font-size:0.9em; color:dimgray; padding-bottom:5px; padding-left:5px; padding-top:10px\">To: Azure Operations Team </td>  <td align=\"Right\" style=\"text-align:start; font-family:Arial; font-size:0.9em; color:dimgray;padding-bottom:5px; padding-right:5px; padding-top:10px\">        @{variables('TodaysDate')}\n</td> \n                            </tr>\n                            <tr>\n                                <td align=\"left\" style=\"text-align:start; font-family:Arial; font-size:0.9em; color:dimgray; padding-bottom:5px; padding-left:5px; padding-top:10px\">From: Azure Internal Notifications Team</td>\n                            </tr>\n                        </tbody>\n                    </table>\n                </td>\n            </tr>\n            <HR WIDTH=\"100%\" COLOR=\"#94d506\" SIZE=\"1\">\n            \n      <p><font color=\"darkgreen\" size=\"3\" >Hi All,</font></p>\n<p><font color=\"darkgreen\" size=\"3\" >\nExecution of  'SecureStorageRemediation' logic app failed due to some reasons. Please check.\n</font></p>\n\n    <p><font color=\"darkgreen\" size=\"3\" >Regards,</font></p>  \n<p><font color=\"darkgreen\" size=\"3\" >Azure Internal Notifications Team</font></p>  \n        </tbody>\n    </table>\n    <small>\n                        <i>\n                            **Automated email generated. Do not reply.\n                        </i>\n                    </small>\n</body>\n</html>\n"
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "office365": {
+                "id": "[concat('/subscriptions/',subscription().subscriptionId,'/providers/Microsoft.Web/locations/',resourceGroup().location,'/managedApis/office365')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('o365APIConnectionName'))]",
+                "connectionName": "[variables('o365APIConnectionName')]"
+              },
+              "sql": {
+                "id": "[concat('/subscriptions/',subscription().subscriptionId,'/providers/Microsoft.Web/locations/',resourceGroup().location,'/managedApis/sql')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('sql_name'))]",
+                "connectionName": "[variables('sql_name')]"
+              },
+              "azdevops": {
+                "id": "[concat('/subscriptions/',subscription().subscriptionId,'/providers/Microsoft.Web/locations/',resourceGroup().location,'/managedApis/visualstudioteamservices')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('AzDevOpsAPIConnectionName'))]",
+                "connectionName": "[variables('AzDevOpsAPIConnectionName')]"
+              }
+            }
+          }
+        }
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      }
+    },
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "location": "[resourceGroup().location]",
+      "name": "[variables('AzDevOpsAPIConnectionName')]",
+      "properties": {
+        "api": {
+          "id": "[concat('/subscriptions/',subscription().subscriptionId,'/providers/Microsoft.Web/locations/',resourceGroup().location,'/managedApis/visualstudioteamservices')]"
+        },
+        "displayName": "[variables('SenderAddress')]"
+      }
+    },
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "location": "[resourceGroup().location]",
+      "name": "[variables('sql_name')]",
+      "properties": {
+        "api": {
+          "id": "[concat('/subscriptions/',subscription().subscriptionId,'/providers/Microsoft.Web/locations/',resourceGroup().location,'/managedApis/sql')]"
+        },
+        "displayName": "sqlDisplayName",
+        "parameterValues": {
+          "server": "sqlServerContosoExample.database.windows.net",
+          "database": "sqlDatabaseName",
+          "username": "sqlUsernameCredential",
+          "password": "[variables('sql_password')]",
+          "encryptConnection": true,
+          "privacySetting": "None",
+          "sqlConnectionString": "sqlConnectionString"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "location": "[resourceGroup().location]",
+      "name": "[variables('o365APIConnectionName')]",
+      "properties": {
+        "api": {
+          "id": "[concat('/subscriptions/',subscription().subscriptionId,'/providers/Microsoft.Web/locations/',resourceGroup().location,'/managedApis/office365')]"
+        },
+        "displayName": "[variables('SenderAddress')]"
+      }
+    }
+  ],
+  "outputs": {}
+}

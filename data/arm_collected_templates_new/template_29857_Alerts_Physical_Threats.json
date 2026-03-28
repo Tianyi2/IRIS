@@ -1,0 +1,73 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/88db8505-1889-46aa-a4e2-4e866262dcb9')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/88db8505-1889-46aa-a4e2-4e866262dcb9')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": false,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "PT5H",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "enabled": true,
+        "severity": "Low",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Physical Threat Detected  {{PT_Title_Nested}}",
+          "alertDescriptionFormat": "A physical threat incident was identified by Cyble Intelligence.\nTitle {{PT_Title_Nested}}\nThreat Type {{PT_ThreatType}}\nPublished At {{PT_PublishedAt}}\n"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Cyble Vision Alerts Physical Threat Alert",
+        "description": "'Creates an incident for physical threats identified by Cyble Intelligence such as explosions, safety incidents, riots, or violence. Each alert generates a single incident for SOC evaluation.'\n",
+        "suppressionDuration": "PT5M",
+        "query": "Alerts_physical_threats\n| where Service == \"physical_threats\"\n| extend MappedSeverity = Severity\n",
+        "status": "Available",
+        "queryFrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "PT_BaseSourceURL",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          }
+        ],
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "Impact"
+        ],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "ThreatTitle": "PT_Title_Nested",
+          "MappedSeverity": "Severity",
+          "AlertID": "AlertID",
+          "Location": "PT_LocationName",
+          "Latitude": "PT_Latitude",
+          "LocationType": "PT_LocationType",
+          "Longitude": "PT_Longitude",
+          "Service": "Service",
+          "ThreatType": "PT_ThreatType",
+          "Status": "Status"
+        },
+        "queryPeriod": "30m"
+      }
+    }
+  ]
+}

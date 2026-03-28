@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deploy-Resource-Diag",
+      "apiVersion": "2020-09-01",
+      "location": "[deployment().location]",
+      "properties": {
+        "Scope": "/providers/Microsoft.Management/managementGroups/bugbash",
+        "NotScopes": null,
+        "DisplayName": "Deploy-Resource-Diag",
+        "Description": "Deploy-Resource-Diag",
+        "EnforcementMode": 0,
+        "PolicyDefinitionId": "/providers/Microsoft.Management/managementGroups/bugbash/providers/Microsoft.Authorization/policySetDefinitions/Deploy-Diag-LogAnalytics",
+        "Parameters": {
+          "logAnalytics": {
+            "value": "/subscriptions/dddbadc2-9d31-43f4-a7e3-ae83c9da646a/resourcegroups/bugbash-mgmt/providers/microsoft.operationalinsights/workspaces/bugbash-la-dddbadc2-9d31-43f4-a7e3-ae83c9da646a"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

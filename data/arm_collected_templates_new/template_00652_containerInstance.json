@@ -1,0 +1,205 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "resourceTags": {
+            "type": "object",
+            "metadata": {
+                "description": "The tags that will be assigned to the Container Instance"
+            }
+        },
+        "name": {
+            "type": "string",
+            "metadata": {
+                "description": "Name for the container group"
+            }
+        },
+        "image": {
+            "type": "string",
+            "metadata": {
+                "description": "Container image to deploy. Should be of the form repoName/imagename:tag for images stored in public Docker Hub, or a fully qualified URI for other registries. Images from private registries require additional registry credentials."
+            }
+        },
+        "port": {
+            "type": "string",
+            "metadata": {
+                "description": "Port to open on the container and the public IP address."
+            }
+        },
+        "cpuCores": {
+            "type": "string",
+            "metadata": {
+                "description": "The number of CPU cores to allocate to the container."
+            }
+        },
+        "memoryInGb": {
+            "type": "string",
+            "metadata": {
+                "description": "The amount of memory to allocate to the container in gigabytes."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for the container and all the deployed resources."
+            }
+        },
+        "restartPolicy": {
+            "type": "string",
+            "metadata": {
+                "description": "The behavior of Azure runtime if container has stopped."
+            }
+        },
+        "osType": {
+            "type": "string",
+            "metadata": {
+                "description": "The OS to be used for the container host."
+            }
+        },
+        "imageRegistryLoginServer": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The url of the image registry server"
+            }
+        },
+        "imageRegistryUsername": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The username to connect to the image registry server"
+            }
+        },
+        "imageRegistryPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password to connect to the image registry server"
+            }
+        },
+        "CONSUMER_KEY": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Here we're connecting to the Twitter API"
+            }
+        },
+        "CONSUMER_SECRET": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Here we're connecting to the Twitter API"
+            }
+        },
+        "ACCESS_KEY": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Here we're connecting to the Twitter API"
+            }
+        },
+        "ACCESS_SECRET": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Here we're connecting to the Twitter API"
+            }
+        },
+        "EVENTHUB_ENDPOINT": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Here we're connecting to an Azure Event Hub"
+            }
+        },
+        "EVENTHUB_NAME": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Here we're connecting to an Azure Event Hub"
+            }
+        },
+        "RUNTIME_MINS": {
+            "type": "securestring",
+            "metadata": {
+                "description": "How long the twitter stream program will execute"
+            }
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('name')]",
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2019-12-01",
+            "location": "[parameters('location')]",
+            "tags": "[parameters('resourceTags')]",
+            "properties": {
+                "containers": [
+                    {
+                        "name": "[parameters('name')]",
+                        "properties": {
+                            "image": "[parameters('image')]",
+                            "ports": [
+                                {
+                                    "port": "[parameters('port')]"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "cpu": "[parameters('cpuCores')]",
+                                    "memoryInGb": "[parameters('memoryInGb')]"
+                                }
+                            },
+                            "environmentVariables": [
+                                {
+                                    "name": "CONSUMER_KEY",
+                                    "value": "[parameters('CONSUMER_KEY')]"
+                                },
+                                {
+                                    "name": "CONSUMER_SECRET",
+                                    "value": "[parameters('CONSUMER_SECRET')]"
+                                },
+                                {
+                                    "name": "ACCESS_KEY",
+                                    "value": "[parameters('ACCESS_KEY')]"
+                                },
+                                {
+                                    "name": "ACCESS_SECRET",
+                                    "value": "[parameters('ACCESS_SECRET')]"
+                                },
+                                {
+                                    "name": "EVENTHUB_ENDPOINT",
+                                    "value": "[parameters('EVENTHUB_ENDPOINT')]"
+                                },
+                                {
+                                    "name": "EVENTHUB_NAME",
+                                    "value": "[parameters('EVENTHUB_NAME')]"
+                                },
+                                {
+                                    "name": "RUNTIME_MINS",
+                                    "value": "[parameters('RUNTIME_MINS')]"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "restartPolicy": "[parameters('restartPolicy')]",
+                "osType": "[parameters('osType')]",
+                "ipAddress": {
+                    "type": "Public",
+                    "ports": [
+                        {
+                            "protocol": "Tcp",
+                            "port": "[parameters('port')]"
+                        }
+                    ]
+                },
+                "imageRegistryCredentials": [
+                    {
+                        "server": "[parameters('imageRegistryLoginServer')]",
+                        "username": "[parameters('imageRegistryUsername')]",
+                        "password": "[parameters('imageRegistryPassword')]"
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {
+        "containerIPv4Address": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups/', parameters('name'))).ipAddress.ip]"
+        }
+    }
+}

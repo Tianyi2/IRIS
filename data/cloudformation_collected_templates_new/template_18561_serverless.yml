@@ -1,0 +1,76 @@
+service: alerta-utec-seguridad
+frameworkVersion: '4'
+
+org: darosv
+app: alerta-utec
+
+provider:
+  name: aws
+  runtime: python3.13      # <--- cambiar 3.12 por 3.11
+  region: us-east-1
+  stage: production
+
+  iam:
+    role: arn:aws:iam::645337731455:role/LabRole
+
+  httpApi:
+    cors:
+      allowedOrigins:
+        - '*'
+      allowedMethods:
+        - OPTIONS
+        - GET
+        - POST
+      allowedHeaders:
+        - '*'
+
+custom:
+  usuariosTableName: tabla_usuarios
+  tokensTableName: tokens_acceso
+
+functions:
+  crearUsuario:
+    handler: crear_usuario.lambda_handler
+    environment:
+      USUARIOS_TABLE: ${self:custom.usuariosTableName}
+      TOKENS_TABLE: ${self:custom.tokensTableName}
+    events:
+      - httpApi:
+          path: /usuarios
+          method: post
+
+  loginUsuario:
+    handler: login_usuario.lambda_handler
+    environment:
+      USUARIOS_TABLE: ${self:custom.usuariosTableName}
+      TOKENS_TABLE: ${self:custom.tokensTableName}
+    events:
+      - httpApi:
+          path: /login
+          method: post
+
+resources:
+  Resources:
+    TablaUsuarios:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.usuariosTableName}
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    TablaTokensAcceso:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tokensTableName}
+        AttributeDefinitions:
+          - AttributeName: token
+            AttributeType: S
+        KeySchema:
+          - AttributeName: token
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST

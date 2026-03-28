@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/891724c5-8f42-41d0-aa3e-a58947cf4d3a')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/891724c5-8f42-41d0-aa3e-a58947cf4d3a')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "triggerThreshold": 0,
+        "severity": "Informational",
+        "description": "New Domain Infringement with severity Informational found",
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "PT5H",
+            "reopenClosedIncident": false,
+            "enabled": false
+          }
+        },
+        "query": "CBSLog_Azure_1_CL | where severity_s == \"Informational\" | where type_s == \"Domain Infringement\" | where status_s != \"Closed\" or status_s != \"Resolved\"",
+        "name": "Domain Infringement (Informational)",
+        "status": "Available",
+        "queryPeriod": "5m",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryFrequency": "5m",
+        "triggerOperator": "gt",
+        "tactics": [
+          "Reconnaissance"
+        ],
+        "suppressionDuration": "5h",
+        "suppressionEnabled": false
+      }
+    }
+  ]
+}

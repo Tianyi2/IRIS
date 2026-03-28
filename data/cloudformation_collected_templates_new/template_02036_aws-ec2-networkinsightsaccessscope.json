@@ -1,0 +1,299 @@
+{
+  "typeName": "AWS::EC2::NetworkInsightsAccessScope",
+  "description": "Resource schema for AWS::EC2::NetworkInsightsAccessScope",
+  "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-ec2-ni.git",
+  "definitions": {
+    "Tag": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Key": {
+          "type": "string",
+          "markdownDescription": "\n\n---\n\nRequired: Yes  \nType: String  \nUpdate requires: No interruption\n"
+        },
+        "Value": {
+          "type": "string",
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\n"
+        }
+      },
+      "required": [
+        "Key"
+      ],
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "AccessScopePathRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Source": {
+          "$ref": "#/definitions/PathStatementRequest"
+        },
+        "Destination": {
+          "$ref": "#/definitions/PathStatementRequest"
+        },
+        "ThroughResources": {
+          "type": "array",
+          "insertionOrder": true,
+          "items": {
+            "$ref": "#/definitions/ThroughResourcesStatementRequest"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        }
+      },
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "PathStatementRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "PacketHeaderStatement": {
+          "$ref": "#/definitions/PacketHeaderStatementRequest"
+        },
+        "ResourceStatement": {
+          "$ref": "#/definitions/ResourceStatementRequest"
+        }
+      },
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "PacketHeaderStatementRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "SourceAddresses": {
+          "type": "array",
+          "insertionOrder": true,
+          "items": {
+            "type": "string",
+            "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\n"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        },
+        "DestinationAddresses": {
+          "type": "array",
+          "insertionOrder": true,
+          "items": {
+            "type": "string",
+            "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\n"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        },
+        "SourcePorts": {
+          "type": "array",
+          "insertionOrder": true,
+          "items": {
+            "type": "string",
+            "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\n"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        },
+        "DestinationPorts": {
+          "type": "array",
+          "insertionOrder": true,
+          "items": {
+            "type": "string",
+            "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\n"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        },
+        "SourcePrefixLists": {
+          "type": "array",
+          "insertionOrder": true,
+          "items": {
+            "type": "string",
+            "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\n"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        },
+        "DestinationPrefixLists": {
+          "type": "array",
+          "insertionOrder": true,
+          "items": {
+            "type": "string",
+            "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\n"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        },
+        "Protocols": {
+          "type": "array",
+          "insertionOrder": true,
+          "items": {
+            "$ref": "#/definitions/Protocol"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        }
+      },
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "Protocol": {
+      "type": "string",
+      "enum": [
+        "tcp",
+        "udp"
+      ],
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nAllowed Values: tcp | udp  \nUpdate requires: No interruption\n"
+    },
+    "ResourceStatementRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Resources": {
+          "type": "array",
+          "insertionOrder": true,
+          "items": {
+            "type": "string",
+            "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\n"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        },
+        "ResourceTypes": {
+          "type": "array",
+          "insertionOrder": true,
+          "items": {
+            "type": "string",
+            "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\n"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        }
+      },
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "ThroughResourcesStatementRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ResourceStatement": {
+          "$ref": "#/definitions/ResourceStatementRequest"
+        }
+      },
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    }
+  },
+  "properties": {
+    "NetworkInsightsAccessScopeId": {
+      "type": "string",
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "NetworkInsightsAccessScopeArn": {
+      "type": "string",
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "CreatedDate": {
+      "type": "string",
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "UpdatedDate": {
+      "type": "string",
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "Tags": {
+      "type": "array",
+      "insertionOrder": false,
+      "items": {
+        "$ref": "#/definitions/Tag"
+      },
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+    },
+    "MatchPaths": {
+      "type": "array",
+      "insertionOrder": true,
+      "items": {
+        "$ref": "#/definitions/AccessScopePathRequest"
+      },
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: Replacement\n"
+    },
+    "ExcludePaths": {
+      "type": "array",
+      "insertionOrder": true,
+      "items": {
+        "$ref": "#/definitions/AccessScopePathRequest"
+      },
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: Replacement\n"
+    }
+  },
+  "additionalProperties": false,
+  "tagging": {
+    "taggable": true,
+    "tagOnCreate": true,
+    "tagUpdatable": true,
+    "cloudFormationSystemTags": false,
+    "tagProperty": "/properties/Tags",
+    "permissions": [
+      "ec2:CreateTags",
+      "ec2:DeleteTags"
+    ]
+  },
+  "readOnlyProperties": [
+    "/properties/NetworkInsightsAccessScopeId",
+    "/properties/NetworkInsightsAccessScopeArn",
+    "/properties/CreatedDate",
+    "/properties/UpdatedDate"
+  ],
+  "createOnlyProperties": [
+    "/properties/MatchPaths",
+    "/properties/ExcludePaths"
+  ],
+  "writeOnlyProperties": [
+    "/properties/MatchPaths",
+    "/properties/ExcludePaths"
+  ],
+  "primaryIdentifier": [
+    "/properties/NetworkInsightsAccessScopeId"
+  ],
+  "additionalIdentifiers": [
+    [
+      "/properties/NetworkInsightsAccessScopeArn"
+    ]
+  ],
+  "handlers": {
+    "create": {
+      "permissions": [
+        "ec2:CreateNetworkInsightsAccessScope",
+        "ec2:CreateTags",
+        "tiros:CreateQuery"
+      ]
+    },
+    "read": {
+      "permissions": [
+        "ec2:DescribeNetworkInsightsAccessScopes",
+        "ec2:GetNetworkInsightsAccessScopeContent"
+      ]
+    },
+    "update": {
+      "permissions": [
+        "ec2:DescribeNetworkInsightsAccessScopes",
+        "ec2:GetNetworkInsightsAccessScopeContent",
+        "ec2:CreateTags",
+        "ec2:DeleteTags"
+      ]
+    },
+    "delete": {
+      "permissions": [
+        "ec2:DeleteNetworkInsightsAccessScope",
+        "ec2:DeleteTags"
+      ]
+    },
+    "list": {
+      "permissions": [
+        "ec2:DescribeNetworkInsightsAccessScopes"
+      ]
+    }
+  },
+  "attributes": {
+    "NetworkInsightsAccessScopeId": {
+      "type": "string",
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "NetworkInsightsAccessScopeArn": {
+      "type": "string",
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "CreatedDate": {
+      "type": "string",
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "UpdatedDate": {
+      "type": "string",
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nUpdate requires: No interruption\nRead only property: Yes"
+    }
+  }
+}

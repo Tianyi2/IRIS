@@ -1,0 +1,35 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "principalId": {
+        "type": "string"
+      },
+      "assignmentType": {
+        "type": "string",
+        "allowedValues": [
+          "AiSearchIndexReader",
+          "AiSearchIndexContributor"
+        ]
+      },
+      "resourceName": {
+        "type": "string"
+      }
+    },
+    "variables": {
+      "AiSearchIndexReader": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '985c0cb4-34a0-4b8d-8a10-eb48105c3ba0')]",
+      "AiSearchIndexContributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '3361dc54-610a-4045-99fe-6879e51ef62d')]"
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Search/searchServices/providers/roleAssignments",
+        "apiVersion": "2021-04-01-preview",
+        "name": "[concat(parameters('resourceName'), '/Microsoft.Authorization/', guid(uniqueString(parameters('principalId'), parameters('resourceName'), last(split(variables(parameters('assignmentType')), '/')))))]",
+        "properties": {
+          "roleDefinitionId": "[variables(parameters('assignmentType'))]",
+          "principalId": "[parameters('principalId')]"
+        }
+      }
+    ]
+  }
+  

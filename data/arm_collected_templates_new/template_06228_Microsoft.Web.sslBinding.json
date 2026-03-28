@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "app": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the website to create ssl certificate and binding for."
+            }
+        },
+        "hostName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Custom host name for the Website."
+            }
+        },
+        "thumbprint": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Certificate thumbprint."
+            }
+        }
+    },
+    "variables": {
+        "bindingName": "[concat(parameters('app'), '/', parameters('hostName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/sites/hostnameBindings",
+            "apiVersion": "2019-08-01",
+            "name": "[variables('bindingName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "sslState": "SniEnabled",
+                "thumbprint": "[parameters('thumbprint')]"
+            }
+        }
+    ]
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "name": {
+      "type": "string"
+    },
+    "cacheSKUName": {
+      "type": "string",
+      "allowedValues": [
+        "Basic",
+        "Standard"
+      ],
+      "defaultValue": "Basic",
+      "metadata": {
+        "description": "The pricing tier of the new Azure Redis Cache."
+      }
+    },
+    "cacheSKUCapacity": {
+      "type": "int",
+      "allowedValues": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "defaultValue": 0,
+      "metadata": {
+        "description": "The size of the new Azure Redis Cache instance. "
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {
+      }
+    }
+  },
+  "variables": {
+    "customTags": {
+      "displayName": "[parameters('name')]"
+    },
+    "t": "[union(parameters('tags'), variables('customTags'))]"
+  },
+  "resources": [
+    {
+      "name": "[parameters('name')]",
+      "type": "Microsoft.Cache/Redis",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2017-10-01",
+      "tags": "[variables('t')]",
+      "properties": {
+        "sku": {
+          "name": "[parameters('cacheSKUName')]",
+          "family": "C",
+          "capacity": "[parameters('cacheSKUCapacity')]"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "cache": {
+      "type": "object",
+      "value": "[reference(parameters('name'), '2017-10-01', 'Full')]"
+    },
+    "primaryKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.Cache/Redis', parameters('name')), '2017-10-01').primaryKey]"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "cosmosDatabase": {
+      "type": "string"
+    },
+    "cosmosDbAccountName": {
+      "type": "string"
+    },
+    "cosmosDBType": {
+      "type": "string",
+      "allowedValues": [
+        "GlobalDocumentDB",
+        "MongoDB"
+      ]
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+      "condition": "[equals(parameters('cosmosDBType'), 'GlobalDocumentDB')]",
+      "name": "[concat(parameters('cosmosDbAccountName'), '/', parameters('CosmosDatabase'))]",
+      "apiVersion": "2021-04-15",
+      "properties": {
+        "resource": {
+          "id": "[parameters('cosmosDatabase')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases",
+      "condition": "[equals(parameters('cosmosDBType'), 'MongoDB')]",
+      "name": "[concat(parameters('cosmosDbAccountName'), '/', parameters('CosmosDatabase'))]",
+      "apiVersion": "2021-04-15",
+      "properties": {
+        "resource": {
+          "id": "[parameters('cosmosDatabase')]"
+        }
+      }
+    }
+  ],
+  "outputs": {
+  }
+}

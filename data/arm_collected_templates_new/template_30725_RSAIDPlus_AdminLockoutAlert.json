@@ -1,0 +1,84 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/488c759d-a82e-44cd-91bb-d766573918d7')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/488c759d-a82e-44cd-91bb-d766573918d7')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "2h",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "severity": "Medium",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "RSA ID Plus Administrator - {{{adminUserName}} is locked out.",
+          "alertDescriptionFormat": "Administrator - {{{adminUserName}} with Role - {{{adminUserRole}} got locked out of Admin Console at: {{{TimeGenerated}}"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "name": "RSA ID Plus - Locked Administrator Account Detected",
+        "description": "'Raises an alert when an admin account is locked out of the Admin console (RSAIDPlus Admin Events).'\n",
+        "query": "RSAIDPlus_AdminLogs_CL\n|where activityKey == 'LOCKED_ADMIN_ACCOUNT'\n|project TimeGenerated, customerName, adminUserName, adminUserRole, activityKey, sourceIPAddress\n",
+        "status": "Available",
+        "queryFrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "sourceIPAddress",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "adminUserName",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "customerName",
+                "identifier": "HostName"
+              }
+            ],
+            "entityType": "Host"
+          }
+        ],
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "Impact",
+          "CredentialAccess"
+        ],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "Administrator_Type": "adminUserRole",
+          "Activity": "activityKey",
+          "Customer_Name": "customerName",
+          "Administrator": "adminUserName"
+        },
+        "queryPeriod": "1d"
+      }
+    }
+  ]
+}

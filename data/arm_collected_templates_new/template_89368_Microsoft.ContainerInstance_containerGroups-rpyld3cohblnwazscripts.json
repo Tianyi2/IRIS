@@ -1,0 +1,181 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.ContainerInstance/containerGroups",
+      "name": "rpyld3cohblnwazscripts",
+      "apiVersion": "2020-11-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "AZ_SCRIPTS_STATUS": "bugbash-AzOps-GitHub:Completed"
+      },
+      "properties": {
+        "sku": "Standard",
+        "provisioningState": "Succeeded",
+        "containers": [
+          {
+            "name": "az-scripts-rpyld3cohblnwazscripts",
+            "properties": {
+              "image": "mcr.microsoft.com/azuredeploymentscripts-powershell:az5.5-1.0.2977.0_master",
+              "command": [
+                "pwsh",
+                "-File",
+                "/mnt/azscripts/azscriptinput/DeploymentScript.ps1",
+                "-KeyVault",
+                "bugbash-AzOps-azpbaypcyf",
+                "-NewRepositoryName",
+                "bugbash",
+                "-GitHubUserNameOrOrg",
+                "uday31in",
+                "-SPNSecretName",
+                "SPNSecret",
+                "-SpnAppId",
+                "60748a19-157c-41fa-92c8-416e28517321",
+                "-PATSecretName",
+                "PATSecret",
+                "-AzureTenantId",
+                "360d509d-82f2-42d5-9446-fbf417d9139c",
+                "-EnterpriseScalePrefix",
+                "bugbash",
+                "-AzureSubscriptionId",
+                "dddbadc2-9d31-43f4-a7e3-ae83c9da646a"
+              ],
+              "ports": [],
+              "environmentVariables": [
+                {
+                  "name": "AZ_SCRIPTS_PATH_INPUT_DIRECTORY",
+                  "value": "/mnt/azscripts/azscriptinput"
+                },
+                {
+                  "name": "AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY",
+                  "value": "/mnt/azscripts/azscriptoutput"
+                },
+                {
+                  "name": "AZ_SCRIPTS_PATH_USER_SCRIPT_FILE_NAME",
+                  "value": "userscript.ps1"
+                },
+                {
+                  "name": "AZ_SCRIPTS_PATH_PRIMARY_SCRIPT_URI_FILE_NAME",
+                  "value": "primaryscripturi.config"
+                },
+                {
+                  "name": "AZ_SCRIPTS_PATH_SUPPORTING_SCRIPT_URI_FILE_NAME",
+                  "value": "supportingscripturi.config"
+                },
+                {
+                  "name": "AZ_SCRIPTS_PATH_SCRIPT_OUTPUT_FILE_NAME",
+                  "value": "scriptoutputs.json"
+                },
+                {
+                  "name": "AZ_SCRIPTS_PATH_EXECUTION_RESULTS_FILE_NAME",
+                  "value": "executionresult.json"
+                },
+                {
+                  "name": "AZ_SCRIPTS_AZURE_ENVIRONMENT",
+                  "value": "AzureCloud"
+                },
+                {
+                  "name": "AZ_SCRIPTS_CLEANUP_PREFERENCE",
+                  "value": "OnSuccess"
+                },
+                {
+                  "name": "AZ_SCRIPTS_USER_ASSIGNED_IDENTITY",
+                  "value": "/subscriptions/dddbadc2-9d31-43f4-a7e3-ae83c9da646a/resourceGroups/bugbash-AzOps/providers/Microsoft.ManagedIdentity/userAssignedIdentities/bugbash-AzOps-umi"
+                }
+              ],
+              "instanceView": {
+                "restartCount": 17,
+                "currentState": {
+                  "state": "Running",
+                  "startTime": "2021-03-20T12:12:38.55Z",
+                  "detailStatus": ""
+                },
+                "previousState": {
+                  "state": "Terminated",
+                  "startTime": "2021-03-20T11:03:47.953Z",
+                  "exitCode": 0,
+                  "finishTime": "2021-03-20T12:12:37.387Z",
+                  "detailStatus": "Completed"
+                },
+                "events": [
+                  {
+                    "count": 1,
+                    "firstTimestamp": "2021-03-19T16:40:59Z",
+                    "lastTimestamp": "2021-03-19T16:40:59Z",
+                    "name": "Pulling",
+                    "message": "pulling image \"mcr.microsoft.com/azuredeploymentscripts-powershell@sha256:a9a2916d9ff8faedee5c6ad6bc905c22591953cb68a75c6db6dc1fa32bee55c3\"",
+                    "type": "Normal"
+                  },
+                  {
+                    "count": 1,
+                    "firstTimestamp": "2021-03-19T16:41:27Z",
+                    "lastTimestamp": "2021-03-19T16:41:27Z",
+                    "name": "Pulled",
+                    "message": "Successfully pulled image \"mcr.microsoft.com/azuredeploymentscripts-powershell@sha256:a9a2916d9ff8faedee5c6ad6bc905c22591953cb68a75c6db6dc1fa32bee55c3\"",
+                    "type": "Normal"
+                  },
+                  {
+                    "count": 18,
+                    "firstTimestamp": "2021-03-19T16:41:40Z",
+                    "lastTimestamp": "2021-03-20T12:12:38Z",
+                    "name": "Started",
+                    "message": "Started container",
+                    "type": "Normal"
+                  },
+                  {
+                    "count": 17,
+                    "firstTimestamp": "2021-03-19T17:50:44Z",
+                    "lastTimestamp": "2021-03-20T12:12:37Z",
+                    "name": "Killing",
+                    "message": "Killing container with id bc6d739df81c224ad572938b15d601590840528aa0da855e9dad9edd6c60b560.",
+                    "type": "Normal"
+                  }
+                ]
+              },
+              "resources": {
+                "requests": {
+                  "memoryInGB": 1,
+                  "cpu": 1
+                }
+              },
+              "volumeMounts": [
+                {
+                  "name": "azscripts",
+                  "mountPath": "/mnt/azscripts/"
+                }
+              ]
+            }
+          }
+        ],
+        "initContainers": [],
+        "osType": "Linux",
+        "volumes": [
+          {
+            "name": "azscripts",
+            "azureFile": {
+              "shareName": "nw2gn3oqy4ekiazscripts",
+              "storageAccountName": "rpyld3cohblnwazscripts"
+            }
+          }
+        ],
+        "instanceView": {
+          "events": [
+            {
+              "count": 1,
+              "firstTimestamp": "2021-03-19T16:41:36.846Z",
+              "lastTimestamp": "2021-03-19T16:41:36.846Z",
+              "name": "SuccessfulMountAzureFileVolume",
+              "message": "Successfully mounted Azure File Volume.",
+              "type": "Normal"
+            }
+          ],
+          "state": "Running"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

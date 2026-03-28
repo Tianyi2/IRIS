@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deny-RDP-from-internet",
+      "apiVersion": "2020-09-01",
+      "location": "[deployment().location]",
+      "properties": {
+        "Scope": "/providers/Microsoft.Management/managementGroups/bugbash-landingzones",
+        "NotScopes": null,
+        "DisplayName": "Deny-RDP-from-Internet",
+        "Description": "Deny-RDP-from-Internet",
+        "EnforcementMode": 0,
+        "PolicyDefinitionId": "/providers/Microsoft.Management/managementGroups/bugbash/providers/Microsoft.Authorization/policyDefinitions/Deny-RDP-From-Internet",
+        "Parameters": null
+      }
+    }
+  ],
+  "outputs": {}
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/f47f8c58-0a5b-42c3-ba02-c312dd1d92b8')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/f47f8c58-0a5b-42c3-ba02-c312dd1d92b8')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "queryPeriod": "5m",
+        "tactics": [
+          "Impact"
+        ],
+        "status": "Available",
+        "query": "ContrastADR_CL | where severity_s == \"CRITICAL\"",
+        "description": "'Critical Severity Level.'\n",
+        "entityMappings": [
+          {
+            "entityType": "URL",
+            "fieldMappings": [
+              {
+                "columnName": "uiUrl_s",
+                "identifier": "Url"
+              }
+            ]
+          }
+        ],
+        "severity": "Medium",
+        "triggerThreshold": 0,
+        "triggerOperator": "gt",
+        "name": "SQL Injection",
+        "queryFrequency": "5m"
+      }
+    }
+  ]
+}

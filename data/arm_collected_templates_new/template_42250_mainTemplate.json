@@ -1,0 +1,538 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "author": "NXLog",
+    "comments": "Solution template for NXLogDNSLogs"
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Not used, but needed to pass arm-ttk test `Location-Should-Not-Be-Hardcoded`.  We instead use the `workspace-location` which is derived from the LA workspace"
+      }
+    },
+    "workspace-location": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "[concat('Region to deploy solution resources -- separate from location selection',parameters('location'))]"
+      }
+    },
+    "workspace": {
+      "defaultValue": "",
+      "type": "string",
+      "metadata": {
+        "description": "Workspace name for Log Analytics where Microsoft Sentinel is setup"
+      }
+    }
+  },
+  "variables": {
+    "solutionId": "nxlogltd1589381969261.nxlog_dns_logs",
+    "_solutionId": "[variables('solutionId')]",
+    "workspaceResourceId": "[resourceId('microsoft.OperationalInsights/Workspaces', parameters('workspace'))]",
+    "uiConfigId1": "NXLogDNSLogs",
+    "_uiConfigId1": "[variables('uiConfigId1')]",
+    "dataConnectorContentId1": "NXLogDNSLogs",
+    "_dataConnectorContentId1": "[variables('dataConnectorContentId1')]",
+    "dataConnectorId1": "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/dataConnectors', variables('_dataConnectorContentId1'))]",
+    "_dataConnectorId1": "[variables('dataConnectorId1')]",
+    "dataConnectorTemplateSpecName1": "[concat(parameters('workspace'),'-dc-',uniquestring(variables('_dataConnectorContentId1')))]",
+    "dataConnectorVersion1": "1.0.0",
+    "parserVersion1": "1.0.0",
+    "parserContentId1": "ASimDnsMicrosoftNXLog-Parser",
+    "_parserContentId1": "[variables('parserContentId1')]",
+    "parserName1": "ASimDnsMicrosoftNXLog",
+    "_parserName1": "[concat(parameters('workspace'),'/',variables('parserName1'))]",
+    "parserId1": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspace'), variables('parserName1'))]",
+    "_parserId1": "[variables('parserId1')]",
+    "parserTemplateSpecName1": "[concat(parameters('workspace'),'-pr-',uniquestring(variables('_parserContentId1')))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/templateSpecs",
+      "apiVersion": "2022-02-01",
+      "name": "[variables('dataConnectorTemplateSpecName1')]",
+      "location": "[parameters('workspace-location')]",
+      "tags": {
+        "hidden-sentinelWorkspaceId": "[variables('workspaceResourceId')]",
+        "hidden-sentinelContentType": "DataConnector"
+      },
+      "properties": {
+        "description": "NXLogDNSLogs data connector with template",
+        "displayName": "NXLogDNSLogs template"
+      }
+    },
+    {
+      "type": "Microsoft.Resources/templateSpecs/versions",
+      "apiVersion": "2022-02-01",
+      "name": "[concat(variables('dataConnectorTemplateSpecName1'),'/',variables('dataConnectorVersion1'))]",
+      "location": "[parameters('workspace-location')]",
+      "tags": {
+        "hidden-sentinelWorkspaceId": "[variables('workspaceResourceId')]",
+        "hidden-sentinelContentType": "DataConnector"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/templateSpecs', variables('dataConnectorTemplateSpecName1'))]"
+      ],
+      "properties": {
+        "description": "NXLogDNSLogs data connector with template version 2.0.2",
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('dataConnectorVersion1')]",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',variables('_dataConnectorContentId1'))]",
+              "apiVersion": "2021-03-01-preview",
+              "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
+              "location": "[parameters('workspace-location')]",
+              "kind": "GenericUI",
+              "properties": {
+                "connectorUiConfig": {
+                  "id": "[variables('_uiConfigId1')]",
+                  "title": "NXLog DNS Logs",
+                  "publisher": "NXLog",
+                  "descriptionMarkdown": "The NXLog DNS Logs data connector uses Event Tracing for Windows ([ETW](https://docs.microsoft.com/windows/apps/trace-processing/overview)) for collecting both Audit and Analytical DNS Server events. The [NXLog *im_etw* module](https://docs.nxlog.co/refman/current/im/etw.html) reads event tracing data directly for maximum efficiency, without the need to capture the event trace into an .etl file. This REST API connector can forward DNS Server events to Microsoft Sentinel in real time.",
+                  "additionalRequirementBanner": "This data connector depends on parsers based on Kusto functions deployed with the Microsoft Sentinel Solution to work as expected. The [**ASimDnsMicrosoftNXLog **](https://aka.ms/sentinel-nxlogdnslogs-parser) is designed to leverage Microsoft Sentinel's built-in DNS-related analytics capabilities.",
+                  "graphQueries": [
+                    {
+                      "metricName": "Total data received",
+                      "legend": "ASimDnsMicrosoftNXLog ",
+                      "baseQuery": "ASimDnsMicrosoftNXLog "
+                    }
+                  ],
+                  "sampleQueries": [
+                    {
+                      "description": "DNS Server top 5 hostlookups",
+                      "query": "ASimDnsMicrosoftNXLog \n| summarize count() by Domain\n| take 5\n| render piechart title='Top 5 host lookups'"
+                    },
+                    {
+                      "description": "DNS Server Top 5 EventOriginalTypes (Event IDs)",
+                      "query": "ASimDnsMicrosoftNXLog \n| extend EventID=strcat('Event ID ',trim_end('.0',tostring(EventOriginalType)))\n| summarize CountByEventID=count() by EventID\n| sort by CountByEventID\n| take 5\n| render piechart title='Top 5 EventOriginalTypes (Event IDs)'"
+                    },
+                    {
+                      "description": "DNS Server analytical events per second (EPS)",
+                      "query": "ASimDnsMicrosoftNXLog \n| where EventEndTime >= todatetime('2021-09-17 03:07')\n| where EventEndTime <  todatetime('2021-09-18 03:14')\n| summarize EPS=count() by bin(EventEndTime, 1s)\n| render timechart title='DNS analytical events per second (EPS) - All event types'"
+                    }
+                  ],
+                  "dataTypes": [
+                    {
+                      "name": "NXLog_DNS_Server_CL",
+                      "lastDataReceivedQuery": "ASimDnsMicrosoftNXLog             | summarize Time = max(TimeGenerated)            | where isnotempty(Time)"
+                    }
+                  ],
+                  "connectivityCriterias": [
+                    {
+                      "type": "IsConnectedQuery",
+                      "value": [
+                        "NXLog_DNS_Server_CL | summarize LastLogReceived = max(TimeGenerated) | project IsConnected = LastLogReceived > ago(30d)"
+                      ]
+                    }
+                  ],
+                  "availability": {
+                    "status": 1,
+                    "isPreview": false
+                  },
+                  "permissions": {
+                    "resourceProvider": [
+                      {
+                        "provider": "Microsoft.OperationalInsights/workspaces",
+                        "permissionsDisplayText": "read and write permissions are required.",
+                        "providerDisplayName": "Workspace",
+                        "scope": "Workspace",
+                        "requiredPermissions": {
+                          "write": true,
+                          "read": true,
+                          "delete": true
+                        }
+                      },
+                      {
+                        "provider": "Microsoft.OperationalInsights/workspaces/sharedKeys",
+                        "permissionsDisplayText": "read permissions to shared keys for the workspace are required. [See the documentation to learn more about workspace keys](https://docs.microsoft.com/azure/azure-monitor/platform/agent-windows#obtain-workspace-id-and-key).",
+                        "providerDisplayName": "Keys",
+                        "scope": "Workspace",
+                        "requiredPermissions": {
+                          "action": true
+                        }
+                      }
+                    ]
+                  },
+                  "instructionSteps": [
+                    {
+                      "description": ">**NOTE:** This data connector depends on parsers based on Kusto functions deployed with the Microsoft Sentinel Solution to work as expected. The [**ASimDnsMicrosoftNXLog **](https://aka.ms/sentinel-nxlogdnslogs-parser) is designed to leverage Microsoft Sentinel's built-in DNS-related analytics capabilities."
+                    },
+                    {
+                      "description": "Follow the step-by-step instructions in the *NXLog User Guide* Integration Topic [Microsoft Sentinel](https://docs.nxlog.co/userguide/integrate/microsoft-azure-sentinel.html) to configure this connector.",
+                      "instructions": [
+                        {
+                          "parameters": {
+                            "fillWith": [
+                              "WorkspaceId"
+                            ],
+                            "label": "Workspace ID"
+                          },
+                          "type": "CopyableLabel"
+                        },
+                        {
+                          "parameters": {
+                            "fillWith": [
+                              "PrimaryKey"
+                            ],
+                            "label": "Primary Key"
+                          },
+                          "type": "CopyableLabel"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+              "apiVersion": "2022-01-01-preview",
+              "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',concat('DataConnector-', last(split(variables('_dataConnectorId1'),'/'))))]",
+              "properties": {
+                "parentId": "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/dataConnectors', variables('_dataConnectorContentId1'))]",
+                "contentId": "[variables('_dataConnectorContentId1')]",
+                "kind": "DataConnector",
+                "version": "[variables('dataConnectorVersion1')]",
+                "source": {
+                  "kind": "Solution",
+                  "name": "NXLogDNSLogs",
+                  "sourceId": "[variables('_solutionId')]"
+                },
+                "author": {
+                  "name": "NXLog"
+                },
+                "support": {
+                  "name": "NXLog",
+                  "tier": "Partner",
+                  "link": "https://nxlog.co/support-tickets/add/support-ticket"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2022-01-01-preview",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',concat('DataConnector-', last(split(variables('_dataConnectorId1'),'/'))))]",
+      "dependsOn": [
+        "[variables('_dataConnectorId1')]"
+      ],
+      "location": "[parameters('workspace-location')]",
+      "properties": {
+        "parentId": "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/dataConnectors', variables('_dataConnectorContentId1'))]",
+        "contentId": "[variables('_dataConnectorContentId1')]",
+        "kind": "DataConnector",
+        "version": "[variables('dataConnectorVersion1')]",
+        "source": {
+          "kind": "Solution",
+          "name": "NXLogDNSLogs",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "NXLog"
+        },
+        "support": {
+          "name": "NXLog",
+          "tier": "Partner",
+          "link": "https://nxlog.co/support-tickets/add/support-ticket"
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',variables('_dataConnectorContentId1'))]",
+      "apiVersion": "2021-03-01-preview",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
+      "location": "[parameters('workspace-location')]",
+      "kind": "GenericUI",
+      "properties": {
+        "connectorUiConfig": {
+          "title": "NXLog DNS Logs",
+          "publisher": "NXLog",
+          "descriptionMarkdown": "The NXLog DNS Logs data connector uses Event Tracing for Windows ([ETW](https://docs.microsoft.com/windows/apps/trace-processing/overview)) for collecting both Audit and Analytical DNS Server events. The [NXLog *im_etw* module](https://docs.nxlog.co/refman/current/im/etw.html) reads event tracing data directly for maximum efficiency, without the need to capture the event trace into an .etl file. This REST API connector can forward DNS Server events to Microsoft Sentinel in real time.",
+          "graphQueries": [
+            {
+              "metricName": "Total data received",
+              "legend": "ASimDnsMicrosoftNXLog ",
+              "baseQuery": "ASimDnsMicrosoftNXLog "
+            }
+          ],
+          "dataTypes": [
+            {
+              "name": "NXLog_DNS_Server_CL",
+              "lastDataReceivedQuery": "ASimDnsMicrosoftNXLog             | summarize Time = max(TimeGenerated)            | where isnotempty(Time)"
+            }
+          ],
+          "connectivityCriterias": [
+            {
+              "type": "IsConnectedQuery",
+              "value": [
+                "NXLog_DNS_Server_CL | summarize LastLogReceived = max(TimeGenerated) | project IsConnected = LastLogReceived > ago(30d)"
+              ]
+            }
+          ],
+          "sampleQueries": [
+            {
+              "description": "DNS Server top 5 hostlookups",
+              "query": "ASimDnsMicrosoftNXLog \n| summarize count() by Domain\n| take 5\n| render piechart title='Top 5 host lookups'"
+            },
+            {
+              "description": "DNS Server Top 5 EventOriginalTypes (Event IDs)",
+              "query": "ASimDnsMicrosoftNXLog \n| extend EventID=strcat('Event ID ',trim_end('.0',tostring(EventOriginalType)))\n| summarize CountByEventID=count() by EventID\n| sort by CountByEventID\n| take 5\n| render piechart title='Top 5 EventOriginalTypes (Event IDs)'"
+            },
+            {
+              "description": "DNS Server analytical events per second (EPS)",
+              "query": "ASimDnsMicrosoftNXLog \n| where EventEndTime >= todatetime('2021-09-17 03:07')\n| where EventEndTime <  todatetime('2021-09-18 03:14')\n| summarize EPS=count() by bin(EventEndTime, 1s)\n| render timechart title='DNS analytical events per second (EPS) - All event types'"
+            }
+          ],
+          "availability": {
+            "status": 1,
+            "isPreview": false
+          },
+          "permissions": {
+            "resourceProvider": [
+              {
+                "provider": "Microsoft.OperationalInsights/workspaces",
+                "permissionsDisplayText": "read and write permissions are required.",
+                "providerDisplayName": "Workspace",
+                "scope": "Workspace",
+                "requiredPermissions": {
+                  "write": true,
+                  "read": true,
+                  "delete": true
+                }
+              },
+              {
+                "provider": "Microsoft.OperationalInsights/workspaces/sharedKeys",
+                "permissionsDisplayText": "read permissions to shared keys for the workspace are required. [See the documentation to learn more about workspace keys](https://docs.microsoft.com/azure/azure-monitor/platform/agent-windows#obtain-workspace-id-and-key).",
+                "providerDisplayName": "Keys",
+                "scope": "Workspace",
+                "requiredPermissions": {
+                  "action": true
+                }
+              }
+            ]
+          },
+          "instructionSteps": [
+            {
+              "description": ">**NOTE:** This data connector depends on parsers based on Kusto functions deployed with the Microsoft Sentinel Solution to work as expected. The [**ASimDnsMicrosoftNXLog **](https://aka.ms/sentinel-nxlogdnslogs-parser) is designed to leverage Microsoft Sentinel's built-in DNS-related analytics capabilities."
+            },
+            {
+              "description": "Follow the step-by-step instructions in the *NXLog User Guide* Integration Topic [Microsoft Sentinel](https://docs.nxlog.co/userguide/integrate/microsoft-azure-sentinel.html) to configure this connector.",
+              "instructions": [
+                {
+                  "parameters": {
+                    "fillWith": [
+                      "WorkspaceId"
+                    ],
+                    "label": "Workspace ID"
+                  },
+                  "type": "CopyableLabel"
+                },
+                {
+                  "parameters": {
+                    "fillWith": [
+                      "PrimaryKey"
+                    ],
+                    "label": "Primary Key"
+                  },
+                  "type": "CopyableLabel"
+                }
+              ]
+            }
+          ],
+          "id": "[variables('_uiConfigId1')]",
+          "additionalRequirementBanner": "This data connector depends on parsers based on Kusto functions deployed with the Microsoft Sentinel Solution to work as expected. The [**ASimDnsMicrosoftNXLog **](https://aka.ms/sentinel-nxlogdnslogs-parser) is designed to leverage Microsoft Sentinel's built-in DNS-related analytics capabilities."
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/templateSpecs",
+      "apiVersion": "2022-02-01",
+      "name": "[variables('parserTemplateSpecName1')]",
+      "location": "[parameters('workspace-location')]",
+      "tags": {
+        "hidden-sentinelWorkspaceId": "[variables('workspaceResourceId')]",
+        "hidden-sentinelContentType": "Parser"
+      },
+      "properties": {
+        "description": "ASimDnsMicrosoftNXLog Data Parser with template",
+        "displayName": "ASimDnsMicrosoftNXLog Data Parser template"
+      }
+    },
+    {
+      "type": "Microsoft.Resources/templateSpecs/versions",
+      "apiVersion": "2022-02-01",
+      "name": "[concat(variables('parserTemplateSpecName1'),'/',variables('parserVersion1'))]",
+      "location": "[parameters('workspace-location')]",
+      "tags": {
+        "hidden-sentinelWorkspaceId": "[variables('workspaceResourceId')]",
+        "hidden-sentinelContentType": "Parser"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/templateSpecs', variables('parserTemplateSpecName1'))]"
+      ],
+      "properties": {
+        "description": "ASimDnsMicrosoftNXLog Data Parser with template version 2.0.2",
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "[variables('parserVersion1')]",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "name": "[variables('_parserName1')]",
+              "apiVersion": "2022-10-01",
+              "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+              "location": "[parameters('workspace-location')]",
+              "properties": {
+                "eTag": "*",
+                "displayName": "ASimDnsMicrosoftNXLog",
+                "category": "Samples",
+                "functionAlias": "ASimDnsMicrosoftNXLog",
+                "query": "\n  let ASimDnsMicrosoftNXLog = (\n    starttime:datetime=datetime(null), endtime:datetime=datetime(null)\n    , srcipaddr:string='*'\n    , domain_has_any:dynamic=dynamic([])\n    , responsecodename:string='*', response_has_ipv4:string='*'\n    , response_has_any_prefix:dynamic=dynamic([]) , eventtype:string='Query'\n    , disabled:bool=false\n    ){\n  let EventTypeTable=datatable(EventOriginalType:real,EventType:string)[\n      256, 'Query'\n    , 257, 'Query'\n    , 258, 'Query'\n    , 259, 'Query'\n    , 260, 'Query'\n    , 261, 'Query'\n    , 262, 'Query'\n    , 263, 'Dynamic update'\n    , 264, 'Dynamic update'\n    , 265, 'Zone XFR'\n    , 266, 'Zone XFR'\n    , 267, 'Zone XFR'\n    , 268, 'Zone XFR'\n    , 269, 'Zone XFR'\n    , 270, 'Zone XFR'\n    , 271, 'Zone XFR'\n    , 272, 'Zone XFR'\n    , 273, 'Zone XFR'\n    , 274, 'Zone XFR'\n    , 275, 'Zone XFR'\n    , 276, 'Zone XFR'\n    , 277, 'Dynamic update'\n    , 278, 'Dynamic update'\n    , 279, 'Query'\n    , 280, 'Query'\n  ];\n  let EventSubTypeTable=datatable(EventOriginalType:real,EventSubType:string)[\n    256, 'request'\n  , 257, 'response'\n  , 258, 'response'\n  , 259, 'response'\n  , 260, 'request'\n  , 261, 'response'\n  , 262, 'response'\n  , 263, 'request'\n  , 264, 'response'\n  , 265, 'request'\n  , 266, 'request'\n  , 267, 'response'\n  , 268, 'response'\n  , 269, 'request'\n  , 270, 'request'\n  , 271, 'response'\n  , 272, 'response'\n  , 273, 'request'\n  , 274, 'request'\n  , 275, 'response'\n  , 276, 'response'\n  , 277, 'request'\n  , 278, 'response'\n  , 279, 'response'\n  , 280, 'response'\n  ];\n  let EventResultTable=datatable(EventOriginalType:real,EventResult:string)[\n      256, 'NA'\n    , 257, 'Success'\n    , 258, 'Failure'\n    , 259, 'Failure'\n    , 260, 'NA'\n    , 261, 'NA'\n    , 262, 'Failure'\n    , 263, 'NA'\n    , 264, 'Based on RCODE'\n    , 265, 'NA'\n    , 266, 'NA'\n    , 267, 'Based on RCODE'\n    , 268, 'Based on RCODE'\n    , 269, 'NA'\n    , 270, 'NA'\n    , 271, 'Based on RCODE'\n    , 272, 'Based on RCODE'\n    , 273, 'NA'\n    , 274, 'NA'\n    , 275, 'Success'\n    , 276, 'Success'\n    , 277, 'NA'\n    , 278, 'Based on RCODE'\n    , 279, 'NA'\n    , 280, 'NA'\n  ];\n  let RCodeTable=datatable(DnsResponseCode:int,ResponseCodeName:string)[\n      0,'NOERROR'\n    , 1,'FORMERR'\n    , 2,'SERVFAIL'\n    , 3,'NXDOMAIN'\n    , 4,'NOTIMP'\n    , 5,'REFUSED'\n    , 6,'YXDOMAIN'\n    , 7,'YXRRSET'\n    , 8,'NXRRSET'\n    , 9,'NOTAUTH'\n    , 10,'NOTZONE'\n    , 11,'DSOTYPENI'\n    , 16,'BADVERS'\n    , 16,'BADSIG'\n    , 17,'BADKEY'\n    , 18,'BADTIME'\n    , 19,'BADMODE'\n    , 20,'BADNAME'\n    , 21,'BADALG'\n    , 22,'BADTRUNC'\n    , 23,'BADCOOKIE'\n  ];\n  let QTypeTable=datatable(DnsQueryType:int,QTypeName:string)[\n      0, 'Reserved'\n    , 1, 'A'\n    , 2, 'NS'\n    , 3, 'MD'\n    , 4, 'MF'\n    , 5, 'CNAME'\n    , 6, 'SOA'\n    , 7, 'MB'\n    , 8 ,'MG'\n    , 9 ,'MR'\n    , 10,'NULL'\n    , 11,'WKS'\n    , 12,'PTR'\n    , 13,'HINFO'\n    , 14,'MINFO'\n    , 15,'MX'\n    , 16,'TXT'\n    , 17,'RP'\n    , 18,'AFSDB'\n    , 19,'X25'\n    , 20,'ISDN'\n    , 21,'RT'\n    , 22,'NSAP'\n    , 23,'NSAP-PTR'\n    , 24,'SIG'\n    , 25,'KEY'\n    , 26,'PX'\n    , 27,'GPOS'\n    , 28,'AAAA'\n    , 29,'LOC'\n    , 30,'NXT'\n    , 31,'EID'\n    , 32,'NB'\n    , 33,'SRV'\n    , 34,'ATMA'\n    , 35,'NAPTR'\n    , 36,'KX'\n    , 37,'CERT'\n    , 38,'A6'\n    , 39,'DNAME'\n    , 40,'SINK'\n    , 41,'OP'\n    , 42,'APL'\n    , 43,'DS'\n    , 44,'SSHFP'\n    , 45,'IPSECKEY'\n    , 46,'RRSIG'\n    , 47,'NSEC'\n    , 48,'DNSKEY'\n    , 49,'DHCID'\n    , 50,'NSEC3'\n    , 51,'NSEC3PARAM'\n    , 52,'TLSA'\n    , 53,'SMIMEA'\n    , 55,'HIP'\n    , 56,'NINFO'\n    , 57,'RKEY'\n    , 58,'TALINK'\n    , 59,'CDS'\n    , 60,'CDNSKEY'\n    , 61,'OPENPGPKEY'\n    , 62,'CSYNC'\n    , 63,'ZONEMD'\n    , 64,'SVCB'\n    , 65,'HTTPS'\n    , 99,'SPF'\n    , 100,'UINFO'\n    , 101,'UID'\n    , 102,'GID'\n    , 103,'UNSPEC'\n    , 104,'NID'\n    , 105,'L32'\n    , 106,'L64'\n    , 107,'LP'\n    , 108,'EUI48'\n    , 109,'EUI64'\n    , 249,'TKEY'\n    , 250,'TSIG'\n    , 251,'IXFR'\n    , 252,'AXFR'\n    , 253,'MAILB'\n    , 254,'MAILA'\n    , 255,'*'\n    , 256,'URI'\n    , 257,'CAA'\n    , 259,'DOA'\n    , 32768,'TA'\n    , 32769,'DLV'\n  ];\n  NXLog_DNS_Server_CL | where not(disabled)\n  | where EventID_d < 281\n  | project-rename\n     EventOriginalType=EventID_d\n  | lookup EventTypeTable on EventOriginalType\n  | extend\n    eventtype = iff (eventtype == \"lookup\", \"Query\", eventtype)\n  //  Pre-parsing filtering:\n    | where\n      // Return empty list if response IPs are passed\n      (response_has_ipv4=='*')\n      and (array_length(response_has_any_prefix) ==0)\n      and (eventtype=='*' or EventType == eventtype)\n      and (isnull(starttime) or TimeGenerated >= starttime)\n      and (isnull(endtime) or TimeGenerated <= endtime)\n      and (srcipaddr=='*' or Source_s==srcipaddr)\n      and (array_length(domain_has_any) ==0 or QNAME_s has_any (domain_has_any))\n      and (responsecodename=='*' or RCODE_s=~responsecodename)\n  // --\n  | project-rename\n      DnsFlags=Flags_s,\n      DnsQuery=QNAME_s,\n      DnsQueryType=QTYPE_s,\n      DnsResponseCode=RCODE_s,\n      DnsResponseName=PacketData_s,\n      Dvc=Hostname_s,\n      EventOriginalUid=GUID_g,\n      EventStartTime=EventTime_t,\n      SrcIpAddr=Source_s\n  | extend\n      DnsQuery=trim_end(\".\",DnsQuery),\n      DnsQueryType=toint(DnsQueryType),\n      DnsResponseCode=toint(DnsResponseCode),\n      SrcPortNumber=toint(Port_s),\n      DvcHostname=Dvc,\n      EventEndTime=EventStartTime,\n      EventProduct = \"DNS Server\",\n      EventSchemaVersion = \"0.1.3\",\n      EventVendor = \"Microsoft\",\n      EventSchema = \"Dns\",\n      EventCount = int(1),\n      NetworkProtocol=iff(TCP_s == \"0\",\"UDP\",\"TCP\"),\n      TransactionIdHex=tohex(toint(XID_s)),\n      DnsFlagsAuthenticated = tobool(AD_s),\n      DnsFlagsAuthoritative = tobool(AA_s),\n      DnsFlagsRecursionDesired = tobool(RD_s)\n  | lookup EventSubTypeTable on EventOriginalType\n  | lookup EventResultTable on EventOriginalType\n  | lookup RCodeTable on DnsResponseCode\n  | lookup QTypeTable on DnsQueryType\n  | extend\n      EventResultDetails = case (isnotempty(ResponseCodeName), ResponseCodeName\n        , DnsResponseCode between (3841 .. 4095), 'Reserved for Private Use'\n        , 'Unassigned'),\n      EventOriginalType = tostring(EventOriginalType)\n  | extend\n      Domain=DnsQuery,\n      DnsResponseCodeName=EventResultDetails,\n      DnsQueryTypeName = case (isnotempty(QTypeName), QTypeName\n        , DnsQueryType between (66 .. 98), 'Unassigned'\n        , DnsQueryType between (110 .. 248), 'Unassigned'\n        , DnsQueryType between (261 .. 32767), 'Unassigned'\n        , 'Unassigned'),\n       EventResult=iff (EventResult == \"Based on RCODE\", iff(DnsResponseCode == 0, \"Success\", \"Failure\"),EventResult)\n  | extend\n    // Aliases\n      IpAddr = SrcIpAddr,\n      Src = SrcIpAddr,\n    // Backward compatibility\n      Query = DnsQuery,\n      QueryType = DnsQueryType,\n      QueryTypeName = DnsQueryTypeName,\n      ResponseCode = DnsResponseCode,\n      ResponseCodeName = DnsResponseCodeName\n  | project-away\n      *_s, *_d, QTypeName, TenantId, SourceSystem, MG, ManagementGroupName, Computer, RawData\n  };\n  ASimDnsMicrosoftNXLog (starttime, endtime, srcipaddr, domain_has_any, responsecodename, response_has_ipv4, response_has_any_prefix, eventtype, disabled)\n",
+                "version": 1,
+                "tags": [
+                  {
+                    "name": "description",
+                    "value": "ASimDnsMicrosoftNXLog"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+              "apiVersion": "2022-01-01-preview",
+              "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',concat('Parser-', last(split(variables('_parserId1'),'/'))))]",
+              "dependsOn": [
+                "[variables('_parserName1')]"
+              ],
+              "properties": {
+                "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspace'), variables('parserName1'))]",
+                "contentId": "[variables('_parserContentId1')]",
+                "kind": "Parser",
+                "version": "[variables('parserVersion1')]",
+                "source": {
+                  "name": "NXLogDNSLogs",
+                  "kind": "Solution",
+                  "sourceId": "[variables('_solutionId')]"
+                },
+                "author": {
+                  "name": "NXLog"
+                },
+                "support": {
+                  "name": "NXLog",
+                  "tier": "Partner",
+                  "link": "https://nxlog.co/support-tickets/add/support-ticket"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2022-10-01",
+      "name": "[variables('_parserName1')]",
+      "location": "[parameters('workspace-location')]",
+      "properties": {
+        "eTag": "*",
+        "displayName": "ASimDnsMicrosoftNXLog",
+        "category": "Samples",
+        "functionAlias": "ASimDnsMicrosoftNXLog",
+        "query": "\n  let ASimDnsMicrosoftNXLog = (\n    starttime:datetime=datetime(null), endtime:datetime=datetime(null)\n    , srcipaddr:string='*'\n    , domain_has_any:dynamic=dynamic([])\n    , responsecodename:string='*', response_has_ipv4:string='*'\n    , response_has_any_prefix:dynamic=dynamic([]) , eventtype:string='Query'\n    , disabled:bool=false\n    ){\n  let EventTypeTable=datatable(EventOriginalType:real,EventType:string)[\n      256, 'Query'\n    , 257, 'Query'\n    , 258, 'Query'\n    , 259, 'Query'\n    , 260, 'Query'\n    , 261, 'Query'\n    , 262, 'Query'\n    , 263, 'Dynamic update'\n    , 264, 'Dynamic update'\n    , 265, 'Zone XFR'\n    , 266, 'Zone XFR'\n    , 267, 'Zone XFR'\n    , 268, 'Zone XFR'\n    , 269, 'Zone XFR'\n    , 270, 'Zone XFR'\n    , 271, 'Zone XFR'\n    , 272, 'Zone XFR'\n    , 273, 'Zone XFR'\n    , 274, 'Zone XFR'\n    , 275, 'Zone XFR'\n    , 276, 'Zone XFR'\n    , 277, 'Dynamic update'\n    , 278, 'Dynamic update'\n    , 279, 'Query'\n    , 280, 'Query'\n  ];\n  let EventSubTypeTable=datatable(EventOriginalType:real,EventSubType:string)[\n    256, 'request'\n  , 257, 'response'\n  , 258, 'response'\n  , 259, 'response'\n  , 260, 'request'\n  , 261, 'response'\n  , 262, 'response'\n  , 263, 'request'\n  , 264, 'response'\n  , 265, 'request'\n  , 266, 'request'\n  , 267, 'response'\n  , 268, 'response'\n  , 269, 'request'\n  , 270, 'request'\n  , 271, 'response'\n  , 272, 'response'\n  , 273, 'request'\n  , 274, 'request'\n  , 275, 'response'\n  , 276, 'response'\n  , 277, 'request'\n  , 278, 'response'\n  , 279, 'response'\n  , 280, 'response'\n  ];\n  let EventResultTable=datatable(EventOriginalType:real,EventResult:string)[\n      256, 'NA'\n    , 257, 'Success'\n    , 258, 'Failure'\n    , 259, 'Failure'\n    , 260, 'NA'\n    , 261, 'NA'\n    , 262, 'Failure'\n    , 263, 'NA'\n    , 264, 'Based on RCODE'\n    , 265, 'NA'\n    , 266, 'NA'\n    , 267, 'Based on RCODE'\n    , 268, 'Based on RCODE'\n    , 269, 'NA'\n    , 270, 'NA'\n    , 271, 'Based on RCODE'\n    , 272, 'Based on RCODE'\n    , 273, 'NA'\n    , 274, 'NA'\n    , 275, 'Success'\n    , 276, 'Success'\n    , 277, 'NA'\n    , 278, 'Based on RCODE'\n    , 279, 'NA'\n    , 280, 'NA'\n  ];\n  let RCodeTable=datatable(DnsResponseCode:int,ResponseCodeName:string)[\n      0,'NOERROR'\n    , 1,'FORMERR'\n    , 2,'SERVFAIL'\n    , 3,'NXDOMAIN'\n    , 4,'NOTIMP'\n    , 5,'REFUSED'\n    , 6,'YXDOMAIN'\n    , 7,'YXRRSET'\n    , 8,'NXRRSET'\n    , 9,'NOTAUTH'\n    , 10,'NOTZONE'\n    , 11,'DSOTYPENI'\n    , 16,'BADVERS'\n    , 16,'BADSIG'\n    , 17,'BADKEY'\n    , 18,'BADTIME'\n    , 19,'BADMODE'\n    , 20,'BADNAME'\n    , 21,'BADALG'\n    , 22,'BADTRUNC'\n    , 23,'BADCOOKIE'\n  ];\n  let QTypeTable=datatable(DnsQueryType:int,QTypeName:string)[\n      0, 'Reserved'\n    , 1, 'A'\n    , 2, 'NS'\n    , 3, 'MD'\n    , 4, 'MF'\n    , 5, 'CNAME'\n    , 6, 'SOA'\n    , 7, 'MB'\n    , 8 ,'MG'\n    , 9 ,'MR'\n    , 10,'NULL'\n    , 11,'WKS'\n    , 12,'PTR'\n    , 13,'HINFO'\n    , 14,'MINFO'\n    , 15,'MX'\n    , 16,'TXT'\n    , 17,'RP'\n    , 18,'AFSDB'\n    , 19,'X25'\n    , 20,'ISDN'\n    , 21,'RT'\n    , 22,'NSAP'\n    , 23,'NSAP-PTR'\n    , 24,'SIG'\n    , 25,'KEY'\n    , 26,'PX'\n    , 27,'GPOS'\n    , 28,'AAAA'\n    , 29,'LOC'\n    , 30,'NXT'\n    , 31,'EID'\n    , 32,'NB'\n    , 33,'SRV'\n    , 34,'ATMA'\n    , 35,'NAPTR'\n    , 36,'KX'\n    , 37,'CERT'\n    , 38,'A6'\n    , 39,'DNAME'\n    , 40,'SINK'\n    , 41,'OP'\n    , 42,'APL'\n    , 43,'DS'\n    , 44,'SSHFP'\n    , 45,'IPSECKEY'\n    , 46,'RRSIG'\n    , 47,'NSEC'\n    , 48,'DNSKEY'\n    , 49,'DHCID'\n    , 50,'NSEC3'\n    , 51,'NSEC3PARAM'\n    , 52,'TLSA'\n    , 53,'SMIMEA'\n    , 55,'HIP'\n    , 56,'NINFO'\n    , 57,'RKEY'\n    , 58,'TALINK'\n    , 59,'CDS'\n    , 60,'CDNSKEY'\n    , 61,'OPENPGPKEY'\n    , 62,'CSYNC'\n    , 63,'ZONEMD'\n    , 64,'SVCB'\n    , 65,'HTTPS'\n    , 99,'SPF'\n    , 100,'UINFO'\n    , 101,'UID'\n    , 102,'GID'\n    , 103,'UNSPEC'\n    , 104,'NID'\n    , 105,'L32'\n    , 106,'L64'\n    , 107,'LP'\n    , 108,'EUI48'\n    , 109,'EUI64'\n    , 249,'TKEY'\n    , 250,'TSIG'\n    , 251,'IXFR'\n    , 252,'AXFR'\n    , 253,'MAILB'\n    , 254,'MAILA'\n    , 255,'*'\n    , 256,'URI'\n    , 257,'CAA'\n    , 259,'DOA'\n    , 32768,'TA'\n    , 32769,'DLV'\n  ];\n  NXLog_DNS_Server_CL | where not(disabled)\n  | where EventID_d < 281\n  | project-rename\n     EventOriginalType=EventID_d\n  | lookup EventTypeTable on EventOriginalType\n  | extend\n    eventtype = iff (eventtype == \"lookup\", \"Query\", eventtype)\n  //  Pre-parsing filtering:\n    | where\n      // Return empty list if response IPs are passed\n      (response_has_ipv4=='*')\n      and (array_length(response_has_any_prefix) ==0)\n      and (eventtype=='*' or EventType == eventtype)\n      and (isnull(starttime) or TimeGenerated >= starttime)\n      and (isnull(endtime) or TimeGenerated <= endtime)\n      and (srcipaddr=='*' or Source_s==srcipaddr)\n      and (array_length(domain_has_any) ==0 or QNAME_s has_any (domain_has_any))\n      and (responsecodename=='*' or RCODE_s=~responsecodename)\n  // --\n  | project-rename\n      DnsFlags=Flags_s,\n      DnsQuery=QNAME_s,\n      DnsQueryType=QTYPE_s,\n      DnsResponseCode=RCODE_s,\n      DnsResponseName=PacketData_s,\n      Dvc=Hostname_s,\n      EventOriginalUid=GUID_g,\n      EventStartTime=EventTime_t,\n      SrcIpAddr=Source_s\n  | extend\n      DnsQuery=trim_end(\".\",DnsQuery),\n      DnsQueryType=toint(DnsQueryType),\n      DnsResponseCode=toint(DnsResponseCode),\n      SrcPortNumber=toint(Port_s),\n      DvcHostname=Dvc,\n      EventEndTime=EventStartTime,\n      EventProduct = \"DNS Server\",\n      EventSchemaVersion = \"0.1.3\",\n      EventVendor = \"Microsoft\",\n      EventSchema = \"Dns\",\n      EventCount = int(1),\n      NetworkProtocol=iff(TCP_s == \"0\",\"UDP\",\"TCP\"),\n      TransactionIdHex=tohex(toint(XID_s)),\n      DnsFlagsAuthenticated = tobool(AD_s),\n      DnsFlagsAuthoritative = tobool(AA_s),\n      DnsFlagsRecursionDesired = tobool(RD_s)\n  | lookup EventSubTypeTable on EventOriginalType\n  | lookup EventResultTable on EventOriginalType\n  | lookup RCodeTable on DnsResponseCode\n  | lookup QTypeTable on DnsQueryType\n  | extend\n      EventResultDetails = case (isnotempty(ResponseCodeName), ResponseCodeName\n        , DnsResponseCode between (3841 .. 4095), 'Reserved for Private Use'\n        , 'Unassigned'),\n      EventOriginalType = tostring(EventOriginalType)\n  | extend\n      Domain=DnsQuery,\n      DnsResponseCodeName=EventResultDetails,\n      DnsQueryTypeName = case (isnotempty(QTypeName), QTypeName\n        , DnsQueryType between (66 .. 98), 'Unassigned'\n        , DnsQueryType between (110 .. 248), 'Unassigned'\n        , DnsQueryType between (261 .. 32767), 'Unassigned'\n        , 'Unassigned'),\n       EventResult=iff (EventResult == \"Based on RCODE\", iff(DnsResponseCode == 0, \"Success\", \"Failure\"),EventResult)\n  | extend\n    // Aliases\n      IpAddr = SrcIpAddr,\n      Src = SrcIpAddr,\n    // Backward compatibility\n      Query = DnsQuery,\n      QueryType = DnsQueryType,\n      QueryTypeName = DnsQueryTypeName,\n      ResponseCode = DnsResponseCode,\n      ResponseCodeName = DnsResponseCodeName\n  | project-away\n      *_s, *_d, QTypeName, TenantId, SourceSystem, MG, ManagementGroupName, Computer, RawData\n  };\n  ASimDnsMicrosoftNXLog (starttime, endtime, srcipaddr, domain_has_any, responsecodename, response_has_ipv4, response_has_any_prefix, eventtype, disabled)\n",
+        "version": 1
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2022-01-01-preview",
+      "location": "[parameters('workspace-location')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',concat('Parser-', last(split(variables('_parserId1'),'/'))))]",
+      "dependsOn": [
+        "[variables('_parserId1')]"
+      ],
+      "properties": {
+        "parentId": "[resourceId('Microsoft.OperationalInsights/workspaces/savedSearches', parameters('workspace'), variables('parserName1'))]",
+        "contentId": "[variables('_parserContentId1')]",
+        "kind": "Parser",
+        "version": "[variables('parserVersion1')]",
+        "source": {
+          "kind": "Solution",
+          "name": "NXLogDNSLogs",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "NXLog"
+        },
+        "support": {
+          "name": "NXLog",
+          "tier": "Partner",
+          "link": "https://nxlog.co/support-tickets/add/support-ticket"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/metadata",
+      "apiVersion": "2022-01-01-preview",
+      "location": "[parameters('workspace-location')]",
+      "properties": {
+        "version": "2.0.2",
+        "kind": "Solution",
+        "contentSchemaVersion": "2.0.0",
+        "contentId": "[variables('_solutionId')]",
+        "parentId": "[variables('_solutionId')]",
+        "source": {
+          "kind": "Solution",
+          "name": "NXLogDNSLogs",
+          "sourceId": "[variables('_solutionId')]"
+        },
+        "author": {
+          "name": "NXLog"
+        },
+        "support": {
+          "name": "NXLog",
+          "tier": "Partner",
+          "link": "https://nxlog.co/support-tickets/add/support-ticket"
+        },
+        "dependencies": {
+          "operator": "AND",
+          "criteria": [
+            {
+              "kind": "DataConnector",
+              "contentId": "[variables('_dataConnectorContentId1')]",
+              "version": "[variables('dataConnectorVersion1')]"
+            },
+            {
+              "kind": "Parser",
+              "contentId": "[variables('_parserContentId1')]",
+              "version": "[variables('parserVersion1')]"
+            }
+          ]
+        },
+        "firstPublishDate": "2022-05-24",
+        "providers": [
+          "NXLog"
+        ],
+        "categories": {
+          "domains": [
+            "Security - Others",
+            "IT Operations"
+          ]
+        }
+      },
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('_solutionId'))]"
+    }
+  ],
+  "outputs": {}
+}

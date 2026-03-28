@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/04528635-a5f1-438b-ab74-21ca7bc3aa32')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/04528635-a5f1-438b-ab74-21ca7bc3aa32')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Low",
+        "name": "SlackAudit - Empty User Agent",
+        "description": "'This query shows connections to the Slack Workspace with empty User Agent.'\n",
+        "query": "SlackAudit\n| where isempty(UserAgentOriginal)\n| extend AccountCustomEntity = SrcUserName\n",
+        "status": "Available",
+        "queryFrequency": "1d",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "AccountCustomEntity",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "InitialAccess"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1d"
+      }
+    }
+  ]
+}

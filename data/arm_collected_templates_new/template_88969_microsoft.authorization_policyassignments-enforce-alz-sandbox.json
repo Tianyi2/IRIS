@@ -1,0 +1,41 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Enforce-ALZ-Sandbox",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "westeurope",
+      "properties": {
+        "description": "This initiative will help enforce and govern subscriptions that are placed within the Sandobx Management Group. See https://aka.ms/alz/policies for more information.",
+        "displayName": "Enforce ALZ Sandbox Guardrails",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "parameters": {
+          "listOfResourceTypesNotAllowed": {
+            "value": [
+              "microsoft.network/expressroutecircuits",
+              "microsoft.network/expressroutegateways",
+              "microsoft.network/virtualwans",
+              "microsoft.network/virtualhubs",
+              "microsoft.network/vpngateways",
+              "microsoft.network/vpnsites"
+            ]
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Management/managementGroups/contoso/providers/Microsoft.Authorization/policySetDefinitions/Enforce-ALZ-Sandbox",
+        "scope": "/providers/Microsoft.Management/managementGroups/contoso-sandboxes"
+      }
+    }
+  ],
+  "outputs": {}
+}

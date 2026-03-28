@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "17188670362787275570"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DataLakeStore/accounts",
+      "apiVersion": "2016-11-01",
+      "name": "name",
+      "location": "location",
+      "properties": {
+        "newTier": "Consumption",
+        "encryptionState": "Enabled"
+      }
+    }
+  ]
+}

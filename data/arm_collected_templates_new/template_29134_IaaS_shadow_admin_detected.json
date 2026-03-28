@@ -1,0 +1,79 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/31f43e9d-1839-4baf-a668-54c28b98af3e')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/31f43e9d-1839-4baf-a668-54c28b98af3e')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "lookbackDuration": "5h",
+            "groupByCustomDetails": [],
+            "matchingMethod": "AnyAlert",
+            "enabled": true,
+            "reopenClosedIncident": false,
+            "groupByEntities": [],
+            "groupByAlertDetails": []
+          },
+          "createIncident": true
+        },
+        "severity": "High",
+        "alertDetailsOverride": {
+          "alertTactics": "Tactics",
+          "alertDynamicProperties": [
+            {
+              "alertProperty": "AlertLink",
+              "value": "URL"
+            }
+          ],
+          "alertDescriptionFormat": "IaaS shadow admin detected. The policy detects shadow admin users in AWS or Azure.\n",
+          "alertnameFormat": "Alert from Authomize - IaaS shadow admin detected",
+          "alertSeverity": "Severity"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "name": "IaaS shadow admin detected",
+        "description": "The policy detects shadow admin users in AWS or Azure.",
+        "suppressionDuration": "5h",
+        "query": "Authomize_v2_CL\n| where ingestion_time() >= ago(30m)\n| extend EventID = id_s, Policy = policy_name_s, Severity = severity_s,Description = description_s,Recommendation = recommendation_s,URL = url_s,Tactics = tactics_s\n| where Policy has \"IaaS shadow admin detected\"\n| project  EventID, Policy, Severity, Description, Recommendation, URL, Category, Tactics",
+        "status": "Available",
+        "queryFrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "URL",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          }
+        ],
+        "suppressionEnabled": false,
+        "queryPeriod": "30m",
+        "triggerOperator": "gt",
+        "tactics": [
+          "InitialAccess"
+        ],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "AuthomizeEventID": "EventID",
+          "EventDescription": "Description",
+          "EventRecommendation": "Recommendation",
+          "EventName": "Policy",
+          "ReferencedURL": "URL"
+        }
+      }
+    }
+  ]
+}

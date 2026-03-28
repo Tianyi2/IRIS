@@ -1,0 +1,289 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.DocumentDB/DatabaseAccounts to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.DocumentDB/DatabaseAccounts to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "cassandrarequestsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CassandraRequests",
+        "description": "Enable or disable log category CassandraRequests"
+      },
+      "defaultValue": true
+    },
+    "controlplanerequestsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "ControlPlaneRequests",
+        "description": "Enable or disable log category ControlPlaneRequests"
+      },
+      "defaultValue": true
+    },
+    "dataplanerequestsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DataPlaneRequests",
+        "description": "Enable or disable log category DataPlaneRequests"
+      },
+      "defaultValue": true
+    },
+    "dataplanerequests15mEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DataPlaneRequests15M",
+        "description": "Enable or disable log category DataPlaneRequests15M"
+      },
+      "defaultValue": true
+    },
+    "dataplanerequests5mEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DataPlaneRequests5M",
+        "description": "Enable or disable log category DataPlaneRequests5M"
+      },
+      "defaultValue": true
+    },
+    "gremlinrequestsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "GremlinRequests",
+        "description": "Enable or disable log category GremlinRequests"
+      },
+      "defaultValue": true
+    },
+    "mongorequestsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "MongoRequests",
+        "description": "Enable or disable log category MongoRequests"
+      },
+      "defaultValue": true
+    },
+    "partitionkeyruconsumptionEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "PartitionKeyRUConsumption",
+        "description": "Enable or disable log category PartitionKeyRUConsumption"
+      },
+      "defaultValue": true
+    },
+    "partitionkeystatisticsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "PartitionKeyStatistics",
+        "description": "Enable or disable log category PartitionKeyStatistics"
+      },
+      "defaultValue": true
+    },
+    "queryruntimestatisticsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "QueryRuntimeStatistics",
+        "description": "Enable or disable log category QueryRuntimeStatistics"
+      },
+      "defaultValue": true
+    },
+    "tableapirequestsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "TableApiRequests",
+        "description": "Enable or disable log category TableApiRequests"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.DocumentDB/DatabaseAccounts"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.DocumentDB/DatabaseAccounts/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.DocumentDB/DatabaseAccounts, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "CassandraRequests",
+                    "enabled": "[parameters('cassandrarequestsEnabled')]"
+                  },
+                  {
+                    "category": "ControlPlaneRequests",
+                    "enabled": "[parameters('controlplanerequestsEnabled')]"
+                  },
+                  {
+                    "category": "DataPlaneRequests",
+                    "enabled": "[parameters('dataplanerequestsEnabled')]"
+                  },
+                  {
+                    "category": "DataPlaneRequests15M",
+                    "enabled": "[parameters('dataplanerequests15mEnabled')]"
+                  },
+                  {
+                    "category": "DataPlaneRequests5M",
+                    "enabled": "[parameters('dataplanerequests5mEnabled')]"
+                  },
+                  {
+                    "category": "GremlinRequests",
+                    "enabled": "[parameters('gremlinrequestsEnabled')]"
+                  },
+                  {
+                    "category": "MongoRequests",
+                    "enabled": "[parameters('mongorequestsEnabled')]"
+                  },
+                  {
+                    "category": "PartitionKeyRUConsumption",
+                    "enabled": "[parameters('partitionkeyruconsumptionEnabled')]"
+                  },
+                  {
+                    "category": "PartitionKeyStatistics",
+                    "enabled": "[parameters('partitionkeystatisticsEnabled')]"
+                  },
+                  {
+                    "category": "QueryRuntimeStatistics",
+                    "enabled": "[parameters('queryruntimestatisticsEnabled')]"
+                  },
+                  {
+                    "category": "TableApiRequests",
+                    "enabled": "[parameters('tableapirequestsEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

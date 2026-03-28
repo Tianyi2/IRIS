@@ -1,0 +1,865 @@
+{
+  "description": "The **AWSSupport-RestoreEC2InstanceFromSnapshot** runbook assists you in restoring an Amazon Elastic Compute Cloud (Amazon EC2) instance from a functional Amazon Elastic Block Store (Amazon EBS) snapshot.\n\nThis runbook allows you to specify an Amazon EBS snapshot for restoration or identify a working snapshot of the target instance's root volume. By default, the runbook will create a new Amazon EC2 instance with the restored root volume. However, you have the option to perform an in-place restore of the original instance by setting the `InplaceSwap` parameter to `true`.\n\n### Important Considerations\n- The runbook will incur costs for creating new Amazon EBS volumes and snapshots within your AWS account. Refer to the [Amazon EBS pricing](https://aws.amazon.com/ebs/pricing/) for associated costs. Unused volumes and snapshots will be removed at the end of automation execution.\n- The automation will temporarily tag the target instance with `SSMExecutionStatusOn` during execution, and this tag will be removed upon successful completion.\n- During automation execution, a new Amazon EC2 instance will be created in your account. If you opt for in-place restore, this instance will be terminated at the end of successful automation execution.\n- If you do not opt for an in-place restore, the resulting Amazon EC2 instance will have IMDSv2 enforced. Consult the [EC2 documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-IMDS-existing-instances.html#modify-restore-IMDSv1) if you need to restore the use of IMDSv1. \n- If you choose in-place restore, the automation will create a root volume replacement task to replace the volume. You must specify the snapshot that belong to the same lineage as the current root volume or let the automation to identify the snapshot. Consult [EC2 documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/replace-root.html) for more details.\n\n### Unsupported Scenarios\nIn-place restore operation is not supported for Amazon EC2 instances managed by AWS Auto Scaling.",
+  "schemaVersion": "0.3",
+  "assumeRole": "{{ AutomationAssumeRole }}",
+  "outputs": [
+    "LaunchCloneInstance.InstanceId",
+    "GenerateRecoveryStatus.Message",
+    "CleanupResources.Message"
+  ],
+  "parameters": {
+    "InstanceId": {
+      "type": "AWS::EC2::Instance::Id",
+      "description": "(Required) The instance ID of the Amazon EC2 instance you need to restore from snapshot.",
+      "allowedPattern": "^i-[a-z0-9]{8,17}$"
+    },
+    "SnapshotId": {
+      "type": "String",
+      "description": "(Optional) The ID of the Amazon EBS snapshot you want to restore the EC2 instance from.",
+      "default": "",
+      "allowedPattern": "^$|^snap-[a-z0-9]{8,17}$"
+    },
+    "InplaceSwap": {
+      "type": "Boolean",
+      "description": "(Optional) If set to true, automation will replace the existing root volume of your EC2 instance with a new EBS volume created from the snapshot.",
+      "allowedValues": [
+        true,
+        false
+      ],
+      "default": false
+    },
+    "StartDate": {
+      "type": "String",
+      "description": "(Optional) The earliest date in YYYY-MM-DD format from which the automation should consider snapshots, with the default value being 7 days prior to the current date.",
+      "default": "",
+      "allowedPattern": "^$|^(19|20)\\d\\d-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+    },
+    "EndDate": {
+      "type": "String",
+      "description": "(Optional) The latest date in YYYY-MM-DD format up to which the automation should consider snapshots, with the default value being the current date. This date must be later than the specified 'StartDate'.",
+      "default": "",
+      "allowedPattern": "^$|^(19|20)\\d\\d-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+    },
+    "LookForInstanceStatusCheck": {
+      "description": "(Optional) If the value for this parameter is set to true, the automation checks first for the instance status check failures within the given time range and adjusts the end time to a time before the failure, in order to filter out Amazon EBS snapshots more efficiently.",
+      "type": "Boolean",
+      "allowedValues": [
+        true,
+        false
+      ],
+      "default": true
+    },
+    "TotalSnapshotsToLook": {
+      "type": "String",
+      "description": "(Optional) Specify the number of snapshots, up to a maximum of five, that the automation will attempt to restore from.",
+      "default": "",
+      "allowedPattern": "^$|^[1-5]$"
+    },
+    "SkipSnapshotsBy": {
+      "type": "String",
+      "description": "(Optional) The interval at which snapshots are skipped when searching for snapshots to restore your instance. For example, if there are 100 snapshots available, and you specify a value of 2 for this parameter, then every third snapshot is considered for recovery.",
+      "default": "0",
+      "allowedPattern": "^$|^[0-4]$"
+    },
+    "AutomationAssumeRole": {
+      "type": "AWS::IAM::Role::Arn",
+      "description": "(Optional) The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that allows Systems Manager Automation to perform the actions on your behalf. If no role is specified, Systems Manager Automation uses the permissions of the user that starts this runbook.",
+      "default": ""
+    }
+  },
+  "variables": {
+    "WorkingSnapshot": {
+      "type": "String",
+      "description": "The ID of the snapshot to be used for EC2 instance recovery."
+    },
+    "FailureHandling": {
+      "type": "Boolean",
+      "default": false,
+      "description": "Indicates any failures in the automation."
+    }
+  },
+  "mainSteps": [
+    {
+      "description": "Verifies that another automation isn't already running that targets this instance.",
+      "name": "CheckForConcurrentExecution",
+      "action": "aws:assertAwsResourceProperty",
+      "maxAttempts": 2,
+      "timeoutSeconds": 120,
+      "nextStep": "ValidateTargetInstance",
+      "isCritical": true,
+      "onCancel": "Abort",
+      "onFailure": "Abort",
+      "inputs": {
+        "Service": "ec2",
+        "Api": "DescribeTags",
+        "PropertySelector": "$.Tags",
+        "DesiredValues": [
+          "[]"
+        ],
+        "Filters": [
+          {
+            "Name": "resource-id",
+            "Values": [
+              "{{ InstanceId }}"
+            ]
+          },
+          {
+            "Name": "key",
+            "Values": [
+              "SSMExecutionStatusOn"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "description": "Verifies the target Amazon EC2 instance and collects relevant information about it.",
+      "name": "ValidateTargetInstance",
+      "action": "aws:executeScript",
+      "maxAttempts": 2,
+      "nextStep": "DescribeRootVolume",
+      "onFailure": "Abort",
+      "inputs": {
+        "InputPayload": {
+          "InstanceId": "{{ InstanceId }}",
+          "InplaceSwap": "{{ InplaceSwap }}"
+        },
+        "Handler": "validate_target.script_handler",
+        "Runtime": "python3.11",
+        "Attachment": "attachment.zip"
+      },
+      "outputs": [
+        {
+          "Name": "InstanceType",
+          "Selector": "$.Payload.InstanceType",
+          "Type": "String"
+        },
+        {
+          "Name": "AvailabilityZone",
+          "Selector": "$.Payload.Placement.AvailabilityZone",
+          "Type": "String"
+        },
+        {
+          "Name": "SecurityGroupIds",
+          "Selector": "$.Payload.SecurityGroups..GroupId",
+          "Type": "StringList"
+        },
+        {
+          "Name": "KeyName",
+          "Selector": "Payload.KeyName",
+          "Type": "String"
+        },
+        {
+          "Name": "SubnetId",
+          "Selector": "$.Payload.SubnetId",
+          "Type": "String"
+        },
+        {
+          "Name": "RootDeviceName",
+          "Selector": "$.Payload.RootDeviceName",
+          "Type": "String"
+        },
+        {
+          "Type": "String",
+          "Name": "RootVolumeId",
+          "Selector": "$.Payload.RootVolumeId"
+        },
+        {
+          "Type": "String",
+          "Name": "InstanceState",
+          "Selector": "$.Payload.State"
+        }
+      ]
+    },
+    {
+      "description": "Gathers the details of the EC2 instance's root volume.",
+      "name": "DescribeRootVolume",
+      "action": "aws:executeAwsApi",
+      "maxAttempts": 2,
+      "timeoutSeconds": 120,
+      "nextStep": "TagTargetInstance",
+      "isCritical": true,
+      "onCancel": "Abort",
+      "onFailure": "Abort",
+      "inputs": {
+        "Service": "ec2",
+        "Api": "DescribeVolumes",
+        "VolumeIds": [
+          "{{ ValidateTargetInstance.RootVolumeId }}"
+        ]
+      },
+      "outputs": [
+        {
+          "Type": "String",
+          "Name": "VolumeType",
+          "Selector": "$.Volumes[0].VolumeType"
+        },
+        {
+          "Type": "Integer",
+          "Name": "VolumeIops",
+          "Selector": "$.Volumes[0].Iops"
+        }
+      ]
+    },
+    {
+      "description": "Tags the target EC2 instance to avoid concurrent automation executions.",
+      "name": "TagTargetInstance",
+      "action": "aws:executeAwsApi",
+      "maxAttempts": 2,
+      "timeoutSeconds": 120,
+      "nextStep": "FindUsableSnapshots",
+      "isCritical": true,
+      "onCancel": "Abort",
+      "onFailure": "Abort",
+      "inputs": {
+        "Service": "ec2",
+        "Api": "CreateTags",
+        "Resources": [
+          "{{InstanceId}}"
+        ],
+        "Tags": [
+          {
+            "Key": "SSMExecutionStatusOn",
+            "Value": "Yes"
+          }
+        ]
+      }
+    },
+    {
+      "description": "Finds restorable snapshots for the EC2 instance's root volume.",
+      "name": "FindUsableSnapshots",
+      "action": "aws:executeScript",
+      "nextStep": "CreateImageWithNoReboot",
+      "isCritical": true,
+      "onCancel": "step:FailureHandling",
+      "onFailure": "step:FailureHandling",
+      "inputs": {
+        "InputPayload": {
+          "SnapshotToBeUsed": "{{ SnapshotId }}",
+          "SourceInstance": "{{ InstanceId }}",
+          "SourceRootVolume": "{{ ValidateTargetInstance.RootVolumeId }}",
+          "StartDate": "{{ StartDate }}",
+          "EndDate": "{{ EndDate }}",
+          "CheckInstanceStatus": "{{ LookForInstanceStatusCheck }}",
+          "TotalSnapshotsToLook": "{{ TotalSnapshotsToLook }}",
+          "SkipSnapshotsBy": "{{ SkipSnapshotsBy }}"
+        },
+        "Handler": "find_usable_snapshots.script_handler",
+        "Runtime": "python3.11",
+        "Attachment": "attachment.zip"
+      },
+      "outputs": [
+        {
+          "Type": "StringList",
+          "Name": "SnapshotsToBeChecked",
+          "Selector": "$.Payload.SnapshotsToBeChecked"
+        },
+        {
+          "Type": "StringList",
+          "Name": "RemainingSnapshots",
+          "Selector": "$.Payload.RemainingSnapshots"
+        }
+      ]
+    },
+    {
+      "description": "Creates an Amazon Machine Image (AMI) from the target instance without rebooting it.",
+      "name": "CreateImageWithNoReboot",
+      "action": "aws:createImage",
+      "nextStep": "waitForInstanceImage",
+      "isCritical": true,
+      "onCancel": "step:FailureHandling",
+      "onFailure": "step:FailureHandling",
+      "inputs": {
+        "InstanceId": "{{ InstanceId }}",
+        "ImageName": "AWSSupport-RestoreEC2InstanceFromSnapshot_{{ automation:EXECUTION_ID }}",
+        "ImageDescription": "Image created from {{ InstanceId }} by AWSSupport-RestoreEC2InstanceFromSnapshot automation",
+        "NoReboot": true
+      }
+    },
+    {
+      "description": "Waits for the Amazon Machine Image (AMI) to complete creation and reach the 'available' state.",
+      "name": "waitForInstanceImage",
+      "action": "aws:waitForAwsResourceProperty",
+      "maxAttempts": 1,
+      "timeoutSeconds": 3600,
+      "nextStep": "LaunchCloneInstance",
+      "isCritical": true,
+      "onCancel": "step:FailureHandling",
+      "onFailure": "step:FailureHandling",
+      "inputs": {
+        "Service": "ec2",
+        "Api": "DescribeImages",
+        "DesiredValues": [
+          "available"
+        ],
+        "PropertySelector": "$.Images[0].State",
+        "ImageIds": [
+          "{{ CreateImageWithNoReboot.ImageId }}"
+        ]
+      }
+    },
+    {
+      "description": "Launches a new Amazon EC2 instance from the created AMI.",
+      "name": "LaunchCloneInstance",
+      "action": "aws:executeScript",
+      "maxAttempts": 1,
+      "timeoutSeconds": 600,
+      "nextStep": "WaitForCloneInstance",
+      "isCritical": true,
+      "onCancel": "step:FailureHandling",
+      "onFailure": "step:FailureHandling",
+      "inputs": {
+        "InputPayload": {
+          "SourceInstance": "{{ InstanceId }}",
+          "ImageId": "{{ CreateImageWithNoReboot.ImageId }}",
+          "InstanceType": "{{ ValidateTargetInstance.InstanceType }}",
+          "SubnetId": "{{ ValidateTargetInstance.SubnetId }}",
+          "KeyName": "{{ ValidateTargetInstance.KeyName }}",
+          "SecurityGroupIds": "{{ ValidateTargetInstance.SecurityGroupIds }}"
+        },
+        "Handler": "launch_clone_instance.script_handler",
+        "Runtime": "python3.11",
+        "Attachment": "attachment.zip"
+      },
+      "outputs": [
+        {
+          "Name": "InstanceId",
+          "Type": "String",
+          "Selector": "$.Payload.InstanceId"
+        }
+      ]
+    },
+    {
+      "description": "Waits for the cloned EC2 instance to be in running state before proceeding.",
+      "name": "WaitForCloneInstance",
+      "action": "aws:waitForAwsResourceProperty",
+      "maxAttempts": 2,
+      "timeoutSeconds": 300,
+      "nextStep": "SnapshotValidationLoop",
+      "isCritical": true,
+      "onCancel": "step:FailureHandling",
+      "onFailure": "step:FailureHandling",
+      "inputs": {
+        "Service": "ec2",
+        "Api": "DescribeInstances",
+        "InstanceIds": [
+          "{{ LaunchCloneInstance.InstanceId }}"
+        ],
+        "PropertySelector": "$.Reservations[0].Instances[0].State.Name",
+        "DesiredValues": [
+          "running"
+        ]
+      }
+    },
+    {
+      "description": "Tests the snapshots until working snapshot is identified.",
+      "name": "SnapshotValidationLoop",
+      "action": "aws:loop",
+      "nextStep": "FailureHandling",
+      "onFailure": "step:FailureHandling",
+      "inputs": {
+        "Iterators": "{{ FindUsableSnapshots.SnapshotsToBeChecked }}",
+        "IteratorDataType": "String",
+        "MaxIterations": 10,
+        "Steps": [
+          {
+            "description": "Gathers details of the cloned EC2 instance.",
+            "name": "DescribeCloneInstance",
+            "action": "aws:executeAwsApi",
+            "maxAttempts": 2,
+            "timeoutSeconds": 120,
+            "nextStep": "CreateNewRootVolumeFromSnapshot",
+            "isCritical": true,
+            "onCancel": "step:FailureHandling",
+            "onFailure": "step:FailureHandling",
+            "inputs": {
+              "Service": "ec2",
+              "Api": "DescribeInstances",
+              "InstanceIds": [
+                "{{LaunchCloneInstance.InstanceId}}"
+              ]
+            },
+            "outputs": [
+              {
+                "Name": "AvailabilityZone",
+                "Selector": "$.Reservations[0].Instances[0].Placement.AvailabilityZone",
+                "Type": "String"
+              },
+              {
+                "Name": "RootVolumeId",
+                "Selector": "$.Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId",
+                "Type": "String"
+              },
+              {
+                "Name": "RootDeviceName",
+                "Selector": "$.Reservations[0].Instances[0].RootDeviceName",
+                "Type": "String"
+              }
+            ]
+          },
+          {
+            "description": "Creates a new Amazon EBS volume from the specified snapshot.",
+            "name": "CreateNewRootVolumeFromSnapshot",
+            "action": "aws:executeScript",
+            "nextStep": "StopCloneInstance",
+            "isCritical": true,
+            "onCancel": "step:FailureHandling",
+            "onFailure": "step:FailureHandling",
+            "inputs": {
+              "InputPayload": {
+                "SnapshotId": "{{ SnapshotValidationLoop.CurrentIteratorValue }}",
+                "AvailabilityZone": "{{ DescribeCloneInstance.AvailabilityZone }}",
+                "VolumeType": "{{ DescribeRootVolume.VolumeType }}",
+                "Iops": "{{ DescribeRootVolume.VolumeIops }}"
+              },
+              "Handler": "create_ebs_volume.script_handler",
+              "Runtime": "python3.11",
+              "Attachment": "attachment.zip"
+            },
+            "outputs": [
+              {
+                "Name": "RootVolumeId",
+                "Selector": "$.Payload.VolumeId",
+                "Type": "String"
+              }
+            ]
+          },
+          {
+            "description": "Stops the cloned EC2 instance.",
+            "name": "StopCloneInstance",
+            "action": "aws:changeInstanceState",
+            "maxAttempts": 2,
+            "timeoutSeconds": 300,
+            "nextStep": "WaitForVolumeAvailability",
+            "isCritical": true,
+            "onCancel": "step:FailureHandling",
+            "onFailure": "step:FailureHandling",
+            "inputs": {
+              "InstanceIds": [
+                "{{ LaunchCloneInstance.InstanceId }}"
+              ],
+              "DesiredState": "stopped"
+            }
+          },
+          {
+            "description": "Waits for the EBS volume to complete creation and reach the 'available' state.",
+            "name": "WaitForVolumeAvailability",
+            "action": "aws:waitForAwsResourceProperty",
+            "maxAttempts": 2,
+            "timeoutSeconds": 300,
+            "nextStep": "DetachRootVolume",
+            "isCritical": true,
+            "onCancel": "step:FailureHandling",
+            "onFailure": "step:FailureHandling",
+            "inputs": {
+              "Service": "ec2",
+              "Api": "DescribeVolumes",
+              "PropertySelector": "$.Volumes[0].State",
+              "DesiredValues": [
+                "available"
+              ],
+              "VolumeIds": [
+                "{{ CreateNewRootVolumeFromSnapshot.RootVolumeId }}"
+              ]
+            }
+          },
+          {
+            "description": "Detaches the EBS root volume from the cloned EC2 instance.",
+            "name": "DetachRootVolume",
+            "action": "aws:executeAwsApi",
+            "maxAttempts": 2,
+            "timeoutSeconds": 300,
+            "nextStep": "WaitForRootVolumeToBeDetached",
+            "isCritical": false,
+            "onCancel": "step:FailureHandling",
+            "onFailure": "step:WaitForRootVolumeToBeDetached",
+            "inputs": {
+              "Service": "ec2",
+              "Api": "DetachVolume",
+              "VolumeId": "{{ DescribeCloneInstance.RootVolumeId }}"
+            }
+          },
+          {
+            "description": "Waits for the EBS root volume to be detached from the cloned EC2 instance.",
+            "name": "WaitForRootVolumeToBeDetached",
+            "action": "aws:waitForAwsResourceProperty",
+            "maxAttempts": 2,
+            "timeoutSeconds": 300,
+            "nextStep": "AttachNewRootVolume",
+            "isCritical": true,
+            "onCancel": "step:FailureHandling",
+            "onFailure": "step:FailureHandling",
+            "inputs": {
+              "Service": "ec2",
+              "Api": "DescribeVolumes",
+              "PropertySelector": "$.Volumes[0].State",
+              "DesiredValues": [
+                "available"
+              ],
+              "VolumeIds": [
+                "{{ DescribeCloneInstance.RootVolumeId }}"
+              ]
+            }
+          },
+          {
+            "description": "Attaches the new root volume to the cloned EC2 instance.",
+            "name": "AttachNewRootVolume",
+            "action": "aws:executeAwsApi",
+            "maxAttempts": 2,
+            "timeoutSeconds": 300,
+            "nextStep": "WaitForNewRootVolumeToBeAttached",
+            "isCritical": true,
+            "onCancel": "step:FailureHandling",
+            "onFailure": "step:FailureHandling",
+            "inputs": {
+              "Service": "ec2",
+              "Api": "AttachVolume",
+              "InstanceId": "{{ LaunchCloneInstance.InstanceId }}",
+              "VolumeId": "{{ CreateNewRootVolumeFromSnapshot.RootVolumeId }}",
+              "Device": "{{ DescribeCloneInstance.RootDeviceName }}"
+            }
+          },
+          {
+            "description": "Waits for the new root volume to be attached to the cloned EC2 instance.",
+            "name": "WaitForNewRootVolumeToBeAttached",
+            "action": "aws:waitForAwsResourceProperty",
+            "maxAttempts": 2,
+            "timeoutSeconds": 300,
+            "nextStep": "StartCloneInstance",
+            "isCritical": true,
+            "onCancel": "step:FailureHandling",
+            "onFailure": "step:FailureHandling",
+            "inputs": {
+              "Service": "ec2",
+              "Api": "DescribeVolumes",
+              "PropertySelector": "$.Volumes[0].Attachments[0].State",
+              "DesiredValues": [
+                "attached"
+              ],
+              "VolumeIds": [
+                "{{ CreateNewRootVolumeFromSnapshot.RootVolumeId }}"
+              ]
+            }
+          },
+          {
+            "description": "Starts the cloned EC2 instance and waits up to 20 minutes for the instance status checks to pass.",
+            "name": "StartCloneInstance",
+            "action": "aws:changeInstanceState",
+            "maxAttempts": 2,
+            "timeoutSeconds": 300,
+            "nextStep": "DescribeInstanceStatus",
+            "isCritical": false,
+            "onCancel": "step:FailureHandling",
+            "onFailure": "step:DescribeInstanceStatus",
+            "inputs": {
+              "InstanceIds": [
+                "{{ LaunchCloneInstance.InstanceId }}"
+              ],
+              "DesiredState": "running"
+            }
+          },
+          {
+            "description": "Describes the instance status check with restored volume.",
+            "name": "DescribeInstanceStatus",
+            "action": "aws:executeAwsApi",
+            "maxAttempts": 3,
+            "timeoutSeconds": 120,
+            "nextStep": "BranchOnInstanceStatus",
+            "isCritical": true,
+            "onCancel": "step:FailureHandling",
+            "onFailure": "step:FailureHandling",
+            "inputs": {
+              "Service": "ec2",
+              "Api": "DescribeInstanceStatus",
+              "InstanceIds": [
+                "{{ LaunchCloneInstance.InstanceId }}"
+              ]
+            },
+            "outputs": [
+              {
+                "Type": "String",
+                "Name": "InstanceStatus",
+                "Selector": "$.InstanceStatuses[0].InstanceStatus.Status"
+              }
+            ]
+          },
+          {
+            "description": "Branches automation based on the instance status check status.",
+            "name": "BranchOnInstanceStatus",
+            "action": "aws:branch",
+            "inputs": {
+              "Choices": [
+                {
+                  "NextStep": "UpdateWorkingSnapshot",
+                  "Variable": "{{ DescribeInstanceStatus.InstanceStatus }}",
+                  "StringEquals": "ok"
+                }
+              ],
+              "Default": "TagSnapshotAsCorrupted"
+            }
+          },
+          {
+            "description": "Tags the snapshot as corrupted if the instance fails status check.",
+            "name": "TagSnapshotAsCorrupted",
+            "action": "aws:executeAwsApi",
+            "isEnd": true,
+            "onCancel": "step:FailureHandling",
+            "onFailure": "step:FailureHandling",
+            "inputs": {
+              "Service": "ec2",
+              "Api": "CreateTags",
+              "Resources": [
+                "{{ SnapshotValidationLoop.CurrentIteratorValue }}"
+              ],
+              "Tags": [
+                {
+                  "Key": "corrupted",
+                  "Value": "Yes"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "Updates the value of WorkingSnapshot variable.",
+      "name": "UpdateWorkingSnapshot",
+      "action": "aws:updateVariable",
+      "nextStep": "BranchOnInplaceSwap",
+      "isCritical": false,
+      "onFailure": "step:BranchOnInplaceSwap",
+      "inputs": {
+        "Name": "variable:WorkingSnapshot",
+        "Value": "{{ SnapshotValidationLoop.CurrentIteratorValue }}"
+      }
+    },
+    {
+      "description": "Branches automation based on InplaceSwap parameter.",
+      "name": "BranchOnInplaceSwap",
+      "action": "aws:branch",
+      "isEnd": false,
+      "inputs": {
+        "Choices": [
+          {
+            "NextStep": "CreateVolumeReplacementTask",
+            "And": [
+              {
+                "Variable": "{{ InplaceSwap }}",
+                "BooleanEquals": true
+              },
+              {
+                "Variable": "{{ ValidateTargetInstance.InstanceState }}",
+                "StringEquals": "running"
+              }
+            ]
+          },
+          {
+            "NextStep": "StartTargetForInplaceSwap",
+            "And": [
+              {
+                "Variable": "{{ InplaceSwap }}",
+                "BooleanEquals": true
+              },
+              {
+                "Variable": "{{ ValidateTargetInstance.InstanceState }}",
+                "StringEquals": "stopped"
+              }
+            ]
+          }
+        ],
+        "Default": "GenerateRecoveryStatus"
+      }
+    },
+    {
+      "description": "Starts the original instance for root volume replacement.",
+      "name": "StartTargetForInplaceSwap",
+      "action": "aws:executeAwsApi",
+      "maxAttempts": 2,
+      "timeoutSeconds": 300,
+      "nextStep": "WaitForTargetInstanceRunning",
+      "isCritical": true,
+      "onCancel": "step:FailureHandling",
+      "onFailure": "step:FailureHandling",
+      "inputs": {
+        "Service": "ec2",
+        "Api": "StartInstances",
+        "InstanceIds": [
+          "{{ InstanceId }}"
+        ]
+      }
+    },
+    {
+      "description": "Waits for the original instance to be in running state before proceeding.",
+      "name": "WaitForTargetInstanceRunning",
+      "action": "aws:waitForAwsResourceProperty",
+      "maxAttempts": 2,
+      "timeoutSeconds": 300,
+      "nextStep": "CreateVolumeReplacementTask",
+      "isCritical": true,
+      "onCancel": "step:FailureHandling",
+      "onFailure": "step:FailureHandling",
+      "inputs": {
+        "Service": "ec2",
+        "Api": "DescribeInstances",
+        "InstanceIds": [
+          "{{ InstanceId }}"
+        ],
+        "PropertySelector": "$.Reservations[0].Instances[0].State.Name",
+        "DesiredValues": [
+          "running"
+        ]
+      }
+    },
+    {
+      "description": "Creates root volume replacement task for original instance.",
+      "name": "CreateVolumeReplacementTask",
+      "action": "aws:executeAwsApi",
+      "maxAttempts": 2,
+      "timeoutSeconds": 300,
+      "nextStep": "WaitForVolumeReplacement",
+      "isCritical": true,
+      "onCancel": "step:FailureHandling",
+      "onFailure": "step:FailureHandling",
+      "inputs": {
+        "Service": "ec2",
+        "Api": "CreateReplaceRootVolumeTask",
+        "ClientToken": "{{ automation:EXECUTION_ID }}",
+        "InstanceId": "{{ InstanceId }}",
+        "SnapshotId": "{{ SnapshotValidationLoop.CurrentIteratorValue }}"
+      },
+      "outputs": [
+        {
+          "Name": "ReplaceRootVolumeTaskId",
+          "Selector": "$.ReplaceRootVolumeTask.ReplaceRootVolumeTaskId",
+          "Type": "String"
+        }
+      ]
+    },
+    {
+      "description": "Waits for the EBS volume replacement task to be completed.",
+      "name": "WaitForVolumeReplacement",
+      "action": "aws:waitForAwsResourceProperty",
+      "maxAttempts": 2,
+      "timeoutSeconds": 300,
+      "nextStep": "AssertTargetInstanceStatus",
+      "isCritical": true,
+      "onCancel": "step:FailureHandling",
+      "onFailure": "step:FailureHandling",
+      "inputs": {
+        "Service": "ec2",
+        "Api": "DescribeReplaceRootVolumeTasks",
+        "ReplaceRootVolumeTaskIds": [
+          "{{ CreateVolumeReplacementTask.ReplaceRootVolumeTaskId }}"
+        ],
+        "PropertySelector": "$.ReplaceRootVolumeTasks[0].TaskState",
+        "DesiredValues": [
+          "succeeded"
+        ]
+      }
+    },
+    {
+      "description": "Asserts the original EC2 instance status check passing.",
+      "name": "AssertTargetInstanceStatus",
+      "action": "aws:assertAwsResourceProperty",
+      "maxAttempts": 3,
+      "timeoutSeconds": 60,
+      "nextStep": "GenerateRecoveryStatus",
+      "onCancel": "step:FailureHandling",
+      "onFailure": "step:FailureHandling",
+      "isCritical": true,
+      "inputs": {
+        "Service": "ec2",
+        "Api": "DescribeInstanceStatus",
+        "InstanceIds": [
+          "{{ InstanceId }}"
+        ],
+        "PropertySelector": "$.InstanceStatuses[0].InstanceStatus.Status",
+        "DesiredValues": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "description": "Updates the value of failure handling variable.",
+      "name": "FailureHandling",
+      "action": "aws:updateVariable",
+      "maxAttempts": 1,
+      "timeoutSeconds": 600,
+      "nextStep": "GenerateRecoveryStatus",
+      "isCritical": true,
+      "onFailure": "step:GenerateRecoveryStatus",
+      "inputs": {
+        "Name": "variable:FailureHandling",
+        "Value": true
+      }
+    },
+    {
+      "description": "Generates instance recovery status report.",
+      "name": "GenerateRecoveryStatus",
+      "action": "aws:executeScript",
+      "maxAttempts": 1,
+      "timeoutSeconds": 300,
+      "nextStep": "CleanupResources",
+      "onFailure": "step:CleanupResources",
+      "onCancel": "step:CleanupResources",
+      "isCritical": true,
+      "inputs": {
+        "Runtime": "python3.11",
+        "Handler": "recovery_status.script_handler",
+        "InputPayload": {
+          "WorkingSnapshot": "{{ variable:WorkingSnapshot }}",
+          "CloneInstanceId": "{{ LaunchCloneInstance.InstanceId }}",
+          "OriginalInstanceId": "{{ InstanceId }}",
+          "InplaceSwap": "{{ InplaceSwap }}",
+          "FailureHandling": "{{ variable:FailureHandling }}"
+        },
+        "Attachment": "attachment.zip"
+      },
+      "outputs": [
+        {
+          "Type": "String",
+          "Name": "Message",
+          "Selector": "$.Payload"
+        }
+      ]
+    },
+    {
+      "description": "Deletes resources created by the automation.",
+      "name": "CleanupResources",
+      "action": "aws:executeScript",
+      "maxAttempts": 2,
+      "timeoutSeconds": 600,
+      "isEnd": true,
+      "isCritical": true,
+      "onFailure": "Abort",
+      "inputs": {
+        "InputPayload": {
+          "InstanceId": "{{ InstanceId }}",
+          "ImageId": "{{ CreateImageWithNoReboot.ImageId }}",
+          "CloneInstanceId": "{{ LaunchCloneInstance.InstanceId }}",
+          "TagValue": "AWSSupport-RestoreEC2InstanceFromSnapshot_{{ automation:EXECUTION_ID }}",
+          "InplaceSwap": "{{ InplaceSwap }}",
+          "FailureHandling": "{{ variable:FailureHandling }}"
+        },
+        "Handler": "cleanup.script_handler",
+        "Runtime": "python3.11",
+        "Attachment": "attachment.zip"
+      },
+      "outputs": [
+        {
+          "Type": "String",
+          "Name": "Message",
+          "Selector": "$.Payload"
+        }
+      ]
+    }
+  ],
+  "files": {
+    "attachment.zip": {
+      "checksums": {
+        "SHA256": "86b9aec2fb0ed2795ac58e8304e18698cb8501e34a9b868995bbe8295230e5d2"
+      }
+    }
+  }
+}

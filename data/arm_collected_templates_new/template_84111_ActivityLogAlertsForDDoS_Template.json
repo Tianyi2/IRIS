@@ -1,0 +1,731 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "logicAppName": {
+      "type": "string",
+      "defaultValue": "ActivityLogAlertsForDDoS",
+      "metadata": {
+        "description": "Name of the Logic App."
+      }
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2016-06-01",
+      "name": "[parameters('logicAppName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [],
+      "properties": {
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "AllAlertName": {
+              "defaultValue": [
+                "CreateOrUpdateVNet_",
+                "CreateOrUpdatePublicIP_"
+              ],
+              "type": "Array"
+            },
+            "Region": {
+              "defaultValue": {
+                "zcu": "centralus",
+                "zks": "uksouth",
+                "zkw": "ukwest",
+                "znc": "northcentralus",
+                "zne": "northeurope",
+                "zsc": "southcentralus",
+                "zu3": "northcentralus",
+                "zwc": "westcentralus",
+                "zwe": "westeurope"
+              },
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "Recurrence": {
+              "recurrence": {
+                "frequency": "Minute",
+                "interval": 30
+              },
+              "type": "Recurrence"
+            }
+          },
+          "actions": {
+            "AllSubscriptions": {
+              "runAfter": {
+                "Initialize_regionCode": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "authentication": {
+                  "type": "ManagedServiceIdentity"
+                },
+                "method": "GET",
+                "uri": "https://management.azure.com/subscriptions?api-version=2016-06-01"
+              }
+            },
+            "For_each_Subscriptions": {
+              "foreach": "@body('AllSubscriptions')['value']",
+              "actions": {
+                "Condition_for_Active_Subscriptions": {
+                  "actions": {
+                    "HTTP_CheckProviderRegistration": {
+                      "runAfter": {
+                        "Set_RegionCode": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Http",
+                      "inputs": {
+                        "authentication": {
+                          "type": "ManagedServiceIdentity"
+                        },
+                        "method": "GET",
+                        "uri": "https://management.azure.com/subscriptions/@{items('For_each_Subscriptions')['subscriptionId']}/providers/microsoft.insights?api-version=2019-08-01"
+                      }
+                    },
+                    "IfXRGnet_Present": {
+                      "actions": {
+                        "For_each_Alerts": {
+                          "foreach": "@parameters('AllAlertName')",
+                          "actions": {
+                            "Condition_AlertPresent": {
+                              "actions": {
+                                "Condition_AlertDisabled": {
+                                  "actions": {
+                                    "HTTP_Enable_Alert": {
+                                      "runAfter": {},
+                                      "type": "Http",
+                                      "inputs": {
+                                        "authentication": {
+                                          "type": "ManagedServiceIdentity"
+                                        },
+                                        "body": {
+                                          "properties": {
+                                            "enabled": true
+                                          }
+                                        },
+                                        "method": "PATCH",
+                                        "uri": "https://management.azure.com@{body('HTTP_GetAlert')['data']['rows'][0][0]}?api-version=2017-04-01"
+                                      }
+                                    }
+                                  },
+                                  "runAfter": {},
+                                  "expression": {
+                                    "and": [
+                                      {
+                                        "equals": [
+                                          "@body('HTTP_GetAlert')['data']['rows'][0][11]['enabled']",
+                                          false
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "type": "If"
+                                }
+                              },
+                              "runAfter": {
+                                "HTTP_GetAlert": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "else": {
+                                "actions": {
+                                  "Switch": {
+                                    "runAfter": {},
+                                    "cases": {
+                                      "Case": {
+                                        "case": "CreateOrUpdateVNet_",
+                                        "actions": {
+                                          "Create_VNetAlert": {
+                                            "runAfter": {},
+                                            "type": "Http",
+                                            "inputs": {
+                                              "authentication": {
+                                                "type": "ManagedServiceIdentity"
+                                              },
+                                              "body": {
+                                                "identity": null,
+                                                "kind": null,
+                                                "location": "Global",
+                                                "properties": {
+                                                  "actions": {
+                                                    "actionGroups": [
+                                                      {
+                                                        "actionGroupId": "@{parameters('ActionGroupID')}",
+                                                        "webhookProperties": {}
+                                                      }
+                                                    ]
+                                                  },
+                                                  "condition": {
+                                                    "allOf": [
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "Administrative",
+                                                        "field": "category",
+                                                        "odata.type": null
+                                                      },
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "microsoft.network/virtualNetworks",
+                                                        "field": "resourceType",
+                                                        "odata.type": null
+                                                      },
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "Microsoft.Network/virtualNetworks/write",
+                                                        "field": "operationName",
+                                                        "odata.type": null
+                                                      },
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "succeeded",
+                                                        "field": "status",
+                                                        "odata.type": null
+                                                      }
+                                                    ],
+                                                    "odata.type": null
+                                                  },
+                                                  "description": "Whenever VNet gets created or updated",
+                                                  "enabled": true,
+                                                  "scopes": [
+                                                    "/subscriptions/@{items('For_each_Subscriptions')['subscriptionId']}"
+                                                  ]
+                                                },
+                                                "tags": {}
+                                              },
+                                              "method": "PUT",
+                                              "uri": "https://management.azure.com/subscriptions/@{items('For_each_Subscriptions')['subscriptionId']}/resourceGroups/@{body('XRGnet')['data']['rows'][0][1]}/providers/microsoft.insights/activityLogAlerts/@{concat(items('For_each_Alerts'),items('For_each_Subscriptions')['displayName'])}?api-version=2017-04-01"
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "Case_2": {
+                                        "case": "CreateOrUpdatePublicIP_",
+                                        "actions": {
+                                          "Create_PublicIPAlert": {
+                                            "runAfter": {},
+                                            "type": "Http",
+                                            "inputs": {
+                                              "authentication": {
+                                                "type": "ManagedServiceIdentity"
+                                              },
+                                              "body": {
+                                                "identity": null,
+                                                "kind": null,
+                                                "location": "Global",
+                                                "properties": {
+                                                  "actions": {
+                                                    "actionGroups": [
+                                                      {
+                                                        "actionGroupId": "@{parameters('ActionGroupID')}",
+                                                        "webhookProperties": {}
+                                                      }
+                                                    ]
+                                                  },
+                                                  "condition": {
+                                                    "allOf": [
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "Administrative",
+                                                        "field": "category",
+                                                        "odata.type": null
+                                                      },
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "microsoft.network/publicIPAddresses",
+                                                        "field": "resourceType",
+                                                        "odata.type": null
+                                                      },
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "Microsoft.Network/publicIPAddresses/write",
+                                                        "field": "operationName",
+                                                        "odata.type": null
+                                                      },
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "succeeded",
+                                                        "field": "status",
+                                                        "odata.type": null
+                                                      }
+                                                    ],
+                                                    "odata.type": null
+                                                  },
+                                                  "description": "Whenever Public IP gets created or updated",
+                                                  "enabled": true,
+                                                  "scopes": [
+                                                    "/subscriptions/@{items('For_each_Subscriptions')['subscriptionId']}"
+                                                  ]
+                                                },
+                                                "tags": {}
+                                              },
+                                              "method": "PUT",
+                                              "uri": "https://management.azure.com/subscriptions/@{items('For_each_Subscriptions')['subscriptionId']}/resourceGroups/@{body('XRGnet')['data']['rows'][0][1]}/providers/microsoft.insights/activityLogAlerts/@{concat(items('For_each_Alerts'),items('For_each_Subscriptions')['displayName'])}?api-version=2017-04-01"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "default": {
+                                      "actions": {}
+                                    },
+                                    "expression": "@items('For_each_Alerts')",
+                                    "type": "Switch"
+                                  }
+                                }
+                              },
+                              "expression": {
+                                "and": [
+                                  {
+                                    "greater": [
+                                      "@body('HTTP_GetAlert')['count']",
+                                      0
+                                    ]
+                                  }
+                                ]
+                              },
+                              "type": "If"
+                            },
+                            "HTTP_GetAlert": {
+                              "runAfter": {},
+                              "type": "Http",
+                              "inputs": {
+                                "authentication": {
+                                  "type": "ManagedServiceIdentity"
+                                },
+                                "body": {
+                                  "query": "where type=~ 'microsoft.insights/activitylogalerts' and name matches regex @'^*@{concat(items('For_each_Alerts'),items('For_each_Subscriptions')['displayName'])}*'",
+                                  "subscriptions": [
+                                    "@{items('For_each_Subscriptions')['subscriptionId']}"
+                                  ]
+                                },
+                                "method": "POST",
+                                "retryPolicy": {
+                                  "count": 6,
+                                  "interval": "PT20S",
+                                  "type": "fixed"
+                                },
+                                "uri": "https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2019-04-01"
+                              }
+                            }
+                          },
+                          "runAfter": {},
+                          "type": "Foreach"
+                        }
+                      },
+                      "runAfter": {
+                        "XRGnet": [
+                          "Succeeded"
+                        ]
+                      },
+                      "else": {
+                        "actions": {
+                          "Append_X-RG": {
+                            "runAfter": {},
+                            "type": "AppendToArrayVariable",
+                            "inputs": {
+                              "name": "X-RG-Subscription",
+                              "value": "@items('For_each_Subscriptions')['subscriptionId']"
+                            }
+                          },
+                          "Condition_If_RG_Needs_to_be_created": {
+                            "actions": {
+                              "Append_to_array_variable": {
+                                "runAfter": {},
+                                "type": "AppendToArrayVariable",
+                                "inputs": {
+                                  "name": "SubsWithoutXRG",
+                                  "value": "@items('For_each_Subscriptions')['displayName']"
+                                }
+                              },
+                              "Create_X-RG": {
+                                "runAfter": {
+                                  "Append_to_array_variable": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "type": "Http",
+                                "inputs": {
+                                  "authentication": {
+                                    "type": "ManagedServiceIdentity"
+                                  },
+                                  "body": {
+                                    "location": "@{parameters('Region')[split(items('For_each_Subscriptions')['displayName'],'-')[0]]}"
+                                  },
+                                  "method": "PUT",
+                                  "uri": "https://management.azure.com/subscriptions/@{items('For_each_Subscriptions')['subscriptionId']}/resourcegroups/@{concat(split(substring(concat(items('For_each_Subscriptions')['displayName'],'          '),0,10),' ')[0],'-02-net-rsg')}?api-version=2019-08-01"
+                                }
+                              },
+                              "Delay": {
+                                "runAfter": {
+                                  "Create_X-RG": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "type": "Wait",
+                                "inputs": {
+                                  "interval": {
+                                    "count": 5,
+                                    "unit": "Second"
+                                  }
+                                }
+                              },
+                              "For_each_alert": {
+                                "foreach": "@parameters('AllAlertName')",
+                                "actions": {
+                                  "Switch_2": {
+                                    "runAfter": {},
+                                    "cases": {
+                                      "Case": {
+                                        "case": "CreateOrUpdateVNet_",
+                                        "actions": {
+                                          "HTTP_Create_VNetAlert": {
+                                            "runAfter": {},
+                                            "type": "Http",
+                                            "inputs": {
+                                              "authentication": {
+                                                "type": "ManagedServiceIdentity"
+                                              },
+                                              "body": {
+                                                "identity": null,
+                                                "kind": null,
+                                                "location": "Global",
+                                                "properties": {
+                                                  "actions": {
+                                                    "actionGroups": [
+                                                      {
+                                                        "actionGroupId": "@{parameters('ActionGroupID')}",
+                                                        "webhookProperties": {}
+                                                      }
+                                                    ]
+                                                  },
+                                                  "condition": {
+                                                    "allOf": [
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "Administrative",
+                                                        "field": "category",
+                                                        "odata.type": null
+                                                      },
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "microsoft.network/virtualNetworks",
+                                                        "field": "resourceType",
+                                                        "odata.type": null
+                                                      },
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "Microsoft.Network/virtualNetworks/write",
+                                                        "field": "operationName",
+                                                        "odata.type": null
+                                                      },
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "succeeded",
+                                                        "field": "status",
+                                                        "odata.type": null
+                                                      }
+                                                    ],
+                                                    "odata.type": null
+                                                  },
+                                                  "description": "Whenever VNet gets created or updated",
+                                                  "enabled": true,
+                                                  "scopes": [
+                                                    "/subscriptions/@{items('For_each_Subscriptions')['subscriptionId']}"
+                                                  ]
+                                                },
+                                                "tags": {}
+                                              },
+                                              "method": "PUT",
+                                              "uri": "https://management.azure.com/subscriptions/@{items('For_each_Subscriptions')['subscriptionId']}/resourceGroups/@{concat(split(substring(concat(items('For_each_Subscriptions')['displayName'],'          '),0,10),' ')[0],'-02-net-rsg')}/providers/microsoft.insights/activityLogAlerts/@{concat(items('For_each_alert'),items('For_each_Subscriptions')['displayName'])}?api-version=2017-04-01"
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "Case_2": {
+                                        "case": "CreateOrUpdatePublicIP_",
+                                        "actions": {
+                                          "HTTP_Create_PublicIPAlert": {
+                                            "runAfter": {},
+                                            "type": "Http",
+                                            "inputs": {
+                                              "authentication": {
+                                                "type": "ManagedServiceIdentity"
+                                              },
+                                              "body": {
+                                                "identity": null,
+                                                "kind": null,
+                                                "location": "Global",
+                                                "properties": {
+                                                  "actions": {
+                                                    "actionGroups": [
+                                                      {
+                                                        "actionGroupId": "@{parameters('ActionGroupID')}",
+                                                        "webhookProperties": {}
+                                                      }
+                                                    ]
+                                                  },
+                                                  "condition": {
+                                                    "allOf": [
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "Administrative",
+                                                        "field": "category",
+                                                        "odata.type": null
+                                                      },
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "microsoft.network/publicIPAddresses",
+                                                        "field": "resourceType",
+                                                        "odata.type": null
+                                                      },
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "Microsoft.Network/publicIPAddresses/write",
+                                                        "field": "operationName",
+                                                        "odata.type": null
+                                                      },
+                                                      {
+                                                        "containsAny": null,
+                                                        "equals": "succeeded",
+                                                        "field": "status",
+                                                        "odata.type": null
+                                                      }
+                                                    ],
+                                                    "odata.type": null
+                                                  },
+                                                  "description": "Whenever Public IP gets created or updated",
+                                                  "enabled": true,
+                                                  "scopes": [
+                                                    "/subscriptions/@{items('For_each_Subscriptions')['subscriptionId']}"
+                                                  ]
+                                                },
+                                                "tags": {}
+                                              },
+                                              "method": "PUT",
+                                              "uri": "https://management.azure.com/subscriptions/@{items('For_each_Subscriptions')['subscriptionId']}/resourceGroups/@{concat(split(substring(concat(items('For_each_Subscriptions')['displayName'],'          '),0,10),' ')[0],'-02-net-rsg')}/providers/microsoft.insights/activityLogAlerts/@{concat(items('For_each_alert'),items('For_each_Subscriptions')['displayName'])}?api-version=2017-04-01"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "default": {
+                                      "actions": {}
+                                    },
+                                    "expression": "@items('For_each_alert')",
+                                    "type": "Switch"
+                                  }
+                                },
+                                "runAfter": {
+                                  "Delay": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "type": "Foreach"
+                              }
+                            },
+                            "runAfter": {
+                              "Append_X-RG": [
+                                "Succeeded"
+                              ]
+                            },
+                            "expression": {
+                              "and": [
+                                {
+                                  "contains": [
+                                    "@items('For_each_Subscriptions')['displayName']",
+                                    "-s-"
+                                  ]
+                                }
+                              ]
+                            },
+                            "type": "If"
+                          }
+                        }
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "greater": [
+                              "@body('XRGnet')['count']",
+                              0
+                            ]
+                          }
+                        ]
+                      },
+                      "type": "If"
+                    },
+                    "XRGnet": {
+                      "runAfter": {
+                        "Register_Provider": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Http",
+                      "inputs": {
+                        "authentication": {
+                          "type": "ManagedServiceIdentity"
+                        },
+                        "body": {
+                          "query": "project SubscriptionID=subscriptionId,ResourceGroup=resourceGroup|distinct SubscriptionID,ResourceGroup",
+                          "subscriptions": [
+                            "@{items('For_each_Subscriptions')['subscriptionId']}"
+                          ]
+                        },
+                        "method": "POST",
+                        "retryPolicy": {
+                          "count": 6,
+                          "interval": "PT20S",
+                          "type": "fixed"
+                        },
+                        "uri": "https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2019-04-01"
+                      }
+                    },
+                    "Register_Provider": {
+                      "actions": {
+                        "HTTP_Register_Provider": {
+                          "runAfter": {},
+                          "type": "Http",
+                          "inputs": {
+                            "authentication": {
+                              "type": "ManagedServiceIdentity"
+                            },
+                            "method": "POST",
+                            "uri": "https://management.azure.com/subscriptions/@{items('For_each_Subscriptions')['subscriptionId']}/providers/microsoft.insights/register?api-version=2019-08-01"
+                          }
+                        }
+                      },
+                      "runAfter": {
+                        "HTTP_CheckProviderRegistration": [
+                          "Succeeded"
+                        ]
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "equals": [
+                              "@body('HTTP_CheckProviderRegistration')['registrationState']",
+                              "NotRegistered"
+                            ]
+                          }
+                        ]
+                      },
+                      "type": "If"
+                    },
+                    "Set_RegionCode": {
+                      "runAfter": {},
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "regionCode",
+                        "value": "@{split(items('For_each_Subscriptions')['displayName'],'-')[0]}"
+                      }
+                    }
+                  },
+                  "runAfter": {},
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@items('For_each_Subscriptions')['state']",
+                          "Enabled"
+                        ]
+                      },
+                      {
+                        "not": {
+                          "contains": [
+                            "@items('For_each_Subscriptions')['displayName']",
+                            "Visual Studio"
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "contains": [
+                            "@items('For_each_Subscriptions')['displayName']",
+                            "Free Trial"
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "contains": [
+                            "@items('For_each_Subscriptions')['displayName']",
+                            "Pay-As-You-Go"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "AllSubscriptions": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Foreach"
+            },
+            "Initialize_X-RG-Subscription": {
+              "runAfter": {},
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "X-RG-Subscription",
+                    "type": "Array"
+                  }
+                ]
+              }
+            },
+            "Initialize_SubsWithoutXRG": {
+              "runAfter": {
+                "Initialize_X-RG-Subscription": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "SubsWithoutXRG",
+                    "type": "array"
+                  }
+                ]
+              }
+            },
+            "Initialize_regionCode": {
+              "runAfter": {
+                "Initialize_SubsWithoutXRG": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "regionCode",
+                    "type": "string"
+                  }
+                ]
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {}
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      }
+    }
+  ],
+  "outputs": {}
+}

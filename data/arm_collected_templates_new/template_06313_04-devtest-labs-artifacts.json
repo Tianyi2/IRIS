@@ -1,0 +1,43 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "devTestLabsName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "A DevTest Labs name"
+            }
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "type": "microsoft.devtestlab/labs/artifactsources",
+            "apiVersion": "2018-09-15",
+            "name": "[concat(parameters('devTestLabsName'), '/public environment repo')]",
+            "properties": {
+                "displayName": "Public Environment Repo",
+                "uri": "https://github.com/Azure/azure-devtestlab.git",
+                "sourceType": "GitHub",
+                "armTemplateFolderPath": "/Environments",
+                "branchRef": "master",
+                "status": "Disabled"
+            }
+        },
+        {
+            "type": "microsoft.devtestlab/labs/artifactsources",
+            "apiVersion": "2018-09-15",
+            "name": "[concat(parameters('devTestLabsName'), '/public repo')]",
+            "properties": {
+                "displayName": "Public Artifact Repo",
+                "uri": "https://github.com/Azure/azure-devtestlab.git",
+                "sourceType": "GitHub",
+                "folderPath": "/Artifacts",
+                "branchRef": "master",
+                "status": "Enabled"
+            }
+        }
+    ]
+}

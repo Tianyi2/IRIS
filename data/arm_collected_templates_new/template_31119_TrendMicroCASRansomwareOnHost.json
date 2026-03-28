@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/0bec3f9a-dbe9-4b4c-9ff6-498d64bbef90')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/0bec3f9a-dbe9-4b4c-9ff6-498d64bbef90')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "High",
+        "name": "Trend Micro CAS - Ransomware infection",
+        "description": "'Triggeres when ransomware was detected.'\n",
+        "query": "TrendMicroCAS\n| where EventType =~ 'ransomware'\n| extend AccountCustomEntity = DstUserName, MalwareCustomEntity = RansomwareName\n",
+        "status": "Available",
+        "queryFrequency": "5m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "AccountCustomEntity",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "MalwareCustomEntity",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Malware"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "Impact"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "5m"
+      }
+    }
+  ]
+}

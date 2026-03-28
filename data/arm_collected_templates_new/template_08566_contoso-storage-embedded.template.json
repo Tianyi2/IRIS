@@ -1,0 +1,83 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Resources/templateSpecs",
+            "apiVersion": "2019-06-01-preview",
+            "name": "contosoStorage",
+            "location": "westeurope",
+            "properties": {
+                "displayName": "Contoso secure storage template spec",
+                "description": "This is a fully compliant storage account template for Contoso cloud."
+            },
+            "tags": {},
+            "resources": [
+                {
+                    "type": "versions",
+                    "apiVersion": "2019-06-01-preview",
+                    "name": "1.0",
+                    "location": "westeurope",
+                    "dependsOn": [ "contosoStorage" ],
+                    "properties": {
+                        "template": {
+                            "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                            "contentVersion": "1.0.0.0",
+                            "parameters": {
+                                "storageAccountType": {
+                                    "type": "string",
+                                    "defaultValue": "Standard_GRS",
+                                    "allowedValues": [
+                                        "Standard_GRS",
+                                        "Standard_RAGRS",
+                                        "Standard_GZRS",
+                                        "Standard_RAGZRS"
+                                    ]
+                                },
+                                "storageAccountConfig": {
+                                    "type": "object",
+                                    "metadata": {
+                                        "description": "A JSON object specifying additional configuration of a storage account."
+                                    }
+                                }
+                            },
+                            "variables": {
+                                "storageAccountString": "[[toLower(concat(parameters('storageAccountConfig').prefix, uniquestring(resourceGroup().id)))]",
+                                "storageAccountName": "[[if(lessOrEquals(length(variables('storageAccountString')), 24), variables('storageAccountString'), substring(variables('storageAccountString'),0, 24))]"
+
+                            },
+                            "resources": [
+                                {
+                                    // This will be a templateSpec named contosoStorage in the Template Library
+                                    "type": "Microsoft.Storage/storageAccounts",
+                                    "apiVersion": "2019-06-01",
+                                    "name": "[[variables('storageAccountName')]",
+                                    "location": "[[parameters('storageAccountConfig').location]",
+                                    "kind": "[[parameters('storageAccountConfig').kind]",
+                                    "sku": {
+                                        "name": "[[parameters('storageAccountType')]",
+                                        "tier": "Standard"
+                                    },
+                                    "properties": {
+                                        "supportsHttpsTrafficOnly": true
+                                    }
+                                }
+                            ],
+                            "outputs": {
+                                "storageAccountName": {
+                                    "type": "string",
+                                    "value": "[[variables('storageAccountName')]"
+                                }
+                            }
+                        }
+                    },
+                    "tags": {}
+                }
+            ]
+        }
+    ],
+    "outputs": {}
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/0e76e420-fa55-4718-adc6-40a1a76411af')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/0e76e420-fa55-4718-adc6-40a1a76411af')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "High",
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Veeam ONE VM with No Backup",
+        "description": "Detects Veeam ONE VMs with no backup.",
+        "query": "VeeamOneTriggeredAlarms_CL | where PredefinedAlarmId == 314",
+        "status": "Available",
+        "queryFrequency": "5m",
+        "triggerOperator": "gt",
+        "tactics": [],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "Comment": "Comment",
+          "TriggeredTime": "TriggeredTime",
+          "ObjectType": "ObjectType",
+          "Description": "Description",
+          "ObjectName": "ObjectName",
+          "Name": "Name",
+          "VoneHostName": "VoneHostName",
+          "TriggeredAlarmId": "TriggeredAlarmId",
+          "PredefinedAlarmId": "PredefinedAlarmId",
+          "ObjectId": "ObjectId",
+          "Status": "Status"
+        },
+        "queryPeriod": "5m"
+      }
+    }
+  ]
+}

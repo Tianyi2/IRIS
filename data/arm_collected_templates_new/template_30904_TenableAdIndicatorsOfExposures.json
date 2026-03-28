@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/55de1072-e93f-40f9-a14d-f7356d217cf6')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/55de1072-e93f-40f9-a14d-f7356d217cf6')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "name": "Tenable.ad Indicators of Exposures",
+        "description": "'Searches for triggered Indicators of Exposures.'\n",
+        "query": "// For the query to work properly, make sure you have imported the afad_parser.kql parser into the workspace\n// Retrieve the parser here: https://raw.githubusercontent.com/tenable/Azure-Sentinel/Tenable.ad-connector/Solutions/TenableAD/Parsers/afad_parser.kql\n// Then, create the Kusto Function with alias afad_parser\nlet SeverityTable=datatable(Severity:string,Level:int) [\n  \"low\", 1,\n  \"medium\", 2,\n  \"high\", 3,\n  \"critical\", 4\n  ];\n  afad_parser\n  | where MessageType == 0\n  | lookup kind=leftouter SeverityTable on Severity\n  | order by Level\n  | extend HostName = tostring(split(Host, '.', 0)[0]), DnsDomain = tostring(strcat_array(array_slice(split(Host, '.'), 1, -1), '.'))\n",
+        "queryFrequency": "2h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "HostName",
+                "identifier": "HostName"
+              },
+              {
+                "columnName": "DnsDomain",
+                "identifier": "DnsDomain"
+              }
+            ],
+            "entityType": "Host"
+          }
+        ],
+        "severity": "Low",
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "tactics": [
+          "CredentialAccess"
+        ],
+        "queryPeriod": "2h"
+      }
+    }
+  ]
+}

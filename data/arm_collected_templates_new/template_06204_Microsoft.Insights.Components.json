@@ -1,0 +1,35 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue" : {}
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Insights/components",
+            "name": "[parameters('name')]",
+            "apiVersion": "2015-05-01",
+            "location": "[resourceGroup().location]",
+            "kind": "web",
+            "tags": "[parameters('tags')]",
+            "properties": {
+                "ApplicationId": "[parameters('name')]",
+                "Application_Type": "web",
+                "Flow_Type": "Bluefield",
+                "Request_Source": "rest"
+            }
+        }
+    ],
+    "outputs": {
+        "InstrumentationKey": {
+            "type": "string",
+            "value": "[reference(parameters('name'), '2015-05-01', 'Full').properties.InstrumentationKey]"
+        }
+    }
+}

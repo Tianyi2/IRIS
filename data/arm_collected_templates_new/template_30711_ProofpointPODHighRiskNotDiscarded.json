@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/c7cd6073-6d2c-4284-a5c8-da27605bdfde')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/c7cd6073-6d2c-4284-a5c8-da27605bdfde')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Low",
+        "name": "ProofpointPOD - High risk message not discarded",
+        "description": "'Detects when email with high risk score was not rejected or discarded by filters.'\n",
+        "query": "let lbtime = 10m;\nProofpointPOD\n| where TimeGenerated > ago(lbtime)\n| where EventType == 'message'\n| where NetworkDirection == 'inbound'\n| where FilterDisposition !in ('reject', 'discard')\n| where FilterModulesSpamScoresOverall == '100'\n| project SrcUserUpn, DstUserUpn\n| extend AccountCustomEntity = SrcUserUpn\n",
+        "status": "Available",
+        "queryFrequency": "10m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "AccountCustomEntity",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "InitialAccess"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "10m"
+      }
+    }
+  ]
+}

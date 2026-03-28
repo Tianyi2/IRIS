@@ -1,0 +1,34 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {
+      "templateBlobUrl": "https://aj5bzfku4kc5istorage.blob.core.windows.net/linkedtemplates/",
+      "ServicePlan": "ArmDemoSvcPlan",
+      "WebApp": "ArmDemoWeb"
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2016-09-01",
+        "name": "LinkedappService",
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "uri": "[concat(variables('templateBlobUrl'), 'appServicePlan.json')]",
+            "contentVersion": "1.0.0.0"
+          },
+          "parameters": {
+            "appServicePlanName": {
+              "value": "[variables('ServicePlan')]"
+            },
+            "webAppName": {
+              "value": "[variables('WebApp')]"
+            }
+          }
+        }
+      }
+    ],
+    "outputs": {}
+}
+  

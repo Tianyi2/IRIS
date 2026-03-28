@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/0adab960-5565-4978-ba6d-044553e4acc4')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/0adab960-5565-4978-ba6d-044553e4acc4')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "High",
+        "name": "Successful API executed from a Tor exit node",
+        "description": "'A successful API execution was detected from an IP address categorized as a TOR exit node by Threat Intelligence.'\n",
+        "query": "let TorNodes = (\nexternaldata (TorIP:string)\n[h@'https://firewalliplists.gypthecat.com/lists/kusto/kusto-tor-exit.csv.zip']\nwith (ignoreFirstRecord=true));\nAWSCloudTrail\n| where SourceIpAddress in (TorNodes) and isempty(ErrorCode) and isempty(ErrorMessage)\n| extend UserIdentityArn = iif(isempty(UserIdentityArn), tostring(parse_json(Resources)[0].ARN), UserIdentityArn)\n| extend UserName = tostring(split(UserIdentityArn, '/')[-1])\n| extend AccountName = case( UserIdentityPrincipalid == \"Anonymous\", \"Anonymous\", isempty(UserIdentityUserName), UserName, UserIdentityUserName)\n| extend AccountName = iif(AccountName contains \"@\", tostring(split(AccountName, '@', 0)[0]), AccountName),\n    AccountUPNSuffix = iif(AccountName contains \"@\", tostring(split(AccountName, '@', 1)[0]), \"\")\n| extend timestamp = TimeGenerated\n",
+        "status": "Available",
+        "queryFrequency": "1d",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "AccountName",
+                "identifier": "Name"
+              },
+              {
+                "columnName": "AccountUPNSuffix",
+                "identifier": "UPNSuffix"
+              },
+              {
+                "columnName": "RecipientAccountId",
+                "identifier": "CloudAppAccountId"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SourceIpAddress",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "Execution"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1d"
+      }
+    }
+  ]
+}

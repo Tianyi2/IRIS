@@ -1,0 +1,248 @@
+name: CD ECS Fargate via CloudFormation (blue/green)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  PROJECT_NAME: medical-chatbot-enterprise
+  ECR_REPO: medical-chatbot-enterprise
+  CFN_TEMPLATE: cloudformation/ecs-fargate-public.yml
+
+  APP_PORT: "8080"
+  CPU: "512"
+  MEMORY: "1024"
+  DESIRED_COUNT: "1"
+  MIN_CAPACITY: "1"
+  MAX_CAPACITY: "2"
+  CPU_SCALE_TARGET: "60"
+  TG_PREFIX: "medchat"
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    outputs:
+      image_uri: ${{ steps.build.outputs.image_uri }}
+      image_uri_digest: ${{ steps.digest.outputs.image_uri_digest }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS (OIDC) - BUILD ROLE
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_BUILD }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Ensure ECR repo exists
+        run: |
+          aws ecr describe-repositories --repository-names "$ECR_REPO" >/dev/null 2>&1 || \
+          aws ecr create-repository --repository-name "$ECR_REPO" >/dev/null
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & push image (tag = commit SHA)
+        id: build
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t "$REGISTRY/$ECR_REPO:$IMAGE_TAG" .
+          docker push "$REGISTRY/$ECR_REPO:$IMAGE_TAG"
+          echo "image_uri=$REGISTRY/$ECR_REPO:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Capture immutable image digest
+        id: digest
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          DIGEST=$(aws ecr describe-images \
+            --repository-name "$ECR_REPO" \
+            --image-ids imageTag="$IMAGE_TAG" \
+            --query 'imageDetails[0].imageDigest' \
+            --output text)
+          echo "image_uri_digest=$REGISTRY/$ECR_REPO@$DIGEST" >> $GITHUB_OUTPUT
+
+  deploy_staging:
+    runs-on: ubuntu-latest
+    needs: build_and_push
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS (OIDC) - STAGING ROLE
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_STAGING }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Seed Secrets (staging)
+        run: |
+          aws secretsmanager create-secret --name "${PROJECT_NAME}/staging/OPENAI_API_KEY" --secret-string "${{ secrets.OPENAI_API_KEY }}" >/dev/null 2>&1 || \
+          aws secretsmanager put-secret-value --secret-id "${PROJECT_NAME}/staging/OPENAI_API_KEY" --secret-string "${{ secrets.OPENAI_API_KEY }}"
+          aws secretsmanager create-secret --name "${PROJECT_NAME}/staging/PINECONE_API_KEY" --secret-string "${{ secrets.PINECONE_API_KEY }}" >/dev/null 2>&1 || \
+          aws secretsmanager put-secret-value --secret-id "${PROJECT_NAME}/staging/PINECONE_API_KEY" --secret-string "${{ secrets.PINECONE_API_KEY }}"
+
+      - name: Resolve secret ARNs (staging)
+        id: sm_arns
+        run: |
+          OPENAI_ARN=$(aws secretsmanager describe-secret --secret-id "${PROJECT_NAME}/staging/OPENAI_API_KEY" --query 'ARN' --output text)
+          PINECONE_ARN=$(aws secretsmanager describe-secret --secret-id "${PROJECT_NAME}/staging/PINECONE_API_KEY" --query 'ARN' --output text)
+          echo "openai=$OPENAI_ARN" >> $GITHUB_OUTPUT
+          echo "pinecone=$PINECONE_ARN" >> $GITHUB_OUTPUT
+
+      - name: Validate CFN template
+        run: aws cloudformation validate-template --template-body "file://${{ env.CFN_TEMPLATE }}"
+
+      - name: Deploy/Update stack (staging)
+        run: |
+          aws cloudformation deploy \
+            --stack-name "${PROJECT_NAME}-staging" \
+            --template-file "${{ env.CFN_TEMPLATE }}" \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides \
+              ProjectName="${PROJECT_NAME}" Env="staging" \
+              ImageUri="${{ needs.build_and_push.outputs.image_uri_digest }}" \
+              AppPort="${APP_PORT}" ContainerCpu="${CPU}" ContainerMemory="${MEMORY}" DesiredCount="${DESIRED_COUNT}" \
+              OpenAISecretArn="${{ steps.sm_arns.outputs.openai }}" \
+              PineconeSecretArn="${{ steps.sm_arns.outputs.pinecone }}" \
+              MinCapacity="${MIN_CAPACITY}" MaxCapacity="${MAX_CAPACITY}" CpuScaleTarget="${CPU_SCALE_TARGET}" \
+              TGPrefix="${TG_PREFIX}" AlertEmail=""
+
+      - name: Start CodeDeploy blue/green (staging)
+        shell: bash
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          STACK: "${{ env.PROJECT_NAME }}-staging"
+          APP_PORT: ${{ env.APP_PORT }}
+        run: |
+          set -euo pipefail
+          TD=$(aws ecs list-task-definitions --family-prefix "$STACK" --sort DESC --max-items 1 \
+               --query 'taskDefinitionArns[0]' --output text --region "$AWS_REGION")
+          echo "TaskDef: $TD"
+
+          APP_SPEC_OBJ=$(jq -n --arg td "$TD" --argjson port "$APP_PORT" \
+            '{version:1,Resources:[{TargetService:{Type:"AWS::ECS::Service",Properties:{TaskDefinition:$td,LoadBalancerInfo:{ContainerName:"web",ContainerPort:$port}}}}]}')
+
+          REQ=$(jq -n --arg app "$STACK" --arg dg "$STACK" --arg content "$APP_SPEC_OBJ" \
+            '{applicationName:$app,deploymentGroupName:$dg,revision:{revisionType:"AppSpecContent",appSpecContent:{content:$content}}}')
+
+          DEPLOY_ID=$(aws deploy create-deployment --cli-input-json "$REQ" \
+                       --query deploymentId --output text --region "$AWS_REGION")
+          echo "DeployId: $DEPLOY_ID"
+
+          set +e
+          aws deploy wait deployment-successful --deployment-id "$DEPLOY_ID" --region "$AWS_REGION"
+          RC=$?
+          if [ $RC -ne 0 ]; then
+            echo "------ CodeDeploy failure details ------"
+            aws deploy get-deployment --deployment-id "$DEPLOY_ID" --region "$AWS_REGION" \
+              --query 'deploymentInfo.[status,errorInformation]' --output json || true
+            exit 1
+          fi
+          set -e
+
+      - name: Output ALB DNS + health check (staging)
+        shell: bash
+        run: |
+          DNS=$(aws cloudformation describe-stacks --stack-name "${PROJECT_NAME}-staging" \
+            --query "Stacks[0].Outputs[?OutputKey=='AlbDNS'].OutputValue" --output text)
+          echo "Staging ALB: http://$DNS"
+          URL="http://$DNS/health"
+          for i in {1..40}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || true)
+            echo "Attempt $i -> $code"
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 10
+          done
+          echo "Health check failed"; exit 1
+
+  deploy_production:
+    runs-on: ubuntu-latest
+    needs: [build_and_push, deploy_staging]
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS (OIDC) - PRODUCTION ROLE
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_PRODUCTION }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Seed Secrets (production)
+        run: |
+          aws secretsmanager create-secret --name "${PROJECT_NAME}/production/OPENAI_API_KEY" --secret-string "${{ secrets.OPENAI_API_KEY }}" >/dev/null 2>&1 || \
+          aws secretsmanager put-secret-value --secret-id "${PROJECT_NAME}/production/OPENAI_API_KEY" --secret-string "${{ secrets.OPENAI_API_KEY }}"
+          aws secretsmanager create-secret --name "${PROJECT_NAME}/production/PINECONE_API_KEY" --secret-string "${{ secrets.PINECONE_API_KEY }}" >/dev/null 2>&1 || \
+          aws secretsmanager put-secret-value --secret-id "${PROJECT_NAME}/production/PINECONE_API_KEY" --secret-string "${{ secrets.PINECONE_API_KEY }}"
+
+      - name: Resolve secret ARNs (production)
+        id: sm_arns_prod
+        run: |
+          OPENAI_ARN=$(aws secretsmanager describe-secret --secret-id "${PROJECT_NAME}/production/OPENAI_API_KEY" --query 'ARN' --output text)
+          PINECONE_ARN=$(aws secretsmanager describe-secret --secret-id "${PROJECT_NAME}/production/PINECONE_API_KEY" --query 'ARN' --output text)
+          echo "openai=$OPENAI_ARN" >> $GITHUB_OUTPUT
+          echo "pinecone=$PINECONE_ARN" >> $GITHUB_OUTPUT
+
+      - name: Deploy/Update stack (production)
+        run: |
+          aws cloudformation deploy \
+            --stack-name "${PROJECT_NAME}-production" \
+            --template-file "${{ env.CFN_TEMPLATE }}" \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides \
+              ProjectName="${PROJECT_NAME}" Env="production" \
+              ImageUri="${{ needs.build_and_push.outputs.image_uri_digest }}" \
+              AppPort="${APP_PORT}" ContainerCpu="${CPU}" ContainerMemory="${MEMORY}" DesiredCount="${DESIRED_COUNT}" \
+              OpenAISecretArn="${{ steps.sm_arns_prod.outputs.openai }}" \
+              PineconeSecretArn="${{ steps.sm_arns_prod.outputs.pinecone }}" \
+              MinCapacity="${MIN_CAPACITY}" MaxCapacity="${MAX_CAPACITY}" CpuScaleTarget="${CPU_SCALE_TARGET}" \
+              TGPrefix="${TG_PREFIX}" AlertEmail="abelashishroy@gmail.com"
+
+      - name: Start CodeDeploy blue/green (production)
+        shell: bash
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          STACK: "${{ env.PROJECT_NAME }}-production"
+          APP_PORT: ${{ env.APP_PORT }}
+        run: |
+          set -euo pipefail
+          TD=$(aws ecs list-task-definitions --family-prefix "$STACK" --sort DESC --max-items 1 \
+               --query 'taskDefinitionArns[0]' --output text --region "$AWS_REGION")
+          echo "TaskDef: $TD"
+
+          APP_SPEC_OBJ=$(jq -n --arg td "$TD" --argjson port "$APP_PORT" \
+            '{version:1,Resources:[{TargetService:{Type:"AWS::ECS::Service",Properties:{TaskDefinition:$td,LoadBalancerInfo:{ContainerName:"web",ContainerPort:$port}}}}]}')
+
+          REQ=$(jq -n --arg app "$STACK" --arg dg "$STACK" --arg content "$APP_SPEC_OBJ" \
+            '{applicationName:$app,deploymentGroupName:$dg,revision:{revisionType:"AppSpecContent",appSpecContent:{content:$content}}}')
+
+          DEPLOY_ID=$(aws deploy create-deployment --cli-input-json "$REQ" \
+                       --query deploymentId --output text --region "$AWS_REGION")
+          echo "DeployId: $DEPLOY_ID"
+
+          set +e
+          aws deploy wait deployment-successful --deployment-id "$DEPLOY_ID" --region "$AWS_REGION"
+          RC=$?
+          if [ $RC -ne 0 ]; then
+            echo "------ CodeDeploy failure details ------"
+            aws deploy get-deployment --deployment-id "$DEPLOY_ID" --region "$AWS_REGION" \
+              --query 'deploymentInfo.[status,errorInformation]' --output json || true
+            exit 1
+          fi
+          set -e
+
+      - name: Output ALB DNS (production)
+        run: |
+          DNS=$(aws cloudformation describe-stacks --stack-name "${PROJECT_NAME}-production" \
+            --query "Stacks[0].Outputs[?OutputKey=='AlbDNS'].OutputValue" --output text)
+          echo "Production ALB: http://$DNS"

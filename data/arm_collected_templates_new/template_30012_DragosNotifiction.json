@@ -1,0 +1,87 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/9a74fe72-4c21-4ac5-80d9-37434e809721')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/9a74fe72-4c21-4ac5-80d9-37434e809721')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "Selected",
+            "lookbackDuration": "PT1H",
+            "groupByCustomDetails": [
+              "DragosIdentifier"
+            ],
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "severity": "Medium",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Dragos: {{summary}}",
+          "alertDynamicProperties": [
+            {
+              "alertProperty": "Techniques",
+              "value": "MitreTechniques"
+            },
+            {
+              "alertProperty": "ProductName",
+              "value": "AlertProductName"
+            }
+          ],
+          "alertTacticsColumnName": "MitreTactics",
+          "alertDescriptionFormat": "{{content}}",
+          "alertSeverityColumnName": "MSSentinelSeverity"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Dragos Notifications",
+        "description": "'Fires Microsoft Sentinel alerts for Dragos Notifcations.'\n",
+        "query": "DragosNotificationsToSentinel()\n",
+        "status": "Available",
+        "queryFrequency": "10m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SentinelEntities",
+                "identifier": "Entities"
+              }
+            ],
+            "entityType": "SentinelEntities"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "DragosCreatedAt": "createdAt",
+          "DragosIpAddresses": "IpAddresses",
+          "DragosIdentifier": "id",
+          "DragosThreatInfo": "threatInfo",
+          "DragosFirstSeenAt": "firstSeenAt",
+          "DragosSeverity": "severity",
+          "DragosOccurredAt": "occurredAt",
+          "DragosConnectSrc": "DragosConnectorSource",
+          "DragosSource": "source",
+          "DragosState": "state",
+          "DragosDetectionQuads": "detectionQuads",
+          "DragosLastSeenAt": "lastSeenAt",
+          "DragosMacAddresses": "MacAddresses"
+        },
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

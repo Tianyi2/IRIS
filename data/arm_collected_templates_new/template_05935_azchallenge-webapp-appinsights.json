@@ -1,0 +1,417 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "CosmosDbDatabaseAccountName": {
+            "type": "string",
+            "minLength": 3,
+            "metadata": {
+                "description": "The Azure Cosmos DB database account name."
+            }
+        },
+        "webAppName": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "The name of the Web App"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "keyvaultName": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "The Key Vault name"
+            }
+        },
+        "appInsightsName": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "The Key Vault name"
+            }
+        },
+        "cosmosDbKey_secret_name": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "The Cosmos Db Key secret name"
+            }
+        },
+        "sqlDbConnectionString_secret_name": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "The SQL Db Connection String secret name"
+            }
+        },
+        "signalR_secret_name": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "The Azure SignalR secret name"
+            }
+        },
+        "cosmosDbMasterKey": {
+            "type": "securestring",
+            "minLength": 1,
+            "metadata": {
+                "description": "The Cosmos Db Master Key"
+            }
+        },
+        "databaseFQDN": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "The SQL Server FQDN"
+            }
+        },
+        "signalRConnString": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "The Azure SignalR Connection String"
+            }
+        },
+        "sqlServerAdminLogin": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "The SQL Server admin user name"
+            }
+        },
+        "sqlServerAdminLoginPassword": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "The SQL Server admin password"
+            }
+        },
+        "sqlDatabaseName": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "The SQL Database name"
+            }
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "name": "[parameters('appInsightsName')]",
+            "type": "Microsoft.Insights/components",
+            "apiVersion": "2015-05-01",
+            "location": "[parameters('location')]",
+            "tags": {
+            },
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web"
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2016-10-01",
+            "name": "[parameters('keyvaultName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+            ],
+            "properties": {
+                "sku": {
+                    "family": "A",
+                    "name": "Standard"
+                },
+                "tenantId": "[subscription().tenantId]",
+                "accessPolicies": [
+                ],
+                "enabledForDeployment": true,
+                "enabledForDiskEncryption": true,
+                "enabledForTemplateDeployment": true
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2016-10-01",
+            "name": "[concat(parameters('keyvaultName'), '/', parameters('cosmosDbKey_secret_name'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+            ],
+            "properties": {
+                "value": "[parameters('cosmosDbMasterKey')]",
+                "attributes": {
+                    "enabled": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2016-10-01",
+            "name": "[concat(parameters('keyvaultName'), '/', parameters('signalR_secret_name'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+            ],
+            "properties": {
+                "value": "[parameters('signalRConnString')]",
+                "attributes": {
+                    "enabled": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2016-10-01",
+            "name": "[concat(parameters('keyvaultName'), '/', parameters('sqlDbConnectionString_secret_name'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+            ],
+            "properties": {
+                "value": "[concat('Server=tcp:',parameters('databaseFQDN'),',1433;Initial Catalog=',parameters('sqlDatabaseName'),';Persist Security Info=False;User ID=',parameters('sqlServerAdminLogin'),';Password=',parameters('sqlServerAdminLoginPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]",
+                "attributes": {
+                    "enabled": true
+                }
+            }
+        },
+        {
+            "name": "[parameters('webAppName')]",
+            "type": "Microsoft.Web/serverfarms",
+            "location": "[parameters('location')]",
+            "apiVersion": "2019-08-01",
+            "dependsOn": [
+            ],
+            "sku": {
+                "name": "S1",
+                "tier": "Standard",
+                "size": "S1",
+                "family": "S",
+                "capacity": 1
+            },
+            "kind": "app",
+            "properties": {
+                "perSiteScaling": false,
+                "maximumElasticWorkerCount": 1,
+                "isSpot": false,
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0
+            }
+        },
+        {
+            "name": "[parameters('webAppName')]",
+            "type": "Microsoft.Web/sites",
+            "location": "[parameters('location')]",
+            "apiVersion": "2018-11-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('webAppName'))]",
+                "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]",
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]",
+                "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyvaultName'), parameters('cosmosDbKey_secret_name'))]",
+                "[resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyvaultName'), parameters('sqlDbConnectionString_secret_name'))]"
+            ],
+            "tags": {
+                "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('webAppName'))]": "Resource",
+                "displayName": "Web App"
+            },
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('webAppName'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('webAppName'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('webAppName'))]",
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "siteConfig": {
+                  "appSettings": [
+                    {
+                      "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                      "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName'))).InstrumentationKey]",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "PROJECT",
+                      "value": "src/AzureChallenge.UI/AzureChallenge.UI.csproj",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "APPINSIGHTS_PROFILERFEATURE_VERSION",
+                      "value": "1.0.0",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+                      "value": "~2",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "ASPNETCORE_HOSTINGSTARTUP__KEYVAULT__CONFIGURATIONENABLED",
+                      "value": "true",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "ASPNETCORE_HOSTINGSTARTUP__KEYVAULT__CONFIGURATIONVAULT",
+                      "value": "[concat('https://', parameters('keyvaultName'), '.vault.azure.net/')]",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "Authentication:Facebook:Enabled",
+                      "value": false,
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "Authentication:Facebook:AppId",
+                      "value": "Invalid - Please Change",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "Authentication:Facebook:AppSecret",
+                      "value": "Invalid - Please Change",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "Authentication:Google:Enabled",
+                      "value": false,
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "Authentication:Google:ClientId",
+                      "value": "Invalid - Please Change",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "Authentication:Google:ClientSecret",
+                      "value": "Invalid - Please Change",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "Authentication:AzureAD:ClientId",
+                      "value": "Invalid - Please Change",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "Authentication:AzureAD:Enabled",
+                      "value": false,
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "Authentication:AzureAD:ClientSecret",
+                      "value": "Invalid - Please Change",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "Authentication:AzureAD:AllowedDomains",
+                      "value": "Invalid - Please Change",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "Authentication:LoginMessage",
+                      "value": "",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "SendGrid_Api_Key",
+                      "value": "Invalid - Please Change",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "CosmosDb:Account",
+                      "value": "[concat('https://', parameters('CosmosDbDatabaseAccountName') ,'.documents.azure.com:443/')]",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "CosmosDb:ContainerName",
+                      "value": "resources",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "CosmosDb:DatabaseName",
+                      "value": "azurechallenge",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "CosmosDb:Key",
+                      "value": "[concat('@Microsoft.KeyVault(SecretUri=', reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyVaultName'), parameters('cosmosDbKey_secret_name'))).secretUriWithVersion, ')')]",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "Azure:SignalR:ConnectionString",
+                      "value": "[concat('@Microsoft.KeyVault(SecretUri=', reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyVaultName'), parameters('signalR_secret_name'))).secretUriWithVersion, ')')]",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "DiagnosticServices_EXTENSION_VERSION",
+                      "value": "~3",
+                      "slotSetting": false
+                    },
+                    {
+                      "name": "Endpoints:AzureServicesEnpoint",
+                      "value": "https://docs.microsoft.com/en-us/rest/api/rest-products.json",
+                      "slotSetting": false
+                    }
+                  ],
+                    "connectionStrings": [
+                        {
+                            "name": "DefaultConnection",
+                            "connectionString": "[concat('@Microsoft.KeyVault(SecretUri=', reference(resourceId('Microsoft.KeyVault/vaults/secrets', parameters('keyVaultName'), parameters('sqlDbConnectionString_secret_name'))).secretUriWithVersion, ')')]",
+                            "type": "SQLAzure",
+                            "slotSetting": false
+                        }
+                    ]
+                },
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false,
+                "redundancyMode": "None"
+            },
+            "resources": [
+                {
+                    "type": "sourcecontrols",
+                    "apiVersion": "2018-02-01",
+                    "name": "web",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+                    ],
+                    "properties": {
+                        "repoUrl": "https://github.com/istavrinides/AzureChallenge.git",
+                        "branch": "master",
+                        "isManualIntegration": true
+                    }
+                }
+            ]
+        }
+    ],
+    "outputs": {
+        "webAppPrincipalId": {
+            "value": "[reference(resourceId('Microsoft.Web/sites', parameters('webAppName')),'2019-08-01', 'full').identity.principalId]",
+            "type": "string"
+        }
+    }
+}

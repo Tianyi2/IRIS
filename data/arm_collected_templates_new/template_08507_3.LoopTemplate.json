@@ -1,0 +1,47 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "numberOfInstances": {
+        "type": "int",
+        "defaultValue": 2,
+        "minValue": 1,
+        "maxValue": 12
+      }
+    },
+    "variables": {
+      "virtualNetworkName": "vNet",
+      "subnet1Name": "subnet1",
+      "subnet1Ref": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnet1Name'))]"
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Network/networkInterfaces",
+        "name": "[concat('Demo', copyindex(), '_Nic')]",
+        "apiVersion": "2017-06-01",
+        "location": "[resourceGroup().location]",
+        "copy": {
+            "name": "nicLoop",
+            "count": "[parameters('numberOfInstances')]",
+            "mode": "Parallel"
+        },
+        "properties": {
+            "ipConfigurations": [
+                {
+                    "name": "ipconfig1",
+                    "properties": {
+                        "privateIPAllocationMethod": "Dynamic",
+                        "subnet": {
+                            "id": "[variables('subnet1Ref')]"
+                        },
+                        "privateIPAddressVersion": "IPv4"
+                    }
+                }
+            ]
+        },
+        "dependsOn": []
+      }
+    ],
+    "outputs": {}
+}
+  

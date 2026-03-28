@@ -1,0 +1,49 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "saturn-log",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "westeurope",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-policy-identity/providers/Microsoft.ManagedIdentity/userAssignedIdentities/saturn-policy-identity": {
+            "clientId": "3af92696-7908-4732-bb6b-9f96fb6432f6",
+            "principalId": "bee3d72e-1c84-46a5-a0a5-79c0cd4a9ec7"
+          }
+        }
+      },
+      "properties": {
+        "description": "This policy initiative is a group of policies that ensures centralized logging is compliant per FSI Landing Zones",
+        "displayName": "Enforce centralized logging for Financial Services Industry",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "parameters": {
+          "enableLogAnalytics": {
+            "value": "DeployIfNotExists"
+          },
+          "logAnalyticsWorkspaceId": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-mgmt/providers/Microsoft.OperationalInsights/workspaces/saturn-law"
+          },
+          "logCategories": {
+            "value": "allLogs"
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Management/managementGroups/saturn/providers/Microsoft.Authorization/policySetDefinitions/Centralized-Logging",
+        "scope": "/providers/Microsoft.Management/managementGroups/saturn-playground"
+      }
+    }
+  ],
+  "outputs": {}
+}

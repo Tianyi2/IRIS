@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/802e3699-f87f-4662-b300-8ec29fc508a2')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/802e3699-f87f-4662-b300-8ec29fc508a2')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "triggerThreshold": 0,
+        "severity": "High",
+        "description": "New Attack Indication with severity High found",
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "PT5H",
+            "reopenClosedIncident": false,
+            "enabled": false
+          }
+        },
+        "query": "CBSLog_Azure_1_CL | where severity_s == \"High\" | where type_s == \"Attack Indication\" | where status_s != \"Closed\" or status_s != \"Resolved\"",
+        "name": "Attack Indication (High)",
+        "status": "Available",
+        "queryPeriod": "5m",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "queryFrequency": "5m",
+        "triggerOperator": "gt",
+        "tactics": [
+          "Execution",
+          "Persistence"
+        ],
+        "suppressionDuration": "5h",
+        "suppressionEnabled": false
+      }
+    }
+  ]
+}

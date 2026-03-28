@@ -1,0 +1,82 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/5b66d176-e344-4abf-b915-e5f09a6430ef')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/5b66d176-e344-4abf-b915-e5f09a6430ef')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "1d",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "enabled": true,
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "name": "Mimecast Secure Email Gateway - Internal Email Protect",
+        "description": "Detects threats from internal email threat protection",
+        "suppressionDuration": "5h",
+        "query": "MimecastSIEM_CL| where mimecastEventId_s==\"mail_ttp_iep\"",
+        "queryFrequency": "5m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Sender_s",
+                "identifier": "Sender"
+              },
+              {
+                "columnName": "Recipient_s",
+                "identifier": "Recipient"
+              },
+              {
+                "columnName": "MsgId_s",
+                "identifier": "InternetMessageId"
+              }
+            ],
+            "entityType": "MailMessage"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "URL_s",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          }
+        ],
+        "suppressionEnabled": false,
+        "severity": "High",
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "tactics": [
+          "LateralMovement",
+          "Persistence",
+          "Exfiltration"
+        ],
+        "customDetails": {
+          "UrlCategory": "UrlCategory_s",
+          "ScanResultInfo": "ScanResultInfo_s",
+          "Subject": "Subject_s",
+          "Route": "Route_s"
+        },
+        "queryPeriod": "15m"
+      }
+    }
+  ]
+}

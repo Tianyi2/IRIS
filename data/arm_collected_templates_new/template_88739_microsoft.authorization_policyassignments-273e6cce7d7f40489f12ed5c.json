@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "273e6cce7d7f40489f12ed5c",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "global",
+      "properties": {
+        "displayName": "Not allowed resource types",
+        "enforcementMode": "Default",
+        "metadata": {
+          "parameterScopes": {
+            "listOfResourceTypesNotAllowed": "/subscriptions/6a439cba-0e4d-46ca-9eda-e3b7a8f60a49"
+          }
+        },
+        "nonComplianceMessages": [],
+        "notScopes": [],
+        "overrides": [],
+        "parameters": {
+          "listOfResourceTypesNotAllowed": {
+            "value": [
+              "microsoft.network/virtualnetworks/virtualnetworkpeerings",
+              "microsoft.network/expressroutecircuits/peerings",
+              "microsoft.network/expressroutecircuits/peerings/connections",
+              "microsoft.network/expressroutecrossconnections/peerings",
+              "microsoft.network/virtualrouters/peerings"
+            ]
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/6c112d4e-5bc7-47ae-a041-ea2d9dccd749",
+        "resourceSelectors": [],
+        "scope": "/subscriptions/6a439cba-0e4d-46ca-9eda-e3b7a8f60a49"
+      }
+    }
+  ],
+  "outputs": {}
+}

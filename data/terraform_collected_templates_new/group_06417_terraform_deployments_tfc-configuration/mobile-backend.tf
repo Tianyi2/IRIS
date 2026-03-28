@@ -1,0 +1,109 @@
+module "mobile-backend-production" {
+  source = "github.com/alphagov/terraform-govuk-tfe-workspacer"
+
+  organization      = var.organization
+  workspace_name    = "mobile-backend-production"
+  workspace_desc    = "Infrastucture for GOV.UK App"
+  workspace_tags    = ["production", "mobile-backend", "aws"]
+  terraform_version = var.terraform_version
+  execution_mode    = "remote"
+  working_directory = "/terraform/deployments/mobile-backend/"
+  trigger_patterns = [
+    "/terraform/deployments/mobile-backend/**/*",
+    "/terraform/variables/production/common.tfvars"
+  ]
+  global_remote_state = true
+
+  project_name = "govuk-infrastructure"
+  vcs_repo = {
+    identifier     = "alphagov/govuk-infrastructure"
+    branch         = "main"
+    oauth_token_id = data.tfe_oauth_client.github.oauth_token_id
+  }
+
+  team_access = {
+    "GOV.UK Production" = "write"
+  }
+
+  tfvars_files = [
+    "production/common.tfvars"
+  ]
+
+  variable_set_ids = [
+    local.aws_credentials["production"]
+  ]
+}
+
+module "mobile-backend-staging" {
+  source = "github.com/alphagov/terraform-govuk-tfe-workspacer"
+
+  organization      = var.organization
+  workspace_name    = "mobile-backend-staging"
+  workspace_desc    = "Infrastucture for GOV.UK App"
+  workspace_tags    = ["staging", "mobile-backend", "aws"]
+  terraform_version = var.terraform_version
+  execution_mode    = "remote"
+  working_directory = "/terraform/deployments/mobile-backend/"
+  trigger_patterns = [
+    "/terraform/deployments/mobile-backend/**/*",
+    "/terraform/variables/staging/common.tfvars"
+  ]
+  global_remote_state = true
+
+  project_name = "govuk-infrastructure"
+  vcs_repo = {
+    identifier     = "alphagov/govuk-infrastructure"
+    branch         = "main"
+    oauth_token_id = data.tfe_oauth_client.github.oauth_token_id
+  }
+
+  team_access = {
+    "GOV.UK Production" = "write"
+  }
+
+  tfvars_files = [
+    "staging/common.tfvars"
+  ]
+
+  variable_set_ids = [
+    local.aws_credentials["staging"]
+  ]
+}
+
+module "mobile-backend-integration" {
+  source = "github.com/alphagov/terraform-govuk-tfe-workspacer"
+
+  organization      = var.organization
+  workspace_name    = "mobile-backend-integration"
+  workspace_desc    = "Infrastucture for GOV.UK App"
+  workspace_tags    = ["integration", "mobile-backend", "aws"]
+  terraform_version = var.terraform_version
+  execution_mode    = "remote"
+  working_directory = "/terraform/deployments/mobile-backend/"
+  trigger_patterns = [
+    "/terraform/deployments/mobile-backend/**/*",
+    "/terraform/variables/integration/common.tfvars"
+  ]
+  global_remote_state = true
+
+  project_name = "govuk-infrastructure"
+  vcs_repo = {
+    identifier     = "alphagov/govuk-infrastructure"
+    branch         = "main"
+    oauth_token_id = data.tfe_oauth_client.github.oauth_token_id
+  }
+
+  team_access = {
+    "GOV.UK Non-Production (r/o)" = "write"
+    "GOV.UK Production"           = "write"
+  }
+
+  tfvars_files = [
+    "integration/common.tfvars"
+  ]
+
+  variable_set_ids = [
+    local.aws_credentials["integration"]
+  ]
+}
+

@@ -1,0 +1,6220 @@
+﻿failure_type,count,percentage
+No 'resource' block found,1063,38.88
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",781,28.57
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\ndata ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",47,1.72
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '{{- /* Copyright 2021 Google LLC\n\nLicensed under the Apache License, Version 2.0 (the ') at line 1, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* $END
+	* FOR
+Previous tokens: [None]",25,0.91
+"HCL2 parse error: Unexpected token Token('COMMA', ',') at line 3, column 52.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",19,0.69
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 20, column 5.
+Expected one of: 
+	* RPAR",12,0.44
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",10,0.37
+"HCL2 parse error: Error trying to process rule ""body"":
+
+tags already defined",8,0.29
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<PARAMETERS_JSON\n      {\n        ') at line 25, column 23.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",8,0.29
+"HCL2 parse error: Unexpected token Token('RBRACE', '}') at line 7, column 1.
+Expected one of: 
+	* LBRACE",6,0.22
+"HCL2 parse error: Unexpected token Token('__ANON_0', '${') at line 11, column 63.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* DOT
+	* RBRACE
+	* NAME
+	* "".*""
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* IF
+	* LSQB
+	* FOR
+	* ""[*]""
+Previous tokens: [Token('NAME', 'example-remote-secret-')]",6,0.22
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 18, column 5.
+Expected one of: 
+	* RPAR",5,0.18
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.name[count.index] : local.admiralty[') at line 58, column 88.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",5,0.18
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\nlocals {\n  project = ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",5,0.18
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 16, column 13.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",4,0.15
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 21, column 5.
+Expected one of: 
+	* RPAR",4,0.15
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 29, column 13.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",4,0.15
+"HCL2 parse error: Error trying to process rule ""body"":
+
+kubernetes_cluster_viewer_folder_binding already defined",4,0.15
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 2, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",4,0.15
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 51, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",4,0.15
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.network_ip}') at line 3, column 72.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",4,0.15
+"HCL2 parse error: Unexpected token Token('__ANON_0', '${') at line 7, column 30.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* DOT
+	* QMARK
+	* RBRACE
+	* LSQB
+	* NAME
+	* "".*""
+	* ""::""
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* IF
+	* LPAR
+	* FOR
+	* ""[*]""
+Previous tokens: [Token('NAME', 'true-')]",4,0.15
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    var.region\n    }:lambda:path/2015-03-31/functions/') at line 56, column 31.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",4,0.15
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.access_config.0.nat_ip,\n  )\n}\n\n') at line 8, column 53.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",3,0.11
+"HCL2 parse error: Unexpected token Token('$END', '') at line 2, column 1.
+Expected one of: 
+	* LBRACE",3,0.11
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 7, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",3,0.11
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<-EOF\n  {\n      ') at line 150, column 12.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",3,0.11
+"HCL2 parse error: Error trying to process rule ""body"":
+
+ebs_block_device already defined",3,0.11
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 43, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",3,0.11
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    var.allow_local_ssh_access ? var.network_cidr_block : ') at line 6, column 34.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",3,0.11
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 45, column 9.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",3,0.11
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n// Forwarding rule for Internal Load Balancing\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",3,0.11
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 20, column 3.
+Expected one of: 
+	* RPAR",3,0.11
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '/') at line 7, column 32.
+Expected one of: 
+	* EQ
+	* IN
+	* DBLQUOTE
+	* NAME
+	* IF
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* LBRACE
+	* FOR",3,0.11
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 22, column 5.
+Expected one of: 
+	* RPAR",3,0.11
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 52, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",3,0.11
+"HCL2 parse error: Error trying to process rule ""body"":
+
+ingress already defined",3,0.11
+"HCL2 parse error: Unexpected token Token('__ANON_0', '${') at line 17, column 61.
+Expected one of: 
+	* BINARY_OP
+	* DOT
+	* QMARK
+	* "".*""
+	* NL_OR_COMMENT
+	* LSQB
+	* RSQB
+	* ""[*]""
+	* COMMA
+Previous tokens: [Token('NAME', 'health-check-')]",3,0.11
+"HCL2 parse error: Unexpected token Token('$END', '') at line 6, column 1.
+Expected one of: 
+	* RBRACE",2,0.07
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 24, column 9.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",2,0.07
+"HCL2 parse error: Unexpected token Token('NAME', 'description') at line 5, column 3.
+Expected one of: 
+	* LBRACE",2,0.07
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 2, column 1.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",2,0.07
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '%') at line 2, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",2,0.07
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 26, column 5.
+Expected one of: 
+	* RPAR",2,0.07
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '%') at line 4, column 2.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",2,0.07
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 27, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",2,0.07
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 24, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",2,0.07
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 24, column 62.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",2,0.07
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 64, column 7.
+Expected one of: 
+	* RPAR",2,0.07
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 4, column 24.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",2,0.07
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 54, column 14.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",2,0.07
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 9, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",2,0.07
+"HCL2 parse error: Unexpected token Token('COLON', ':') at line 1, column 9.
+Expected one of: 
+	* IN
+	* DBLQUOTE
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* LBRACE
+	* FOR",2,0.07
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 28, column 7.
+Expected one of: 
+	* RPAR",2,0.07
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 8, column 5.
+Expected one of: 
+	* RPAR",2,0.07
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 40, column 7.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",2,0.07
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 47, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",2,0.07
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 68, column 9.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",2,0.07
+"HCL2 parse error: Error trying to process rule ""body"":
+
+dcos_security already defined",2,0.07
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 91, column 21.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",2,0.07
+"HCL2 parse error: Error trying to process rule ""body"":
+
+description already defined",2,0.07
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 70, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* $END
+	* FOR",2,0.07
+"HCL2 parse error: Error trying to process rule ""body"":
+
+enable_flow_logs already defined",2,0.07
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 59, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",2,0.07
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '||') at line 231, column 5.
+Expected one of: 
+	* RPAR",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.name\n\n  rules = [{\n    id      = ') at line 8, column 38.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[2]s.id\n}\n\n') at line 8, column 59.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",2,0.07
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 93, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.mac)}') at line 95, column 64.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",2,0.07
+"HCL2 parse error: Unexpected token Token('COMMA', ',') at line 5, column 52.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.network_ip[count.index]]\n}\n\n# Zones in the region\ndata ') at line 14, column 70.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",2,0.07
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 12, column 19.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', ';\n}\n\nresource ') at line 4, column 16.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* DOT
+	* QMARK
+	* RBRACE
+	* NAME
+	* "".*""
+	* NL_OR_COMMENT
+	* IF
+	* FOR_EACH
+	* LSQB
+	* FOR
+	* ""[*]""
+Previous tokens: [Token('DBLQUOTE', '""')]",2,0.07
+"HCL2 parse error: Unexpected token Token('DOT', '.') at line 23, column 14.
+Expected one of: 
+	* EQ
+	* IN
+	* DBLQUOTE
+	* NAME
+	* IF
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* LBRACE
+	* FOR",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# start code-server IDE\ncode-server --auth none --port 13337 &\n\n# run configure script to add VS Code extensions and copy JetBrains projector files to $HOME\n/coder/configure\n\n# start JetBrains projector-based IDE\n~/.local/bin/projector run IntelliJ &\n\n# clone repo\nmkdir -p ~/.ssh\nssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts\ngit clone --progress git@github.com:') at line 107, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",2,0.07
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 41, column 5.
+Expected one of: 
+	* RPAR",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\n# clone repo\nif [ ! -d ') at line 88, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",2,0.07
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 54, column 7.
+Expected one of: 
+	* RPAR",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<YAML\napiVersion: ') at line 3, column 17.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<YAML\napiVersion: networking.istio.io/v1alpha3\nkind: Gateway\nmetadata:\n  name: seldon-gateway\n  namespace: istio-system\nspec:\n  selector:\n    istio: ingressgateway # use istio default controller\n  servers:\n  - port:\n      number: 80\n      name: http\n      protocol: HTTP\n    hosts:\n    - ') at line 38, column 15.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<__eof\nHost default\n    Hostname ') at line 15, column 13.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\\"",\\"", var.ami)}') at line 6, column 17.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* DECIMAL
+	* RPAR
+	* MINUS
+	* NAME
+	* NL_OR_COMMENT
+	* LBRACE
+	* FOR_EACH
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('LPAR', '(')]",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    [ ') at line 9, column 33.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    map(\n     ') at line 141, column 13.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",2,0.07
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 56, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",2,0.07
+"HCL2 parse error: Unexpected token Token('EQ', ' =') at line 37, column 21.
+Expected one of: 
+	* IN
+	* DBLQUOTE
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* LBRACE
+	* FOR",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# VPC network\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# start code-server IDE\ncode-server --auth none --port 13337 &\n\n# run configure script to add VS Code extensions and copy JetBrains projector files to $HOME\n/coder/configure\n\n# start JetBrains projector-based IDE\n~/.local/bin/projector run PyCharm &\n\n# clone repo\nmkdir -p ~/.ssh\nssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts\ngit clone --progress git@github.com:') at line 107, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",2,0.07
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 49, column 5.
+Expected one of: 
+	* RPAR",2,0.07
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 174, column 10.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",2,0.07
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 61, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",2,0.07
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 193, column 7.
+Expected one of: 
+	* RSQB",2,0.07
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 32, column 5.
+Expected one of: 
+	* RPAR",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '{\n  ') at line 1, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* $END
+	* FOR
+Previous tokens: [None]",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '{{component_name}}_build_container\n  ]\n  name     = ') at line 9, column 19.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', 'π      = 3.14159265359\n}\n\n') at line 15, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n  ')]",2,0.07
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 15, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",2,0.07
+"HCL2 parse error: Unexpected token Token('NAME', 'depends_on') at line 70, column 3.
+Expected one of: 
+	* LBRACE",2,0.07
+"HCL2 parse error: Unexpected token Token('__ANON_0', '${') at line 6, column 34.
+Expected one of: 
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* LBRACE
+	* MINUS
+	* LSQB
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* BANG
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LPAR
+	* NL_OR_COMMENT
+	* FOR
+Previous tokens: [Token('BINARY_OP', '-')]",2,0.07
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# You may also want to control name generation explicitly:\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",2,0.07
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '&&') at line 22, column 7.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '&&') at line 30, column 9.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '&&') at line 34, column 7.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '&&') at line 441, column 44.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '&&') at line 48, column 5.
+Expected one of: 
+	* RSQB",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '&&') at line 85, column 44.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '+') at line 13, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '+') at line 19, column 9.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '+') at line 20, column 9.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '/') at line 5, column 43.
+Expected one of: 
+	* DOT
+	* COLON
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '/') at line 6, column 37.
+Expected one of: 
+	* EQ
+	* IN
+	* DBLQUOTE
+	* NAME
+	* IF
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* LBRACE
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '/') at line 9, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* $END
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '<') at line 347, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* $END
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '==') at line 4, column 10.
+Expected one of: 
+	* IN
+	* DBLQUOTE
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* LBRACE
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '||') at line 107, column 7.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '||') at line 39, column 7.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('COLON', ':') at line 1, column 8.
+Expected one of: 
+	* EQ
+	* IN
+	* DBLQUOTE
+	* NAME
+	* IF
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* LBRACE
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('COLON', ':') at line 29, column 37.
+Expected one of: 
+	* BINARY_OP
+	* QMARK
+	* IF
+	* NL_OR_COMMENT
+	* RSQB",1,0.04
+"HCL2 parse error: Unexpected token Token('COMMA', ',') at line 10, column 20.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('COMMA', ',') at line 126, column 9.
+Expected one of: 
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* DECIMAL
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* NL_OR_COMMENT
+	* LPAR
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('COMMA', ',') at line 14, column 73.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('COMMA', ',') at line 29, column 34.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('COMMA', ',') at line 46, column 27.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('COMMA', ',') at line 5, column 37.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('COMMA', ',') at line 6, column 73.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('COMMA', ',') at line 7, column 50.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('COMMA', ',') at line 7, column 52.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('COMMA', ',') at line 7, column 69.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('COMMA', ',') at line 81, column 25.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 1, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* $END
+	* FOR
+Previous tokens: [None]",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 12, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 121, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 13, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 149, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 15, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 162, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 17, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 185, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 20, column 9.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 21, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 23, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 23, column 63.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 24, column 7.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 24, column 9.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 27, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 3, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 31, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 34, column 35.
+Expected one of: 
+	* LBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 359, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 36, column 78.
+Expected one of: 
+	* BINARY_OP
+	* QMARK
+	* NL_OR_COMMENT
+	* RSQB
+	* COMMA",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 43, column 9.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 46, column 9.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 48, column 9.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 5, column 9.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 50, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 50, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 6, column 46.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 60, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 7, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* $END
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DBLQUOTE', '""') at line 93, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DECIMAL', '1') at line 10, column 24.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DECIMAL', '2') at line 10, column 29.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('DOT', '.') at line 35, column 10.
+Expected one of: 
+	* EQ
+	* IN
+	* DBLQUOTE
+	* NAME
+	* IF
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* LBRACE
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('EQ', ' =') at line 354, column 101.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* DOT
+	* QMARK
+	* RBRACE
+	* NAME
+	* __ANON_5
+	* NL_OR_COMMENT
+	* IF
+	* FOR_EACH
+	* LSQB
+	* FOR
+	* __ANON_6",1,0.04
+"HCL2 parse error: Unexpected token Token('EQ', '=') at line 10, column 25.
+Expected one of: 
+	* IN
+	* DBLQUOTE
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* LBRACE
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 112, column 20.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 13, column 27.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 14, column 27.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 14, column 5.
+Expected one of: 
+	* RSQB
+	* NL_OR_COMMENT
+	* COMMA",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 146, column 20.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 153, column 14.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 19, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 19, column 43.
+Expected one of: 
+	* BINARY_OP
+	* __ANON_3
+	* DOT
+	* QMARK
+	* RPAR
+	* __ANON_5
+	* NL_OR_COMMENT
+	* LSQB
+	* __ANON_6
+	* COMMA",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 2, column 38.
+Expected one of: 
+	* BINARY_OP
+	* DOT
+	* QMARK
+	* RBRACE
+	* __ANON_5
+	* LSQB
+	* __ANON_6",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 26, column 41.
+Expected one of: 
+	* BINARY_OP
+	* DOT
+	* QMARK
+	* RBRACE
+	* __ANON_5
+	* LSQB
+	* __ANON_6",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 28, column 16.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 29, column 27.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 3, column 1.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 3, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 30, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* $END
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 34, column 16.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 5, column 1.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 53, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 63, column 49.
+Expected one of: 
+	* BINARY_OP
+	* DOT
+	* QMARK
+	* __ANON_5
+	* NL_OR_COMMENT
+	* LSQB
+	* RSQB
+	* __ANON_6
+	* COMMA",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 64, column 21.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 68, column 20.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 71, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 8, column 60.
+Expected one of: 
+	* BINARY_OP
+	* DOT
+	* QMARK
+	* RBRACE
+	* __ANON_5
+	* LSQB
+	* __ANON_6",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 87, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* $END
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 9, column 56.
+Expected one of: 
+	* BINARY_OP
+	* DOT
+	* QMARK
+	* RBRACE
+	* __ANON_5
+	* LSQB
+	* __ANON_6",1,0.04
+"HCL2 parse error: Unexpected token Token('LBRACE', '{') at line 92, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* $END
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 1, column 11.
+Expected one of: 
+	* EQ
+	* IN
+	* DBLQUOTE
+	* NAME
+	* IF
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* LBRACE
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 120, column 13.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 13, column 19.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 15, column 13.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 187, column 7.
+Expected one of: 
+	* RSQB",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 20, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 20, column 15.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 248, column 5.
+Expected one of: 
+	* RPAR
+	* NL_OR_COMMENT
+	* COMMA",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 30, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 31, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 33, column 13.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 40, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 42, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 44, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 46, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 50, column 96.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 54, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 548, column 5.
+Expected one of: 
+	* RPAR
+	* NL_OR_COMMENT
+	* COMMA",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 57, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 59, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 6, column 30.
+Expected one of: 
+	* __ANON_4",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 60, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 62, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 62, column 14.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 65, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 66, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 70, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 75, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 82, column 17.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LPAR', '(') at line 97, column 11.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LSQB', '[') at line 17, column 36.
+Expected one of: 
+	* DOT
+	* COLON
+	* EQ",1,0.04
+"HCL2 parse error: Unexpected token Token('LSQB', '[') at line 80, column 11.
+Expected one of: 
+	* RPAR
+	* NL_OR_COMMENT
+	* COMMA",1,0.04
+"HCL2 parse error: Unexpected token Token('MINUS', '-') at line 15, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('MINUS', '-') at line 25, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('MINUS', '-') at line 337, column 9.
+Expected one of: 
+	* BINARY_OP
+	* __ANON_3
+	* QMARK
+	* RPAR
+	* NL_OR_COMMENT
+	* COMMA",1,0.04
+"HCL2 parse error: Unexpected token Token('MINUS', '-') at line 5, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('MINUS', '-') at line 6, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('NAME', 'content') at line 16, column 5.
+Expected one of: 
+	* LBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('NAME', 'depends_on') at line 67, column 3.
+Expected one of: 
+	* LBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('NAME', 'display_name') at line 3, column 3.
+Expected one of: 
+	* LBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('NAME', 'most_recent') at line 2, column 3.
+Expected one of: 
+	* LBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('NAME', 'ratio_alerts') at line 35, column 5.
+Expected one of: 
+	* LBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('NAME', 'string') at line 146, column 51.
+Expected one of: 
+	* BINARY_OP
+	* QMARK
+	* NL_OR_COMMENT
+	* RSQB
+	* COMMA",1,0.04
+"HCL2 parse error: Unexpected token Token('NAME', 'version') at line 5, column 3.
+Expected one of: 
+	* LBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('NL_OR_COMMENT', '\n             ') at line 2, column 43.
+Expected one of: 
+	* RBRACE
+	* BINARY_OP
+	* QMARK",1,0.04
+"HCL2 parse error: Unexpected token Token('NL_OR_COMMENT', '\n  ') at line 36, column 133.
+Expected one of: 
+	* BINARY_OP
+	* QMARK
+	* FOR_OBJECT_ARROW",1,0.04
+"HCL2 parse error: Unexpected token Token('NL_OR_COMMENT', '\n  ') at line 5, column 34.
+Expected one of: 
+	* RBRACE
+	* BINARY_OP
+	* QMARK",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 10, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 104, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 107, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 113, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 117, column 11.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 14, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 151, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 16, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 17, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 187, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 197, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 22, column 9.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 23, column 11.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 233, column 11.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 24, column 9.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 26, column 7.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 27, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 299, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 3, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 308, column 11.
+Expected one of: 
+	* IF
+	* RSQB
+	* NL_OR_COMMENT",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 31, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 33, column 7.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 34, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 347, column 7.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 36, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 37, column 15.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 37, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 37, column 7.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 38, column 11.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 41, column 11.
+Expected one of: 
+	* RPAR
+	* NL_OR_COMMENT
+	* COMMA",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 42, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 436, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 44, column 7.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 45, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 46, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 49, column 5.
+Expected one of: 
+	* RBRACE
+	* __ANON_3
+	* IF
+	* NL_OR_COMMENT",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 50, column 13.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 50, column 7.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 54, column 13.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 56, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 59, column 7.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 62, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 673, column 17.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 72, column 7.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 78, column 5.
+Expected one of: 
+	* RPAR
+	* NL_OR_COMMENT
+	* COMMA",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 89, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 89, column 9.
+Expected one of: 
+	* RPAR
+	* NL_OR_COMMENT
+	* COMMA",1,0.04
+"HCL2 parse error: Unexpected token Token('QMARK', '?') at line 9, column 5.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('RBRACE', '}') at line 1, column 32.
+Expected one of: 
+	* IN
+	* DBLQUOTE
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* LBRACE
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('RBRACE', '}') at line 10, column 1.
+Expected one of: 
+	* LBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('RBRACE', '}') at line 11, column 1.
+Expected one of: 
+	* LBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('RBRACE', '}') at line 12, column 1.
+Expected one of: 
+	* $END",1,0.04
+"HCL2 parse error: Unexpected token Token('RBRACE', '}') at line 19, column 1.
+Expected one of: 
+	* LBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('RBRACE', '}') at line 207, column 3.
+Expected one of: 
+	* RPAR
+	* NL_OR_COMMENT
+	* COMMA",1,0.04
+"HCL2 parse error: Unexpected token Token('RBRACE', '}') at line 4, column 1.
+Expected one of: 
+	* LBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('RBRACE', '}') at line 6, column 1.
+Expected one of: 
+	* LBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('RPAR', ')') at line 52, column 3.
+Expected one of: 
+	* LPAR
+	* __ANON_1
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* DECIMAL
+	* MINUS
+	* NAME
+	* NL_OR_COMMENT
+	* LBRACE
+	* FOR_EACH
+	* IF
+	* __ANON_2
+	* LSQB
+	* BANG
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('RSQB', ']') at line 102, column 3.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('RSQB', ']') at line 135, column 3.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('RSQB', ']') at line 143, column 3.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('RSQB', ']') at line 153, column 3.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('RSQB', ']') at line 172, column 3.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('RSQB', ']') at line 182, column 3.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('RSQB', ']') at line 186, column 3.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('RSQB', ']') at line 200, column 3.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('RSQB', ']') at line 215, column 3.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('RSQB', ']') at line 222, column 3.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('RSQB', ']') at line 227, column 3.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('RSQB', ']') at line 27, column 6.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* QMARK
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* NL_OR_COMMENT
+	* LPAR
+	* FOR
+	* COMMA",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', ""'I am single quoted' # ERROR!\n}\n\n\nlocals {\n  multi_line = <<EOF\nHere is my multi-line string.\nShare and enjoy! 🌮🌮🌮\nEOF\n}\n\nresource "") at line 27, column 19.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', ""'ftpuser'\n}\nvariable "") at line 6, column 13.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', ""'ftpuser'\n}\nvariable "") at line 7, column 13.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', ""<<EOT\n#!/bin/bash\n\n# clone repo\nmkdir -p ~/.ssh\nssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts\ngit clone --progress git@github.com:sharkymark/rust-hw.git &\n\n# install rust programming language\ncurl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y &\n\n# use coder CLI to clone and install dotfiles\ncoder dotfiles -y "") at line 55, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', ""<<EOT\n#!/bin/bash\n\n# install microsoft visual studio code server\n\n# Create install directory if it doesn't exist\nmkdir -p "") at line 232, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', ""<<EOT\n#!/bin/sh\n\nBOLD='\\033[0;1m'\n\n# Create install directory if it doesn't exist\nmkdir -p "") at line 263, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', ""<<EOT\n\n#!/bin/bash\n\n# Install the public key for the repository:\ncurl -fsS https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo gpg --dearmor -o /usr/share/keyrings/packages-pgadmin-org.gpg\n\n\n# Create the repository configuration file:\nsudo sh -c 'echo "") at line 105, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', ""```hcl\n// This example assumes this network already exists.\n// The API creates a tenant network per network authorized for a\n// Memcache instance and that network is not deleted when the user-created\n// network (authorized_network) is deleted, so this prevents issues\n// with tenant network quota.\n// If this network hasn't been created and you are using this example in your\n// config, add an additional network resource or change\n// this from "") at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', ""```hcl\n// This example assumes this network already exists.\n// The API creates a tenant network per network authorized for a\n// Redis instance and that network is not deleted when the user-created\n// network (authorized_network) is deleted, so this prevents issues\n// with tenant network quota.\n// If this network hasn't been created and you are using this example in your\n// config, add an additional network resource or change\n// this from "") at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', ""```hcl\n// Using with Region Target HTTPS Proxies\n//\n// SSL certificates cannot be updated after creation. In order to apply\n// the specified configuration, Terraform will destroy the existing\n// resource and create a replacement. To effectively use an SSL\n// certificate resource with a Target HTTPS Proxy resource, it's\n// recommended to specify create_before_destroy in a lifecycle block.\n// Either omit the Instance Template name attribute, specify a partial\n// name with name_prefix, or use random_id resource. Example:\n\nresource "") at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', ""```hcl\n// Using with Target HTTPS Proxies\n//\n// SSL certificates cannot be updated after creation. In order to apply\n// the specified configuration, Terraform will destroy the existing\n// resource and create a replacement. To effectively use an SSL\n// certificate resource with a Target HTTPS Proxy resource, it's\n// recommended to specify create_before_destroy in a lifecycle block.\n// Either omit the Instance Template name attribute, specify a partial\n// name with name_prefix, or use random_id resource. Example:\n\nresource "") at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', ""{{ cookiecutter.module_name|replace('-', '_') }}.bucket_name\n}\n\n"") at line 19, column 24.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '!!\n\n') at line 1, column 14.
+Expected one of: 
+	* IN
+	* DBLQUOTE
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* LBRACE
+	* FOR
+Previous tokens: [Token('NAME', 'terraform')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[10]t\n\t\t\t}\n\t\t}\n\n') at line 14, column 16.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]q\n  hostname   = %[2]q\n  name       = %[3]q\n  auth_type  = ') at line 2, column 16.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]q\n  hostname   = %[2]q\n  name       = %[3]q\n  id         = ') at line 2, column 16.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s-shop-1,\n    cloudflare_dns_record.%[1]s-shop-2\n  ]\n}\n\n') at line 45, column 27.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.account_id\n  identifier = cloudflare_custom_pages.%[1]s.identifier\n}\n\n') at line 9, column 40.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n    network = ') at line 9, column 58.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n    },\n    {\n      name = ') at line 29, column 54.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n    }\n  }]\n}\n\n') at line 24, column 47.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n  assets = {\n    directory = ') at line 8, column 33.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n  comment    = ') at line 10, column 57.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n  depends_on = [cloudflare_api_token.%[1]s]\n}\n') at line 17, column 35.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n  event_start_time          = ') at line 20, column 55.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n  hostname {\n    url_hostname = ') at line 10, column 32.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n  key          = ') at line 8, column 50.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n  pattern = {\n    regex = ') at line 4, column 57.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n\n  config = {\n  origin_request = {\n    connect_timeout          = 60\n    tls_timeout              = 60\n    tcp_keep_alive           = 60\n    no_happy_eyeballs        = false\n    keep_alive_connections   = 1024\n    keep_alive_timeout       = 60\n    http_host_header         = ') at line 10, column 65.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n\n  config {\n    ingress_rule {\n      service = ') at line 10, column 34.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n\n  rules = [{\n    action      = ') at line 20, column 45.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n\t\t\tresolver_ips = [') at line 15, column 60.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n\tkey_name = ') at line 8, column 49.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n}\n') at line 8, column 33.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id\n}\n\n') at line 10, column 32.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id]\n}\n\n') at line 10, column 47.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id]\n}\n\n') at line 17, column 40.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id]\n}\n\n') at line 9, column 47.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.id}') at line 12, column 38.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.name\n    enabled = ') at line 10, column 40.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.name\n  domain      = ') at line 8, column 38.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.name\n  rules = [\n    {\n      id = ') at line 8, column 38.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+count already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.name\n\t\t  name = ') at line 9, column 45.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.result[0].id\n}\n') at line 7, column 48.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.script_name\n  enabled     = true\n}\n\n\n') at line 9, column 43.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.script_name\n}\n') at line 10, column 39.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s.sitekey\n}\n\n') at line 10, column 44.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s\n  to   = cloudflare_workers_for_platforms_dispatch_namespace.%[1]s\n}\n\n') at line 7, column 53.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s]\n  account_id = ') at line 9, column 47.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s]\n\t}\n\n') at line 11, column 58.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s]\n}\n') at line 17, column 72.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s]\n}\n') at line 22, column 36.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s]\n}\n') at line 31, column 36.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s]\n}\n\n') at line 11, column 44.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s]\n}\n\n') at line 13, column 64.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s]\n}\n\n') at line 21, column 59.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s_idp.id\n    }\n  }\n\n  depends_on = [cloudflare_access_identity_provider.%[1]s_idp]\n}\n\n') at line 19, column 66.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[1]s_kv_namespace.id\n        }\n      }\n      durable_object_namespaces = {\n        DO_BINDING = {\n          namespace_id = ') at line 24, column 58.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[2]s.account_id\n\tname       = cloudflare_zero_trust_tunnel_cloudflared.%[2]s.name\n\tdepends_on = [cloudflare_zero_trust_tunnel_cloudflared.%[2]s]\n}\n\n') at line 9, column 56.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[2]s.id\n  \tasn = 1\n  \tcomment    = ') at line 11, column 33.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[2]s.id\n  tunnel_id          = cloudflare_zero_trust_tunnel_cloudflared.%[3]s.id\n  comment            = ') at line 17, column 81.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[2]s.id\n\taccount_id = cloudflare_zero_trust_tunnel_cloudflared_virtual_network.%[2]s.account_id\n\tdepends_on = [') at line 10, column 81.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n// Cloud Run Example\n\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[2]s.id\n}\n\n') at line 9, column 56.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[2]s.modified\n}\n\n') at line 7, column 39.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[2]s.script_name\n\tdispatch_namespace = cloudflare_workers_for_platforms_dispatch_namespace.%[2]s.name\n\tname \t\t= ') at line 17, column 42.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[2]s.zone_id\n\t\n\tdepends_on = [cloudflare_argo_tiered_caching.%[2]s]\n}\n') at line 7, column 43.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[2]s]\n}\n\n') at line 14, column 60.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[3]d\n  action      = ') at line 5, column 17.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '  =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[3]d\n  enabled     = true\n  description = ') at line 5, column 17.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '  =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[3]d\n}\n') at line 6, column 15.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[3]s.id\n  default_pools = [') at line 4, column 49.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[3]s.id\n\n  rate_plan = {\n    id = ') at line 10, column 29.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[3]s\n  entries = [\n    {\n      enabled = false\n      id      = ') at line 4, column 17.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[3]s\n\t}\n\n') at line 11, column 23.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[3]s\n}\n\n') at line 13, column 24.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[3]s\n}\n\n') at line 14, column 13.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[3]s]\n}\n\n') at line 7, column 17.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* RSQB
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* DECIMAL
+	* MINUS
+	* NAME
+	* NL_OR_COMMENT
+	* LBRACE
+	* FOR_EACH
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('LSQB', '[')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[3]t\n}\n') at line 4, column 22.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[3]t\n}\n\n') at line 3, column 12.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[4]d\n\tdepends_on  = [cloudflare_magic_wan_ipsec_tunnel.temp_ipsec_tunnel]\n  }\n') at line 25, column 11.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[4]d\n}\n\n') at line 11, column 9.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[4]d\n}\n\n') at line 6, column 19.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[4]s  # true or false\n  traffic_type = ') at line 14, column 24.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[4]s\n  notes     = ') at line 6, column 15.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[5]s.id\n    }\n  ]\n}\n\n') at line 21, column 43.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[5]s\n\n  attack_mitigation = {\n    enabled = false\n  }\n}\n\n') at line 5, column 15.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[5]s]\n  credentials = {\n    keys = [\n%[6]s\n    ]\n  }\n}\n') at line 6, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* RSQB
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* DECIMAL
+	* MINUS
+	* NAME
+	* NL_OR_COMMENT
+	* LBRACE
+	* FOR_EACH
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('LSQB', '[')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[6]d\n\tsupport_url               = ') at line 13, column 30.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '                =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%[6]s\n # reference the ID of the generated token config, this constructs: is_jwt_valid(') at line 36, column 12.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%t\n  %[4]s\n  %[5]s\n  %[6]s\n  %[7]s\n}\n\n') at line 4, column 13.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%t\n  name                        = ') at line 5, column 33.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '                     =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '%t\n  }\n\n') at line 4, column 11.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '*.*@company.com\n        restrict_invitation = true\n      }\n    }\n  }\n}\n\nresource ') at line 26, column 43.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '.this.id\n  storage_account_id             = each.value.storage_account_resource_id\n  eventhub_authorization_rule_id = each.value.event_hub_authorization_rule_resource_id\n  eventhub_name                  = each.value.event_hub_name\n  partner_solution_id            = each.value.marketplace_partner_resource_id\n  log_analytics_workspace_id     = each.value.workspace_resource_id\n  log_analytics_destination_type = each.value.log_analytics_destination_type\n\n  dynamic ') at line 50, column 57.
+Expected one of: 
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* LBRACE
+	* MINUS
+	* LSQB
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* BANG
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LPAR
+	* NL_OR_COMMENT
+	* FOR
+Previous tokens: [Token('BINARY_OP', '>')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0, vsphere_virtual_machine.windows.*.guest_ip_addresses.0)), 0)}') at line 6, column 86.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+public_ip_address_id already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.access_config.0.nat_ip\n}\n') at line 3, column 69.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.access_config.0.nat_ip\n}\n\n# Controller instances\nresource ') at line 27, column 85.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.address)}') at line 120, column 90.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.address)}') at line 121, column 97.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.address)}') at line 124, column 89.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.address)}') at line 17, column 118.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.address, list(') at line 10, column 85.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.address\n}\n\noutput ') at line 36, column 78.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.addresses)}') at line 117, column 71.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.addresses)}') at line 122, column 65.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.addresses.0\n  api_servers_ips      = libvirt_domain.controller-machine.*.network_interface.0.addresses.0\n  etcd_servers         = data.template_file.controllernames.*.rendered\n  asset_dir            = var.asset_dir\n  networking           = var.networking\n  network_mtu          = var.network_mtu\n\n  network_ip_autodetection_method = var.network_ip_autodetection_method\n\n  pod_cidr              = var.pod_cidr\n  service_cidr          = var.service_cidr\n  cluster_domain_suffix = var.cluster_domain_suffix\n  enable_reporting      = var.enable_reporting\n  enable_aggregation    = var.enable_aggregation\n\n  certs_validity_period_hours = var.certs_validity_period_hours\n}\n\ndata ') at line 7, column 80.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.address}') at line 112, column 68.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.address}') at line 18, column 69.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.address}') at line 80, column 66.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.address}') at line 85, column 65.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.address}') at line 85, column 68.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.address}') at line 88, column 67.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.address}') at line 98, column 66.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.client_certificate\n}\n\noutput ') at line 11, column 79.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.customize.0.network_interface.0.ipv4_address, count.index)}') at line 83, column 63.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.fixed_ip_v4, count.index) }') at line 110, column 201.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.fixed_ip_v4[0]\n    bastion_host = var.bastion_ip\n  }\n\n  depends_on = [\n    null_resource.manager_config]\n}\n\nresource ') at line 6, column 68.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.fixed_ip_v4\n      master_ips = openstack_compute_instance_v2.master.*.network.0.fixed_ip_v4\n    }\n    )\n    destination     = ') at line 65, column 67.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.fixed_ip_v4\n}\n\n\n') at line 2, column 58.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.ipv4_address, 1)\n}\n\noutput ') at line 15, column 56.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.issuer, [') at line 48, column 61.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.mac)}') at line 101, column 64.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.mac)}') at line 67, column 67.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '{{- /* Copyright 2021 Google LLC\nLicensed under the Apache License, Version 2.0 (the ') at line 1, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* $END
+	* FOR
+Previous tokens: [None]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.mac_address, count.index)}') at line 26, column 71.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.name, [') at line 4, column 60.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+cluster_name already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.namespace, [') at line 30, column 52.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.namespace, [') at line 4, column 51.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.nat_ip_address\n}\n\n') at line 9, column 85.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+default already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.network_ip\n}\n\n# Private IP addresses\noutput ') at line 5, column 63.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+droplet_region already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.oidc.0.issuer)\n}\n\nresource ') at line 3, column 57.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.principal_id\n}\n') at line 47, column 55.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.principal_id\n}\n\noutput ') at line 24, column 54.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '0.uuid[count.index]\n}\n\nresource ') at line 26, column 62.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+evaluation_periods already defined",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+health_check_timeout already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<-EOT\n    swagger: ') at line 23, column 27.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<-EOT\n%sEOT\n  private_key = <<-EOT\n%sEOT\n  type        = ') at line 3, column 17.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOF\n  {\n    ') at line 91, column 21.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOF\n****************************************************************\n| 🗑️\tCommand: redinfracraft.py destroy azure phishing evilginx |\n****************************************************************\nEOF \n}\n') at line 217, column 11.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOF\n***************************************************************\n| 🗑️\tCommand: redinfracraft.py destroy aws phishing evilginx |\n***************************************************************\nEOF \n}\n') at line 175, column 11.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOF\n***************************************************************\n| 🗑️\tCommand: redinfracraft.py destroy azure phishing gophish |\n***************************************************************\nEOF \n}\n') at line 216, column 11.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOF\n**************************************************************\n| 🗑️\tCommand: redinfracraft.py destroy aws phishing gophish |\n**************************************************************\nEOF \n}\n') at line 191, column 11.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOF\n**************************************************************\n| 🗑️\tCommand: redinfracraft.py destroy azure payload pwndrop |\n**************************************************************\nEOF \n}\n') at line 217, column 11.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOF\n*************************************************************\n| 🗑️\tCommand: redinfracraft.py destroy aws payload pwndrop |\n*************************************************************\nEOF \n}\n') at line 151, column 11.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOF\n***********************************************************\n| 🗑️\tCommand: redinfracraft.py destroy azure c2 mythic_lb |\n***********************************************************\nEOF \n}\n') at line 279, column 11.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOF\n*********************************************************\n| 🗑️\tCommand: redinfracraft.py destroy aws c2 mythic_lb |\n*********************************************************\nEOF \n}\n\n') at line 314, column 11.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOF\n********************************************************\n| 🗑️\tCommand: redinfracraft.py destroy azure c2 mythic |\n********************************************************\nEOF \n}\n') at line 215, column 11.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOF\n*******************************************************\n| 🗑️\tCommand: redinfracraft.py destroy aws c2 mythic |\n*******************************************************\nEOF \n}\n\n') at line 169, column 11.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOF\n--cert-file=/etc/ssl/etcd/server.crt ') at line 14, column 18.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n  <jq-formatted-value>\nEOT \n}\nvariable ') at line 28, column 13.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n  EOT  \n}\n\nresource ') at line 200, column 21.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '  =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# Start Docker\nsudo dockerd &\n\n# clone repo\nmkdir -p ~/.ssh\nssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts\ngit clone --progress git@github.com:') at line 128, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# clone pgadmin repo\nmkdir -p ~/.ssh\nssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts\ngit clone --progress git@github.com:sharkymark/pgadmin.git\n\n# start pgadmin utility\ncd pgadmin\ndocker-compose up&\n\n# use coder CLI to clone and install dotfiles\ncoder dotfiles -y ') at line 89, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# clone repo\nif test -z ') at line 206, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# clone repo\nif test -z ') at line 210, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# clone repo\nif test -z ') at line 214, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# echo the developer secret\necho ') at line 121, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# if rust is the desired programming languge, install\nif [[ ') at line 231, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# if rust is the desired programming languge, install\nif [[ ') at line 243, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# install and start code-server\ncurl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server\n/tmp/code-server/bin/code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &\n\n# clone repo\nif test -z ') at line 328, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# install and start code-server\ncurl -fsSL https://code-server.dev/install.sh | sh\ncode-server --auth none --port 13337 >/dev/null 2>&1 &\n\n# use coder CLI to clone and install dotfiles\nif [[ ! -z ') at line 162, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# install and start microsoft visual studio code server\nwget -O- https://aka.ms/install-vscode-server/setup.sh | sh\ncode-server --accept-server-license-terms serve-local --without-connection-token --quality stable --telemetry-level off >/dev/null 2>&1 &\n\n# use coder CLI to clone and install dotfiles\nif [[ ! -z ') at line 60, column 21.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '  =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# install and start the latest code-server\ncurl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server\n/tmp/code-server/bin/code-server --auth none --port 13337 >/dev/null 2>&1 &\n\n# use coder CLI to clone and install dotfiles\nif [[ ! -z ') at line 162, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# install and start the latest code-server\ncurl -fsSL https://code-server.dev/install.sh | sh\ncode-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &\n\n# use coder CLI to clone and install dotfiles\nif [[ ! -z ') at line 160, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# install code-server\ncurl -fsSL https://code-server.dev/install.sh | sh\ncode-server --auth none --port 13337 >/dev/null 2>&1 &\n\n# use coder CLI to clone and install dotfiles\nif [ -n ') at line 278, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# run configure script to start tigervnc\n/coder/configure\n\n# install and start code-server\ncurl -fsSL https://code-server.dev/install.sh | sh\ncode-server --auth none --port 13337 >/dev/null 2>&1 &\n\n# use coder CLI to clone and install dotfiles\nif [ ') at line 107, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# start VNC\n# based on custom container image:\n# https://hub.docker.com/r/marktmilligan/vnc tag:coder-v2\n\n/coder/start_vnc >/dev/null 2>&1 &\n\n# use coder CLI to clone and install dotfiles\nif [ -n ') at line 100, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+host_rule already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# start code-server IDE\ncode-server --auth none --port 13337 &\n\n# run configure script to add VS Code extensions and copy JetBrains projector files to $HOME\n/coder/configure\n\n# start JetBrains projector-based IDE\n~/.local/bin/projector run IntelliJ1 &\n~/.local/bin/projector run IntelliJ2 &\n\n# clone 2 Java repos\nmkdir -p ~/.ssh\nssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts\ngit clone --progress git@github.com:sharkymark/java_helloworld.git\ngit clone --progress git@github.com:iluwatar/java-design-patterns.git\n\n# use coder CLI to clone and install dotfiles\ncoder dotfiles -y ') at line 101, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# start code-server IDE\ncode-server --auth none --port 13337 &\n\n# run configure script to add VS Code extensions and copy JetBrains projector files to $HOME\n/coder/configure\n\n# start JetBrains projector-based IDE\n~/.local/bin/projector run PhpStorm &\n\n# clone repo\nmkdir -p ~/.ssh\nssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts\ngit clone --progress git@github.com:') at line 108, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+iam_instance_profile already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# use coder CLI to clone and install dotfiles\ncoder dotfiles -y ') at line 66, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# use coder CLI to clone and install dotfiles\nif [ -n ') at line 144, column 29.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '          =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n# use coder CLI to clone and install dotfiles\nif [[ ') at line 113, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\n\n\n  EOT  \n}\n\nresource ') at line 245, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/bash\n\nset -e\n\n# use coder CLI to clone and install dotfiles\nif [[ ! -z ') at line 150, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+instance_storage already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\n# clone repo\nif test -z ') at line 192, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\n# clone repo\nif test -z ') at line 220, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\n# clone repo\nmkdir -p ~/.ssh\nssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts\ngit clone --progress https://github.com/') at line 150, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\n# install OS packages expected by microsoft visual studio code\n\nsudo apt update -y\nsudo apt install -y libnss3 libatk-bridge2.0-0 libatk1.0-0 libatspi2.0-0 libcairo2 libdrm2 libgbm1 libgtk-3-0 libnspr4 libpango-1.0-0 libsecret-1-0 libxcomposite1 libxdamage1 libxfixes3 libxkbcommon0 libxkbfile1 libxrandr2 xdg-utils\n\n# install microsoft visual studio code server\n\ncurl -L ') at line 218, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\n# install and start the latest code-server\ncurl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server\n/tmp/code-server/bin/code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &\n\n# use coder CLI to clone and install dotfiles\nif [ -n ') at line 269, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\n# install and start the latest code-server\ncurl -fsSL https://code-server.dev/install.sh | sh\ncode-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &\n\n# use coder CLI to clone and install dotfiles\nif [ ! -z ') at line 179, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\n# install code-server\ncurl -fsSL https://code-server.dev/install.sh | sh\ncode-server --auth none --port 13337 >/dev/null 2>&1 &\n\n# use coder CLI to clone and install dotfiles\nif [[ ! -z ') at line 134, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\n# install microsoft visual studio code server\n\ncurl -L ') at line 223, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\n# use coder CLI to clone and install dotfiles\nif [ ! -z ') at line 92, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\n# use coder CLI to clone and install dotfiles\nif [[ ') at line 100, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\nset -e\n\n# clone repo selected by user\nif test -z ') at line 225, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\nset -e\n\n# clone repo selected by user\nif test -z ') at line 246, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\nset -e\n\n# clone repo\nif [ ! -d ') at line 116, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\nset -e\n\n# use coder CLI to clone and install dotfiles\nif [ -n ') at line 128, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n#!/bin/sh\n\nset -e\n\necho ') at line 110, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n%[3]sEOT\n\thostnames          = [ ') at line 3, column 23.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '                =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n%[3]sEOT\n}\n \n') at line 3, column 17.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n%[4]sEOT\n}\n\n') at line 4, column 17.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n\n# clone repo selected by user\nif test -z ') at line 220, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n\n# clone repo\nif test -z ') at line 220, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n\n# install and start code-server\ncurl -fsSL https://code-server.dev/install.sh | sh\ncode-server --auth none --port 13337 >/dev/null 2>&1 &\n\n# add psql\nsudo apt-get install -y postgresql-client \n\n# clone repo\nif [ ! -d ') at line 159, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n\n# start VNC\n# based on custom container images:\n# https://hub.docker.com/r/marktmilligan/intellij-idea-community-vnc\n#\n# Dockerfile:\n# https://github.com/sharkymark/dockerfiles/blob/main/intellij-idea/vnc/Dockerfile\n#\n# parent container image is noVNC and TurboVNC\n# https://hub.docker.com/r/marktmilligan/vnc\n# tags:\n# coder-v2\n#\n# Dockerfile:\n# https://github.com/sharkymark/dockerfiles/tree/main/vnc\n/coder/start_vnc >/dev/null 2>&1 \n\n# use coder CLI to clone and install dotfiles\nif [[ ! -z ') at line 110, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n\n#!/bin/bash\n\n# install and start the latest code-server\ncurl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server\n/tmp/code-server/bin/code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &\n\n# use coder CLI to clone and install dotfiles\nif [[ ! -z ') at line 115, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n\n#!/bin/sh\n\n# start Kasm\n/dockerstartup/kasm_default_profile.sh\n/dockerstartup/vnc_startup.sh > /dev/null 2>&1 &\n\n# use coder CLI to clone and install dotfiles\nif [ ! -z ') at line 95, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n\n#!/bin/sh\n\n/coder/start_vnc >/dev/null 2>&1 \n\n# use coder CLI to clone and install dotfiles\nif [ ! -z ') at line 95, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n\n#!/bin/sh\n\nset -e\n\n# clone repo\nif test -z ') at line 96, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n\nset -e\n\n# install and start code-server\ncurl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server\n/tmp/code-server/bin/code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &\n\n# use coder CLI to clone and install dotfiles\nif [[ ! -z ') at line 118, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n\nset -e\n\n# use coder CLI to clone and install dotfiles\nif [[ ! -z ') at line 125, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<EOT\n\nset -e\n\n# use coder CLI to clone and install dotfiles\nif [[ ! -z ') at line 207, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<PARAMETERS\n  {\n    ') at line 20, column 25.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '  =')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+project already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<POLICY\n  \n  {\n  ') at line 8, column 11.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<POLICY\n{\n  ') at line 3, column 17.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '      =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<POLICY\n{\n  ') at line 47, column 12.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<YAML\n\napiVersion: networking.istio.io/v1alpha3\n\nkind: Gateway\n\nmetadata:\n\n  name: seldon-gateway\n\n  namespace: istio-system\n\nspec:\n\n  selector:\n\n    istio: ingressgateway # use istio default controller\n\n  servers:\n\n  - port:\n\n      number: 80\n\n      name: http\n\n      protocol: HTTP\n\n    hosts:\n\n    - ') at line 75, column 15.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+set already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<YAML\napiVersion: cert-manager.io/v1\nkind: ClusterIssuer\nmetadata:\n  name: letsencrypt-staging\n  namespace: cert-manager\nspec:\n  acme:\n    server: https://acme-v02.api.letsencrypt.org/directory\n    email: stefan@zenml.io\n    privateKeySecretRef:\n      name: letsencrypt-staging\n    solvers:\n    - http01:\n        ingress:\n          class: nginx\nYAML    \n  depends_on = [\n    resource.helm_release.cert-manager\n  ]\n}\n\n') at line 26, column 15.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<YAML\napiVersion: cert-manager.io/v1\nkind: ClusterIssuer\nmetadata:\n  name: letsencrypt-staging\n  namespace: cert-manager\nspec:\n  acme:\n    server: https://acme-v02.api.letsencrypt.org/directory\n    email: stefan@zenml.io\n    privateKeySecretRef:\n      name: letsencrypt-staging\n    solvers:\n    - http01:\n        ingress:\n          class: nginx\nYAML    \n  depends_on = [\n    resource.helm_release.cert-manager\n  ]\n}\n\n') at line 30, column 15.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<YAML\napiVersion: networking.istio.io/v1alpha3\nkind: Gateway\nmetadata:\n  name: ') at line 5, column 24.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '          =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<YAML\napiVersion: networking.istio.io/v1alpha3\nkind: Gateway\nmetadata:\n  name: ') at line 9, column 24.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '          =')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+shape already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<YAML\napiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: kubeflow-ui-ingress\n  namespace: kubeflow\n  annotations:\n%{if var.tls_enabled}\n    cert-manager.io/cluster-issuer: letsencrypt-staging\n%{endif}\n    ingress.annotations.nginx.ingress.kubernetes.io/ssl-redirect: ') at line 34, column 15.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<YAML\napiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: kubeflow-ui-ingress\n  namespace: kubeflow\n  annotations:\n%{if var.tls_enabled}\n    cert-manager.io/cluster-issuer: letsencrypt-staging\n%{endif}\n    ingress.annotations.nginx.ingress.kubernetes.io/ssl-redirect: ') at line 38, column 15.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<YAML\napiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: zenml-minio-ingress\n  namespace: zenml-minio\n  annotations:\n    nginx.ingress.kubernetes.io/proxy-body-size: 0m\n    nginx.org/client-max-body-size: 0m\n    nginx.org/proxy-buffering: ') at line 145, column 15.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<YAML\napiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: zenml-minio-ingress\n  namespace: zenml-minio\n  annotations:\n    nginx.ingress.kubernetes.io/proxy-body-size: 0m\n    nginx.org/client-max-body-size: 0m\n    nginx.org/proxy-buffering: ') at line 149, column 15.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<__SCRIPT__\n#!/bin/bash\nset -o errexit\nset -o nounset\nset -o pipefail\n\nexport DEBIAN_FRONTEND=noninteractive\nsudo apt update\nsudo apt -yq install software-properties-common\n\nsudo apt-add-repository --yes --update ppa:ansible/ansible\nsudo apt -yq install ansible\n__SCRIPT__\n}\n\nresource ') at line 2, column 14.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+tag already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<<kafka-api-key>>\n    ') at line 32, column 37.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '               =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<ACCOUNT_RESOURCE>.account_id\n    name             = ') at line 2, column 38.
+Expected one of: 
+	* IN
+	* NAME
+	* FOR_EACH
+	* IF
+	* DECIMAL
+	* FOR
+Previous tokens: [Token('DOT', '.')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<no value>\n    log_template_operations                  = <no value>\n    multi_language_detection {\n      enable_multi_language_detection        = <no value>\n    }\n    ignore_partial_invocation_failures       = <no value>\n    custom_prompt_safety_error_code          = <no value>\n    custom_prompt_safety_error_message       = ') at line 15, column 48.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '                  =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<no value>\n    }\n  }\n}\n\n') at line 25, column 41.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<no value>\n    }\n  }\n}\n\n') at line 27, column 46.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '        =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '<reviewers>\n\t\t\t}\n\t\t}\n\t}\n\tmerge_settings {\n\t\t#Required\n\t\tallowed_merge_strategies = [') at line 40, column 20.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '=data ') at line 1, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* $END
+	* FOR
+Previous tokens: [None]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+volume already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\\""\\n\\"", \\""\\\\n\\"")}') at line 131, column 60.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* DECIMAL
+	* RPAR
+	* MINUS
+	* NAME
+	* NL_OR_COMMENT
+	* LBRACE
+	* FOR_EACH
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('COMMA', ',')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\\\\') at line 12, column 25.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* DECIMAL
+	* RPAR
+	* MINUS
+	* NAME
+	* NL_OR_COMMENT
+	* LBRACE
+	* FOR_EACH
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('COMMA', ',')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\\_resource\\_group.example.name\n  location                 = azurerm\\_resource\\_group.example.location\n  account_tier             = ') at line 3, column 37.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* DOT
+	* QMARK
+	* RBRACE
+	* LSQB
+	* NAME
+	* "".*""
+	* ""::""
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* IF
+	* LPAR
+	* FOR
+	* ""[*]""
+Previous tokens: [Token('NAME', 'azurerm')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n            module.control_planes[each.key].private_ipv4_address == module.control_planes[keys(module.control_planes)[0]].private_ipv4_address ?\n            module.control_planes[keys(module.control_planes)[1]].private_ipv4_address :\n          module.control_planes[keys(module.control_planes)[0]].private_ipv4_address}:6443') at line 41, column 75.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n          concat(\n            list(\n              aws_iam_role.etcd.arn,\n              aws_iam_role.k8s_master.arn,\n              aws_iam_role.k8s_node.arn,\n            ),\n            formatlist(') at line 161, column 12.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n      each.value == ') at line 13, column 46.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n      sha1(\n        ') at line 25, column 77.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n      sha1(\n        ') at line 33, column 78.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n      sha1(\n        ') at line 42, column 89.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n      sha1(\n        ') at line 42, column 91.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n      var.region\n      }.amazonaws.com/') at line 157, column 36.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n      var.self_hosted_etcd != ') at line 20, column 23.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    (length(local.cluster_name) <= 16 && length(each.value.name) <= 16) ? ') at line 437, column 25.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""heredoc_template"":
+
+Invalid Heredoc token: <<POLICY 
+{
+    ""Version"": ""2012-10-17"",
+    ""Id"": ""DefaultBucketPolicy"",
+    ""Statement"": [
+        {
+          ""Sid"": ""DefaultDenyNonSecure"",
+          ""Effect"": ""Deny"",
+          ""Principal"": { ""AWS"": [""arn:aws:iam::123456789012:root""] },
+          ""Action"": ""*"",
+          ""Condition"": {
+            ""Bool"": {
+              ""aws:SecureTransport"": ""false""
+            },
+            ""StringEquals"": {
+              ""aws:PrincipalOrgID"": ""o-xxxxxxxxxxx""
+            }            
+          },
+          ""Resource"": ""arn:aws:s3:::example-bucket-dev/*""
+        }
+    ]
+}
+POLICY",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    [') at line 8, column 33.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', ' =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    distinct(\n      concat(\n        data.dns_a_record_set.gce_production_1_build_cache.addrs,\n        data.dns_a_record_set.gce_production_2_build_cache.addrs\n      )\n    )\n  }') at line 124, column 17.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    map(\n      ') at line 95, column 14.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    map(\n     ') at line 11, column 13.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    map(\n     ') at line 13, column 13.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('$END', '') at line 1, column 10.
+Expected one of: 
+	* LBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    map(\n     ') at line 207, column 13.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    map(\n     ') at line 212, column 13.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    map(\n     ') at line 75, column 13.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    map(\n    ') at line 23, column 13.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    module.web.cloudfront_distribution_domain_name\n  }') at line 93, column 44.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n    one([for ip in openstack_networking_port_v2.controlplane_public[k].all_fixed_ips : ip if length(split(') at line 121, column 94.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('__ANON_0', '${')]",1,0.04
+"HCL2 parse error: Unexpected token Token('$END', '') at line 1, column 30.
+Expected one of: 
+	* RBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('$END', '') at line 10, column 1.
+Expected one of: 
+	* RBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\n[') at line 131, column 34.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '             =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '\u200b\nprovider ') at line 3, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '// Licensed under the Mozilla Public License v2.0\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# CDN load balancer with Cloud bucket as backend\n\n# Cloud Storage bucket\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# Create a feed that sends notifications about network resource updates under a\n# particular folder.\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# Create a feed that sends notifications about network resource updates under a\n# particular organization.\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# Create a feed that sends notifications about network resource updates.\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# Create a new service account\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# External HTTP load balancer with a CDN-enabled managed instance group backend\n# and custom request and response headers\n\n# VPC\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# External HTTP load balancer with an CDN-enabled managed instance group backend\n\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# External SSL proxy load balancer with managed instance group backend\n\n# VPC\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# External TCP proxy load balancer with managed instance group backend\n\n# VPC\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# Internal HTTP load balancer with a managed instance group backend\n\n# VPC network\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# Internal HTTPS load balancer with HTTP-to-HTTPS redirect\n\n\n# VPC network\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# Internal TCP/UDP load balancer with a managed instance group backend\n\n# VPC\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('$END', '') at line 2, column 1.
+Expected one of: 
+	* RBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('$END', '') at line 34, column 1.
+Expected one of: 
+	* RBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# [START functions_v2_basic]\nlocals {\n  project = ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# [START functions_v2_basic_auditlogs]\n# This example follows the examples shown in this Google Cloud Community blog post\n# https://medium.com/google-cloud/applying-a-path-pattern-when-filtering-in-eventarc-f06b937b4c34\n# and the docs:\n# https://cloud.google.com/eventarc/docs/path-patterns\n\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# [START functions_v2_basic_gcs]\n\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# [START functions_v2_full]\nlocals {\n  project = ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n# to setup a web-server\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n// App Engine Example\n\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n// Cloud Functions Example\n\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+country already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n// Forwarding rule for External Network Load Balancing using Backend Services\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('$END', '') at line 394, column 1.
+Expected one of: 
+	* RBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n// Forwarding rule for Regional External Load Balancing\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n// Forwarding rule for VPC private service connect\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n// Roughly mirrors https://cloud.google.com/load-balancing/docs/https/setting-up-ext-https-hybrid\nvariable ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n// This example allows the list of managed domains to be modified and will\n// recreate the ssl certificate and update the target https proxy correctly\n\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\n\ndata ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('$END', '') at line 4, column 20.
+Expected one of: 
+	* __ANON_0
+	* STRING_CHARS
+	* DBLQUOTE
+	* ESCAPED_INTERPOLATION",1,0.04
+"HCL2 parse error: Unexpected token Token('$END', '') at line 76, column 1.
+Expected one of: 
+	* RBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('$END', '') at line 8, column 1.
+Expected one of: 
+	* RBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '```hcl\nprovider google{}\nprovider tls{}\n\nresource ') at line 17, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* $END
+	* FOR
+Previous tokens: [Token('NL_OR_COMMENT', '\n')]",1,0.04
+"HCL2 parse error: Unexpected token Token('$END', '') at line 904, column 1.
+Expected one of: 
+	* RBRACE",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '{.MediaUploadPieceSize}}\n  show_upload_progress = ') at line 103, column 27.
+Expected one of: 
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* NL_OR_COMMENT
+	* DECIMAL
+	* IF
+	* LPAR
+	* FOR
+Previous tokens: [Token('LBRACE', '{')]",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '%') at line 18, column 1.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+category already defined",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+acl already defined",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '{{/* Copyright 2021 Google LLC\n\nLicensed under the Apache License, Version 2.0 (the ') at line 1, column 1.
+Expected one of: 
+	* IN
+	* NAME
+	* IF
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* $END
+	* FOR
+Previous tokens: [None]",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '%') at line 3, column 2.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', 'ödingers_nat = {\n      ipv4_cidr = ') at line 10, column 9.
+Expected one of: 
+	* COLON
+	* DOT
+	* EQ
+Previous tokens: [Token('NAME', 'schr')]",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '%') at line 3, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('STRING_CHARS', '“network” {\n  source = “./modules/network”\n  vpc_cidr = “10.0.0.0/16”\n}\n\n') at line 1, column 8.
+Expected one of: 
+	* EQ
+	* IN
+	* DBLQUOTE
+	* NAME
+	* FOR_EACH
+	* IF
+	* NL_OR_COMMENT
+	* LBRACE
+	* FOR
+Previous tokens: [Token('NAME', 'module')]",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '%') at line 5, column 3.
+Expected one of: 
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* DECIMAL
+	* RBRACE
+	* NAME
+	* IF
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* LPAR
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('__ANON_0', '${') at line 11, column 70.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* QMARK
+	* DOT
+	* RBRACE
+	* NAME
+	* "".*""
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* IF
+	* LSQB
+	* FOR
+	* ""[*]""
+Previous tokens: [Token('NAME', 'example-custom-remote-secret-')]",1,0.04
+"HCL2 parse error: Unexpected token Token('__ANON_0', '${') at line 16, column 14.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* MINUS
+	* NAME
+	* FOR_EACH
+	* LBRACE
+	* DECIMAL
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('EQ', '     =')]",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '%') at line 6, column 5.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Unexpected token Token('__ANON_0', '${') at line 32, column 26.
+Expected one of: 
+	* LPAR
+	* /<<(?P<heredoc>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc)\n/
+	* IN
+	* DBLQUOTE
+	* NEGATIVE_DECIMAL
+	* DECIMAL
+	* MINUS
+	* NAME
+	* NL_OR_COMMENT
+	* LBRACE
+	* FOR_EACH
+	* IF
+	* /<<-(?P<heredoc_trim>[a-zA-Z][a-zA-Z0-9._-]+)\n?(?:.|\n)*?\n\s*(?P=heredoc_trim)\n/
+	* LSQB
+	* BANG
+	* FOR
+Previous tokens: [Token('LSQB', '[')]",1,0.04
+"HCL2 parse error: Unexpected token Token('__ANON_0', '${') at line 44, column 30.
+Expected one of: 
+	* BINARY_OP
+	* IN
+	* DOT
+	* QMARK
+	* RBRACE
+	* LSQB
+	* NAME
+	* "".*""
+	* ""::""
+	* NL_OR_COMMENT
+	* FOR_EACH
+	* IF
+	* LPAR
+	* FOR
+	* ""[*]""
+Previous tokens: [Token('NAME', 'true-')]",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '&&') at line 135, column 44.
+Expected one of: 
+	* RPAR",1,0.04
+"HCL2 parse error: Unexpected token Token('BINARY_OP', '&&') at line 156, column 11.
+Expected one of: 
+	* RSQB",1,0.04
+"HCL2 parse error: Unexpected token Token('__ANON_3', '...') at line 18, column 3.
+Expected one of: 
+	* IN
+	* RBRACE
+	* NAME
+	* FOR_EACH
+	* IF
+	* FOR",1,0.04
+"HCL2 parse error: Error trying to process rule ""body"":
+
+cors_rule already defined",1,0.04

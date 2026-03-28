@@ -1,0 +1,282 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 45,
+            "metadata": {
+                "description": "The name of the Storage Account."
+            }
+        },
+        "queues": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "The name of the Storage Account queue."
+            }
+        },
+        "tables": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "The name of the Storage Account table."
+            }
+        },
+        "containers": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "The name of the Storage Account container."
+            }
+        },
+        "containerstodeleteblobs": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "Containers name which we want to delete it's Blobs after some days."
+            }
+        },
+        "deleteblobafterdays": {
+            "type": "int",
+            "defaultValue": 7,
+            "metadata": {
+                "description": "delete the blob after this value by day."
+            }
+        },
+        "shares": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "The name of the Storage Account File Share."
+            }
+        },
+        "sku": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Standard_ZRS",
+                "Premium_LRS",
+                "Premium_ZRS",
+                "Standard_GZRS",
+                "Standard_RAGZRS"
+            ],
+            "metadata": {
+                "description": "Storage Account SKU."
+            }
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Tags for service"
+            }
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "sku": "[parameters('sku')]",
+        "name": "[parameters('name')]",
+        "ossVersion": { "ossversion": "0.0.1" },
+        "tags": "[union(parameters('tags'), variables('ossVersion'))]",
+        "hasQueues": "[greater(length(parameters('queues')), 0)]",
+        "hasTables": "[greater(length(parameters('tables')), 0)]",
+        "hasShares": "[greater(length(parameters('shares')), 0)]",
+        "hasContainers": "[greater(length(parameters('containers')), 0)]",
+        "hascontainerstodeleteblobs": "[greater(length(parameters('containerstodeleteblobs')), 0)]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('name')]",
+            "apiVersion": "2020-08-01-preview",
+            "kind": "StorageV2",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "[variables('sku')]",
+                "tier": "Standard"
+            },
+            "properties": {
+                "minimumTlsVersion": "TLS1_2",
+                "supportsHttpsTrafficOnly": true,
+                "accessTier": "Hot",
+                "encryption": {
+                    "services": {
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "file": {
+                            "enabled": true,
+                            "keyType": "Account"
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            },
+            "tags": "[variables('tags')]"
+        },
+        {
+            "condition": "[variables('hascontainerstodeleteblobs')]",
+            "name": "[concat(variables('name'), '/default')]",
+            "type": "Microsoft.Storage/storageAccounts/managementPolicies",
+            "apiVersion": "2019-04-01",
+            "dependsOn": [
+              "[variables('name')]"
+            ],
+            "properties": {
+                "policy": {
+                    "rules": [
+                        {
+                            "name": "[concat(variables('name'),'-RemoveContainerBlobsWithPrefixAfter',parameters('deleteblobafterdays'),'Days')]",
+                            "enabled": true,
+                            "type": "Lifecycle",
+                            "definition": {
+                              "filters": {
+                                "blobTypes": [ "blockBlob" ],
+                                "prefixMatch": "[parameters('containerstodeleteblobs')]"
+                              },
+                              "actions": {
+                                "baseBlob": {
+                                  "delete": { "daysAfterModificationGreaterThan": "[parameters('deleteblobafterdays')]"}
+                                }
+                              }
+                            }
+                          }
+                    ]
+                }
+              }
+        },
+        {
+            "condition": "[variables('hasShares')]",
+            "name": "[concat(variables('name'), '/default/', if(variables('hasShares'), parameters('shares')[copyIndex()], 'none'))]",
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2019-06-01",
+            "properties": {
+                "shareDeleteRetentionPolicy": {
+                    "enabled": true,
+                    "days": 365
+                }
+            },
+            "tags": "[variables('tags')]",
+            "copy": {
+                "name": "shares-copy",
+                "count": "[length(parameters('shares'))]",
+                "mode": "Serial",
+                "batchSize": "[length(parameters('shares'))]"
+            }
+        },
+        {
+            "condition": "[variables('hasQueues')]",
+            "name": "[concat(variables('name'), '/default')]",
+            "type": "Microsoft.Storage/storageAccounts/queueServices",
+            "apiVersion": "2019-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('name'))]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            },
+            "tags": "[variables('tags')]"
+        },
+        {
+            "condition": "[variables('hasQueues')]",
+            "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('name'), '/default/', if(variables('hasQueues'), parameters('queues')[copyIndex()], 'none'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/queueServices', variables('name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('name'))]"
+            ],
+            "properties": {
+                "metadata": {}
+            },
+            "tags": "[variables('tags')]",
+            "copy": {
+                "name": "queue-copy",
+                "count": "[length(parameters('queues'))]",
+                "mode": "Serial",
+                "batchSize": "[length(parameters('queues'))]"
+            }
+        },
+        {
+            "condition": "[variables('hasTables')]",
+            "name": "[concat(variables('name'), '/default')]",
+            "type": "Microsoft.Storage/storageAccounts/tableServices",
+            "apiVersion": "2019-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('name'))]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            },
+            "tags": "[variables('tags')]"
+        },
+        {
+            "condition": "[variables('hasTables')]",
+            "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('name'), '/default/', if(variables('hasTables'), parameters('tables')[copyIndex()], 'none'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('name'))]"
+            ],
+            "properties": {
+                "metadata": {}
+            },
+            "tags": "[variables('tags')]",
+            "copy": {
+                "name": "table-copy",
+                "count": "[length(parameters('tables'))]",
+                "mode": "Serial",
+                "batchSize": "[length(parameters('tables'))]"
+            }
+        },
+        {
+            "condition": "[variables('hasContainers')]",
+            "name": "[concat(variables('name'), '/default')]",
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('name'))]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "isVersioningEnabled": false,
+                "automaticSnapshotPolicyEnabled": false
+            },
+            "tags": "[variables('tags')]"
+        },
+        {
+            "condition": "[variables('hasContainers')]",
+            "name": "[concat(variables('name'), '/default/', if(variables('hasContainers'), parameters('containers')[copyIndex()], 'none'))]",
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "properties": {
+                "publicAccess": "None",
+                "metadata": {}
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('name'), 'default')]",
+                "[concat('Microsoft.Storage/storageAccounts/', variables('name'))]"
+            ],
+            "tags": "[variables('tags')]",
+            "copy": {
+                "name": "cotainer-copy",
+                "count": "[length(parameters('containers'))]",
+                "mode": "Serial",
+                "batchSize": "[length(parameters('containers'))]"
+            }
+        }
+    ]
+}

@@ -1,0 +1,313 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.Network/networkSecurityPerimeters to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.Network/networkSecurityPerimeters to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "nspcrossperimeterinboundallowedEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "NspCrossPerimeterInboundAllowed",
+        "description": "Enable or disable log category NspCrossPerimeterInboundAllowed"
+      },
+      "defaultValue": true
+    },
+    "nspcrossperimeteroutboundallowedEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "NspCrossPerimeterOutboundAllowed",
+        "description": "Enable or disable log category NspCrossPerimeterOutboundAllowed"
+      },
+      "defaultValue": true
+    },
+    "nspintraperimeterinboundallowedEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "NspIntraPerimeterInboundAllowed",
+        "description": "Enable or disable log category NspIntraPerimeterInboundAllowed"
+      },
+      "defaultValue": true
+    },
+    "nspoutboundattemptEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "NspOutboundAttempt",
+        "description": "Enable or disable log category NspOutboundAttempt"
+      },
+      "defaultValue": true
+    },
+    "nspprivateinboundallowedEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "NspPrivateInboundAllowed",
+        "description": "Enable or disable log category NspPrivateInboundAllowed"
+      },
+      "defaultValue": true
+    },
+    "nsppublicinboundperimeterrulesallowedEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "NspPublicInboundPerimeterRulesAllowed",
+        "description": "Enable or disable log category NspPublicInboundPerimeterRulesAllowed"
+      },
+      "defaultValue": true
+    },
+    "nsppublicinboundperimeterrulesdeniedEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "NspPublicInboundPerimeterRulesDenied",
+        "description": "Enable or disable log category NspPublicInboundPerimeterRulesDenied"
+      },
+      "defaultValue": true
+    },
+    "nsppublicinboundresourcerulesallowedEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "NspPublicInboundResourceRulesAllowed",
+        "description": "Enable or disable log category NspPublicInboundResourceRulesAllowed"
+      },
+      "defaultValue": true
+    },
+    "nsppublicinboundresourcerulesdeniedEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "NspPublicInboundResourceRulesDenied",
+        "description": "Enable or disable log category NspPublicInboundResourceRulesDenied"
+      },
+      "defaultValue": true
+    },
+    "nsppublicoutboundperimeterrulesallowedEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "NspPublicOutboundPerimeterRulesAllowed",
+        "description": "Enable or disable log category NspPublicOutboundPerimeterRulesAllowed"
+      },
+      "defaultValue": true
+    },
+    "nsppublicoutboundperimeterrulesdeniedEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "NspPublicOutboundPerimeterRulesDenied",
+        "description": "Enable or disable log category NspPublicOutboundPerimeterRulesDenied"
+      },
+      "defaultValue": true
+    },
+    "nsppublicoutboundresourcerulesallowedEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "NspPublicOutboundResourceRulesAllowed",
+        "description": "Enable or disable log category NspPublicOutboundResourceRulesAllowed"
+      },
+      "defaultValue": true
+    },
+    "nsppublicoutboundresourcerulesdeniedEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "NspPublicOutboundResourceRulesDenied",
+        "description": "Enable or disable log category NspPublicOutboundResourceRulesDenied"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.Network/networkSecurityPerimeters"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.Network/networkSecurityPerimeters/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.Network/networkSecurityPerimeters, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "NspCrossPerimeterInboundAllowed",
+                    "enabled": "[parameters('nspcrossperimeterinboundallowedEnabled')]"
+                  },
+                  {
+                    "category": "NspCrossPerimeterOutboundAllowed",
+                    "enabled": "[parameters('nspcrossperimeteroutboundallowedEnabled')]"
+                  },
+                  {
+                    "category": "NspIntraPerimeterInboundAllowed",
+                    "enabled": "[parameters('nspintraperimeterinboundallowedEnabled')]"
+                  },
+                  {
+                    "category": "NspOutboundAttempt",
+                    "enabled": "[parameters('nspoutboundattemptEnabled')]"
+                  },
+                  {
+                    "category": "NspPrivateInboundAllowed",
+                    "enabled": "[parameters('nspprivateinboundallowedEnabled')]"
+                  },
+                  {
+                    "category": "NspPublicInboundPerimeterRulesAllowed",
+                    "enabled": "[parameters('nsppublicinboundperimeterrulesallowedEnabled')]"
+                  },
+                  {
+                    "category": "NspPublicInboundPerimeterRulesDenied",
+                    "enabled": "[parameters('nsppublicinboundperimeterrulesdeniedEnabled')]"
+                  },
+                  {
+                    "category": "NspPublicInboundResourceRulesAllowed",
+                    "enabled": "[parameters('nsppublicinboundresourcerulesallowedEnabled')]"
+                  },
+                  {
+                    "category": "NspPublicInboundResourceRulesDenied",
+                    "enabled": "[parameters('nsppublicinboundresourcerulesdeniedEnabled')]"
+                  },
+                  {
+                    "category": "NspPublicOutboundPerimeterRulesAllowed",
+                    "enabled": "[parameters('nsppublicoutboundperimeterrulesallowedEnabled')]"
+                  },
+                  {
+                    "category": "NspPublicOutboundPerimeterRulesDenied",
+                    "enabled": "[parameters('nsppublicoutboundperimeterrulesdeniedEnabled')]"
+                  },
+                  {
+                    "category": "NspPublicOutboundResourceRulesAllowed",
+                    "enabled": "[parameters('nsppublicoutboundresourcerulesallowedEnabled')]"
+                  },
+                  {
+                    "category": "NspPublicOutboundResourceRulesDenied",
+                    "enabled": "[parameters('nsppublicoutboundresourcerulesdeniedEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

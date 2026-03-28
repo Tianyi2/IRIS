@@ -1,0 +1,235 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.26.54.24096",
+      "templateHash": "7737727980270162371"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "child",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "skuName": {
+            "value": null
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "languageVersion": "2.0",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.26.54.24096",
+              "templateHash": "14665743710501821887"
+            }
+          },
+          "definitions": {
+            "corsRule": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "allowedHeaders": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "allowedMethods": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "allowedOrigins": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "exposedHeaders": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "maxAgeInSeconds": {
+                    "type": "int"
+                  }
+                }
+              },
+              "nullable": true
+            }
+          },
+          "parameters": {
+            "skuName": {
+              "type": "string",
+              "defaultValue": "Standard_LRS"
+            },
+            "minTLSVersion": {
+              "type": "string",
+              "nullable": true
+            },
+            "corsRules": {
+              "$ref": "#/definitions/corsRule"
+            },
+            "accessPolicies": {
+              "type": "array",
+              "nullable": true
+            },
+            "secrets": {
+              "type": "secureObject",
+              "nullable": true
+            }
+          },
+          "variables": {
+            "copy": [
+              {
+                "name": "formattedAccessPolicies",
+                "count": "[length(coalesce(parameters('accessPolicies'), createArray()))]",
+                "input": {
+                  "objectId": "[coalesce(parameters('accessPolicies'), createArray())[copyIndex('formattedAccessPolicies')].objectId]",
+                  "tenantId": "[if(contains(coalesce(parameters('accessPolicies'), createArray())[copyIndex('formattedAccessPolicies')], 'tenantId'), coalesce(parameters('accessPolicies'), createArray())[copyIndex('formattedAccessPolicies')].tenantId, tenant().tenantId)]",
+                  "permissions": {}
+                }
+              }
+            ],
+            "secretList": "[coalesce(tryGet(parameters('secrets'), 'secureList'), createArray())]"
+          },
+          "resources": {
+            "storage::blob": {
+              "type": "Microsoft.Storage/storageAccounts/blobServices",
+              "apiVersion": "2023-01-01",
+              "name": "[format('{0}/{1}', 'test', 'default')]",
+              "properties": {
+                "cors": {
+                  "corsRules": "[coalesce(parameters('corsRules'), createArray())]"
+                }
+              },
+              "dependsOn": [
+                "storage"
+              ]
+            },
+            "storage": {
+              "type": "Microsoft.Storage/storageAccounts",
+              "apiVersion": "2023-01-01",
+              "name": "test",
+              "location": "[resourceGroup().location]",
+              "sku": {
+                "name": "[parameters('skuName')]"
+              },
+              "kind": "StorageV2",
+              "properties": {
+                "minimumTlsVersion": "[coalesce(parameters('minTLSVersion'), 'TLS1_2')]"
+              }
+            },
+            "kv": {
+              "type": "Microsoft.KeyVault/vaults",
+              "apiVersion": "2023-07-01",
+              "name": "keyVault",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "sku": {
+                  "family": "A",
+                  "name": "standard"
+                },
+                "tenantId": "[tenant().tenantId]",
+                "accessPolicies": "[variables('formattedAccessPolicies')]"
+              }
+            },
+            "kvSecret": {
+              "copy": {
+                "name": "kvSecret",
+                "count": "[length(variables('secretList'))]"
+              },
+              "type": "Microsoft.KeyVault/vaults/secrets",
+              "apiVersion": "2023-07-01",
+              "name": "[variables('secretList')[copyIndex()].name]",
+              "properties": {
+                "value": "[variables('secretList')[copyIndex()].value]"
+              }
+            },
+            "storageAccount_objectReplicationPolicy": {
+              "type": "Microsoft.Storage/storageAccounts/objectReplicationPolicies",
+              "apiVersion": "2022-09-01",
+              "name": "[format('{0}/{1}', 'test', 'default')]",
+              "properties": {
+                "sourceAccount": "sourceId",
+                "destinationAccount": "destId",
+                "rules": [
+                  {
+                    "ruleId": null,
+                    "sourceContainer": "source",
+                    "destinationContainer": "dest",
+                    "filters": null
+                  }
+                ]
+              },
+              "dependsOn": [
+                "storage"
+              ]
+            },
+            "storageAccount_objectReplicationPolicyItems": {
+              "copy": {
+                "name": "storageAccount_objectReplicationPolicyItems",
+                "count": "[length(createArray(1))]"
+              },
+              "type": "Microsoft.Storage/storageAccounts/objectReplicationPolicies",
+              "apiVersion": "2022-09-01",
+              "name": "[format('{0}/{1}', 'test', format('default{0}', copyIndex()))]",
+              "properties": {
+                "sourceAccount": "sourceId",
+                "destinationAccount": "destId",
+                "rules": [
+                  {
+                    "ruleId": null,
+                    "sourceContainer": "source",
+                    "destinationContainer": "dest",
+                    "filters": null
+                  }
+                ]
+              },
+              "dependsOn": [
+                "storage"
+              ]
+            }
+          },
+          "outputs": {
+            "policyId": {
+              "type": "string",
+              "value": "[reference('storageAccount_objectReplicationPolicy').policyId]"
+            },
+            "ruleIds": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "value": "[map(reference('storageAccount_objectReplicationPolicy').rules, lambda('rule', lambdaVariables('rule').ruleId))]"
+            },
+            "fromFor": {
+              "type": "string",
+              "value": "[reference(format('storageAccount_objectReplicationPolicyItems[{0}]', 0)).sourceAccount]"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "childFromFor": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'child'), '2022-09-01').outputs.fromFor.value]"
+    }
+  }
+}

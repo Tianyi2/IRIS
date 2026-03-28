@@ -1,0 +1,284 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "metadata": {
+        "name": "vnet-hub",
+        "description": "This template creates a hub virtual network."
+    },
+    "parameters": {
+        // Some additional comment here
+        "vnetName": {
+            "type": "string", // End of line comments
+            "metadata": {
+                "description": "The name of the virtual network."
+            }
+        },
+        "addressPrefix": {
+            "type": "array",
+            "minLength": 1,
+            "metadata": {
+                "description": ""
+            }
+        },
+        "subnets": {
+            "type": "array",
+            "metadata": {
+                "description": ""
+            }
+        },
+        "aciSubnet": {
+            "type": "string"
+        },
+        "clusterSubnet": {
+            "type": "string"
+        },
+        "clusterObjectId": {
+            "type": "string"
+        },
+        "delegate": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": ""
+            }
+        }
+    },
+    "variables": {
+        "subscriptionDefautTags": {
+            "ffffffff-ffff-ffff-ffff-ffffffffffff": {
+                "role": "Networking"
+            },
+            "nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn": {
+                "role": "Custom"
+            },
+            "00000000-0000-0000-0000-000000000000": {
+                "role": "Networking"
+            }
+        },
+        "rgLocation": {
+            "eastus": "region-A",
+            "region": "region-A",
+            "custom": "Custom"
+        },
+        "gatewaySubnet": [
+            {
+                "name": "GatewaySubnet",
+                "properties": {
+                    "addressPrefix": "[concat(split(parameters('addressPrefix')[0], '/')[0], '/27')]"
+                }
+            }
+        ],
+        "definedSubnets": {
+            "copy": [
+                {
+                    "name": "subnets",
+                    "count": "[length(parameters('subnets'))]",
+                    "input": {
+                        "name": "[parameters('subnets')[copyIndex('subnets')].name]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnets')[copyIndex('subnets')].addressPrefix]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat('nsg-', parameters('subnets')[copyIndex('subnets')].name))]"
+                            },
+                            "routeTable": {
+                                "id": "[resourceId('Microsoft.Network/routeTables/', concat('route-', parameters('subnets')[copyIndex('subnets')].name))]"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "allSubnets": "[union(variables('gatewaySubnet'), variables('definedSubnets').subnets)]",
+        "networkOperatorRoleId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7')]",
+        "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+        "clusterSubnetId": "[concat(variables('vnetId'), '/subnets/', parameters('clusterSubnet'))]",
+        "aciSubnetId": "[concat(variables('vnetId'), '/subnets/', parameters('aciSubnet'))]",
+        "copy": [
+            {
+                "name": "routes",
+                "count": "[length(
+                    variables('allSubnets')
+                )]",
+                "input": {
+                    "name": "[concat('route-', copyIndex('routes'))]",
+                    "properties": {}
+                }
+            },
+            {
+                "name": "routes2",
+                "count": "[length(variables('allSubnets'))]",
+                "input": {
+                    "name": "[concat('route-', copyIndex('routes2'))]",
+                    "properties": {}
+                }
+            }
+        ],
+        "vnetAddressSpace": "[createObject('addressPrefixes', Parameters('addressPrefix'))]"
+    },
+    "resources": [
+        {
+            "comments": "Hub virtual network",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[parameters('VNETName')]",
+            "apiVersion": "2020-06-01",
+            "location": "[variables('rgLocation')[resourceGroup().location]]",
+            "dependsOn": [
+                "routeIndex",
+                "nsgIndex"
+            ],
+            "properties": {
+                "addressSpace": "[variables('vnetAddressSpace')]",
+                "subnets": "[variabLes('AllSubnets')]"
+            },
+            "tags": "[variables('subscriptionDefautTags')[subscription().subscriptionId]]"
+        },
+        {
+            "condition": "[
+                parameters('delegate')
+            ]",
+            "comments": "VNET delegation for AKS cluster",
+            "apiVersion": "2017-05-10",
+            "type": "Microsoft.Resources/deployments",
+            "name": "vnetDelegation",
+            "resourceGroup": "[resourceGroup().name]",
+            "subscriptionId": "[subscription().subscriptionId]",
+            "properties": {
+                "mode": "Incremental",
+                "parameters": {},
+                "template": {
+                    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "resources": [
+                        {
+                            "comments": "ACI subnet in Hub Vnet",
+                            "apiVersion": "2019-04-01",
+                            "name": "[concat(parameters('vnetName'), '/', parameters('aciSubnet'))]",
+                            "type": "Microsoft.Network/virtualNetworks/subnets",
+                            "properties": {
+                                "addressPrefix": "[reference(variables('aciSubnetId'), '2019-07-01').addressPrefix]",
+                                "serviceEndpoints": [],
+                                "delegations": [
+                                    {
+                                        "name": "[deployment().name]",
+                                        "properties": {
+                                            "serviceName": "Microsoft.ContainerInstance/containerGroups",
+                                            "actions": [
+                                                "Microsoft.Network/virtualNetworks/subnets/action"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "comments": "Network Operator role assignment for cluster subnet",
+                            "type": "Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments",
+                            "apiVersion": "2017-05-01",
+                            "name": "[concat(parameters('vnetName'), '/', parameters('clusterSubnet'), '/Microsoft.Authorization/', guid(parameters('clusterSubnet')))]",
+                            "properties": {
+                                "roleDefinitionId": "[variables('networkOperatorRoleId')]",
+                                "principalId": "[parameters('clusterObjectId')]",
+                                "scope": "[variables('clusterSubnetId')]"
+                            }
+                        },
+                        {
+                            "comments": "Network Operator role assignment for ACI subnet", 
+                            "type": "Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments",
+                            "apiVersion": "2017-05-01",
+                            "name": "[concat(parameters('vnetName'), '/', parameters('aciSubnet'), '/Microsoft.Authorization/', guid(parameters('aciSubnet')))]",
+                            "properties": {
+                                "roleDefinitionId": "[variables('networkOperatorRoleId')]",
+                                "principalId": "[parameters('clusterObjectId')]",
+                                "scope": "[variables('aciSubnetId')]"
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('VNETName'))]"
+            ]
+        },
+        {
+            "condition": "[empty(null())]",
+            "comments": "A subnet Route Table",
+            "type": "Microsoft.Network/routeTables",
+            "name": "[concat('route-', parameters('subnets')[copyIndex('routeIndex')].name)]",
+            "apiVersion": "2019-04-01",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "routeIndex",
+                "count": "[length(parameters('subnets'))]"
+            },
+            "properties": {
+                "disableBgpRoutePropagation": "[false()]",
+                "routes": "[variables('routes')]"
+            }
+        },
+        {
+            "condition": "[bool('false')]",
+            "comments": "A subnet Route Table",
+            "type": "Microsoft.Network/routeTables",
+            "name": "[concat('route-', parameters('subnets')[copyIndex('routeIndex')].name)]",
+            "apiVersion": "2019-04-01",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "routeIndex",
+                "count": "[length(parameters('subnets'))]"
+            },
+            "properties": {
+                "disableBgpRoutePropagation": false,
+                "routes": "[variables('routes2')]"
+            }
+        },
+        {
+            "condition": "[true()]",
+            "comments": "A subnet Network Security Group",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[concat('nsg-', parameters('subnets')[copyIndex()].name)]",
+            "apiVersion": "2019-04-01",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "nsgIndex",
+                "count": "[length(parameters('subnets'))]"
+            },
+            "properties": {
+                "securityRules": "[parameters('subnets')[copyIndex()].securityRules]"
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "A subnet Network Security Group",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "nsg-extra",
+            "apiVersion": "2019-04-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "copy": [
+                    {
+                        "name": "securityRules",
+                        "count": 3,
+                        "input": {
+                            "name": "[concat('rule-', copyIndex('securityRules', 200))]",
+                            "properties": {
+                                "description": "[if(equals('a', 'a'), json('null'), json('null'))]",
+                                "protocol": "Tcp",
+                                "sourcePortRange": "*",
+                                "destinationPortRanges": [
+                                    "3389"
+                                ],
+                                "access": "Deny",
+                                "priority": "[copyIndex('securityRules', 200)]",
+                                "direction": "Inbound",
+                                "sourceAddressPrefix": "*",
+                                "destinationAddressPrefix": "VirtualNetwork"
+                            }
+                        }
+                    }
+                ]
+            },
+            "dependsOn": []
+        }
+    ]
+}

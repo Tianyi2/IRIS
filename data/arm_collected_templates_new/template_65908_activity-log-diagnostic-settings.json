@@ -1,0 +1,95 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "settingName": {
+            "type": "string",
+            "defaultValue": "datadog-activity-logs-diagnostic-setting",
+            "metadata": {
+                "description": "The name of the diagnostic setting"
+            }
+        },
+        "resourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Resource Group of the EventHub"
+            }
+        },
+        "eventHubNamespace": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of EventHub namespace, which must be globally unique."
+            }
+        },
+        "eventHubName": {
+            "type": "string",
+            "defaultValue": "datadog-eventhub",
+            "metadata": {
+                "description": "Name of the EventHub to which the Activity logs will be sent."
+            }
+        },
+        "copies": {
+            "type": "int",
+            "metadata": {
+                "description": "number of functins and event hubs"
+            }
+        }
+    },
+    "variables": {
+        "subscriptionId": "[subscription().subscriptionId]"
+    },
+    "resources": [
+
+        // {
+        //     "type": "microsoft.insights/diagnosticSettings",
+        //     "copy": {
+        //         "name": "nsg-loop",
+        //         "count": "[parameters('copies')]"
+        //     },
+        //     "location": "West Europe",
+        //     "apiVersion": "2017-05-01-preview",
+        //     "name": "[concat( parameters('settingName'),'-',copyIndex(1))]",
+        //     "properties": {
+        //         // "eventHubAuthorizationRuleId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', parameters('resourceGroup'), '/providers/Microsoft.EventHub/namespaces/', parameters('eventHubNamespace'),'/eventhubs/',parameters('eventHubName'),'-', copyIndex(1),'/authorizationRules/','Rule-', copyIndex(1))]",
+        //         "eventHubAuthorizationRuleId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', parameters('resourceGroup'), '/providers/Microsoft.EventHub/namespaces/', parameters('eventHubNamespace'),'/authorizationRules/','DatadogRule-', copyIndex(1))]",
+        //         "eventHubName": "[concat(parameters('eventHubName'),'-',copyIndex(1))]",
+        //         "scope": "",
+        //         "logs": [
+        //             {
+        //                 "category": "Administrative",
+        //                 "enabled": true
+        //             },
+        //             {
+        //                 "category": "Security",
+        //                 "enabled": true
+        //             },
+        //             {
+        //                 "category": "ServiceHealth",
+        //                 "enabled": true
+        //             },
+        //             {
+        //                 "category": "Alert",
+        //                 "enabled": true
+        //             },
+        //             {
+        //                 "category": "Recommendation",
+        //                 "enabled": true
+        //             },
+        //             {
+        //                 "category": "Policy",
+        //                 "enabled": true
+        //             },
+        //             {
+        //                 "category": "Autoscale",
+        //                 "enabled": true
+        //             },
+        //             {
+        //                 "category": "ResourceHealth",
+        //                 "enabled": true
+        //             }
+        //         ]
+        //     }
+        // }
+
+    ]
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/ffc9052b-3658-4ad4-9003-0151515fde15')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/ffc9052b-3658-4ad4-9003-0151515fde15')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "name": "McAfee ePO - Spam Email detected",
+        "description": "'Detects when email was marked as spam.'\n",
+        "query": "McAfeeEPOEvent\n| where EventId == '4650'\n| extend IPCustomEntity = DvcIpAddr, HostCustomEntity = DvcHostname\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "IPCustomEntity",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "HostCustomEntity",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Host"
+          }
+        ],
+        "severity": "Medium",
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "tactics": [
+          "InitialAccess"
+        ],
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

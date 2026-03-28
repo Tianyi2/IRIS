@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deploy-Resource-Diag",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "westeurope",
+      "identity": {
+        "principalId": "f8a816bb-f6b6-40a1-a96e-390f3a71fb40",
+        "tenantId": "dbbc60b0-7054-4f16-a0af-724750c58153",
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "description": "This policy set deploys the configurations of application Azure resources to forward diagnostic logs and metrics to an Azure Log Analytics workspace. See the list of policies of the services that are included",
+        "displayName": "Deploy Diagnostic Settings to Azure Services",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "nonComplianceMessages": [
+          {
+            "message": "Diagnostic settings must deployed to Azure services."
+          }
+        ],
+        "parameters": {
+          "logAnalytics": {
+            "value": "/subscriptions/30aca850-a275-4d1a-a24b-68f7605f12d2/resourceGroups/contoso-mgmt/providers/Microsoft.OperationalInsights/workspaces/contoso-law"
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Management/managementGroups/contoso/providers/Microsoft.Authorization/policySetDefinitions/Deploy-Diagnostics-LogAnalytics",
+        "scope": "/providers/Microsoft.Management/managementGroups/contoso"
+      }
+    }
+  ],
+  "outputs": {}
+}

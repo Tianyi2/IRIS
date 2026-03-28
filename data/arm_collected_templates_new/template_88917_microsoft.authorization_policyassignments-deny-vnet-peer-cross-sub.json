@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deny-VNet-Peer-Cross-Sub",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "global",
+      "properties": {
+        "description": "This policy denies the creation of vNet Peerings outside of the same subscriptions under the assigned scope.",
+        "displayName": "Deny vNet peering cross subscription.",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "parameters": {
+          "listOfResourceTypesNotAllowed": {
+            "value": [
+              "microsoft.network/virtualnetworks/virtualnetworkpeerings",
+              "microsoft.network/expressroutecircuits/peerings",
+              "microsoft.network/expressroutecircuits/peerings/connections",
+              "microsoft.network/expressroutecrossconnections/peerings",
+              "microsoft.network/virtualrouters/peerings"
+            ]
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/6c112d4e-5bc7-47ae-a041-ea2d9dccd749",
+        "scope": "/providers/Microsoft.Management/managementGroups/saturn-playground"
+      }
+    }
+  ],
+  "outputs": {}
+}

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/9f921513-65f3-48a2-ae7d-326c5901c55e')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/9f921513-65f3-48a2-ae7d-326c5901c55e')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "Detect .NET runtime being loaded in JScript for code execution",
+        "description": "This query detects .NET being loaded from wscript or cscript to run .NET code, such as cactustorch and sharpshooter.\nAll based on the DotNetToJScript by James Foreshaw documented here https://github.com/tyranid/DotNetToJScript. \n",
+        "query": "DeviceImageLoadEvents \n| where FileName in~ (\"mscoree.dll\", \"mscorlib.dll\", \"mscorlib.ni.dll\") \n| where tolower(InitiatingProcessFileName) in (\"wscript.exe\", \"cscript.exe\", \"mshta.exe\")\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "InitiatingProcessAccountSid",
+                "identifier": "Sid"
+              },
+              {
+                "columnName": "InitiatingProcessAccountName",
+                "identifier": "Name"
+              },
+              {
+                "columnName": "InitiatingProcessAccountDomain",
+                "identifier": "NTDomain"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DeviceName",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "InitiatingProcessCommandLine",
+                "identifier": "CommandLine"
+              }
+            ],
+            "entityType": "Process"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "Execution"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

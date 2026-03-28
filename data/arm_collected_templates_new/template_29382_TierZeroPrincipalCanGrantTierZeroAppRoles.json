@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/8e1df707-a242-42ba-a0aa-68b61f1e620d')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/8e1df707-a242-42ba-a0aa-68b61f1e620d')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "BloodHound Attack Path Finding - Non-Tier Zero Principal Can Grant Tier Zero App Roles",
+        "description": "BloodHound Attack Path Finding - Non-Tier Zero Principal Can Grant Tier Zero App Roles",
+        "query": "BHEAttackPathsData_CL \n| where Finding == \"AzureT0MGGrantAppRoles\"",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "domain_name",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "Remediation": "ShortRemediation",
+          "Description": "ShortDescription"
+        },
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

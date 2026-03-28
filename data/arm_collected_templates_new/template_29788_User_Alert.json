@@ -1,0 +1,37 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/29e0767c-80ac-4689-9a2e-b25b9fc88fce')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/29e0767c-80ac-4689-9a2e-b25b9fc88fce')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "triggerThreshold": 0,
+        "customDetails": {
+          "User": "User"
+        },
+        "entityMappings": null,
+        "severity": "Medium",
+        "description": "'This query identifies users whose user account or credentials have been compromised.'\n",
+        "queryFrequency": "5m",
+        "triggerOperator": "gt",
+        "status": "Available",
+        "query": "SecurityIncident\n| where Title has \"Cvlt Alert\" and Description has \"User\" and Description has \"Compromised\" and Status has \"New\"\n| extend extracted_word = extract(\"User\\\\s(.*?)\\\\sCompromised\", 1, Description)\n| project TimeGenerated, Title, Description, Status, User = extracted_word\n",
+        "tactics": [
+          "DefenseEvasion",
+          "Impact"
+        ],
+        "name": "User Alert",
+        "queryPeriod": "5m"
+      }
+    }
+  ]
+}

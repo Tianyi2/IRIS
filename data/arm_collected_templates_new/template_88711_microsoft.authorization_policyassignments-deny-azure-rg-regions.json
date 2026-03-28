@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deny-Azure-Rg-Regions",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "westeurope",
+      "properties": {
+        "description": "This policy enables you to restrict the locations your organization can create resource groups in. Use to enforce your geo-compliance requirements.",
+        "displayName": "Azure Regions for Resource Groups that are allowed per FSI compliance",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "parameters": {
+          "listOfAllowedLocations": {
+            "value": [
+              "westeurope"
+            ]
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e765b5de-1225-4ba3-bd56-1ac6695af988",
+        "scope": "/providers/Microsoft.Management/managementGroups/saturn-landingzones"
+      }
+    }
+  ],
+  "outputs": {}
+}

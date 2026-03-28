@@ -1,0 +1,61 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "shortName": {
+            "type": "string",
+            "metadata": {
+                "description": "Max length: 15. The group's Short name is included in Email and SMS notifications to identify which Action group was the source of the notification. If a user unsubscribes they are unsubscribing from the specific Action group identified by the Short name."
+            }
+        },
+        "emailReceivers": {
+            "type": "array",
+            "metadata": {
+                "description": "Array of objects with properties: name, emailAddress"
+            }
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue" : {}
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('name')]",
+            "type": "Microsoft.Insights/actionGroups",
+            "apiVersion": "2019-06-01",
+            "location": "Global",
+            "tags": "[parameters('tags')]",
+            "properties": {
+                "groupShortName": "[parameters('shortName')]",
+                "enabled": true,
+                "emailReceivers": "[parameters('emailReceivers')]",
+                "smsReceivers": [
+                ],
+                "webhookReceivers": [
+                ],
+                "itsmReceivers": [
+                ],
+                "azureAppPushReceivers": [
+                ],
+                "automationRunbookReceivers": [
+                ],
+                "voiceReceivers": [
+                ],
+                "logicAppReceivers": [
+                ],
+                "azureFunctionReceivers": [
+                ]
+            }
+        }
+    ],
+    "outputs": {
+        "actionGroup": {
+            "type": "object",
+            "value": "[reference(parameters('name'), '2018-03-01', 'Full')]"
+        }
+    }
+}

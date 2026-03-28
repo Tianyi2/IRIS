@@ -1,0 +1,328 @@
+{
+  "typeName": "AWS::NetworkFirewall::TLSInspectionConfiguration",
+  "description": "Resource type definition for AWS::NetworkFirewall::TLSInspectionConfiguration",
+  "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-networkfirewall.git",
+  "additionalProperties": false,
+  "definitions": {
+    "ResourceArn": {
+      "description": "A resource ARN.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "markdownDescription": "A resource ARN.\n\n---\n\nRequired: No  \nType: String  \nMinimum Length: 1  \nMaximum Length: 256  \nPattern: ^(arn:aws.*)$  \nUpdate requires: No interruption\n"
+    },
+    "Tag": {
+      "type": "object",
+      "properties": {
+        "Key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "markdownDescription": "\n\n---\n\nRequired: Yes  \nType: String  \nMinimum Length: 1  \nMaximum Length: 128  \nPattern: ^.*$  \nUpdate requires: No interruption\n"
+        },
+        "Value": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 255,
+          "markdownDescription": "\n\n---\n\nRequired: Yes  \nType: String  \nMaximum Length: 255  \nPattern: ^.*$  \nUpdate requires: No interruption\n"
+        }
+      },
+      "required": [
+        "Key",
+        "Value"
+      ],
+      "additionalProperties": false,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "TLSInspectionConfiguration": {
+      "type": "object",
+      "properties": {
+        "ServerCertificateConfigurations": {
+          "type": "array",
+          "insertionOrder": true,
+          "uniqueItems": false,
+          "items": {
+            "$ref": "#/definitions/ServerCertificateConfiguration"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        }
+      },
+      "additionalProperties": false,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "ServerCertificateConfiguration": {
+      "type": "object",
+      "properties": {
+        "ServerCertificates": {
+          "type": "array",
+          "insertionOrder": false,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/definitions/ServerCertificate"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        },
+        "Scopes": {
+          "type": "array",
+          "insertionOrder": true,
+          "uniqueItems": false,
+          "items": {
+            "$ref": "#/definitions/ServerCertificateScope"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        },
+        "CertificateAuthorityArn": {
+          "$ref": "#/definitions/ResourceArn"
+        },
+        "CheckCertificateRevocationStatus": {
+          "type": "object",
+          "properties": {
+            "RevokedStatusAction": {
+              "$ref": "#/definitions/RevokedStatusAction"
+            },
+            "UnknownStatusAction": {
+              "$ref": "#/definitions/UnknownStatusAction"
+            }
+          },
+          "additionalProperties": false,
+          "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+        }
+      },
+      "additionalProperties": false,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "RevokedStatusAction": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "DROP",
+        "REJECT"
+      ],
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nAllowed Values: PASS | DROP | REJECT  \nUpdate requires: No interruption\n"
+    },
+    "UnknownStatusAction": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "DROP",
+        "REJECT"
+      ],
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nAllowed Values: PASS | DROP | REJECT  \nUpdate requires: No interruption\n"
+    },
+    "ServerCertificate": {
+      "type": "object",
+      "properties": {
+        "ResourceArn": {
+          "$ref": "#/definitions/ResourceArn"
+        }
+      },
+      "additionalProperties": false,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "ServerCertificateScope": {
+      "type": "object",
+      "properties": {
+        "Sources": {
+          "type": "array",
+          "insertionOrder": true,
+          "uniqueItems": false,
+          "items": {
+            "$ref": "#/definitions/Address"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        },
+        "Destinations": {
+          "type": "array",
+          "insertionOrder": true,
+          "uniqueItems": false,
+          "items": {
+            "$ref": "#/definitions/Address"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        },
+        "SourcePorts": {
+          "type": "array",
+          "insertionOrder": true,
+          "uniqueItems": false,
+          "items": {
+            "$ref": "#/definitions/PortRange"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        },
+        "DestinationPorts": {
+          "type": "array",
+          "insertionOrder": true,
+          "uniqueItems": false,
+          "items": {
+            "$ref": "#/definitions/PortRange"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        },
+        "Protocols": {
+          "type": "array",
+          "insertionOrder": true,
+          "uniqueItems": false,
+          "items": {
+            "$ref": "#/definitions/ProtocolNumber"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        }
+      },
+      "additionalProperties": false,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "Address": {
+      "type": "object",
+      "properties": {
+        "AddressDefinition": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "markdownDescription": "\n\n---\n\nRequired: Yes  \nType: String  \nMinimum Length: 1  \nMaximum Length: 255  \nPattern: ^([a-fA-F\\d:\\.]+/\\d{1,3})$  \nUpdate requires: No interruption\n"
+        }
+      },
+      "required": [
+        "AddressDefinition"
+      ],
+      "additionalProperties": false,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "PortRange": {
+      "type": "object",
+      "properties": {
+        "FromPort": {
+          "$ref": "#/definitions/PortRangeBound"
+        },
+        "ToPort": {
+          "$ref": "#/definitions/PortRangeBound"
+        }
+      },
+      "required": [
+        "FromPort",
+        "ToPort"
+      ],
+      "additionalProperties": false,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "PortRangeBound": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: Integer  \nUpdate requires: No interruption\n"
+    },
+    "ProtocolNumber": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: Integer  \nUpdate requires: No interruption\n"
+    }
+  },
+  "properties": {
+    "TLSInspectionConfigurationName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "markdownDescription": "\n\n---\n\nRequired: Yes  \nType: String  \nMinimum Length: 1  \nMaximum Length: 128  \nPattern: ^[a-zA-Z0-9-]+$  \nUpdate requires: Replacement\n"
+    },
+    "TLSInspectionConfigurationArn": {
+      "$ref": "#/definitions/ResourceArn"
+    },
+    "TLSInspectionConfiguration": {
+      "$ref": "#/definitions/TLSInspectionConfiguration"
+    },
+    "TLSInspectionConfigurationId": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nMinimum Length: 36  \nMaximum Length: 36  \nPattern: ^([0-9a-f]{8})-([0-9a-f]{4}-){3}([0-9a-f]{12})$  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "Description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nMinimum Length: 1  \nMaximum Length: 512  \nPattern: ^.*$  \nUpdate requires: No interruption\n"
+    },
+    "Tags": {
+      "type": "array",
+      "insertionOrder": false,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/Tag"
+      },
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+    }
+  },
+  "tagging": {
+    "taggable": true,
+    "tagOnCreate": true,
+    "tagUpdatable": true,
+    "cloudFormationSystemTags": true,
+    "tagProperty": "/properties/Tags",
+    "permissions": [
+      "network-firewall:TagResource",
+      "network-firewall:UntagResource",
+      "network-firewall:ListTagsForResource"
+    ]
+  },
+  "required": [
+    "TLSInspectionConfigurationName",
+    "TLSInspectionConfiguration"
+  ],
+  "readOnlyProperties": [
+    "/properties/TLSInspectionConfigurationArn",
+    "/properties/TLSInspectionConfigurationId"
+  ],
+  "primaryIdentifier": [
+    "/properties/TLSInspectionConfigurationArn"
+  ],
+  "createOnlyProperties": [
+    "/properties/TLSInspectionConfigurationName"
+  ],
+  "handlers": {
+    "create": {
+      "permissions": [
+        "iam:CreateServiceLinkedRole",
+        "network-firewall:CreateTLSInspectionConfiguration",
+        "network-firewall:DescribeTLSInspectionConfiguration",
+        "network-firewall:TagResource"
+      ]
+    },
+    "read": {
+      "permissions": [
+        "network-firewall:DescribeTLSInspectionConfiguration",
+        "network-firewall:ListTagsForResources"
+      ]
+    },
+    "update": {
+      "permissions": [
+        "network-firewall:UpdateTLSInspectionConfiguration",
+        "network-firewall:DescribeTLSInspectionConfiguration",
+        "network-firewall:TagResource",
+        "network-firewall:UntagResource"
+      ]
+    },
+    "delete": {
+      "permissions": [
+        "network-firewall:DeleteTLSInspectionConfiguration",
+        "network-firewall:DescribeTLSInspectionConfiguration",
+        "network-firewall:UntagResource"
+      ]
+    },
+    "list": {
+      "permissions": [
+        "network-firewall:ListTLSInspectionConfigurations"
+      ]
+    }
+  },
+  "attributes": {
+    "TLSInspectionConfigurationArn": {
+      "$ref": "#/definitions/ResourceArn"
+    },
+    "TLSInspectionConfigurationId": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nMinimum Length: 36  \nMaximum Length: 36  \nPattern: ^([0-9a-f]{8})-([0-9a-f]{4}-){3}([0-9a-f]{12})$  \nUpdate requires: No interruption\nRead only property: Yes"
+    }
+  }
+}

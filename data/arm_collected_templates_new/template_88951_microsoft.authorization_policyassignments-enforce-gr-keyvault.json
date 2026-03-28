@@ -1,0 +1,29 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Enforce-GR-KeyVault",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "global",
+      "properties": {
+        "description": "This initiative assignment enables recommended ALZ guardrails for Azure Key Vault.",
+        "displayName": "Enforce recommended guardrails for Azure Key Vault",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "policyDefinitionId": "/providers/Microsoft.Management/managementGroups/contoso/providers/Microsoft.Authorization/policySetDefinitions/Enforce-Guardrails-KeyVault",
+        "scope": "/providers/Microsoft.Management/managementGroups/contoso-landingzones"
+      }
+    }
+  ],
+  "outputs": {}
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "f54adf6a129f43db92d06fea",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "global",
+      "properties": {
+        "displayName": "Enforce TLS minimum version for PostgreSQL  database",
+        "enforcementMode": "Default",
+        "metadata": {
+          "parameterScopes": {}
+        },
+        "nonComplianceMessages": [
+          {
+            "message": "no tls pgsqlnot allowed"
+          }
+        ],
+        "notScopes": [],
+        "overrides": [],
+        "parameters": {},
+        "policyDefinitionId": "/subscriptions/c97123d8-7b72-4517-b2c7-3cf81f7569e0/providers/Microsoft.Authorization/policyDefinitions/a21d8e0f-142f-4a87-9870-094091108b17",
+        "resourceSelectors": [],
+        "scope": "/subscriptions/c97123d8-7b72-4517-b2c7-3cf81f7569e0"
+      }
+    }
+  ],
+  "outputs": {}
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleDefinitions",
+      "name": "8157eb7a-da31-5397-b716-ba47bcb63ed1",
+      "apiVersion": "2022-05-01-preview",
+      "properties": {
+        "assignableScopes": [
+          "/providers/Microsoft.Management/managementGroups/saturn"
+        ],
+        "description": "Custom Role that grants full access to manage all Platform resources, but does not allow you to assign roles in Azure RBAC, manage assignments in Azure Blueprints, or share image galleries",
+        "permissions": [
+          {
+            "actions": [
+              "*"
+            ],
+            "dataActions": [],
+            "notActions": [
+              "Microsoft.Authorization/*/Delete",
+              "Microsoft.Authorization/*/Write",
+              "Microsoft.Authorization/elevateAccess/Action",
+              "Microsoft.Blueprint/blueprintAssignments/write",
+              "Microsoft.Blueprint/blueprintAssignments/delete",
+              "Microsoft.Compute/galleries/share/action"
+            ],
+            "notDataActions": []
+          }
+        ],
+        "roleName": "saturn-Platform Contributors",
+        "type": "CustomRole"
+      }
+    }
+  ],
+  "outputs": {}
+}

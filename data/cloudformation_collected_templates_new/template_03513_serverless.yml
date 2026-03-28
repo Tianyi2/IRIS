@@ -1,0 +1,994 @@
+service: facial-vote-backend
+frameworkVersion: '3'
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-step-functions
+  - serverless-pseudo-parameters
+  - serverless-dotenv-plugin
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: us-east-1
+  apiGateway:
+    apiKeys:
+      - vote-key
+
+custom:
+  # replace with your verified SES domain
+  ses_domain: ${env:SES_DOMAIN} 
+  jwt_issuer: ${env:JWT_ISSUER}
+  jwt_audience: ${env:JWT_AUDIENCE}
+  jwt_subject: ${env:JWT_SUBJECT}
+  jwt_secret: ${env:JWT_SECRET}
+  uploaded_s3_bucket_name: ${self:service}-facialvote
+  rekognition_collection_name: ${self:service}-facialvote
+  dynamodb_name: ${self:service}-facialvote
+  iot_name: ${self:service}-facialvote
+  sts_user: ${self:service}-facialvote
+  admin_user: ${self:service}-facialvote-admin
+  admin_email: ${env:ADMIN_EMAIL}
+  sts_expiry: 900
+  jwt_expiry: 15m
+  confidence_face: 90
+  region: us-east-1
+
+functions:
+  createUser:
+    handler: src/functions/cognito/create-user.handler
+    environment:
+      USERPOOL_ID: !Ref FacialVoteUserPool
+      ADMIN_ACCESS_KEY: ${self:outputs.AdminUserAccessKeyId.Value}
+      ADMIN_SECRET_KEY: ${self:outputs.AdminUserSecretKey.Value}
+      ADMIN_EMAIL: ${self:custom.admin_email}
+    events:
+      - http: 
+          path: create-user
+          method: post
+          cors: true
+          private: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt: [FacialVoteUserPool, Arn]
+    
+  getUsers:
+    handler: src/functions/cognito/get-users.handler
+    environment:
+      USERPOOL_ID: !Ref FacialVoteUserPool
+      ADMIN_ACCESS_KEY: ${self:outputs.AdminUserAccessKeyId.Value}
+      ADMIN_SECRET_KEY: ${self:outputs.AdminUserSecretKey.Value}
+      ADMIN_EMAIL: ${self:custom.admin_email}
+    events:
+      - http: 
+          path: get-users
+          method: get
+          cors: true
+          private: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt: [FacialVoteUserPool, Arn]
+
+  defineAuthChallenge:
+    handler: src/functions/cognito/define-auth-challenge.handler
+
+  createAuthChallenge:
+    handler: src/functions/cognito/create-auth-challenge.handler
+    environment:
+      SES_FROM_ADDRESS: ${self:custom.ses_domain}
+      DYNAMODB_NAME: ${self:custom.dynamodb_name}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - iot:*
+        Resource: '*'
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+        Resource:
+          - !GetAtt FacialVoteDB.Arn
+      - Effect: Allow
+        Action: ses:SendEmail
+        Resource: 
+          - !Sub arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/*
+          - !Sub arn:aws:ses:${AWS::Region}:${AWS::AccountId}:configuration-set/*
+
+  verifyAuthChallengeResponse:
+    handler: src/functions/cognito/verify-auth-challenge-response.handler
+
+  triggerSavePhoto:
+    handler: src/functions/stepfunctions/trigger-save-photo.handler
+    environment:
+      STATE_MACHINE_ARN: ${self:outputs.SaveFaceStateMachine.Value}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "states:StartExecution"
+        Resource:
+          - "*"
+    events:
+      - s3:
+          bucket: ${self:custom.uploaded_s3_bucket_name}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: private/
+          existing: true
+          forceDeploy: true
+  
+  triggerComparePhoto:
+    handler: src/functions/stepfunctions/trigger-compare-photo.handler
+    environment:
+      STATE_MACHINE_ARN: ${self:outputs.CompareFaceStateMachine.Value}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "states:StartExecution"
+        Resource:
+          - "*"
+    events:
+      - s3:
+          bucket: ${self:custom.uploaded_s3_bucket_name}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: public/
+          existing: true
+          forceDeploy: true
+
+  validateFace:
+    handler: src/functions/stepfunctions/savephoto/validate-face.handler
+    environment:
+      CONFIDENCE_FACE: ${self:custom.confidence_face}
+      IOT_ENDPOINT: !GetAtt IotEndpoint.IotEndpointAddress
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - rekognition:DetectFaces
+        Resource:
+          - "*"
+      - Effect: Allow
+        Action:
+          - s3:*
+        Resource:
+          - "arn:aws:s3:::${self:custom.uploaded_s3_bucket_name}/*"
+      - Effect: Allow
+        Action:
+        - iot:*
+        Resource: '*'
+
+  checkDuplicate:
+    handler: src/functions/stepfunctions/savephoto/check-duplicate.handler
+    environment:
+      CONFIDENCE_FACE: ${self:custom.confidence_face}
+      COLLECTION_ID: ${self:custom.rekognition_collection_name}
+      IOT_ENDPOINT: !GetAtt IotEndpoint.IotEndpointAddress
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - rekognition:SearchFacesByImage
+        Resource:
+          - "*"
+      - Effect: Allow
+        Action:
+          - s3:*
+        Resource:
+          - "arn:aws:s3:::${self:custom.uploaded_s3_bucket_name}/*"
+      - Effect: Allow
+        Action:
+        - iot:*
+        Resource: '*'
+    
+  indexFace:
+    handler: src/functions/stepfunctions/savephoto/index-face.handler
+    environment:
+      COLLECTION_ID: ${self:custom.rekognition_collection_name}
+      IOT_ENDPOINT: !GetAtt IotEndpoint.IotEndpointAddress
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - rekognition:IndexFaces
+        Resource:
+          - "*"
+      - Effect: Allow
+        Action:
+          - s3:*
+        Resource:
+          - "arn:aws:s3:::${self:custom.uploaded_s3_bucket_name}/*"
+      - Effect: Allow
+        Action:
+        - iot:*
+        Resource: '*'
+
+  saveFaceDynamoDb:
+    handler: src/functions/stepfunctions/savephoto/save-face-dynamodb.handler
+    environment:
+      DYNAMODB_NAME: ${self:custom.dynamodb_name}
+      IOT_ENDPOINT: !GetAtt IotEndpoint.IotEndpointAddress
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource:
+          - !GetAtt FacialVoteDB.Arn
+      - Effect: Allow
+        Action:
+        - iot:*
+        Resource: '*'
+
+  checkForFace:
+    handler: src/functions/stepfunctions/comparephoto/check-face.handler
+    environment:
+      CONFIDENCE_FACE: ${self:custom.confidence_face}
+      COLLECTION_ID: ${self:custom.rekognition_collection_name}
+      IOT_ENDPOINT: !GetAtt IotEndpoint.IotEndpointAddress
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - rekognition:SearchFacesByImage
+        Resource:
+          - "*"
+      - Effect: Allow
+        Action:
+          - s3:*
+        Resource:
+          - "arn:aws:s3:::${self:custom.uploaded_s3_bucket_name}/*"
+      - Effect: Allow
+        Action:
+        - iot:*
+        Resource: '*'
+
+  sendEmail:
+    handler: src/functions/stepfunctions/comparephoto/send-email.handler
+    environment:
+      IOT_ENDPOINT: !GetAtt IotEndpoint.IotEndpointAddress
+      DYNAMODB_NAME: ${self:custom.dynamodb_name}
+      SES_FROM_ADDRESS: ${self:custom.ses_domain}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - iot:*
+        Resource: '*'
+      - Effect: Allow
+        Action: 
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+        Resource:
+          - !GetAtt FacialVoteDB.Arn
+          - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${self:custom.dynamodb_name}/*
+      - Effect: Allow
+        Action: ses:SendEmail
+        Resource: 
+          - !Sub arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/*
+          - !Sub arn:aws:ses:${AWS::Region}:${AWS::AccountId}:configuration-set/*
+
+
+  generateToken:
+    handler: src/functions/stepfunctions/comparephoto/generate-token.handler
+    environment:
+      IOT_ENDPOINT: !GetAtt IotEndpoint.IotEndpointAddress
+      STS_ACCESS_KEY: ${self:outputs.StsUserAccessKeyId.Value}
+      STS_SECRET_KEY: ${self:outputs.StsUserSecretKey.Value}
+      STS_EXPIRY: ${self:custom.sts_expiry}
+      JWT_EXPIRY: ${self:custom.jwt_expiry}
+      JWT_ISSUER: ${self:custom.jwt_issuer} 
+      JWT_AUDIENCE: ${self:custom.jwt_audience}
+      JWT_SUBJECT: ${self:custom.jwt_subject}
+      JWT_SECRET: ${self:custom.jwt_secret}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - sts:*
+        Resource:
+          - "*"
+      - Effect: Allow
+        Action:
+          - s3:*
+        Resource:
+          - "arn:aws:s3:::${self:custom.uploaded_s3_bucket_name}/*"
+      - Effect: Allow
+        Action:
+        - iot:*
+        Resource: '*'
+
+  getVotingInProgress:
+    handler: src/functions/voting/get-voting-in-progress.handler
+    memorySize: 128
+    description: Gets all active voting processes
+    environment:
+      DYNAMODB_NAME: ${self:custom.dynamodb_name}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+        Resource:
+          - !GetAtt FacialVoteDB.Arn
+    events:
+      - http: 
+          path: voting
+          method: get
+          cors: true
+          private: true
+
+  addVoting:
+    handler: src/functions/voting/add-voting.handler
+    memorySize: 128
+    description: Add voting category
+    environment:
+      DYNAMODB_NAME: ${self:custom.dynamodb_name}
+      ADMIN_EMAIL: ${self:custom.admin_email}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:PutItem
+          - dynamodb:Scan
+        Resource:
+          - !GetAtt FacialVoteDB.Arn
+          - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${self:custom.dynamodb_name}/*
+    events:
+      - http: 
+          path: voting
+          method: post
+          cors: true
+          private: true
+          authorizer:
+            name: CognitoAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt: [FacialVoteUserPool, Arn]
+
+  getVotes:
+    handler: src/functions/voting/get-votes.handler
+    memorySize: 128
+    description: Gets all votes for a voting process
+    environment:
+      DYNAMODB_NAME: ${self:custom.dynamodb_name}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+        Resource:
+          - !GetAtt FacialVoteDB.Arn
+    events:
+      - http: 
+          path: vote/{id}
+          method: get
+          cors: true
+          private: true
+
+  vote:
+    handler: src/functions/voting/add-vote.handler
+    memorySize: 128
+    description: Adds users vote
+    environment:
+      DYNAMODB_NAME: ${self:custom.dynamodb_name}
+      JWT_ISSUER: ${self:custom.jwt_issuer} 
+      JWT_AUDIENCE: ${self:custom.jwt_audience}
+      JWT_SUBJECT: ${self:custom.jwt_subject}
+      JWT_SECRET: ${self:custom.jwt_secret}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:Scan
+        Resource:
+          - !GetAtt FacialVoteDB.Arn
+          - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${self:custom.dynamodb_name}/*
+    events:
+      - http: 
+          path: vote
+          method: post
+          cors: true
+          private: true
+          authorizer: aws_iam
+
+  processStream:
+    handler: src/functions/voting/process-stream.handler
+    environment:
+       IOT_ENDPOINT: !GetAtt IotEndpoint.IotEndpointAddress
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+        - iot:*
+        Resource: '*'
+      - Effect: Allow
+        Action:
+          - dynamodb:DescribeStream
+          - dynamodb:GetRecords
+          - dynamodb:GetShardIterator
+          - dynamodb:ListStreams
+        Resource:
+          - !GetAtt FacialVoteDB.Arn
+    events:
+      - stream:
+          type: dynamodb
+          maximumRetryAttempts: 2
+          arn:
+            Fn::GetAtt: [FacialVoteDB, StreamArn]
+
+stepFunctions:
+  stateMachines:
+    SaveFace:
+      name: SaveFaceMachine
+      definition:
+        Comment: "Indexes users photo to Amazon Rekognition and saves metadata to DynamoDb"
+        StartAt: ValidateFace
+        States:
+          ValidateFace:
+            Type: Task
+            Resource: !GetAtt validateFace.Arn 
+            Next: IsFaceValidated
+          IsFaceValidated:
+            Type: Choice
+            Choices:
+            - Variable: "$.status"
+              StringEquals: SUCCESS
+              Next: CheckDuplicate
+            - Variable: "$.status"
+              StringEquals: ERROR
+              Next: Fail
+          CheckDuplicate:
+            Type: Task
+            Resource: !GetAtt checkDuplicate.Arn
+            Next: IsFaceDuplicate
+          IsFaceDuplicate:
+            Type: Choice
+            Choices:
+            - Variable: "$.status"
+              StringEquals: SUCCESS
+              Next: IndexFace
+            - Variable: "$.status"
+              StringEquals: ERROR
+              Next: Fail
+          IndexFace:
+            Type: Task
+            Resource: !GetAtt indexFace.Arn
+            Next: SaveFaceDynamoDb
+          SaveFaceDynamoDb:
+            Type: Task
+            Resource: !GetAtt saveFaceDynamoDb.Arn
+            Next: IsFaceSaved
+          IsFaceSaved:
+            Type: Choice
+            Choices:
+            - Variable: "$.status"
+              StringEquals: SUCCESS
+              Next: Success
+            - Variable: "$.status"
+              StringEquals: ERROR
+              Next: Fail
+          Success:
+            Type: Succeed
+          Fail:
+            Type: Fail
+    CompareFace:
+      name: CompareFaceMachine
+      definition:
+        Comment: "Retrieves indexed face from Amazon Rekognition and compares with uploaded face"
+        StartAt: ValidateFace
+        States:
+          ValidateFace:
+            Type: Task
+            Resource: !GetAtt validateFace.Arn 
+            Next: IsFaceValidated
+          IsFaceValidated:
+            Type: Choice
+            Choices:
+            - Variable: "$.status"
+              StringEquals: SUCCESS
+              Next: CheckForFace
+            - Variable: "$.status"
+              StringEquals: ERROR
+              Next: Fail
+          CheckForFace:
+            Type: Task
+            Resource: !GetAtt checkForFace.Arn
+            Next: IsFaceFound
+          IsFaceFound:
+            Type: Choice
+            Choices:
+            - Variable: "$.status"
+              StringEquals: SUCCESS
+              Next: SendEmail
+            - Variable: "$.status"
+              StringEquals: ERROR
+              Next: Fail
+          SendEmail:
+            Type: Task
+            Resource: !GetAtt sendEmail.Arn
+            Next: GenerateToken
+          GenerateToken:
+            Type: Task
+            Resource: !GetAtt generateToken.Arn
+            Next: Success
+          Success:
+            Type: Succeed
+          Fail:
+            Type: Fail
+    
+
+resources:
+  Resources:   
+    # User pool 
+    FacialVoteUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UsernameConfiguration:
+          CaseSensitive: false
+        UsernameAttributes:
+          - email
+        Policies:
+          # this is only to satisfy Cognito requirements
+          # we won't be using passwords, but we also don't
+          # want weak passwords in the system ;-)
+          PasswordPolicy:
+            MinimumLength: 8
+            RequireLowercase: true
+            RequireNumbers: true
+            RequireUppercase: true
+            RequireSymbols: true
+        Schema:
+          - AttributeDataType: String
+            Mutable: false
+            Required: true
+            Name: email
+            StringAttributeConstraints: 
+              MinLength: '8'
+        LambdaConfig:
+          DefineAuthChallenge: !GetAtt DefineAuthChallengeLambdaFunction.Arn
+          CreateAuthChallenge: !GetAtt CreateAuthChallengeLambdaFunction.Arn
+          VerifyAuthChallengeResponse: !GetAtt VerifyAuthChallengeResponseLambdaFunction.Arn
+
+    FacialVoteUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: web
+        UserPoolId: !Ref FacialVoteUserPool
+        ExplicitAuthFlows:
+          - ALLOW_CUSTOM_AUTH
+          - ALLOW_REFRESH_TOKEN_AUTH
+          - ALLOW_USER_SRP_AUTH
+        PreventUserExistenceErrors: ENABLED
+
+    FacialVoteIdentityPool:
+      Type: AWS::Cognito::IdentityPool
+      Properties:
+        IdentityPoolName: facial_vote_upload_identity_pool
+        AllowUnauthenticatedIdentities: true
+        CognitoIdentityProviders:
+          - ClientId:
+              Ref: FacialVoteUserPoolClient
+            ProviderName:
+              Fn::GetAtt: [FacialVoteUserPool, ProviderName]
+    
+    # Cognito roles
+    CognitoIdentityPoolRoles:
+      Type: AWS::Cognito::IdentityPoolRoleAttachment
+      Properties:
+        IdentityPoolId:
+          Ref: FacialVoteIdentityPool
+        Roles:
+          authenticated:
+            Fn::GetAtt: [CognitoAuthRole, Arn]
+          unauthenticated:
+            Fn::GetAtt: [CognitoUnauthRole, Arn]
+    
+    CognitoAuthRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:service}_appAuthRole
+        Path: /
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Federated: "cognito-identity.amazonaws.com"
+              Action:
+                - "sts:AssumeRoleWithWebIdentity"
+              Condition:
+                StringEquals:
+                  "cognito-identity.amazonaws.com:aud":
+                    Ref: FacialVoteIdentityPool
+                "ForAnyValue:StringLike":
+                  "cognito-identity.amazonaws.com:amr": authenticated
+        Policies:
+          - PolicyName: "CognitoAuthorizedPolicy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "mobileanalytics:PutEvents"
+                    - "cognito-sync:*"
+                    - "cognito-identity:*"
+                  Resource: "*"
+                - Effect: Allow
+                  Action:
+                    - iot:Connect
+                    - iot:Subscribe
+                    - iot:Receive
+                  Resource: "*"
+                - Effect: "Allow"
+                  Action: 
+                    - "s3:PutObject"
+                    - "s3:GetObject"
+                  Resource: "arn:aws:s3:::${self:custom.uploaded_s3_bucket_name}/public/*"
+                - Effect: "Allow"
+                  Action: 
+                    - "s3:GetObject"
+                    - "s3:ListAllMyBuckets"
+                    - "s3:PutObject"
+                  Resource:
+                  - Fn::Join:
+                    - ''
+                    -
+                      - Fn::GetAtt: [UploadedS3Bucket, Arn]
+                      - '/private/'
+                      - '$'
+                      - '{cognito-identity.amazonaws.com:sub}/*'
+
+    CognitoUnauthRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:service}_appUnauthRole
+        Path: /
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Federated: "cognito-identity.amazonaws.com"
+              Action:
+                - "sts:AssumeRoleWithWebIdentity"
+              Condition:
+                StringEquals:
+                  "cognito-identity.amazonaws.com:aud":
+                    Ref: FacialVoteIdentityPool
+                "ForAnyValue:StringLike":
+                  "cognito-identity.amazonaws.com:amr": unauthenticated
+        Policies:
+          - PolicyName: "CognitoUnauthorizedPolicy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "mobileanalytics:PutEvents"
+                    - "cognito-sync:*"
+                    - "cognito-identity:*"
+                  Resource: "*"
+                - Effect: Allow
+                  Action:
+                    - iot:Connect
+                    - iot:Subscribe
+                    - iot:Receive
+                  Resource: "*"
+                - Effect: "Allow"
+                  Action: 
+                    - "s3:PutObject"
+                    - "s3:GetObject"
+                  Resource: "arn:aws:s3:::${self:custom.uploaded_s3_bucket_name}/public/*"
+    
+    # S3 Bucket
+    UploadedS3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.uploaded_s3_bucket_name}
+        LifecycleConfiguration:
+          Rules:
+            - Id: DeleteRule
+              Status: Enabled
+              ExpirationInDays: 1
+        CorsConfiguration:
+          CorsRules:
+          - AllowedHeaders: 
+              - '*'
+            AllowedMethods: 
+              - HEAD
+              - GET
+              - PUT
+              - POST
+            AllowedOrigins: 
+              - '*'
+            ExposedHeaders:
+              - x-amz-server-side-encryption
+              - x-amz-request-id
+              - x-amz-id-2
+            MaxAge: 3000
+    
+    # AWS Rekognition
+    RekognitionCollection:
+      Type: AWS::Rekognition::Collection
+      Properties:
+        CollectionId: ${self:custom.rekognition_collection_name}
+       
+    #DynamoDB
+    FacialVoteDB:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:custom.dynamodb_name}
+        AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: GS1PK
+          AttributeType: S
+        - AttributeName: GS1SK
+          AttributeType: S
+        KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: GS1
+            KeySchema:
+              - AttributeName: GS1PK
+                KeyType: HASH
+              - AttributeName: GS1SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: 'ALL'
+        BillingMode: PAY_PER_REQUEST
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+
+    #IoT
+
+    IOTRealtime:
+      Type: "AWS::IoT::Thing"
+      Properties:
+        ThingName: ${self:custom.iot_name}
+        AttributePayload:
+          Attributes: {}
+
+    GetIoTEndpoint:
+      Type: "AWS::Lambda::Function"
+      Properties:
+        FunctionName: ${self:service}-getIoTEndpoint
+        Handler: index.handler
+        Runtime: nodejs16.x
+        Code:
+          ZipFile: |
+            const aws = require("aws-sdk")
+
+            exports.handler = function (event, context) {
+              console.log("REQUEST RECEIVED:\n" + JSON.stringify(event))
+
+              // For Delete requests, immediately send a SUCCESS response.
+              if (event.RequestType == "Delete") {
+                sendResponse(event, context, "SUCCESS")
+                return
+              }
+
+              const iot = new aws.Iot()
+              iot.describeEndpoint({
+                endpointType: "iot:Data-ATS",
+              }, (err, data) => {
+                let responseData, responseStatus
+                if (err) {
+                  responseStatus = "FAILED"
+                  responseData = { Error: "describeEndpoint call failed" }
+                  console.log(responseData.Error + ":\n", err)
+                } else {
+                  responseStatus = "SUCCESS"
+                  responseData = { IotEndpointAddress: data.endpointAddress }
+                  console.log("response data: " + JSON.stringify(responseData))
+                }
+
+                sendResponse(event, context, responseStatus, responseData)
+              })
+            }
+
+            // Send response to the pre-signed S3 URL
+            function sendResponse(event, context, responseStatus, responseData) {
+              let responseBody = JSON.stringify({
+                Status: responseStatus,
+                Reason: `CloudWatch Log Stream: ${context.logStreamName}`,
+                PhysicalResourceId: context.logStreamName,
+                StackId: event.StackId,
+                RequestId: event.RequestId,
+                LogicalResourceId: event.LogicalResourceId,
+                Data: responseData,
+              })
+
+              console.log("RESPONSE BODY:\n", responseBody)
+
+              const https = require("https")
+              const url = require("url")
+
+              let parsedUrl = url.parse(event.ResponseURL)
+              let options = {
+                hostname: parsedUrl.hostname,
+                port: 443,
+                path: parsedUrl.path,
+                method: "PUT",
+                headers: {
+                  "content-type": "",
+                  "content-length": responseBody.length,
+                },
+              }
+
+              console.log("SENDING RESPONSE...\n")
+
+              const request = https.request(options, function (response) {
+                console.log("STATUS: " + response.statusCode)
+                console.log("HEADERS: " + JSON.stringify(response.headers))
+                // Tell AWS Lambda that the function execution is done
+                context.done()
+              })
+
+              request.on("error", function (error) {
+                console.log("sendResponse Error:" + error)
+                // Tell AWS Lambda that the function execution is done
+                context.done()
+              })
+
+              // write data to request body
+              request.write(responseBody)
+              request.end()
+              }
+        Role: !GetAtt LambdaFunctionRoleIoT.Arn
+
+    LambdaFunctionRoleIoT:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action:
+                  - 'sts:AssumeRole'
+        Policies:
+          - PolicyName: lambda-policy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: "*"
+                - Effect: Allow
+                  Action:
+                    - iot:DescribeEndpoint
+                  Resource: '*'
+
+    GetIoTEndpointLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: !Ref GetIoTEndpoint
+
+    IotEndpoint:
+      Type: 'Custom::IotEndpoint'
+      Properties:
+        ServiceToken: !GetAtt GetIoTEndpoint.Arn
+
+    #IAM USER
+    StsUser:
+      Type: AWS::IAM::User
+      Properties:
+        UserName: ${self:custom.sts_user}
+        ManagedPolicyArns:
+        - !Ref SampleManagedPolicy
+
+    StsUserCredentials:
+      Type: AWS::IAM::AccessKey
+      Properties:
+        Status: Active
+        UserName: !Ref StsUser
+    
+    SampleManagedPolicy:
+      Type: AWS::IAM::ManagedPolicy
+      Properties: 
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - sts:*
+                - apigateway:*
+              Resource: "*"
+            - Effect: "Allow"
+              Action:
+                - execute-api:*
+              Resource: "*"
+
+    #Admin user
+    AdminUser:
+      Type: AWS::IAM::User
+      Properties:
+        UserName: ${self:custom.admin_user}
+        ManagedPolicyArns:
+        - !Ref AdminManagedPolicy
+
+    AdminUserCredentials:
+      Type: AWS::IAM::AccessKey
+      Properties:
+        Status: Active
+        UserName: !Ref AdminUser
+    
+    AdminManagedPolicy:
+      Type: AWS::IAM::ManagedPolicy
+      Properties: 
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:AdminCreateUser
+                - cognito-idp:ListUsers
+              Resource: !GetAtt FacialVoteUserPool.Arn 
+
+    # Lambda permissions
+    UserPoolDefineAuthChallengeLambdaPermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        Action: lambda:invokeFunction
+        Principal: cognito-idp.amazonaws.com
+        FunctionName: !Ref DefineAuthChallengeLambdaFunction
+        SourceArn: !GetAtt FacialVoteUserPool.Arn
+
+    UserPoolCreateAuthChallengeLambdaPermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        Action: lambda:invokeFunction
+        Principal: cognito-idp.amazonaws.com
+        FunctionName: !Ref CreateAuthChallengeLambdaFunction
+        SourceArn: !GetAtt FacialVoteUserPool.Arn
+
+    UserPoolVerifyAuthChallengeResponseLambdaPermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        Action: lambda:invokeFunction
+        Principal: cognito-idp.amazonaws.com
+        FunctionName: !Ref VerifyAuthChallengeResponseLambdaFunction
+        SourceArn: !GetAtt FacialVoteUserPool.Arn
+
+outputs:
+  SaveFaceStateMachine:
+      Description: The ARN of the SaveFace state machine
+      Value:
+        Ref: SaveFaceMachine
+  CompareFaceStateMachine:
+      Description: The ARN of the CompareFace state machine
+      Value:
+        Ref: CompareFaceMachine
+  DynamoDbId:
+      Description: The ARN of the DynamoDB
+      Value:
+        Ref: FacialVoteDB
+  StsUserAccessKeyId:
+      Value:
+        Ref: StsUserCredentials
+  StsUserSecretKey:
+      Value:
+        Fn::GetAtt: [ "StsUserCredentials", "SecretAccessKey" ]
+  AdminUserAccessKeyId:
+      Value:
+        Ref: AdminUserCredentials
+  AdminUserSecretKey:
+      Value:
+        Fn::GetAtt: [ "AdminUserCredentials", "SecretAccessKey" ]

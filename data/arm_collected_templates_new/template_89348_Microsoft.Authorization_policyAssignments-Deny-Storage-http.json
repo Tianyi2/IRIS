@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deny-Storage-http",
+      "apiVersion": "2020-09-01",
+      "location": "[deployment().location]",
+      "properties": {
+        "Scope": "/providers/Microsoft.Management/managementGroups/bugbash-landingzones",
+        "NotScopes": null,
+        "DisplayName": "Enforce-Secure-Storage",
+        "Description": "Enforce-Secure-Storage",
+        "EnforcementMode": 0,
+        "PolicyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/404c3081-a854-4457-ae30-26a93ef643f9",
+        "Parameters": {
+          "effect": {
+            "value": "Deny"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

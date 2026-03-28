@@ -1,0 +1,422 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentTag": {
+      "type": "string"
+    },
+    "parentBusinessTag": {
+      "type": "string"
+    },
+    "portfolioTag": {
+      "type": "string"
+    },
+    "productTag": {
+      "type": "string"
+    },
+    "serviceTag": {
+      "type": "string",
+      "defaultValue": "[parameters('productTag')]"
+    },
+    "serviceLineTag": {
+      "type": "string"
+    },
+    "serviceOfferingTag": {
+      "type": "string",
+      "defaultValue": "[parameters('productTag')]"
+    },
+    "appServiceName": {
+      "type": "string"
+    },
+    "appServicePlanName": {
+      "type": "string"
+    },
+    "appServicePlanResourceGroup": {
+      "type": "string"
+    },
+    "appServiceAppSettings": {
+      "type": "array",
+      "defaultValue": []
+    },
+    "appServiceConnectionStrings": {
+      "type": "array",
+      "defaultValue": []
+    },
+    "appServiceVirtualApplications": {
+      "type": "array",
+      "defaultValue": [
+        {
+          "virtualPath": "/",
+          "physicalPath": "site\\wwwroot",
+          "preloadEnabled": true,
+          "virtualDirectories": null
+        }
+      ]
+    },
+    "customHostName": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "certificateThumbprint": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "This can be passed into the template via the reference function: [reference(resourceId(parameters('certificateResourceGroup'), 'Microsoft.Web/certificates', parameters('certificateName')), '2016-03-01').Thumbprint]"
+      }
+    },
+    "ipSecurityRestrictions": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Format removing backlashes: [{\"Name\": \"IP A\",\"ipAddress\": \"123.123.123.123\"},{\"Name\": \"IP B\",\"ipAddress\": \"234.234.234.234\"}]"
+      }
+    },
+    "appKind": {
+      "type": "string",
+      "defaultValue": "app",
+      "allowedValues": [
+        "web",
+        "app",
+        "api",
+        "functionapp"
+      ]
+    },
+    "subnetResourceId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Resource ID of the subnet used for vNet integration"
+      }
+    },
+    "use32BitWorkerProcess": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "http20Enabled": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "ftpsState": {
+      "type": "string",
+      "defaultValue": "Disabled",
+      "allowedValues": [
+        "AllAllowed",
+        "FtpsOnly",
+        "Disabled"
+      ]
+    },
+    "settingName": {
+      "type": "String",
+      "defaultvalue": "AppServiceDiagSettings",
+      "metadata": {
+        "description": "The name of the diagnostic setting"
+      }
+    },
+    "workspaceId": {
+      "type": "String",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ResourceID of the Log Analytics workspace in which resource logs should be saved."
+      }
+    },
+    "appServiceHTTPLogsSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "App Service HTTP Logs diagnostic setting"
+      }
+    },
+    "appServiceConsoleLogsSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "App Service console logs diagnostic setting"
+      }
+    },
+    "appServiceAppLogsSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "App Service app logs diagnostic setting"
+      }
+    },
+    "appServiceAuditLogsSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "App Service audit logs diagnostic setting"
+      }
+    },
+    "appServiceIPSecAuditLogsSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "App Service IP Sec audit logs diagnostic setting"
+      }
+    },
+    "appServicePlatformLogsSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "App Service platform logs diagnostic setting"
+      }
+    },
+    "allMetricsSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "All Metrics diagnostic setting"
+      }
+    },
+    "retentionPolicyEnabled": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "retentionPolicyDays": {
+      "type": "string",
+      "defaultValue": "30"
+    },
+    "minTlsVersion": {
+      "type": "string",
+      "defaultValue": "1.2",
+      "allowedValues": [
+        "1.0",
+        "1.1",
+        "1.2",
+        "1.3"
+      ]
+    },
+    "stagingSlotIsAlwaysOn": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "clientCertEnabled": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "clientCertMode": {
+      "type": "string",
+      "defaultValue": "Required"
+    }
+  },
+  "variables": {
+    "useCustomHostname": "[greater(length(parameters('customHostname')), 0)]",
+    "appServicePlanId": "[resourceId(parameters('appServicePlanResourceGroup'), 'Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
+    "appServiceApiVersion": "2022-03-01"
+  },
+  "resources": [
+    {
+      "name": "[parameters('appServiceName')]",
+      "type": "Microsoft.Web/sites",
+      "kind": "[parameters('appKind')]",
+      "apiVersion": "[variables('appServiceApiVersion')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "tags": {
+        "Environment": "[parameters('environmentTag')]",
+        "Parent Business": "[parameters('parentBusinessTag')]",
+        "Portfolio": "[parameters('portfolioTag')]",
+        "Product": "[parameters('productTag')]",
+        "Service": "[parameters('serviceTag')]",
+        "Service Line": "[parameters('serviceLineTag')]",
+        "Service Offering": "[parameters('serviceOfferingTag')]"
+      },
+      "properties": {
+        "serverFarmId": "[variables('appServicePlanId')]",
+        "clientAffinityEnabled": false,
+        "clientCertEnabled": "[parameters('clientCertEnabled')]",
+        "clientCertMode": "[parameters('clientCertMode')]",
+        "httpsOnly": true
+      }
+    },
+    {
+      "name": "[concat(parameters('appServiceName') , '/staging')]",
+      "type": "Microsoft.Web/sites/slots",
+      "apiVersion": "[variables('appServiceApiVersion')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "tags": {
+        "Environment": "[parameters('environmentTag')]",
+        "Parent Business": "[parameters('parentBusinessTag')]",
+        "Portfolio": "[parameters('portfolioTag')]",
+        "Product": "[parameters('productTag')]",
+        "Service": "[parameters('serviceTag')]",
+        "Service Line": "[parameters('serviceLineTag')]",
+        "Service Offering": "[parameters('serviceOfferingTag')]"
+      },
+      "properties": {
+        "clientAffinityEnabled": false,
+        "clientCertEnabled": "[parameters('clientCertEnabled')]",
+        "clientCertMode": "[parameters('clientCertMode')]",
+        "siteConfig": {
+          "appSettings": "[parameters('appServiceAppSettings')]",
+          "connectionStrings": "[parameters('appServiceConnectionStrings')]"
+        }
+      },
+      "dependsOn": [
+        "[parameters('appServiceName')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites/hostnameBindings",
+      "condition": "[variables('UseCustomHostname')]",
+      "name": "[concat(parameters('appServiceName'), '/', if(variables('useCustomHostname'), parameters('customHostname'), 'placeholder'))]",
+      "apiVersion": "[variables('appServiceApiVersion')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "sslState": "SniEnabled",
+        "thumbprint": "[parameters('certificateThumbprint')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('appServiceName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "name": "[concat(parameters('appServiceName'), '/web')]",
+      "dependsOn": [
+        "[parameters('appServiceName')]"
+      ],
+      "apiVersion": "[variables('appServiceApiVersion')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "ipSecurityRestrictions": "[parameters('ipSecurityRestrictions')]",
+        "virtualApplications": "[parameters('appServiceVirtualApplications')]",
+        "use32BitWorkerProcess": "[parameters('use32BitWorkerProcess')]",
+        "http20Enabled": "[parameters('http20Enabled')]",
+        "ftpsState": "[parameters('ftpsState')]",
+        "minTlsVersion": "[parameters('minTlsVersion')]",
+        "phpVersion": "off",
+        "alwaysOn": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/slots/config",
+      "name": "[concat(parameters('appServiceName'), '/staging/web')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites/slots', parameters('appServiceName') , 'staging')]"
+      ],
+      "apiVersion": "[variables('appServiceApiVersion')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "ipSecurityRestrictions": "[parameters('ipSecurityRestrictions')]",
+        "virtualApplications": "[parameters('appServiceVirtualApplications')]",
+        "use32BitWorkerProcess": "[parameters('use32BitWorkerProcess')]",
+        "http20Enabled": "[parameters('http20Enabled')]",
+        "ftpsState": "[parameters('ftpsState')]",
+        "minTlsVersion": "[parameters('minTlsVersion')]",
+        "phpVersion": "off",
+        "alwaysOn": "[parameters('stagingSlotIsAlwaysOn')]"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "condition": "[greater(length(parameters('subnetResourceId')), 0)]",
+      "name": "[concat(parameters('appServiceName'), '/virtualNetwork')]",
+      "apiVersion": "[variables('appServiceApiVersion')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "subnetResourceId": "[parameters('subnetResourceId')]",
+        "swiftSupported": true
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('appServiceName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites/providers/diagnosticSettings",
+      "condition": "[greater(length(parameters('workspaceId')), 0)]",
+      "apiVersion": "2017-05-01-preview",
+      "name": "[concat(parameters('appServiceName'),'/microsoft.insights/', parameters('settingName'))]",
+      "dependsOn": [
+        "[parameters('appServiceName')]"
+      ],
+      "properties": {
+        "name": "[parameters('settingName')]",
+        "workspaceId": "[parameters('workspaceId')]",
+        "logs": [
+          {
+            "category": "AppServiceHTTPLogs",
+            "enabled": "[parameters('appServiceHTTPLogsSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          },
+          {
+            "category": "AppServiceConsoleLogs",
+            "enabled": "[parameters('appServiceConsoleLogsSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          },
+          {
+            "category": "AppServiceAppLogs",
+            "enabled": "[parameters('appServiceAppLogsSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          },
+          {
+            "category": "AppServiceAuditLogs",
+            "enabled": "[parameters('appServiceAuditLogsSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          },
+          {
+            "category": "AppServiceIPSecAuditLogs",
+            "enabled": "[parameters('AppServiceIPSecAuditLogsSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          },
+          {
+            "category": "AppServicePlatformLogs",
+            "enabled": "[parameters('AppServicePlatformLogsSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "category": "AllMetrics",
+            "enabled": "[parameters('allMetricsSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "possibleOutboundIpAddresses": {
+      "type": "array",
+      "value": "[split(reference(parameters('appServiceName')).possibleOutboundIpAddresses, ',')]"
+    },
+    "managedServiceIdentityId": {
+      "type": "string",
+      "value": "[reference(parameters('appServiceName'), variables('appServiceApiVersion'), 'Full').identity.principalId]"
+    },
+    "managedServiceIdentity": {
+      "type": "object",
+      "value": "[reference(parameters('appServiceName'), variables('appServiceApiVersion'), 'Full').identity]"
+    },
+    "stagingManagedServiceIdentityId": {
+      "type": "string",
+      "value": "[reference('staging', variables('appServiceApiVersion'), 'Full').identity.principalId]"
+    }
+  }
+}

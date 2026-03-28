@@ -1,0 +1,286 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namingPrefix": {
+      "defaultValue": "contoso",
+      "type": "string"
+    }
+  },
+  "variables": {
+    "vnetMainName": "[concat(parameters('namingPrefix'),'-vnet-main')]",
+    "vnetMainAddressPrefix": "10.0.0.0/16",
+    "subnetDmzName": "[concat(parameters('namingPrefix'),'-subnet-dmz')]",
+    "subnetDmzAddressPrefix": "10.0.0.0/24",
+    "nsgDmzName": "[concat(parameters('namingPrefix'),'-nsg-dmz')]",
+    "subnetMiddleTierName": "[concat(parameters('namingPrefix'),'-subnet-mt')]",
+    "subnetMiddleTierAddressPrefix": "10.0.1.0/24",
+    "nsgMiddleTierName": "[concat(parameters('namingPrefix'),'-nsg-mt')]",
+    "subnetDataTierName": "[concat(parameters('namingPrefix'),'-subnet-dt')]",
+    "subnetDataTierAddressPrefix": "10.0.2.0/24",
+    "nsgDataTierName": "[concat(parameters('namingPrefix'),'-nsg-dt')]",
+    "subnetAlmName": "[concat(parameters('namingPrefix'),'-subnet-alm')]",
+    "subnetAlmAddressPrefix": "10.0.3.0/24",
+    "nsgAlmName": "[concat(parameters('namingPrefix'),'-nsg-alm')]",
+    "subnetManagementName": "[concat(parameters('namingPrefix'),'-subnet-mgmt')]",
+    "subnetManagementAddressPrefix": "10.0.4.0/24",
+    "nsgManagementName": "[concat(parameters('namingPrefix'),'-nsg-mgmt')]",
+    "subnetGatewayName": "GatewaySubnet",
+    "subnetGatewayAddressPrefix": "10.0.5.0/27"
+  },
+  "resources": [
+    {
+      "comments": "",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('vnetMainName')]",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "department": "networking",
+        "environment": "core"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('vnetMainAddressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('SubnetDmzName')]",
+            "properties": {
+              "addressPrefix": "[variables('SubnetDmzAddressPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NsgDmzName'))]"
+              }
+            }
+          },
+          {
+            "name": "[variables('SubnetMiddleTierName')]",
+            "properties": {
+              "addressPrefix": "[variables('SubnetMiddleTierAddressPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NsgMiddleTierName'))]"
+              }
+            }
+          },
+          {
+            "name": "[variables('SubnetDataTierName')]",
+            "properties": {
+              "addressPrefix": "[variables('SubnetDataTierAddressPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NsgDataTierName'))]"
+              }
+            }
+          },
+          {
+            "name": "[variables('SubnetAlmName')]",
+            "properties": {
+              "addressPrefix": "[variables('SubnetAlmAddressPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NsgAlmName'))]"
+              }
+            }
+          },
+          {
+            "name": "[variables('SubnetManagementName')]",
+            "properties": {
+              "addressPrefix": "[variables('SubnetManagementAddressPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NsgManagementName'))]"
+              }
+            }
+          },
+          {
+            "name": "[variables('SubnetGatewayName')]",
+            "properties": {
+              "addressPrefix": "[variables('SubnetGatewayAddressPrefix')]"
+            }
+          }
+        ],
+        "virtualNetworkPeerings": []
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NsgDmzName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NsgMiddleTierName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NsgDataTierName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NsgAlmName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NsgManagementName'))]"
+      ]
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('NsgAlmName')]",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": []
+      },
+      "dependsOn": []
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('NsgDataTierName')]",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": []
+      },
+      "dependsOn": []
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('NsgDmzName')]",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": []
+      },
+      "dependsOn": []
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('NsgManagementName')]",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "default-allow-rdp",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3389",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1000,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "default-allow-ssh",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1010,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      },
+      "dependsOn": []
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('NsgMiddleTierName')]",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": []
+      },
+      "dependsOn": []
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "name": "[concat(variables('vnetMainName'), '/', variables('subnetDmzName'))]",
+      "apiVersion": "2017-06-01",
+      "properties": {
+        "addressPrefix": "[variables('subnetDmzAddressPrefix')]",
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgDmzName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetMainName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgDmzName'))]"
+      ]
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "name": "[concat(variables('vnetMainName'), '/', variables('subnetMiddleTierName'))]",
+      "apiVersion": "2017-06-01",
+      "properties": {
+        "addressPrefix": "[variables('subnetMiddletierAddressPrefix')]",
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgMiddleTierName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetMainName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgMiddleTierName'))]"
+      ]
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "name": "[concat(variables('vnetMainName'), '/', variables('subnetDataTierName'))]",
+      "apiVersion": "2017-06-01",
+      "properties": {
+        "addressPrefix": "[variables('subnetDataTierAddressPrefix')]",
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgDataTierName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetMainName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgDataTierName'))]"
+      ]
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "name": "[concat(variables('vnetMainName'), '/', variables('subnetAlmName'))]",
+      "apiVersion": "2017-06-01",
+      "properties": {
+        "addressPrefix": "[variables('subnetAlmAddressPrefix')]",
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgAlmName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetMainName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgAlmName'))]"
+      ]
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "name": "[concat(variables('vnetMainName'), '/', variables('subnetManagementName'))]",
+      "apiVersion": "2017-06-01",
+      "properties": {
+        "addressPrefix": "[variables('subnetManagementAddressPrefix')]",
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgManagementName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetMainName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgManagementName'))]"
+      ]
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "name": "[concat(variables('vnetMainName'), '/', variables('subnetGatewayName'))]",
+      "apiVersion": "2017-06-01",
+      "properties": {
+        "addressPrefix": "[variables('subnetGatewayAddressPrefix')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetMainName'))]"
+      ]
+    }
+  ]
+}

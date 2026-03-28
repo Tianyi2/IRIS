@@ -1,0 +1,68 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/80f244cd-b0d6-404e-9aed-37f7a66eda9f')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/80f244cd-b0d6-404e-9aed-37f7a66eda9f')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "P7D",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "enabled": true,
+        "severity": "High",
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Mimecast Secure Email Gateway - URL Protect",
+        "description": "'Detect threat when potentially malicious url found.'\n",
+        "suppressionDuration": "5h",
+        "query": "MimecastCG\n| where Type == \"email_ttp_url\"\n| extend  SenderEnvelope = ['Sender Envelope']\n",
+        "status": "Available",
+        "queryFrequency": "15m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SenderEnvelope",
+                "identifier": "Sender"
+              },
+              {
+                "columnName": "Recipients",
+                "identifier": "Recipient"
+              },
+              {
+                "columnName": "Subject",
+                "identifier": "Subject"
+              }
+            ],
+            "entityType": "MailMessage"
+          }
+        ],
+        "suppressionEnabled": false,
+        "triggerOperator": "gt",
+        "tactics": [
+          "InitialAccess",
+          "Discovery",
+          "Execution"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "15m"
+      }
+    }
+  ]
+}

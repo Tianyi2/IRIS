@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleDefinitions",
+      "name": "8d839201-f6b8-5f90-96b0-b9c6cbe4f9ff",
+      "apiVersion": "2018-07-01",
+      "properties": {
+        "RoleName": "NetOps",
+        "Description": "Custom Role for Platform-wide global connectivity management",
+        "AssignableScopes": [
+          "/providers/Microsoft.Management/managementGroups/gotops"
+        ],
+        "Permissions": [
+          {
+            "Actions": [
+              "*/read",
+              "Microsoft.Authorization/*/read",
+              "Microsoft.Insights/alertRules/*",
+              "Microsoft.Network/*",
+              "Microsoft.ResourceHealth/availabilityStatuses/read",
+              "Microsoft.Resources/deployments/*",
+              "Microsoft.Resources/subscriptions/resourceGroups/read",
+              "Microsoft.Support/*"
+            ],
+            "DataActions": [],
+            "NotActions": [],
+            "NotDataActions": []
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {}
+}

@@ -1,0 +1,260 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "uniqueSeed": {
+      "type": "string",
+      "defaultValue": "[concat(subscription().subscriptionId, resourceGroup().name)]"
+    },
+    "uniqueSuffix": {
+      "type": "string",
+      "defaultValue": "[uniqueString(parameters('uniqueSeed'))]"
+    },
+    "environment_name": {
+      "type": "string",
+      "defaultValue": "[concat('env-', parameters('uniqueSuffix'))]"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "storage_account_name": {
+      "type": "string",
+      "defaultValue": "[concat('storage', parameters(replace('uniqueSuffix', '-', '')))]"
+    },
+    "blobContainerName": {
+      "type": "string",
+      "defaultValue": "orders"
+    },
+    "managedIdentityName": {
+      "type": "string",
+      "defaultValue": "nodeapp-identity"
+    }
+  },
+  "variables": {
+    "logAnalyticsWorkspaceName": "[concat('logs-', parameters('environment_name'))]",
+    "appInsightsName": "[concat('appins-', parameters('environment_name'))]",
+    "dataContributorRoleDefinitionId": "ba92f5b4-2d11-453d-a403-e96b0029c9fe"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2021-06-01",
+      "name": "[variables('logAnalyticsWorkspaceName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "retentionInDays": 30,
+        "features": {
+          "searchVersion": 1
+        },
+        "sku": {
+          "name": "PerGB2018"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[variables('appInsightsName')]",
+      "location": "[parameters('location')]",
+      "kind": "web",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('logAnalyticsWorkspaceName'))]"
+      ],
+      "properties": {
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('logAnalyticsWorkspaceName'))]"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2021-09-01",
+      "name": "[parameters('storage_account_name')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {},
+      "resources": [
+        {
+          "type": "blobServices",
+          "apiVersion": "2021-09-01",
+          "name": "default",
+          "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', parameters('storage_account_name'))]"
+          ],
+          "resources": [
+            {
+              "type": "containers",
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storage_account_name'), 'default')]"
+              ],
+              "apiVersion": "2021-09-01",
+              "name": "[parameters('blobContainerName')]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2022-01-31-preview",
+      "name": "[parameters('managedIdentityName')]",
+      "location": "[parameters('location')]"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-04-01-preview",
+      "name": "[guid(resourceGroup().id, extensionResourceId(resourceId('Microsoft.Storage/storageAccounts', parameters('storage_account_name')), 'Microsoft.Authorization/roleDefinitions', variables('dataContributorRoleDefinitionId')))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storage_account_name'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[extensionResourceId(resourceId('Microsoft.Storage/storageAccounts', parameters('storage_account_name')), 'Microsoft.Authorization/roleDefinitions', variables('dataContributorRoleDefinitionId'))]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))).principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.App/managedEnvironments",
+      "apiVersion": "2022-03-01",
+      "name": "[parameters('environment_name')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/components/', variables('appInsightsName'))]"
+      ],
+      "properties": {
+        "daprAIInstrumentationKey": "[reference(resourceId('Microsoft.Insights/components/', variables('appInsightsName')), '2020-02-02').InstrumentationKey]",
+        "appLogsConfiguration": {
+          "destination": "log-analytics",
+          "logAnalyticsConfiguration": {
+            "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', variables('logAnalyticsWorkspaceName')), '2021-06-01').customerId]",
+            "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', variables('logAnalyticsWorkspaceName')), '2021-06-01').primarySharedKey]"
+          }
+        }
+      },
+      "resources": [
+        {
+          "type": "daprComponents",
+          "name": "statestore",
+          "apiVersion": "2022-03-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.App/managedEnvironments/', parameters('environment_name'))]"
+          ],
+          "properties": {
+            "componentType": "state.azure.blobstorage",
+            "version": "v1",
+            "ignoreErrors": false,
+            "initTimeout": "5s",
+            "metadata": [
+              {
+                "name": "accountName",
+                "value": "[parameters('storage_account_name')]"
+              },
+              {
+                "name": "containerName",
+                "value": "[parameters('blobContainerName')]"
+              },
+              {
+                "name": "azureClientId",
+                "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))).clientId]"
+              }
+            ],
+            "scopes": ["nodeapp"]
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2022-03-01",
+      "name": "pythonapp",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments/', parameters('environment_name'))]",
+        "[resourceId('Microsoft.App/containerApps/', 'nodeapp')]"
+      ],
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments/', parameters('environment_name'))]",
+        "configuration": {
+          "dapr": {
+            "enabled": true,
+            "appId": "pythonapp"
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "image": "dapriosamples/hello-k8s-python:latest",
+              "name": "hello-k8s-python",
+              "resources": {
+                "cpu": 0.5,
+                "memory": "1.0Gi"
+              }
+            }
+          ],
+          "scale": {
+            "minReplicas": 1,
+            "maxReplicas": 1
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2022-03-01",
+      "name": "nodeapp",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments/', parameters('environment_name'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storage_account_name'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))]"
+      ],
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))]": {}
+        }
+      },
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments/', parameters('environment_name'))]",
+        "configuration": {
+          "ingress": {
+            "external": false,
+            "targetPort": 3000
+          },
+          "dapr": {
+            "enabled": true,
+            "appId": "nodeapp",
+            "appProcotol": "http",
+            "appPort": 3000
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "image": "dapriosamples/hello-k8s-node:latest",
+              "name": "hello-k8s-node",
+              "env": [
+                {
+                  "name": "APP_PORT",
+                  "value": "3000"
+                }
+              ],
+              "resources": {
+                "cpu": 0.5,
+                "memory": "1.0Gi"
+              }
+            }
+          ],
+          "scale": {
+            "minReplicas": 1,
+            "maxReplicas": 1
+          }
+        }
+      }
+    }
+  ]
+}

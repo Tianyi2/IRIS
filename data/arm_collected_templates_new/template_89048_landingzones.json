@@ -1,0 +1,81 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/tenantDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "enterpriseScaleCompanyPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "See es-hubspoke.json"
+            }
+        },
+        "parentResourceID": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide the resource id of the parent management group"
+            }
+        },
+        "lzName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the landing zone"
+            }
+        }
+        
+    },
+    "resources": [
+        // add a landing zone management group        
+        {
+            "type": "Microsoft.Management/managementGroups",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('enterpriseScaleCompanyPrefix'), parameters('lzName'))]",
+            "dependsOn": [
+                "[parameters('parentResourceID')]"
+            ],
+            "properties": {
+                "details": {
+                    "parent": {
+                        "id": "[parameters('parentResourceID')]"
+                    }
+                }
+            }
+        },
+        // add online management group as children of the newly created landing zone
+        {
+            "type": "Microsoft.Management/managementGroups",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('enterpriseScaleCompanyPrefix'), '-online')]",
+            "dependsOn": [
+                "[tenantResourceId('Microsoft.Management/managementGroups', concat(parameters('enterpriseScaleCompanyPrefix'), parameters('lzName')))]"
+            ],
+            "properties": {
+                "details": {
+                    "parent": {
+                        "id": "[tenantResourceId('Microsoft.Management/managementGroups/', concat(parameters('enterpriseScaleCompanyPrefix'), parameters('lzName')))]"
+                    }
+                }
+            }
+        },
+        // to be included in each of the 3 LZ's
+        {
+            "type": "Microsoft.Management/managementGroups",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('enterpriseScaleCompanyPrefix'), '-corp')]",
+            "dependsOn": [
+                "[tenantResourceId('Microsoft.Management/managementGroups', concat(parameters('enterpriseScaleCompanyPrefix'), parameters('lzName')))]"
+            ],
+            "properties": {
+                "details": {
+                    "parent": {
+                        "id": "[tenantResourceId('Microsoft.Management/managementGroups/', concat(parameters('enterpriseScaleCompanyPrefix'), parameters('lzName')))]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "deployment": {
+            "type": "string",
+            "value": "[concat(deployment().name, ' has successfully deployed landing zone', parameters('lzName'), ' with corp and online')]"
+        }
+    }
+}

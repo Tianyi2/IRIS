@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/f4c30666-406d-49fe-b8ba-e742721bf8d1')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/f4c30666-406d-49fe-b8ba-e742721bf8d1')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "name": "Excessive number of failed connections from a single source (ASIM Network Session schema)",
+        "description": "As part of content migration, this file is moved to new location. you can find here: https://github.com/Azure/Azure-Sentinel/blob/master/Solutions/Network%20Session%20Essentials/Analytic%20Rules/ExcessiveHTTPFailuresFromSource.yaml"
+      }
+    }
+  ]
+}

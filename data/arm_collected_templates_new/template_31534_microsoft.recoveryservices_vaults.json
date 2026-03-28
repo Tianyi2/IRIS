@@ -1,0 +1,349 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.RecoveryServices/Vaults to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.RecoveryServices/Vaults to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "addonazurebackupalertsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AddonAzureBackupAlerts",
+        "description": "Enable or disable log category AddonAzureBackupAlerts"
+      },
+      "defaultValue": true
+    },
+    "addonazurebackupjobsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AddonAzureBackupJobs",
+        "description": "Enable or disable log category AddonAzureBackupJobs"
+      },
+      "defaultValue": true
+    },
+    "addonazurebackuppolicyEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AddonAzureBackupPolicy",
+        "description": "Enable or disable log category AddonAzureBackupPolicy"
+      },
+      "defaultValue": true
+    },
+    "addonazurebackupprotectedinstanceEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AddonAzureBackupProtectedInstance",
+        "description": "Enable or disable log category AddonAzureBackupProtectedInstance"
+      },
+      "defaultValue": true
+    },
+    "addonazurebackupstorageEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AddonAzureBackupStorage",
+        "description": "Enable or disable log category AddonAzureBackupStorage"
+      },
+      "defaultValue": true
+    },
+    "asrreplicateditemsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "ASRReplicatedItems",
+        "description": "Enable or disable log category ASRReplicatedItems"
+      },
+      "defaultValue": true
+    },
+    "azurebackupoperationsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AzureBackupOperations",
+        "description": "Enable or disable log category AzureBackupOperations"
+      },
+      "defaultValue": true
+    },
+    "azurebackupreportEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AzureBackupReport",
+        "description": "Enable or disable log category AzureBackupReport"
+      },
+      "defaultValue": true
+    },
+    "azuresiterecoveryeventsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AzureSiteRecoveryEvents",
+        "description": "Enable or disable log category AzureSiteRecoveryEvents"
+      },
+      "defaultValue": true
+    },
+    "azuresiterecoveryjobsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AzureSiteRecoveryJobs",
+        "description": "Enable or disable log category AzureSiteRecoveryJobs"
+      },
+      "defaultValue": true
+    },
+    "azuresiterecoveryprotecteddiskdatachurnEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AzureSiteRecoveryProtectedDiskDataChurn",
+        "description": "Enable or disable log category AzureSiteRecoveryProtectedDiskDataChurn"
+      },
+      "defaultValue": true
+    },
+    "azuresiterecoveryrecoverypointsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AzureSiteRecoveryRecoveryPoints",
+        "description": "Enable or disable log category AzureSiteRecoveryRecoveryPoints"
+      },
+      "defaultValue": true
+    },
+    "azuresiterecoveryreplicateditemsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AzureSiteRecoveryReplicatedItems",
+        "description": "Enable or disable log category AzureSiteRecoveryReplicatedItems"
+      },
+      "defaultValue": true
+    },
+    "azuresiterecoveryreplicationdatauploadrateEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AzureSiteRecoveryReplicationDataUploadRate",
+        "description": "Enable or disable log category AzureSiteRecoveryReplicationDataUploadRate"
+      },
+      "defaultValue": true
+    },
+    "azuresiterecoveryreplicationstatsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AzureSiteRecoveryReplicationStats",
+        "description": "Enable or disable log category AzureSiteRecoveryReplicationStats"
+      },
+      "defaultValue": true
+    },
+    "coreazurebackupEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CoreAzureBackup",
+        "description": "Enable or disable log category CoreAzureBackup"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.RecoveryServices/Vaults"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.RecoveryServices/Vaults/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.RecoveryServices/Vaults, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "AddonAzureBackupAlerts",
+                    "enabled": "[parameters('addonazurebackupalertsEnabled')]"
+                  },
+                  {
+                    "category": "AddonAzureBackupJobs",
+                    "enabled": "[parameters('addonazurebackupjobsEnabled')]"
+                  },
+                  {
+                    "category": "AddonAzureBackupPolicy",
+                    "enabled": "[parameters('addonazurebackuppolicyEnabled')]"
+                  },
+                  {
+                    "category": "AddonAzureBackupProtectedInstance",
+                    "enabled": "[parameters('addonazurebackupprotectedinstanceEnabled')]"
+                  },
+                  {
+                    "category": "AddonAzureBackupStorage",
+                    "enabled": "[parameters('addonazurebackupstorageEnabled')]"
+                  },
+                  {
+                    "category": "ASRReplicatedItems",
+                    "enabled": "[parameters('asrreplicateditemsEnabled')]"
+                  },
+                  {
+                    "category": "AzureBackupOperations",
+                    "enabled": "[parameters('azurebackupoperationsEnabled')]"
+                  },
+                  {
+                    "category": "AzureBackupReport",
+                    "enabled": "[parameters('azurebackupreportEnabled')]"
+                  },
+                  {
+                    "category": "AzureSiteRecoveryEvents",
+                    "enabled": "[parameters('azuresiterecoveryeventsEnabled')]"
+                  },
+                  {
+                    "category": "AzureSiteRecoveryJobs",
+                    "enabled": "[parameters('azuresiterecoveryjobsEnabled')]"
+                  },
+                  {
+                    "category": "AzureSiteRecoveryProtectedDiskDataChurn",
+                    "enabled": "[parameters('azuresiterecoveryprotecteddiskdatachurnEnabled')]"
+                  },
+                  {
+                    "category": "AzureSiteRecoveryRecoveryPoints",
+                    "enabled": "[parameters('azuresiterecoveryrecoverypointsEnabled')]"
+                  },
+                  {
+                    "category": "AzureSiteRecoveryReplicatedItems",
+                    "enabled": "[parameters('azuresiterecoveryreplicateditemsEnabled')]"
+                  },
+                  {
+                    "category": "AzureSiteRecoveryReplicationDataUploadRate",
+                    "enabled": "[parameters('azuresiterecoveryreplicationdatauploadrateEnabled')]"
+                  },
+                  {
+                    "category": "AzureSiteRecoveryReplicationStats",
+                    "enabled": "[parameters('azuresiterecoveryreplicationstatsEnabled')]"
+                  },
+                  {
+                    "category": "CoreAzureBackup",
+                    "enabled": "[parameters('coreazurebackupEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/a6496de5-911b-4199-b7db-d34ac9d70df3')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/a6496de5-911b-4199-b7db-d34ac9d70df3')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "ZeroFox Alerts - Medium Severity Alerts",
+        "description": "'Detects medium severity alerts from ZeroFox'\n",
+        "query": "ZeroFoxAlertPoller_CL\n| where Severity in (4)\n",
+        "status": "Available",
+        "queryFrequency": "5m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "entity_name_s",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "ResourceDevelopment",
+          "InitialAccess"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "5m"
+      }
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "clusterName": {
+            "type": "string",
+            "metadata": {
+                "description": "AKS cluster name"
+            }
+        },
+        "clusterGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "AKS cluster resource group"
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "AKS cluster location"
+            }
+        },
+        "managedIdentityName": {
+            "type": "string",
+            "metadata": {
+                "description": "ACI managed identity name"
+            }
+        }
+    },
+    "variables": {
+        "containerGroupName": "init-container-group",
+        "containerName": "init-container"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+            "apiVersion": "2018-11-30",
+            "name": "[parameters('managedIdentityName')]",
+            "location": "[parameters('location')]"
+        },
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2018-10-01",
+            "name": "[variables('containerGroupName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))]"
+            ],
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))]": {}
+                }
+            },
+            "properties": {
+                "osType": "Linux",
+                "restartPolicy": "Never",
+                "containers": [
+                    {
+                        "name": "[variables('containerName')]",
+                        "properties": {
+                            "image": "ghcr.io/micya/init-container",
+                            "resources": {
+                                "requests": {
+                                    "cpu": 1,
+                                    "memoryInGB": 1.5
+                                }
+                            },
+                            "environmentVariables": [
+                                {
+                                    "name": "CLUSTERNAME",
+                                    "value": "[parameters('clusterName')]"
+                                },
+                                {
+                                    "name": "CLUSTERGROUP",
+                                    "value": "[parameters('clusterGroup')]"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

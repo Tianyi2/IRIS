@@ -1,0 +1,22 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+    },
+    "variables": {
+      "ProviderNameSpace": "microsoft.insights"
+    },
+    "resources": [
+    ],
+    "outputs": {
+        "AppInsights": {
+            "type" : "object",
+            "value" : "[providers(variables('ProviderNameSpace'), 'components')]"
+        },
+        "AppInsightsAlerts": {
+            "type" : "object",
+            "value" : "[providers(variables('ProviderNameSpace'), 'alertrules')]"
+        }
+    }
+}
+  

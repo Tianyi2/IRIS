@@ -1,0 +1,44 @@
+ontology_id,ontology_name,category,language,source
+cfn_1,Resources,section,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-anatomy.html
+cfn_2,Parameters,section,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-anatomy.html
+cfn_3,Outputs,section,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-anatomy.html
+cfn_4,Mappings,section,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-anatomy.html
+cfn_5,Metadata,section,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-anatomy.html
+cfn_6,Rules,section,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-anatomy.html
+cfn_7,Conditions,section,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-anatomy.html
+cfn_8,Transform,section,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-anatomy.html
+cfn_9,Format_version,template attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-anatomy.html
+cfn_10,Description,template attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-anatomy.html
+cfn_11,Parameters.LogicalID,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+cfn_12,Parameters.Description,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+cfn_13,Parameters.Type,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+cfn_14,Parameters.Default,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+cfn_15,Parameters.AllowedPattern,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+cfn_16,Parameters.AllowedValues,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+cfn_17,Parameters.ConstraintDescription,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+cfn_18,Parameters.MaxLength,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+cfn_19,Parameters.MaxValue,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+cfn_20,Parameters.MinLength,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+cfn_21,Parameters.MinValue,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+cfn_22,Parameters.NoEcho,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+cfn_23,Resources.Type,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+cfn_24,Resources.Properties,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+cfn_25,Resources.Condition,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-product-attribute-reference.html
+cfn_26,Resources.DependsOn,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-product-attribute-reference.html
+cfn_27,Resources.CreationPolicy,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-product-attribute-reference.html
+cfn_28,Resources.DeletionPolicy,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-product-attribute-reference.html
+cfn_29,Resources.UpdatePolicy,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-product-attribute-reference.html
+cfn_30,Resources.UpdateReplacePolicy,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-product-attribute-reference.html
+cfn_31,Resources.Metadata,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-product-attribute-reference.html
+cfn_32,Outputs.Description,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
+cfn_33,Outputs.Value,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
+cfn_34,Outputs.Export,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
+cfn_35,Outputs.Condition,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
+cfn_36,Metadata.AWS::CloudFormation::Interface,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-cloudformation-interface.html
+cfn_37,Rules.RuleCondition,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/rules-section-structure.html
+cfn_38,Rules.Assertions,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/rules-section-structure.html
+cfn_39,Resources.LogicalID,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+cfn_40,Outputs.LogicalID,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
+cfn_41,Mapping.LogicalID,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html
+cfn_42,Rules.logicalRuleName,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/rules-section-structure.html
+cfn_43,Conditions.LogicalConditionName,section attribute,CFN,https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/Microsoft.Resources.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "accountName": {
+      "type": "string"
+    },
+    "projectName": {
+      "type": "String"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "microsoft.visualstudio/account",
+      "name": "[parameters('accountName')]",
+      "apiVersion": "2014-02-26",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "operationType": "Create",
+        "accountName": "[parameters('accountName')]"
+      },
+      "resources": [
+        {
+          "type": "project",
+          "name": "[parameters('projectName')]",
+          "apiVersion": "2014-02-26",
+          "location": "[resourceGroup().location]",
+          "properties": {
+            "ProcessTemplateId": "Scrum",
+            "VersionControlOption": "Git"
+          },
+          "dependsOn": [
+            "[concat('microsoft.visualstudio/account/', parameters('accountName'))]"
+          ]
+        }
+      ]
+    }
+  ],
+  "outputs": {}
+}

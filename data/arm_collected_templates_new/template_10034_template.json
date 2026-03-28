@@ -1,0 +1,167 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "sku": {
+            "type": "string"
+        },
+        "tier": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2021-05-01",
+            "name": "[parameters('name')]",
+            "type": "Microsoft.Network/loadBalancers",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "Microsoft.Network/publicIPAddresses/200.200.100.50"
+            ],
+            "tags": {},
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "KANIKE",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "/subscriptions/78523fcb-14d5-426a-9493-62113fdf2c53/resourceGroups/Project-193926/providers/Microsoft.Network/publicIPAddresses/200.200.100.50"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "Lb-backend"
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "wss",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "port": 80,
+                            "requestPath": null,
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 2
+                        }
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "Lb-rule",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "/subscriptions/78523fcb-14d5-426a-9493-62113fdf2c53/resourceGroups/Project-193926/providers/Microsoft.Network/loadBalancers/wordpress-Lb/frontendIPConfigurations/KANIKE"
+                            },
+                            "frontendPort": 80,
+                            "backendPort": 1443,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "TCP",
+                            "loadDistribution": "Default",
+                            "probe": {
+                                "id": "/subscriptions/78523fcb-14d5-426a-9493-62113fdf2c53/resourceGroups/Project-193926/providers/Microsoft.Network/loadBalancers/wordpress-Lb/probes/wss"
+                            },
+                            "disableOutboundSnat": true,
+                            "enableTcpReset": false,
+                            "backendAddressPools": [
+                                {
+                                    "id": "/subscriptions/78523fcb-14d5-426a-9493-62113fdf2c53/resourceGroups/Project-193926/providers/Microsoft.Network/loadBalancers/wordpress-Lb/backendAddressPools/Lb-backend"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "inboundNatRules": [],
+                "outboundRules": [
+                    {
+                        "name": "Lb-out",
+                        "properties": {
+                            "frontendIPConfigurations": [
+                                {
+                                    "id": "/subscriptions/78523fcb-14d5-426a-9493-62113fdf2c53/resourceGroups/Project-193926/providers/Microsoft.Network/loadBalancers/wordpress-Lb/frontendIPConfigurations/KANIKE"
+                                }
+                            ],
+                            "backendAddressPool": {
+                                "id": "/subscriptions/78523fcb-14d5-426a-9493-62113fdf2c53/resourceGroups/Project-193926/providers/Microsoft.Network/loadBalancers/wordpress-Lb/backendAddressPools/Lb-backend"
+                            },
+                            "protocol": "All",
+                            "enableTcpReset": true,
+                            "idleTimeoutInMinutes": 4,
+                            "allocatedOutboundPorts": 0
+                        }
+                    }
+                ]
+            },
+            "sku": {
+                "name": "[parameters('sku')]",
+                "tier": "[parameters('tier')]"
+            }
+        },
+        {
+            "apiVersion": "2021-05-01",
+            "type": "Microsoft.Network/loadBalancers/backendAddressPools",
+            "name": "wordpress-Lb/Lb-backend",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "Microsoft.Network/loadBalancers/wordpress-Lb"
+            ],
+            "properties": {
+                "loadBalancerBackendAddresses": [
+                    {
+                        "name": "851ed474-3c70-4543-a655-6413cda255d7",
+                        "properties": {
+                            "virtualNetwork": {
+                                "id": "/subscriptions/78523fcb-14d5-426a-9493-62113fdf2c53/resourceGroups/Project-193926/providers/Microsoft.Network/virtualNetworks/Project-193926-vnet"
+                            },
+                            "ipAddress": "10.10.1.12"
+                        }
+                    },
+                    {
+                        "name": "a9475cfd-e619-4517-9c26-84d6e6dea775",
+                        "properties": {
+                            "virtualNetwork": {
+                                "id": "/subscriptions/78523fcb-14d5-426a-9493-62113fdf2c53/resourceGroups/Project-193926/providers/Microsoft.Network/virtualNetworks/Project-193926-vnet"
+                            },
+                            "ipAddress": "10.10.1.13"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2020-08-01",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "name": "200.200.100.50",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": [
+                    {
+                        "ipTagType": "RoutingPreference",
+                        "tag": "Internet"
+                    }
+                ]
+            },
+            "sku": {
+                "name": "[parameters('sku')]",
+                "tier": "[parameters('tier')]"
+            },
+            "zones": [
+                "2",
+                "3",
+                "1"
+            ]
+        }
+    ]
+}

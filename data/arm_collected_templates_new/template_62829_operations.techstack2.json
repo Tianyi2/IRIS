@@ -1,0 +1,2404 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceResourceGroup": {
+      "type": "string"
+    },
+    "workspaceName": {
+      "type": "string"
+    },
+    "subscriptionId": {
+      "type": "string"
+    },
+    "dashboardName": {
+      "type": "string"
+    },
+    "applicationName": {
+      "type": "string"
+    },
+    "appGroups": {
+      "type": "array"
+    }
+  },
+  "variables": {
+    "workspaceId": "[concat(subscription().id,'/resourcegroups/',parameters('workspaceResourceGroup'),'/providers/Microsoft.OperationalInsights/workspaces/',parameters('workspaceName'))]"
+  },
+  "resources": [
+    {
+      "properties": {
+        "lenses": {
+          "0": {
+            "order": 0,
+            "parts": {
+              "0": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "colSpan": 5,
+                  "rowSpan": 2
+                },
+                "metadata": {
+                  "inputs": [],
+                  "type": "Extension/HubsExtension/PartType/MarkdownPart",
+                  "settings": {
+                    "content": {
+                      "settings": {
+                        "content": "#### CloudPlatformProvider\r\n#### Azure Managed Services\r\n#### support@msp.com",
+                        "title": "Customer-Example Companies",
+                        "subtitle": ""
+                      }
+                    }
+                  }
+                }
+              },
+              "1": {
+                "position": {
+                  "x": 5,
+                  "y": 0,
+                  "colSpan": 4,
+                  "rowSpan": 2
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "id",
+                      "value": "[concat(variables('workspaceId'), '/views/Azure Backup Monitoring Solution')]"
+                    },
+                    {
+                      "name": "solutionId",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "timeInterval",
+                      "value": {
+                        "_Now": "2019-08-13T15:40:57.381Z",
+                        "_duration": 86400000,
+                        "_end": null
+                      },
+                      "isOptional": true
+                    },
+                    {
+                      "name": "timeRange",
+                      "binding": "timeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/ViewTileIFramePart"
+                }
+              },
+              "2": {
+                "position": {
+                  "x": 9,
+                  "y": 0,
+                  "colSpan": 4,
+                  "rowSpan": 2
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "id",
+                      "value": "[concat(variables('workspaceId'), '/views/ChangeTracking(la-am-eastus-nonprod-e2e)')]"
+                    },
+                    {
+                      "name": "solutionId",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "timeInterval",
+                      "value": {
+                        "_Now": "2019-08-13T15:41:28.251Z",
+                        "_duration": 86400000,
+                        "_end": null
+                      },
+                      "isOptional": true
+                    },
+                    {
+                      "name": "timeRange",
+                      "binding": "timeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/ViewTileIFramePart"
+                }
+              },
+              "3": {
+                "position": {
+                  "x": 13,
+                  "y": 0,
+                  "colSpan": 4,
+                  "rowSpan": 2
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "id",
+                      "value": "[concat(variables('workspaceId'), '/views/Updates(la-am-eastus-nonprod-e2e)')]"
+                    },
+                    {
+                      "name": "solutionId",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "timeInterval",
+                      "value": {
+                        "_Now": "2019-08-13T15:41:28.251Z",
+                        "_duration": 86400000,
+                        "_end": null
+                      },
+                      "isOptional": true
+                    },
+                    {
+                      "name": "timeRange",
+                      "binding": "timeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/ViewTileIFramePart"
+                }
+              },
+              "4": {
+                "position": {
+                  "x": 17,
+                  "y": 0,
+                  "colSpan": 4,
+                  "rowSpan": 2
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "id",
+                      "value": "[concat(variables('workspaceId'), '/views/AgentHealthAssessment(la-am-eastus-nonprod-e2e)')]"
+                    },
+                    {
+                      "name": "solutionId",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "timeInterval",
+                      "value": {
+                        "_Now": "2019-08-13T15:41:28.251Z",
+                        "_duration": 86400000,
+                        "_end": null
+                      },
+                      "isOptional": true
+                    },
+                    {
+                      "name": "timeRange",
+                      "binding": "timeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/ViewTileIFramePart"
+                }
+              },
+              "5": {
+                "position": {
+                  "x": 0,
+                  "y": 2,
+                  "colSpan": 21,
+                  "rowSpan": 1
+                },
+                "metadata": {
+                  "inputs": [],
+                  "type": "Extension/HubsExtension/PartType/MarkdownPart",
+                  "settings": {
+                    "content": {
+                      "settings": {
+                        "content": "<div style=\"font-size:300%;\">Kubernetes Overview</div>\n",
+                        "title": "",
+                        "subtitle": ""
+                      }
+                    }
+                  }
+                }
+              },
+              "6": {
+                "position": {
+                  "x": 0,
+                  "y": 3,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//cluster cpu capacity by nanocore\r\nKubeNodeInventory\r\n| where TimeGenerated > now(-24h)\r\n| where split(_ResourceId, \"/\")[4] in (\"', parameters('appGroups'), '\") \r\n| distinct ClusterName, Computer\r\n| join hint.strategy=shuffle (\r\nPerf\r\n| where TimeGenerated > now(-24h) \r\n| where ObjectName == \"K8SNode\"\r\n| where CounterName == \"cpuCapacityNanoCores\"\r\n| summarize LimitValue = max(CounterValue) by Computer, CounterName, bin(TimeGenerated, 15m)\r\n| project Computer, LimitValue\r\n) on Computer\r\n| join kind=inner hint.strategy=shuffle (\r\nPerf\r\n| where TimeGenerated > now(-24h) \r\n| where ObjectName == \"K8SNode\"\r\n| where CounterName == \"cpuUsageNanoCores\"\r\n| project Computer, UsageValue = CounterValue, TimeGenerated\r\n) on Computer\r\n| project ClusterName, Computer, TimeGenerated, UsagePercent = UsageValue * 100.0 / LimitValue\r\n| summarize cpuUsage = avg(UsagePercent) by  ClusterName, bin(TimeGenerated, 15m) \r\n| render timechart\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "cpuUsage",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "ClusterName",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Average"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "AKS NanoCore Utilization",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "7": {
+                "position": {
+                  "x": 7,
+                  "y": 3,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//kubernetes cluster memory usage across nodes\r\nKubeNodeInventory\r\n| where TimeGenerated > now(-24h) \r\n| where _ResourceId contains \"', parameters('applicationName'), '\" \r\n| distinct ClusterName, Computer\r\n| join hint.strategy=shuffle (\r\nPerf\r\n| where TimeGenerated > now(-24h) \r\n| where ObjectName == \"K8SNode\"\r\n| where CounterName == \"memoryCapacityBytes\"\r\n| summarize LimitValue = max(CounterValue) by Computer, CounterName, bin(TimeGenerated, 15m)\r\n| project Computer, LimitValue\r\n) on Computer\r\n| join kind=inner hint.strategy=shuffle (\r\nPerf\r\n| where TimeGenerated > now(-24h) \r\n| where ObjectName == \"K8SNode\"\r\n| where CounterName == \"memoryRssBytes\"\r\n| project Computer, UsageValue = CounterValue, TimeGenerated\r\n) on Computer\r\n| where TimeGenerated > now(-24h) \r\n| project ClusterName, Computer, TimeGenerated, UsagePercent = UsageValue * 100.0 / LimitValue\r\n| summarize averagePercentMemoryUsage = avg(UsagePercent) by ClusterName, bin(TimeGenerated, 15m)\r\n| render timechart \n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "averagePercentMemoryUsage",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "ClusterName",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Average"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "AKS Memory Usage",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "8": {
+                "position": {
+                  "x": 14,
+                  "y": 3,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//kubernetes disk capacity by cluster\r\nInsightsMetrics\r\n| where TimeGenerated > now(-24h) \r\n| where Origin == \"container.azm.ms/telegraf\"\r\n| where Namespace has \"container.azm.ms/disk\"\r\n| where _ResourceId contains \"', parameters('applicationName'), '\"\r\n| extend ClusterName = tostring(parse_json(Tags).[\"container.azm.ms/clusterName\"])\r\n| extend Tags = todynamic(Tags)\r\n| project TimeGenerated, _ResourceId, Device = tostring(Tags.device), Path = tostring(Tags.path), DiskMetricName = Name, DiskMetricValue = Val, ClusterName\r\n| where DiskMetricName has \"used_percent\"\r\n| summarize diskUsed = max(DiskMetricValue) by ClusterName, bin(TimeGenerated, 15m)\r\n| render timechart\r\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "diskUsed",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "ClusterName",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Average"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "AKS Cluster Disk Capacity",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "9": {
+                "position": {
+                  "x": 0,
+                  "y": 7,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//container CPU usage by nanoCore\r\nKubePodInventory\r\n| where TimeGenerated > now(-24h) \r\n| where _ResourceId contains \"', parameters('applicationName'), '\" \r\n| extend InstanceName = strcat(ClusterId, \"/\", ContainerName), ContainerName = strcat(ControllerName, \"/\", tostring(split(ContainerName, \"/\")[1]))\r\n| distinct Computer, InstanceName, ContainerName, ClusterName\r\n| join hint.strategy=shuffle (\r\nPerf\r\n| where TimeGenerated > now(-24h) \r\n| where ObjectName == \"K8SContainer\"\r\n| where CounterName == \"cpuLimitNanoCores\"\r\n| summarize LimitValue = max(CounterValue) by Computer, InstanceName, bin(TimeGenerated, 15m)\r\n| project Computer, InstanceName, LimitValue\r\n) on Computer, InstanceName\r\n| join kind=inner hint.strategy=shuffle (\r\nPerf\r\n| where TimeGenerated > now(-24h) \r\n| where ObjectName == \"K8SContainer\"\r\n| where CounterName == \"cpuUsageNanoCores\"\r\n| project Computer, InstanceName, UsageValue = CounterValue, TimeGenerated\r\n) on Computer, InstanceName\r\n| where TimeGenerated > now(-24h) \r\n| project Computer, ContainerName, TimeGenerated, UsagePercent = (UsageValue * 100.0 / LimitValue), LimitValue, ClusterName\r\n| summarize averageUsedCPU = avg(UsagePercent) by ContainerName, bin(TimeGenerated, 15m)\r\n| render timechart\r\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "averageUsedCPU",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "ContainerName",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Average"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "Container CPU Usage",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "10": {
+                "position": {
+                  "x": 7,
+                  "y": 7,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//container memory usage\r\nKubePodInventory\r\n| where TimeGenerated > now(-24h) \r\n| where _ResourceId contains \"', parameters('applicationName'), '\" \r\n| extend InstanceName = strcat(ClusterId, \"/\", ContainerName), ContainerName = strcat(ControllerName, \"/\", tostring(split(ContainerName, \"/\")[1]))\r\n| distinct Computer, InstanceName, ContainerName, ClusterName\r\n| join hint.strategy=shuffle (\r\nPerf\r\n| where TimeGenerated > now(-24h) \r\n| where ObjectName == \"K8SContainer\"\r\n| where CounterName == \"memoryLimitBytes\"\r\n| summarize LimitValue = max(CounterValue) by Computer, InstanceName, bin(TimeGenerated, 15m)\r\n| project Computer, InstanceName, LimitValue\r\n) on Computer, InstanceName\r\n| join kind=inner hint.strategy=shuffle (\r\nPerf\r\n| where TimeGenerated > now(-24h) \r\n| where ObjectName == \"K8SContainer\"\r\n| where CounterName == \"memoryRssBytes\"\r\n| project Computer, InstanceName, UsageValue = CounterValue, TimeGenerated\r\n) on Computer, InstanceName\r\n| where TimeGenerated > now(-24h) \r\n| project Computer, ContainerName, TimeGenerated, UsagePercent = (UsageValue * 100.0 / LimitValue), ClusterName\r\n| summarize averageMemoryUsage = avg(UsagePercent) by ContainerName, bin(TimeGenerated, 15m) \r\n| render timechart\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "averageMemoryUsage",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "ContainerName",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Average"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "Container Memory Usage",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "11": {
+                "position": {
+                  "x": 14,
+                  "y": 7,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//kubernetes pod state counts\r\nKubePodInventory\r\n| where TimeGenerated > now(-24h) \r\n| where _ResourceId contains \"', parameters('applicationName'), '\" \r\n| distinct ClusterName, TimeGenerated\r\n| summarize ClusterSnapshotCount = count() by bin(TimeGenerated, 15m), ClusterName\r\n| join hint.strategy=broadcast (\r\nKubePodInventory\r\n| where TimeGenerated > now(-24h) \r\n| distinct ClusterName, Computer, PodUid, TimeGenerated, PodStatus\r\n| summarize TotalCount = count(),\r\nPendingCount = sumif(1, PodStatus =~ \"Pending\"),\r\nRunningCount = sumif(1, PodStatus =~ \"Running\"),\r\nSucceededCount = sumif(1, PodStatus =~ \"Succeeded\"),\r\nFailedCount = sumif(1, PodStatus =~ \"Failed\")\r\nby ClusterName, bin(TimeGenerated, 15m)\r\n) on ClusterName, TimeGenerated\r\n| extend UnknownCount = TotalCount - PendingCount - RunningCount - SucceededCount - FailedCount\r\n| project ClusterName, TimeGenerated,\r\nTotalCount = todouble(TotalCount) / ClusterSnapshotCount,\r\nPendingCount = todouble(PendingCount) / ClusterSnapshotCount,\r\nRunningCount = todouble(RunningCount) / ClusterSnapshotCount,\r\nSucceededCount = todouble(SucceededCount) / ClusterSnapshotCount,\r\nFailedCount = todouble(FailedCount) / ClusterSnapshotCount,\r\nUnknownCount = todouble(UnknownCount) / ClusterSnapshotCount\r\n| summarize by Pending=PendingCount, Failed=FailedCount, Unknown=UnknownCount, Succeeded=SucceededCount, bin(TimeGenerated, 15m)\r\n| render timechart\r\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "Pending",
+                            "type": "Double"
+                          },
+                          {
+                            "name": "Failed",
+                            "type": "Double"
+                          },
+                          {
+                            "name": "Unknown",
+                            "type": "Double"
+                          },
+                          {
+                            "name": "Succeeded",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [],
+                        "aggregation": "Average"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "POD Status",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "12": {
+                "position": {
+                  "x": 0,
+                  "y": 11,
+                  "colSpan": 21,
+                  "rowSpan": 1
+                },
+                "metadata": {
+                  "inputs": [],
+                  "type": "Extension/HubsExtension/PartType/MarkdownPart",
+                  "settings": {
+                    "content": {
+                      "settings": {
+                        "content": "<div style=\"font-size:300%;\">Platform Overview</div>\n",
+                        "title": "",
+                        "subtitle": ""
+                      }
+                    }
+                  }
+                }
+              },
+              "13": {
+                "position": {
+                  "x": 0,
+                  "y": 12,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//dbformysql cpu consumed\r\nAzureMetrics\r\n| where TimeGenerated > now(-24h) \r\n| where _ResourceId contains \"', parameters('applicationName'), '\" and ResourceProvider has \"dbformysql\"\r\n| where MetricName has \"cpu\"\r\n| summarize averageUsedCPU=sum(Total) by Computer=Resource, bin(TimeGenerated, 15m)\r\n| render timechart\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "averageUsedCPU",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "Computer",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Sum"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "DBForMySQL CPU Consumption",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "14": {
+                "position": {
+                  "x": 7,
+                  "y": 12,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//dbformysql memory consumed\r\nAzureMetrics\r\n| where TimeGenerated > now(-24h) \r\n| where _ResourceId contains \"', parameters('applicationName'), '\" and ResourceProvider has \"dbformysql\"\r\n| where MetricName has \"memory\"\r\n| summarize averageUsedMemory=avg(Total) by Computer=Resource, bin(TimeGenerated, 15m)\r\n| render timechart\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "averageUsedMemory",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "Computer",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Sum"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "DBForMySQL Memory Consumption",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "15": {
+                "position": {
+                  "x": 14,
+                  "y": 12,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//dbformysql memory consumed\r\nAzureMetrics\r\n| where TimeGenerated > now(-24h) \r\n| where _ResourceId contains \"', parameters('applicationName'), '\" and ResourceProvider has \"dbformysql\"\r\n| where MetricName has \"storage_used\"\r\n| summarize averageUsedStorage=avg((((Total /1024)/1024)/1024)/1024) by Computer=Resource, bin(TimeGenerated, 15m)\r\n| render timechart\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "averageUsedStorage",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "Computer",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Average"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "DBForMySQL Storage Consumption",
+                      "PartSubTitle": "Last 24 Hours in TB"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "16": {
+                "position": {
+                  "x": 0,
+                  "y": 16,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//dbformysql average connections\r\nAzureMetrics\r\n| where TimeGenerated > now(-24h) \r\n| where _ResourceId contains \"', parameters('applicationName'), '\" and ResourceProvider has \"dbformysql\"\r\n| where MetricName has \"active\"\r\n| summarize averageConnections=avg(Total) by Computer=Resource, bin(TimeGenerated, 15m)\r\n| render timechart\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "averageConnections",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "Computer",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Average"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "DBForMySQL Average Connections",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "17": {
+                "position": {
+                  "x": 7,
+                  "y": 16,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//dbformysql average failed connections\r\nAzureMetrics\r\n| where TimeGenerated > now(-24h) \r\n| where _ResourceId contains \"', parameters('applicationName'), '\" and ResourceProvider has \"dbformysql\"\r\n| where MetricName has \"failed\"\r\n| summarize averageFailedConnections=avg(Total) by Computer=Resource, bin(TimeGenerated, 15m)\r\n| render timechart\r\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "averageFailedConnections",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "Computer",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Average"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "DBForMySQL Failed Connections",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "18": {
+                "position": {
+                  "x": 14,
+                  "y": 16,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//dbformysql average network egress\r\nAzureMetrics\r\n| where TimeGenerated > now(-24h) \r\n| where _ResourceId contains \"', parameters('applicationName'), '\" and ResourceProvider has \"dbformysql\"\r\n| where MetricName has \"egress\"\r\n| summarize averageNetworkEgress=avg(Total /1024) by Computer=Resource, bin(TimeGenerated, 15m)\r\n| render timechart\r\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "averageNetworkEgress",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "Computer",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Average"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "DBForMySQL Network Egress",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "19": {
+                "position": {
+                  "x": 0,
+                  "y": 20,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "options",
+                      "value": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-region1-NonProd-NoodleAI/providers/Microsoft.ContainerRegistry/registries/acr-region1-001"
+                              },
+                              "name": "TotalPushCount",
+                              "aggregationType": 7,
+                              "namespace": "microsoft.containerregistry/registries",
+                              "metricVisualization": {
+                                "displayName": "Total Push Count"
+                              }
+                            }
+                          ],
+                          "title": "ACR Total Push Count",
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            }
+                          }
+                        },
+                        "version": 2
+                      }
+                    },
+                    {
+                      "name": "sharedTimeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                  "settings": {
+                    "content": {
+                      "options": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-region1-NonProd-NoodleAI/providers/Microsoft.ContainerRegistry/registries/acr-region1-001"
+                              },
+                              "name": "TotalPushCount",
+                              "aggregationType": 7,
+                              "namespace": "microsoft.containerregistry/registries",
+                              "metricVisualization": {
+                                "displayName": "Total Push Count"
+                              }
+                            }
+                          ],
+                          "title": "ACR Total Push Count",
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            },
+                            "disablePinning": true
+                          },
+                          "filterCollection": {
+                            "filters": []
+                          }
+                        },
+                        "version": 2
+                      }
+                    }
+                  }
+                }
+              },
+              "20": {
+                "position": {
+                  "x": 7,
+                  "y": 20,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "options",
+                      "value": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-region1-NonProd-NoodleAI/providers/Microsoft.ContainerRegistry/registries/acr-region1-001"
+                              },
+                              "name": "TotalPullCount",
+                              "aggregationType": 7,
+                              "namespace": "microsoft.containerregistry/registries",
+                              "metricVisualization": {
+                                "displayName": "Total Pull Count"
+                              }
+                            }
+                          ],
+                          "title": "ACR Total Pull Count",
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            }
+                          }
+                        },
+                        "version": 2
+                      }
+                    },
+                    {
+                      "name": "sharedTimeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                  "settings": {
+                    "content": {
+                      "options": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-region1-NonProd-NoodleAI/providers/Microsoft.ContainerRegistry/registries/acr-region1-001"
+                              },
+                              "name": "TotalPullCount",
+                              "aggregationType": 7,
+                              "namespace": "microsoft.containerregistry/registries",
+                              "metricVisualization": {
+                                "displayName": "Total Pull Count"
+                              }
+                            }
+                          ],
+                          "title": "ACR Total Pull Count",
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            },
+                            "disablePinning": true
+                          },
+                          "filterCollection": {
+                            "filters": []
+                          }
+                        },
+                        "version": 2
+                      }
+                    }
+                  }
+                }
+              },
+              "21": {
+                "position": {
+                  "x": 14,
+                  "y": 20,
+                  "colSpan": 7,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "options",
+                      "value": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-region1-NonProd-NoodleAI/providers/Microsoft.ContainerRegistry/registries/acr-region1-001"
+                              },
+                              "name": "RunDuration",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.containerregistry/registries",
+                              "metricVisualization": {
+                                "displayName": "Run Duration"
+                              }
+                            }
+                          ],
+                          "title": "ACR Average Run Duration",
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            }
+                          }
+                        },
+                        "version": 2
+                      }
+                    },
+                    {
+                      "name": "sharedTimeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                  "settings": {
+                    "content": {
+                      "options": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-region1-NonProd-NoodleAI/providers/Microsoft.ContainerRegistry/registries/acr-region1-001"
+                              },
+                              "name": "RunDuration",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.containerregistry/registries",
+                              "metricVisualization": {
+                                "displayName": "Run Duration"
+                              }
+                            }
+                          ],
+                          "title": "ACR Average Run Duration",
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            },
+                            "disablePinning": true
+                          },
+                          "filterCollection": {
+                            "filters": []
+                          }
+                        },
+                        "version": 2
+                      }
+                    }
+                  }
+                }
+              },
+              "22": {
+                "position": {
+                  "x": 0,
+                  "y": 24,
+                  "colSpan": 21,
+                  "rowSpan": 1
+                },
+                "metadata": {
+                  "inputs": [],
+                  "type": "Extension/HubsExtension/PartType/MarkdownPart",
+                  "settings": {
+                    "content": {
+                      "settings": {
+                        "content": "<div style=\"font-size:300%;\">Virtual Machine Overview</div>\n",
+                        "title": "",
+                        "subtitle": ""
+                      }
+                    }
+                  }
+                }
+              },
+              "23": {
+                "position": {
+                  "x": 0,
+                  "y": 25,
+                  "colSpan": 1,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [],
+                  "type": "Extension/HubsExtension/PartType/MarkdownPart",
+                  "settings": {
+                    "content": {
+                      "settings": {
+                        "content": "\n",
+                        "title": "",
+                        "subtitle": ""
+                      }
+                    }
+                  }
+                }
+              },
+              "24": {
+                "position": {
+                  "x": 1,
+                  "y": 25,
+                  "colSpan": 10,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//average vm cpu usage\r\nPerf\r\n| where TimeGenerated > now(-24h)\r\n| where _ResourceId contains \"', parameters('applicationName'), '\"\r\n| where Computer !contains \"aks-\" \r\n| where ObjectName has \"processor\"  and CounterName has \"processor time\" and InstanceName has \"_total\"\r\n| summarize averageCPU=avg(CounterValue) by Computer, bin(TimeGenerated, 15m)\r\n| render timechart\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "averageCPU",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "Computer",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Average"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "Average CPU",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "25": {
+                "position": {
+                  "x": 11,
+                  "y": 25,
+                  "colSpan": 10,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//average vm iops\r\nPerf\r\n| where TimeGenerated > now(-24h)\r\n| where _ResourceId contains \"', parameters('applicationName'), '\"\r\n| where Computer !contains \"aks-\"\r\n| where ObjectName has \"logical disk\" or ObjectName has \"logicaldisk\" \r\n| where CounterName has \"transfers/sec\" and InstanceName has \"_total\"\r\n| summarize averageIOPS=avg(CounterValue) by Computer, bin(TimeGenerated, 15m)\r\n| render timechart   \r\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "averageIOPS",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "Computer",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Average"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "Average IOPS",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "26": {
+                "position": {
+                  "x": 0,
+                  "y": 29,
+                  "colSpan": 10,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//average linux memory used\r\nPerf\r\n| where TimeGenerated > now(-24h)\r\n| where _ResourceId contains \"', parameters('applicationName'), '\"\r\n| where Computer !contains \"aks-\" and ObjectName has \"memory\"\r\n| where CounterName has \"used memory\"\r\n| summarize averageMemoryUsed=avg(CounterValue) by Computer, bin(TimeGenerated, 15m)\r\n| render timechart\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "averageMemoryUsed",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "Computer",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Average"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "Average Linux Memory Used",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "27": {
+                "position": {
+                  "x": 10,
+                  "y": 29,
+                  "colSpan": 10,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "SubscriptionId": "[parameters('subscriptionId')]",
+                        "ResourceGroup": "[parameters('workspaceResourceGroup')]",
+                        "Name": "[parameters('workspaceName')]",
+                        "ResourceId": "[variables('workspaceId')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "[concat('//average linux memory used\r\nPerf\r\n| where TimeGenerated > now(-24h)\r\n| where _ResourceId contains \"', parameters('applicationName'), '\"\r\n| where Computer !contains \"aks-\" and ObjectName has \"memory\"\r\n| where CounterName has \"mbytes\"\r\n| summarize averageAvailableGBytes=avg(CounterValue /1024) by Computer, bin(TimeGenerated, 15m)\r\n| render timechart\r\n')]"
+                    },
+                    {
+                      "name": "Dimensions",
+                      "value": {
+                        "xAxis": {
+                          "name": "TimeGenerated",
+                          "type": "DateTime"
+                        },
+                        "yAxis": [
+                          {
+                            "name": "averageAvailableGBytes",
+                            "type": "Double"
+                          }
+                        ],
+                        "splitBy": [
+                          {
+                            "name": "Computer",
+                            "type": "String"
+                          }
+                        ],
+                        "aggregation": "Average"
+                      }
+                    },
+                    {
+                      "name": "Version",
+                      "value": "1.0"
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                      "name": "PartTitle",
+                      "value": "Analytics"
+                    },
+                    {
+                      "name": "PartSubTitle",
+                      "value": "[parameters('workspaceName')]"
+                    },
+                    {
+                      "name": "resourceTypeMode",
+                      "value": "workspace"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsChart"
+                    },
+                    {
+                      "name": "SpecificChart",
+                      "value": "Line"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "PartTitle": "Average Windows Memory Available",
+                      "PartSubTitle": "Last 24 Hours"
+                    }
+                  },
+                  "asset": {
+                    "idInputName": "ComponentId",
+                    "type": "ApplicationInsights"
+                  }
+                }
+              },
+              "28": {
+                "position": {
+                  "x": 20,
+                  "y": 29,
+                  "colSpan": 1,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [],
+                  "type": "Extension/HubsExtension/PartType/MarkdownPart",
+                  "settings": {
+                    "content": {
+                      "settings": {
+                        "content": "\n",
+                        "title": "",
+                        "subtitle": ""
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "metadata": {
+          "model": {
+            "timeRange": {
+              "value": {
+                "relative": {
+                  "duration": 24,
+                  "timeUnit": 1
+                }
+              },
+              "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
+            },
+            "filterLocale": {
+              "value": "en-us"
+            },
+            "filters": {
+              "value": {
+                "MsPortalFx_TimeRange": {
+                  "model": {
+                    "format": "utc",
+                    "granularity": "auto",
+                    "relative": "24h"
+                  },
+                  "displayCache": {
+                    "name": "UTC Time",
+                    "value": "Past 1440 minutes"
+                  },
+                  "filteredPartIds": [
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-MonitorChartPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000",
+                    "StartboardPart-AnalyticsPart-00000000-0000-0000-0000-000000000000"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "[parameters('dashboardName')]",
+      "type": "Microsoft.Portal/dashboards",
+      "location": "East US",
+      "tags": {
+        "hidden-title": "[parameters('dashboardName')]"
+      },
+      "apiVersion": "2015-08-01-preview"
+    }
+  ]
+}

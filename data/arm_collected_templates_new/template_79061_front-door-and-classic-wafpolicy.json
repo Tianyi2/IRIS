@@ -1,0 +1,636 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "fd_name": {
+            "defaultValue": "Servicename-FD",
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Front Door"
+            }
+        },
+        "backendAddress1": {
+            "defaultValue": "webappname.azurewebsites.net",
+            "type": "string",
+            "metadata": {
+                "description": "The hostname of the primary backend. Must be an IP address or FQDN"
+            }
+        },
+        "backendPoolName": {
+            "defaultValue": "backend-pool",
+            "type": "string",
+            "metadata": {
+                "description": "Name for the backend pool"
+            }
+        },
+        "hostHeader": {
+            "defaultValue": "webappname.azurewebsites.net",
+            "type": "string",
+            "metadata": {
+                "description": "Host Header for the backend"
+            }
+        },
+        "wafpolicy": {
+            "defaultValue": "WebAppWAFPolicy",
+            "type": "string",
+            "metadata": {
+                "description": "WAF Policy name (only numbers and letters but allows for capitalization)"
+            }
+        },
+        "workspaceResourceId": {
+            "defaultValue": "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.operationalinsights/workspaces/{workspaceName}",
+            "type": "string",
+            "metadata": {
+                "description": "Log Analytics workspace Resouce ID where Front Door will send logs (including WAF logs). You can get it from the Log Analytics workspace -> Properties -> Resource ID"
+            }
+        }
+    },
+    "variables": {
+        "healthprobesettings": "[concat('healthprobesettings-',parameters('fd_name'))]",
+        "loadbalancingsettings": "[concat('loadbalancingsettings-',parameters('fd_name'))]",
+        "DiagnosticSettingName": "Send-To-Log-Analytics"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/frontdoorwebapplicationfirewallpolicies",
+            "apiVersion": "2020-04-01",
+            "name": "[parameters('wafpolicy')]",
+            "location": "Global",
+            "properties": {
+                "policySettings": {
+                    "enabledState": "Enabled",
+                    "mode": "Detection",
+                    "customBlockResponseStatusCode": 403,
+                    "customBlockResponseBody": "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgICA8dGl0bGU+UmVxdWVzdCBCbG9ja2VkPC90aXRsZT4KICAgIDxzY3JpcHQgc3JjPSJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvZ2gvRGpvbmdvdi9jQ2xpcGJvYXJkQHYyLjEvY0NsaXBib2FyZC5taW4uanMiIGRlZmVyPjwvc2NyaXB0PgogICAgPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xLjAiPgogICAgPG1ldGEgY2hhcnNldD0idXRmLTgiLz4KICAgIDxzdHlsZT4KICAgICAgICBodG1sIHsKICAgICAgICAgICAgZm9udC1zaXplOiAxNnB4OwogICAgICAgIH0KICAgICAgICBib2R5IHsKICAgICAgICAgICAgdGV4dC1hbGlnbjogY2VudGVyOwogICAgICAgICAgICBiYWNrZ3JvdW5kOiB3aGl0ZTsKICAgICAgICB9CiAgICAgICAgcCB7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS4ycmVtOwogICAgICAgIH0KICAgICAgICAuYzBweSB7CiAgICAgICAgICAgIG1heC13aWR0aDogbWF4LWNvbnRlbnQ7CiAgICAgICAgICAgIGJhY2tncm91bmQ6IGRpbWdyYXk7CiAgICAgICAgICAgIG1hcmdpbjogMTBweCBhdXRvOwogICAgICAgICAgICBwYWRkaW5nOiAxcmVtOwogICAgICAgICAgICBjb2xvcjogd2hpdGU7CiAgICAgICAgICAgIGJvcmRlcjogMnB4IHNvbGlkICNmZmE1MDA7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS4ycmVtOwogICAgICAgICAgICBmb250LWZhbWlseTogJ0NvdXJpZXIgTmV3JywgQ291cmllciwgbW9ub3NwYWNlOwogICAgICAgICAgICBib3gtc2hhZG93OiAwIDMuMnB4IDcuMnB4IDAgcmdiKDAgMCAwIC8gNTUlKSwgMCAwLjZweCAxLjhweCAwIHJnYigwIDAgMCAvIDU1JSk7CiAgICAgICAgICAgIHdvcmQtd3JhcDogYnJlYWstd29yZDsKICAgICAgICB9CiAgICA8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5PgogICAgPGgxPllvdXIgcmVxdWVzdCBoYXMgYmVlbiBibG9ja2VkPC9oMT4KICAgIDxwPklmIHlvdSBiZWxpZXZlIHRoYXQgdGhpcyByZXF1ZXN0IHdhcyBibG9ja2VkIGluIGVycm9yLCBwbGVhc2UgY29udGFjdCB0aGUgc3VwcG9ydCB3aXRoIHRoaXMgcmVmZXJlbmNlIGluIGhhbmQ6PC9wPgogICAgPGRpdiBjbGFzcz0iYzBweSIgZGF0YS1jbGlwYm9hcmQtaWNvbi1zdHJva2U9IiNmZmE1MDAiIGRhdGEtY2xpcGJvYXJkLWljb24tc3Ryb2tlLXdpZHRoPSIxLjUiPnt7YXp1cmUtcmVmfX08L2Rpdj4KPC9ib2R5Pgo8L2h0bWw+"
+                },
+                "customRules": {
+                    "rules": [
+                        {
+                            "name": "DenyList",
+                            "enabledState": "Enabled",
+                            "priority": 1,
+                            "ruleType": "MatchRule",
+                            "rateLimitDurationInMinutes": 1,
+                            "matchConditions": [
+                                {
+                                    "matchVariable": "RemoteAddr",
+                                    "operator": "IPMatch",
+                                    "negateCondition": false,
+                                    "matchValue": [
+                                        "1.209.47.241"
+                                    ],
+                                    "transforms": []
+                                }
+                            ],
+                            "action": "Block"
+                        },
+                        {
+                            "name": "RateLimit",
+                            "enabledState": "Enabled",
+                            "priority": 2,
+                            "ruleType": "RateLimitRule",
+                            "rateLimitDurationInMinutes": 1,
+                            "rateLimitThreshold": 1000,
+                            "matchConditions": [
+                                {
+                                    "matchVariable": "RequestUri",
+                                    "operator": "Any",
+                                    "negateCondition": false,
+                                    "matchValue": [],
+                                    "transforms": []
+                                }
+                            ],
+                            "action": "Block"
+                        },
+                        {
+                            "name": "AllowOnlyCertainIPs",
+                            "enabledState": "Disabled",
+                            "priority": 3,
+                            "ruleType": "MatchRule",
+                            "rateLimitDurationInMinutes": 1,
+                            "rateLimitThreshold": 1000,
+                            "matchConditions": [
+                                {
+                                    "matchVariable": "RemoteAddr",
+                                    "operator": "IPMatch",
+                                    "negateCondition": true,
+                                    "matchValue": [
+                                        "185.138.63.1/32"
+                                    ],
+                                    "transforms": []
+                                }
+                            ],
+                            "action": "Block"
+                        },
+                        {
+                            "name": "DisallowUserAgents",
+                            "enabledState": "Enabled",
+                            "priority": 4,
+                            "ruleType": "MatchRule",
+                            "rateLimitDurationInMinutes": 1,
+                            "rateLimitThreshold": 100,
+                            "matchConditions": [
+                                {
+                                    "matchVariable": "RequestHeader",
+                                    "selector": "user-agent",
+                                    "operator": "Contains",
+                                    "negateCondition": false,
+                                    "matchValue": [
+                                        "${jndi:ldap"
+                                    ],
+                                    "transforms": []
+                                }
+                            ],
+                            "action": "Block"
+                        }
+                    ]
+                },
+                "managedRules": {
+                    "managedRuleSets": [
+                        {
+                            "ruleSetType": "Microsoft_DefaultRuleSet",
+                            "ruleSetVersion": "1.1",
+                            "ruleGroupOverrides": [],
+                            "exclusions": []
+                        },
+                        {
+                            "ruleSetType": "Microsoft_BotManagerRuleSet",
+                            "ruleSetVersion": "1.0",
+                            "ruleGroupOverrides": [],
+                            "exclusions": []
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/frontDoors",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('fd_name')]",
+            "location": "Global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/frontdoorwebapplicationfirewallpolicies', parameters('wafpolicy'))]"
+            ],
+            "properties": {
+                "resourceState": "Enabled",
+                "backendPools": [
+                    {
+                        "id": "[concat(resourceId('Microsoft.Network/frontDoors', parameters('fd_name')), concat('/BackendPools/', parameters('backendPoolName')))]",
+                        "name": "[parameters('backendPoolName')]",
+                        "properties": {
+                            "backends": [
+                                {
+                                    "address": "[parameters('backendAddress1')]",
+                                    "httpPort": 80,
+                                    "httpsPort": 443,
+                                    "priority": 1,
+                                    "weight": 50,
+                                    "backendHostHeader": "[parameters('hostHeader')]",
+                                    "enabledState": "Enabled"
+                                }
+                            ],
+                            "healthProbeSettings": {
+                                "id": "[concat(resourceId('Microsoft.Network/frontDoors', parameters('fd_name')), '/healthprobesettings/', variables('healthprobesettings'))]"
+                            },
+                            "loadBalancingSettings": {
+                                "id": "[concat(resourceId('Microsoft.Network/frontDoors', parameters('fd_name')), '/loadbalancingsettings/', variables('loadbalancingsettings'))]"
+                            },
+                            "resourceState": "Enabled"
+                        }
+                    }
+                ],
+                "healthProbeSettings": [
+                    {
+                        "id": "[concat(resourceId('Microsoft.Network/frontDoors', parameters('fd_name')), '/healthprobesettings/', variables('healthprobesettings'))]",
+                        "name": "[variables('healthprobesettings')]",
+                        "properties": {
+                            "intervalInSeconds": 30,
+                            "path": "/",
+                            "protocol": "Https",
+                            "resourceState": "Enabled",
+                            "enabledState": "Enabled",
+                            "healthProbeMethod": "HEAD"
+                        }
+                    }
+                ],
+                "frontendEndpoints": [
+                    {
+                        "id": "[concat(resourceId('Microsoft.Network/frontDoors', parameters('fd_name')), concat('/FrontendEndpoints/', parameters('fd_name'), '-azurefd-net'))]",
+                        "name": "[concat(parameters('fd_name'), '-azurefd-net')]",
+                        "properties": {
+                            "hostName": "[concat(parameters('fd_name'), '.azurefd.net')]",
+                            "sessionAffinityEnabledState": "Disabled",
+                            "sessionAffinityTtlSeconds": 0,
+                            "webApplicationFirewallPolicyLink": {
+                                "id": "[resourceId('Microsoft.Network/frontdoorwebapplicationfirewallpolicies', parameters('wafpolicy'))]"
+                            },
+                            "resourceState": "Enabled"
+                        }
+                    }
+                ],
+                "loadBalancingSettings": [
+                    {
+                        "id": "[concat(resourceId('Microsoft.Network/frontDoors', parameters('fd_name')), '/loadbalancingsettings/', variables('loadbalancingsettings'))]",
+                        "name": "[variables('loadbalancingsettings')]",
+                        "properties": {
+                            "additionalLatencyMilliseconds": 0,
+                            "sampleSize": 4,
+                            "successfulSamplesRequired": 2,
+                            "resourceState": "Enabled"
+                        }
+                    }
+                ],
+                "routingRules": [
+                    {
+                        "id": "[concat(resourceId('Microsoft.Network/frontdoors', parameters('fd_name')), '/RoutingRules/HttpToHttpsRedirect')]",
+                        "name": "HttpToHttpsRedirect",
+                        "properties": {
+                            "frontendEndpoints": [
+                                {
+                                    "id": "[concat(resourceId('Microsoft.Network/frontdoors', parameters('fd_name')), concat('/FrontendEndpoints/', parameters('fd_name'), '-azurefd-net'))]"
+                                }
+                            ],
+                            "acceptedProtocols": [
+                                "Http"
+                            ],
+                            "patternsToMatch": [
+                                "/*"
+                            ],
+                            "enabledState": "Enabled",
+                            "resourceState": "Enabled",
+                            "routeConfiguration": {
+                                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorRedirectConfiguration",
+                                "redirectProtocol": "HttpsOnly",
+                                "redirectType": "Found"
+                            }
+                        }
+                    },
+                    {
+                        "id": "[concat(resourceId('Microsoft.Network/frontdoors', parameters('fd_name')), '/RoutingRules/Forwarding-rule-', parameters('backendPoolName'))]",
+                        "name": "[concat('Forwarding-rule-', parameters('backendPoolName'))]",
+                        "properties": {
+                            "frontendEndpoints": [
+                                {
+                                    "id": "[concat(resourceId('Microsoft.Network/frontdoors', parameters('fd_name')), concat('/FrontendEndpoints/', parameters('fd_name'), '-azurefd-net'))]"
+                                }
+                            ],
+                            "acceptedProtocols": [
+                                "Https"
+                            ],
+                            "patternsToMatch": [
+                                "/*"
+                            ],
+                            "enabledState": "Enabled",
+                            "resourceState": "Enabled",
+                            "routeConfiguration": {
+                                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",
+                                "forwardingProtocol": "HttpsOnly",
+                                "backendPool": {
+                                    "id": "[concat(resourceId('Microsoft.Network/frontdoors', parameters('fd_name')), concat('/BackendPools/', parameters('backendPoolName')))]"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "backendPoolsSettings": {
+                    "enforceCertificateNameCheck": "Enabled",
+                    "sendRecvTimeoutSeconds": 30
+                },
+                "enabledState": "Enabled",
+                "friendlyName": "[parameters('fd_name')]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/frontdoors/providers/diagnosticSettings",
+            "apiVersion": "2017-05-01-preview",
+            "name": "[concat(parameters('fd_name'),'/microsoft.insights/', variables('DiagnosticSettingName'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/frontDoors', parameters('fd_name'))]"
+            ],
+            "properties": {
+                "workspaceId": "[parameters('workspaceResourceId')]",
+                "logs": [
+                    {
+                        "category": "FrontdoorAccessLog",
+                        "enabled": true
+                    },
+                    {
+                        "category": "FrontdoorWebApplicationFirewallLog",
+                        "enabled": true
+                    }
+                ],
+                "metrics": [
+                    {
+                        "category": "AllMetrics",
+                        "enabled": true
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/frontdoors/rulesengines",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('fd_name'), '/SecuirtyHeaders')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/frontdoors', parameters('fd_name'))]"
+            ],
+            "properties": {
+                "resourceState": "Enabled",
+                "rules": [
+                    {
+                        "name": "SecurityHeaders1",
+                        "priority": 0,
+                        "action": {
+                            "requestHeaderActions": [],
+                            "responseHeaderActions": [
+                                {
+                                    "headerActionType": "Overwrite",
+                                    "headerName": "X-Content-Type-Options",
+                                    "value": "nosniff"
+                                },
+                                {
+                                    "headerActionType": "Overwrite",
+                                    "headerName": "Referrer-Policy",
+                                    "value": "strict-origin-when-cross-origin"
+                                },
+                                {
+                                    "headerActionType": "Overwrite",
+                                    "headerName": "X-Permitted-Cross-Domain-Policies",
+                                    "value": "none"
+                                },
+                                {
+                                    "headerActionType": "Overwrite",
+                                    "headerName": "Strict-Transport-Security",
+                                    "value": "max-age=63072000;"
+                                },
+                                {
+                                    "headerActionType": "Overwrite",
+                                    "headerName": "Permissions-Policy",
+                                    "value": "accelerometer=(),autoplay=(self \"https://uefa.com\"),camera=(),display-capture=(),document-domain=(),encrypted-media=(),fullscreen=*,geolocation=(),gyroscope=(),magnetometer=(),microphone=(),midi=(),payment=(),picture-in-picture=(),publickey-credentials-get=(),screen-wake-lock=(),sync-xhr=(self),usb=(),web-share=(),xr-spatial-tracking=()"
+                                }
+                            ]
+                        },
+                        "matchConditions": [
+                            {
+                                "selector": "host",
+                                "rulesEngineMatchValue": [ "[parameters('hostHeader')]" ],
+                                "negateCondition": false,
+                                "rulesEngineMatchVariable": "RequestHeader",
+                                "rulesEngineOperator": "Equal",
+                                "transforms": [
+                                    "Lowercase"
+                                ]
+                            }
+                        ],
+                        "matchProcessingBehavior": "Continue"
+                    },
+                    {
+                        "name": "ContentSecurityPolicy",
+                        "priority": 1,
+                        "action": {
+                            "requestHeaderActions": [],
+                            "responseHeaderActions": [
+                                {
+                                    "headerActionType": "Overwrite",
+                                    "headerName": "Content-Security-Policy",
+                                    "value": "upgrade-insecure-requests;"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy",
+                                    "value": "object-src 'none';"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy",
+                                    "value": "base-uri 'self';"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy",
+                                    "value": "frame-ancestors 'self';"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy",
+                                    "value": "report-uri https://uefa-secops-dashboard.azurewebsites.net/csp-reports/report;"
+                                }
+                            ]
+                        },
+                        "matchConditions": [
+                            {
+                                "selector": "host",
+                                "rulesEngineMatchValue": [ "[parameters('hostHeader')]" ],
+                                "negateCondition": false,
+                                "rulesEngineMatchVariable": "RequestHeader",
+                                "rulesEngineOperator": "Equal",
+                                "transforms": [
+                                    "Lowercase"
+                                ]
+                            }
+                        ],
+                        "matchProcessingBehavior": "Continue"
+                    },
+                    {
+                        "name": "ContentSecurityPolicyReportOnly",
+                        "priority": 2,
+                        "action": {
+                            "requestHeaderActions": [],
+                            "responseHeaderActions": [
+                                {
+                                    "headerActionType": "Overwrite",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "block-all-mixed-content;"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "default-src 'none';"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "style-src 'self' 'report-sample';"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "script-src 'self' 'report-sample';"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "img src 'self';"
+                                }
+                            ]
+                        },
+                        "matchConditions": [
+                            {
+                                "selector": "host",
+                                "rulesEngineMatchValue": [ "[parameters('hostHeader')]" ],
+                                "negateCondition": false,
+                                "rulesEngineMatchVariable": "RequestHeader",
+                                "rulesEngineOperator": "Equal",
+                                "transforms": [
+                                    "Lowercase"
+                                ]
+                            }
+                        ],
+                        "matchProcessingBehavior": "Continue"
+                    },
+                    {
+                        "name": "ContentSecurityPolicy2ReportOnly",
+                        "priority": 3,
+                        "action": {
+                            "requestHeaderActions": [],
+                            "responseHeaderActions": [
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "font-src 'self';"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "form-action 'self';"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "frame-ancestors 'none';"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "frame-src 'self';"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "child-src 'self';"
+                                }
+                            ]
+                        },
+                        "matchConditions": [
+                            {
+                                "selector": "host",
+                                "rulesEngineMatchValue": [ "[parameters('hostHeader')]" ],
+                                "negateCondition": false,
+                                "rulesEngineMatchVariable": "RequestHeader",
+                                "rulesEngineOperator": "Equal",
+                                "transforms": [
+                                    "Lowercase"
+                                ]
+                            }
+                        ],
+                        "matchProcessingBehavior": "Continue"
+                    },
+                    {
+                        "name": "ContentSecurityPolicy3ReportOnly",
+                        "priority": 4,
+                        "action": {
+                            "requestHeaderActions": [],
+                            "responseHeaderActions": [
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "connect-src 'self';"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "base-uri 'self';"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "object-src 'self';"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "media-src 'self';"
+                                }
+                            ]
+                        },
+                        "matchConditions": [
+                            {
+                                "selector": "host",
+                                "rulesEngineMatchValue": [ "[parameters('hostHeader')]" ],
+                                "negateCondition": false,
+                                "rulesEngineMatchVariable": "RequestHeader",
+                                "rulesEngineOperator": "Equal",
+                                "transforms": [
+                                    "Lowercase"
+                                ]
+                            }
+                        ],
+                        "matchProcessingBehavior": "Continue"
+                    },
+                    {
+                        "name": "ContentSecurityPolicy4ReportOnly",
+                        "priority": 5,
+                        "action": {
+                            "requestHeaderActions": [],
+                            "responseHeaderActions": [
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "worker-src 'self';"
+                                },
+                                {
+                                    "headerActionType": "Append",
+                                    "headerName": "Content-Security-Policy-Report-Only",
+                                    "value": "report-uri https://uefa-secops-dashboard.azurewebsites.net/csp-reports/report;"
+                                }
+                            ]
+                        },
+                        "matchConditions": [
+                            {
+                                "selector": "host",
+                                "rulesEngineMatchValue": [ "[parameters('hostHeader')]" ],
+                                "negateCondition": false,
+                                "rulesEngineMatchVariable": "RequestHeader",
+                                "rulesEngineOperator": "Equal",
+                                "transforms": [
+                                    "Lowercase"
+                                ]
+                            }
+                        ],
+                        "matchProcessingBehavior": "Continue"
+                    },
+                    {
+                        "name": "RemoveHeaders",
+                        "priority": 6,
+                        "action": {
+                            "requestHeaderActions": [],
+                            "responseHeaderActions": [
+                                {
+                                    "headerActionType": "Delete",
+                                    "headerName": "Server"
+                                },
+                                {
+                                    "headerActionType": "Delete",
+                                    "headerName": "X-Powered-By"
+                                }
+                            ]
+                        },
+                        "matchConditions": [
+                            {
+                                "selector": "host",
+                                "rulesEngineMatchValue": [ "[parameters('hostHeader')]" ],
+                                "negateCondition": false,
+                                "rulesEngineMatchVariable": "RequestHeader",
+                                "rulesEngineOperator": "Equal",
+                                "transforms": [
+                                    "Lowercase"
+                                ]
+                            }
+                        ],
+                        "matchProcessingBehavior": "Stop"
+                    }
+                ]
+            }
+        }
+    ]
+}

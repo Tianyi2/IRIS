@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "name": "bugbash-AzOps-umi",
+      "apiVersion": "2018-11-30",
+      "location": "[resourceGroup().location]",
+      "tags": {},
+      "properties": {
+        "tenantId": "360d509d-82f2-42d5-9446-fbf417d9139c",
+        "principalId": "2ceb4575-9754-4bee-8ea5-55ba92d4ddd5",
+        "clientId": "46044e5c-88bb-4179-a40e-fb8e7efaf99b"
+      }
+    }
+  ],
+  "outputs": {}
+}

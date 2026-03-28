@@ -1,0 +1,61 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "9947700162394520337"
+    }
+  },
+  "parameters": {
+    "aiResourceName": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "sku": {
+      "type": "string",
+      "defaultValue": "S"
+    },
+    "customSubDomainName": {
+      "type": "string"
+    },
+    "principalIds": {
+      "type": "array",
+      "defaultValue": []
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2023-05-01",
+      "name": "[parameters('aiResourceName')]",
+      "sku": {
+        "name": "[parameters('sku')]"
+      },
+      "tags": "[parameters('tags')]",
+      "location": "[parameters('location')]",
+      "kind": "TextAnalytics",
+      "properties": {
+        "customSubDomainName": "[parameters('customSubDomainName')]"
+      }
+    }
+  ],
+  "outputs": {
+    "name": {
+      "type": "string",
+      "value": "[parameters('aiResourceName')]"
+    },
+    "url": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('aiResourceName')), '2023-05-01').endpoint]"
+    }
+  }
+}

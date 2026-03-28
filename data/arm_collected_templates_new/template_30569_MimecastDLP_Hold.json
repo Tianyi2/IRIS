@@ -1,0 +1,65 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/3e12b7b1-75e5-497c-ba01-b6cb30b60d7f')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/3e12b7b1-75e5-497c-ba01-b6cb30b60d7f')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "1d",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "enabled": true,
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "name": "Mimecast Data Leak Prevention - Hold",
+        "description": "Detects threat for data leak when action is hold",
+        "suppressionDuration": "5h",
+        "query": "MimecastDLP_CL| where action_s == \"hold\";",
+        "queryFrequency": "5m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "senderAddress_s",
+                "identifier": "Sender"
+              },
+              {
+                "columnName": "recipientAddress_s",
+                "identifier": "Recipient"
+              },
+              {
+                "columnName": "action_s",
+                "identifier": "DeliveryAction"
+              }
+            ],
+            "entityType": "MailMessage"
+          }
+        ],
+        "suppressionEnabled": false,
+        "severity": "Informational",
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "tactics": [
+          "Exfiltration"
+        ],
+        "queryPeriod": "15m"
+      }
+    }
+  ]
+}

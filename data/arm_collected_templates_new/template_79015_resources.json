@@ -1,0 +1,110 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storage-name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 24
+        },
+        "unique-id": {
+            "type": "string",
+            "defaultValue": "[utcNow()]"
+        },
+        "scripts-repo-path": {
+            "type": "string",
+            "defaultValue": "https://github.com/CloudPRO-club/infrastructure"
+        },
+        "scripts-repo-branch": {
+            "type": "string",
+            "defaultValue": "main"
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "storage": {
+            "name": "[parameters('storage-name')]",
+            "sku": "Standard_LRS"
+        },
+        "site": {
+            "index": "index.html",
+            "error": "error.html"
+        },
+        "source": {
+            "repo": {
+                "path": "[parameters('scripts-repo-path')]",
+                "branch": "[parameters('scripts-repo-branch')]"
+            }
+        },
+        "assets": {
+            "raw": {
+                "path": "[replace(variables('source').repo.path, 'github.com', 'raw.githubusercontent.com')]"
+            }
+        },
+        "general": {
+            "uniqueId": "[parameters('unique-id')]",
+            "id": "[uniqueString(resourceGroup().id)]",
+            "sharedRG": "Shared"
+        },
+        "custom": {
+            "identity": {
+                "name": "GitHub_Automation"
+            },
+            "scripts": {
+                "storage": {
+                    "staticWebsite": {
+                        "enable": {
+                            "name": "[concat(variables('storage').name, '-website')]",
+                            "absolutePath": "[concat(variables('assets').raw.path, '/', variables('source').repo.branch, '/wiki/cli/storage-static-website-enable.sh')]",
+                            "arguments": "[concat('--name ', variables('storage').name, ' --index ', variables('site').index, ' --error ', variables('site').error)]"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "resources": [
+        {
+            "name": "[variables('storage').name]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-06-01",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "[variables('storage').sku]"
+            },
+            "kind": "StorageV2"
+        },
+        {
+            "name": "[variables('custom').scripts.storage.staticWebsite.enable.name]",
+            "type": "Microsoft.Resources/deploymentScripts",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/', variables('storage').name)]"
+            ],
+            "apiVersion": "2020-10-01",
+            "location": "[variables('location')]",
+            "kind": "AzureCLI",
+            "identity": {
+                "type": "userAssigned",
+                "userAssignedIdentities": {
+                    "[resourceID(variables('general').sharedRG, 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('custom').identity.name)]": {}
+                }
+            },
+            "properties": {
+                "forceUpdateTag": "[variables('general').uniqueId]",
+                "azCliVersion": "2.30.0",
+                "arguments": "[variables('custom').scripts.storage.staticWebsite.enable.arguments]",
+                "primaryScriptUri": "[variables('custom').scripts.storage.staticWebsite.enable.absolutePath]",
+                "supportingScriptUris": [],
+                "timeout": "PT10M",
+                "cleanupPreference": "Always",
+                "retentionInterval": "P1D"
+            }
+        }
+    ],
+    "outputs": {
+        "website-url": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('storage').name), '2021-06-01', 'Full').properties.primaryEndpoints.web]"
+        }
+    }
+}

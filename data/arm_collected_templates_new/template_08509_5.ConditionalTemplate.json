@@ -1,0 +1,47 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "useBlobStorage": {
+          "type": "bool"
+      },
+      "storageAcctName": {
+          "type": "string"
+      }
+    },
+    "variables": {
+        "blobStgName": "[concat('blob', tolower(parameters('storageAcctName')), uniqueString(resourceGroup().id))]",
+        "stdStgName": "[concat('std', tolower(parameters('storageAcctName')), uniqueString(resourceGroup().id))]"
+    },
+    "resources": [
+        {
+            "condition": "[not(parameters('useBlobStorage'))]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('stdStgName')]",
+            "apiVersion": "2017-06-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage"
+        },
+        {
+            "condition": "[parameters('useBlobStorage')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('blobStgName')]",
+            "apiVersion": "2017-06-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "BlobStorage",
+            "properties": {
+                "accessTier": "Cool"
+            }
+        }
+    ],
+    "outputs": {    }
+}
+  

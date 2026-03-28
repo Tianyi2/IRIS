@@ -1,0 +1,139 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+  },
+  "variables": {
+    "role_customAutomanage_id": "fc2022d7-1074-4ec5-823c-2e5e691c4e1a",
+    "role_VmContributor": "/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
+    "role_automationContributor": "/providers/Microsoft.Authorization/roleDefinitions/f353d9bd-d4a6-484e-a77a-8050b599b867",
+    "role_arcMachineAdmin": "/providers/Microsoft.Authorization/roleDefinitions/cd570a14-e51a-42ad-bac8-bafd67325302",
+    "role_monitoringContributor": "/providers/Microsoft.Authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+    "role_wacAdmin": "/providers/Microsoft.Authorization/roleDefinitions/a6333a3e-0164-44c3-b281-7a577aff287f",
+    "role_policyContributor": "/providers/Microsoft.Authorization/roleDefinitions/36243c78-bf99-498c-9df9-86d9f8d28608",
+    "role_logAnalyticsContributor": "/providers/Microsoft.Authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293",
+    "role_guestConfigContributor": "/providers/Microsoft.Authorization/roleDefinitions/088ab73d-1256-47ae-bea9-9de8e7131f31",
+    "role_managedIdentityOperator": "/providers/Microsoft.Authorization/roleDefinitions/f1a07417-d97a-45cb-824c-7a7467783830",
+    "seed": "AzureAutomanage"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleDefinitions",
+      "apiVersion": "2022-04-01",
+      "name": "[variables('role_customAutomanage_id')]",
+      "properties": {
+        "roleName": "Automanage Supplemental Permissions",
+        "assignableScopes": [
+          "[subscription().id]"
+        ],
+        "description": "Permissions that are needed by the Automanage service that are not present in other built-in roles.",
+        "permissions": [
+          {
+            "actions": [
+              "Microsoft.Resources/subscriptions/resourceGroups/read",
+              "Microsoft.Resources/subscriptions/resourceGroups/write",
+              "Microsoft.Security/settings/read",
+              "Microsoft.Security/settings/write"
+            ],
+            "dataActions": [],
+            "notActions": [],
+            "notDataActions": []
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(subscription().id, variables('seed'), variables('role_customAutomanage_id'))]",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('role_customAutomanage_id'))]",
+        "principalId": "[reference(subscriptionResourceId('Microsoft.Automanage/servicePrincipals', 'default'), '2022-05-04', 'Full').properties.servicePrincipalId]"
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('role_customAutomanage_id'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(subscription().id, variables('seed'), variables('role_guestConfigContributor'))]",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "roleDefinitionId": "[variables('role_guestConfigContributor')]",
+        "principalId": "[reference(subscriptionResourceId('Microsoft.Automanage/servicePrincipals', 'default'), '2022-05-04', 'Full').properties.servicePrincipalId]"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(subscription().id, variables('seed'), variables('role_VmContributor'))]",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "roleDefinitionId": "[variables('role_VmContributor')]",
+        "principalId": "[reference(subscriptionResourceId('Microsoft.Automanage/servicePrincipals', 'default'), '2022-05-04', 'Full').properties.servicePrincipalId]"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(subscription().id, variables('seed'), variables('role_arcMachineAdmin'))]",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "roleDefinitionId": "[variables('role_arcMachineAdmin')]",
+        "principalId": "[reference(subscriptionResourceId('Microsoft.Automanage/servicePrincipals', 'default'), '2022-05-04', 'Full').properties.servicePrincipalId]"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(subscription().id, variables('seed'), variables('role_monitoringContributor'))]",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "roleDefinitionId": "[variables('role_monitoringContributor')]",
+        "principalId": "[reference(subscriptionResourceId('Microsoft.Automanage/servicePrincipals', 'default'), '2022-05-04', 'Full').properties.servicePrincipalId]"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(subscription().id, variables('seed'), variables('role_logAnalyticsContributor'))]",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "roleDefinitionId": "[variables('role_logAnalyticsContributor')]",
+        "principalId": "[reference(subscriptionResourceId('Microsoft.Automanage/servicePrincipals', 'default'), '2022-05-04', 'Full').properties.servicePrincipalId]"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(subscription().id, variables('seed'), variables('role_wacAdmin'))]",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "roleDefinitionId": "[variables('role_wacAdmin')]",
+        "principalId": "[reference(subscriptionResourceId('Microsoft.Automanage/servicePrincipals', 'default'), '2022-05-04', 'Full').properties.servicePrincipalId]"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(subscription().id, variables('seed'), variables('role_automationContributor'))]",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "roleDefinitionId": "[variables('role_automationContributor')]",
+        "principalId": "[reference(subscriptionResourceId('Microsoft.Automanage/servicePrincipals', 'default'), '2022-05-04', 'Full').properties.servicePrincipalId]"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(subscription().id, variables('seed'), variables('role_policyContributor'))]",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "roleDefinitionId": "[variables('role_policyContributor')]",
+        "principalId": "[reference(subscriptionResourceId('Microsoft.Automanage/servicePrincipals', 'default'), '2022-05-04', 'Full').properties.servicePrincipalId]"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(subscription().id, variables('seed'), variables('role_managedIdentityOperator'))]",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "roleDefinitionId": "[variables('role_managedIdentityOperator')]",
+        "principalId": "[reference(subscriptionResourceId('Microsoft.Automanage/servicePrincipals', 'default'), '2022-05-04', 'Full').properties.servicePrincipalId]"
+      }
+    }
+  ]
+}

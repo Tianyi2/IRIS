@@ -1,0 +1,63 @@
+construct_id,construct_name,is_exclude,mapped_arm_id,ontology_id,ontology_name
+ir_1,metadata,,arm_4,,$schema
+ir_2,parameters,,"arm_5, arm_6",,contentVersion
+ir_3,conditions,,arm_24,,apiProfile
+ir_4,resources,,arm_8,,metadata
+ir_5,outputs,,arm_9,,parameters
+ir_6,metadata.template_id,TRUE,,,variables
+ir_7,metadata.template_type,TRUE,,arm_7,functions
+ir_8,metadata.cloud_service_provider,,arm_2,,resources
+ir_9,metadata.file_name,TRUE,,,outputs
+ir_10,metadata.description,,,,parameters.name
+ir_11,metadata.additional_info,,"arm_1, arm_2, arm_3",,parameters.type
+ir_12,parameters.id,TRUE,,,parameters.defaultValue
+ir_13,parameters.name,,"arm_10, arm_34",,parameters.allowedValues
+ir_14,parameters.type,,arm_11,,parameters.minValue
+ir_15,parameters.param_type,,"arm_5, arm_6",,parameters.maxValue
+ir_16,parameters.default,,arm_12,,parameters.minLength
+ir_17,parameters.constraints,,"arm_13, arm_14, arm_15, arm_16, arm_17, arm_35",,parameters.maxLength
+ir_18,parameters.description,,arm_18,,parameters.metadata
+ir_19,parameters.depend_parameter,TRUE,,,resources.type
+ir_20,parameters.depend_resource,TRUE,,,resources.apiVersion
+ir_21,parameters.depend_condition,TRUE,,,resources.name
+ir_22,conditions.id,TRUE,,,resources.location
+ir_23,conditions.name,,,,resources.dependsOn
+ir_24,conditions.condition,,arm_24,,resources.condition
+ir_25,conditions.ruled_para,,arm_24,,resources.copy
+ir_26,conditions.constraint,,"arm_36, arm_37",,resources.properties
+ir_27,conditions.description,,,,outputs.type
+ir_28,conditions.depend_parameter,TRUE,,,outputs.value
+ir_29,conditions.depend_condition,TRUE,,,outputs.condition
+ir_30,resources.id,TRUE,,arm_30,outputs.copy
+ir_31,resources.name,,"arm_34, arm_21",,output.name
+ir_32,resources.type,,arm_19,arm_32,functions.namespace
+ir_33,resources.arguments,TRUE,,arm_33,functions.members
+ir_34,resources.arguments.depends_on,,arm_23,,variables.name
+ir_35,resources.arguments.condition,,arm_24,,definition
+ir_36,resources.arguments.creation_policy,TRUE,,,definition.nullable
+ir_37,resources.arguments.update_policy,TRUE,,,defintiion.additionalProperties
+ir_38,resources.arguments.deletion_policy,TRUE,,,
+ir_39,resources.arguments.update_replace_policy,TRUE,,,
+ir_40,resources.arguments.value,,"arm_20, arm_22, arm_25",,
+ir_41,resources.arguments.resource_refs,TRUE,,,
+ir_42,resources.arguments.parameter_refs,TRUE,,,
+ir_43,resources.properties,,arm_26,,
+ir_44,resources.properties.name,TRUE,,,
+ir_45,resources.properties.value,TRUE,,,
+ir_46,resources.properties.resource_refs,TRUE,,,
+ir_47,resources.properties.parameter_refs,TRUE,,,
+ir_48,resources.properties.depend_conditions,TRUE,,,
+ir_49,outputs.id,TRUE,,,
+ir_50,outputs.name,,arm_31,,
+ir_51,outputs.description,,,,
+ir_52,outputs.value,TRUE,,,
+ir_53,outputs.value.value,,"arm_27, arm_28",,
+ir_54,outputs.value.depend_conditions,TRUE,,,
+ir_55,outputs.source_resource,TRUE,,,
+ir_56,outputs.source_parameter,TRUE,,,
+ir_57,outputs.export_name,TRUE,,,
+ir_58,outputs.export_name.name,,arm_31,,
+ir_59,outputs.export_name.depend_parameter,TRUE,,,
+ir_60,outputs.export_name.depend_resource,TRUE,,,
+ir_61,outputs.export_name.depend_conditions,TRUE,,,
+ir_62,outputs.depend_conditions,,arm_29,,

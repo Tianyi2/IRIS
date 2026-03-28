@@ -1,0 +1,289 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.AAD/DomainServices to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.AAD/DomainServices to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "accountlogonEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AccountLogon",
+        "description": "Enable or disable log category AccountLogon"
+      },
+      "defaultValue": true
+    },
+    "accountmanagementEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AccountManagement",
+        "description": "Enable or disable log category AccountManagement"
+      },
+      "defaultValue": true
+    },
+    "detailtrackingEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DetailTracking",
+        "description": "Enable or disable log category DetailTracking"
+      },
+      "defaultValue": true
+    },
+    "directoryserviceaccessEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DirectoryServiceAccess",
+        "description": "Enable or disable log category DirectoryServiceAccess"
+      },
+      "defaultValue": true
+    },
+    "dnsserverauditsdynamicupdatesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DNSServerAuditsDynamicUpdates",
+        "description": "Enable or disable log category DNSServerAuditsDynamicUpdates"
+      },
+      "defaultValue": true
+    },
+    "dnsserverauditsgeneralEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DNSServerAuditsGeneral",
+        "description": "Enable or disable log category DNSServerAuditsGeneral"
+      },
+      "defaultValue": true
+    },
+    "logonlogoffEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "LogonLogoff",
+        "description": "Enable or disable log category LogonLogoff"
+      },
+      "defaultValue": true
+    },
+    "objectaccessEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "ObjectAccess",
+        "description": "Enable or disable log category ObjectAccess"
+      },
+      "defaultValue": true
+    },
+    "policychangeEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "PolicyChange",
+        "description": "Enable or disable log category PolicyChange"
+      },
+      "defaultValue": true
+    },
+    "privilegeuseEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "PrivilegeUse",
+        "description": "Enable or disable log category PrivilegeUse"
+      },
+      "defaultValue": true
+    },
+    "systemsecurityEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SystemSecurity",
+        "description": "Enable or disable log category SystemSecurity"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.AAD/DomainServices"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.AAD/DomainServices/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.AAD/DomainServices, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "AccountLogon",
+                    "enabled": "[parameters('accountlogonEnabled')]"
+                  },
+                  {
+                    "category": "AccountManagement",
+                    "enabled": "[parameters('accountmanagementEnabled')]"
+                  },
+                  {
+                    "category": "DetailTracking",
+                    "enabled": "[parameters('detailtrackingEnabled')]"
+                  },
+                  {
+                    "category": "DirectoryServiceAccess",
+                    "enabled": "[parameters('directoryserviceaccessEnabled')]"
+                  },
+                  {
+                    "category": "DNSServerAuditsDynamicUpdates",
+                    "enabled": "[parameters('dnsserverauditsdynamicupdatesEnabled')]"
+                  },
+                  {
+                    "category": "DNSServerAuditsGeneral",
+                    "enabled": "[parameters('dnsserverauditsgeneralEnabled')]"
+                  },
+                  {
+                    "category": "LogonLogoff",
+                    "enabled": "[parameters('logonlogoffEnabled')]"
+                  },
+                  {
+                    "category": "ObjectAccess",
+                    "enabled": "[parameters('objectaccessEnabled')]"
+                  },
+                  {
+                    "category": "PolicyChange",
+                    "enabled": "[parameters('policychangeEnabled')]"
+                  },
+                  {
+                    "category": "PrivilegeUse",
+                    "enabled": "[parameters('privilegeuseEnabled')]"
+                  },
+                  {
+                    "category": "SystemSecurity",
+                    "enabled": "[parameters('systemsecurityEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

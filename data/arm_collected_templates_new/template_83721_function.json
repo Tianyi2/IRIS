@@ -1,0 +1,219 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "functionName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Azure Function that will recieve the Event Grid Topic."
+            },
+            "defaultValue": "func-governance-pwsh"
+        },
+        "functionAppRepo": {
+            "type": "string",
+            "metadata": {
+                "description": ""
+            },
+            "defaultValue": "https://github.com/jsmallwood/azure-governance-function.git"
+        },
+        "planName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the App Service Plan."
+            },
+            "defaultValue": ""
+        },
+        "budgetTagNames": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the App Service Plan."
+            },
+            "defaultValue": "CostCenter"
+        },
+        "CreatedByTagName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the App Service Plan."
+            },
+            "defaultValue": "CreatedBy"
+        },
+        "CreatedOnDateTagName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the App Service Plan."
+            },
+            "defaultValue": "CreatedOnDate"
+        }
+    },
+    "functions": [],
+    "variables": {
+        "functionName": "[toLower(if(contains(parameters('functionName'), 'func-'), parameters('functionName'), concat('func-', parameters('functionName'))))]",
+        "planName": "[toLower(if(equals(parameters('planName'), ''), concat('plan-', variables('functionName')), parameters('planName')))]",
+        "storageAccountName": "[toLower(concat('st', trim(resourceGroup().location), uniqueString(subscription().subscriptionId)))]",
+        "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "branch": "main"
+    },
+    "resources": [
+        {
+            "name": "[variables('planName')]",
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2020-12-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Y1",
+                "capacity": 1
+            },
+            "properties": {
+                "name": "[variables('planName')]"
+            }
+        },
+        {
+            "name": "[variables('storageAccountName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "location": "[resourceGroup().location]",
+            "kind": "StorageV2",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            }
+        },
+        {
+            "name": "[variables('functionName')]",
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2020-12-01",
+            "location": "[resourceGroup().location]",
+            "kind": "functionapp",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ],
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2019-06-01').keys[0].value)]"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTSHARE",
+                            "value": "[toLower(variables('functionName'))]"
+                        },
+                        {
+                            "name": "AzureWebJobsStorage",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2019-06-01').keys[0].value)]"
+                        },
+                        {
+                            "name": "FUNCTIONS_EXTENSION_VERSION",
+                            "value": "~3"
+                        },
+                        {
+                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                            "value": "powershell"
+                        },
+                        {
+                            "name": "BUDGET_CONTACT_EMAILS",
+                            "value": "",
+                            "slotSetting": false
+                        },
+                        {
+                            "name": "BUDGET_MANAGMENT_GROUP_TEMPLATE_URL",
+                            "value": "https://raw.githubusercontent.com/jsmallwood/azure-governance/main/function/budget-ManagementGroup.json",
+                            "slotSetting": false
+                        },
+                        {
+                            "name": "BUDGET_SCOPE",
+                            "value": "",
+                            "slotSetting": false
+                        },
+                        {
+                            "name": "BUDGET_SUBSCRIPTION_IDs",
+                            "value": "",
+                            "slotSetting": false
+                        },
+                        {
+                            "name": "BUDGET_TAG_NAMES",
+                            "value": "[parameters('budgetTagNames')]",
+                            "slotSetting": false
+                        },
+                        {
+                            "name": "CREATED_BY_TAG_NAME",
+                            "value": "[parameters('CreatedByTagName')]",
+                            "slotSetting": false
+                        },
+                        {
+                            "name": "CREATED_ON_DATE_TAG_NAME",
+                            "value": "[parameters('CreatedOnDateTagName')]",
+                            "slotSetting": false
+                        },
+                        {
+                            "name": "EVENT_GRID_LOCATION",
+                            "value": "[resourceGroup().location]",
+                            "slotSetting": false
+                        },
+                        {
+                            "name": "EVENT_GRID_RESOURCE_GROUP_NAME",
+                            "value": "",
+                            "slotSetting": false
+                        },
+                        {
+                            "name": "EVENT_GRID_SUBSCRIPTION_TEMPLATE_URL",
+                            "value": "https://raw.githubusercontent.com/jsmallwood/azure-governance/main/function/eventGrid-Subscription.json",
+                            "slotSetting": false
+                        },
+                        {
+                            "name": "EVENT_GRID_TOPIC_NAME",
+                            "value": "",
+                            "slotSetting": false
+                        },
+                        {
+                            "name": "EVENT_GRID_TOPIC_TEMPLATE_URL",
+                            "value": "https://raw.githubusercontent.com/jsmallwood/azure-governance/main/function/eventGrid-Topic.json",
+                            "slotSetting": false
+                        }
+                    ]
+                }
+            },
+            "resources": [
+                {
+                    "name": "web",
+                    "type": "sourcecontrols",
+                    "apiVersion": "2018-11-01",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites', variables('functionName'))]"
+                    ],
+                    "properties": {
+                        "RepoUrl": "[parameters('functionAppRepo')]",
+                        "branch": "[variables('branch')]",
+                        "IsManualIntegration": true
+                    }
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2020-12-01",
+            "name": "[concat(variables('functionName'), '/web')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', variables('functionName'))]"
+            ],
+            "properties": {
+                "powerShellVersion": "~7"
+            }
+        }
+    ],
+    "outputs": {
+        "systemAssignedIdentityPrincipalId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Web/sites', variables('functionName')), '2020-09-01', 'Full').identity.principalId]"
+        },
+        "functionName": {
+            "type": "string",
+            "value": "[variables('functionName')]"
+        }
+    }
+}

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "tagName": {
+      "type": "String",
+      "metadata": {
+        "displayName": "TagName",
+        "description": "Name of the tag",
+        "default": "type"
+      }
+    },
+    "tagValue": {
+      "type": "String",
+      "metadata": {
+        "displayName": "TagValue",
+        "description": "Value of the tag, such as 'production'",
+        "default": "sensitive"
+      }
+    }
+  },
+  "functions": [],
+  "variables": {
+    "policyName": "[concat('PI', uniqueString('PolicyTest12345'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyDefinitions",
+      "name": "[variables('policyName')]",
+      "apiVersion": "2019-09-01",
+      "properties": {
+        "displayName": "[variables('policyName')]",
+        "policyType": "Custom",
+        "mode": "Indexed",
+        "description": "This is policy test 1",
+        "metadata": {
+          "version": "1.0.1",
+          "category": "PolicyCategory1"
+        },
+        "parameters": {},
+        "policyRule": {
+          "if": {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Resources/subscriptions/resourceGroups"
+              },
+              {
+                "field": "[concat('tags[', parameters('tagName'), ']')]",
+                "exists": "false"
+              }
+            ]
+          },
+          "then": {
+            "effect": "modify",
+            "details": {
+              "operations": [
+                {
+                  "operation": "add",
+                  "field": "[concat('tags[', parameters('tagName'), ']')]",
+                  "value": "[parameters('tagValue')]"
+                }
+              ],
+              "roleDefinitionIds": [
+                "/subscriptions/b698965a-1f53-45ec-8b81-58458d1b25f7/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Policy080320201450PM-Assignment",
+      "apiVersion": "2019-09-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Authorization/policyDefinitions/', variables('policyName'))]"
+      ],
+      "properties": {
+        "policyDefinitionId": "[concat(subscription().id, '/providers/Microsoft.Authorization/policyDefinitions/', variables('policyName'))]"
+      }
+    }
+  ],
+  "outputs": {
+    "policyName": {
+      "type": "string",
+      "value": "[variables('policyName')]"
+    }
+  }
+}

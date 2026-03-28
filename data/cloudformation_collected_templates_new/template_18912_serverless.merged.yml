@@ -1,0 +1,101 @@
+service: appsync-merged
+
+frameworkVersion: '3'
+
+configValidationMode: error
+
+provider:
+  name: aws
+  logRetentionInDays: 7
+  region: us-east-1
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  deploymentBucket:
+    name: com.reference-architecture.deploys
+    maxPreviousDeploymentArtifacts: 5
+    serverSideEncryption: AES256
+  tags:
+    lumigo:auto-trace: 'true'
+
+plugins:
+- serverless-deployment-bucket
+
+resources:
+  Resources:
+    MergedApi:
+      Type: AWS::AppSync::GraphQLApi
+      Properties:
+        ApiType: MERGED
+        AuthenticationType: API_KEY
+        MergedApiExecutionRoleArn: !GetAtt MergedApiExecutionRole.Arn
+        Name: appsync-merged-api
+
+    MergedApiExecutionRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - appsync.amazonaws.com
+            Action: 
+            - sts:AssumeRole
+        Path: /
+        Policies:
+        - PolicyName: merged-api-source-permissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action: 
+              - appsync:SourceGraphQL
+              Resource:
+              - !Sub arn:aws:appsync:${self:provider.region}:${AWS::AccountId}:apis/${cf:users-source-dev.ApiId}/*
+              - !Sub arn:aws:appsync:${self:provider.region}:${AWS::AccountId}:apis/${cf:users-source-dev.ApiId}
+              - !Sub arn:aws:appsync:${self:provider.region}:${AWS::AccountId}:apis/${cf:orders-source-dev.ApiId}/*
+              - !Sub arn:aws:appsync:${self:provider.region}:${AWS::AccountId}:apis/${cf:orders-source-dev.ApiId}
+        - PolicyName: merged-api-schema-merge
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action: 
+              - appsync:StartSchemaMerge
+              Resource:
+              - !Sub arn:aws:appsync:${self:provider.region}:${AWS::AccountId}:apis/*/sourceApiAssociations/*
+        RoleName: merged-api-execution-role
+
+    MergedApiKey:
+      Type: AWS::AppSync::ApiKey
+      Properties:
+        ApiId: !GetAtt MergedApi.ApiId
+        Description: The merged-api ApiKey
+        Expires: 1751126569 #2025-06-28 and some change...
+      
+    OrdersApiAssociation:
+      Type: AWS::AppSync::SourceApiAssociation
+      Properties:
+        Description: The association of the Orders API to the Merged API
+        MergedApiIdentifier: !GetAtt MergedApi.ApiId
+        SourceApiAssociationConfig:
+          MergeType: AUTO_MERGE
+        SourceApiIdentifier: ${cf:orders-source-dev.ApiId}
+    
+    UsersApiAssociation:
+      Type: AWS::AppSync::SourceApiAssociation
+      Properties:
+        Description: The association of the Users API to the Merged API
+        MergedApiIdentifier: !GetAtt MergedApi.ApiId
+        SourceApiAssociationConfig:
+          MergeType: AUTO_MERGE
+        SourceApiIdentifier: ${cf:users-source-dev.ApiId}
+    
+  Outputs:
+    ApiKey:
+      Value: !GetAtt MergedApiKey.ApiKey
+    ApiId:
+      Value: !GetAtt MergedApi.ApiId
+    ApiUrl:
+      Value: !GetAtt MergedApi.GraphQLUrl

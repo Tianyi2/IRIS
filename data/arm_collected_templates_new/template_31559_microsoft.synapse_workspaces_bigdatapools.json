@@ -1,0 +1,289 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.Synapse/workspaces/bigDataPools to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.Synapse/workspaces/bigDataPools to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "bigdatapoolappeventsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "BigDataPoolAppEvents",
+        "description": "Enable or disable log category BigDataPoolAppEvents"
+      },
+      "defaultValue": true
+    },
+    "bigdatapoolappsendedEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "BigDataPoolAppsEnded",
+        "description": "Enable or disable log category BigDataPoolAppsEnded"
+      },
+      "defaultValue": true
+    },
+    "bigdatapoolblockmanagereventsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "BigDataPoolBlockManagerEvents",
+        "description": "Enable or disable log category BigDataPoolBlockManagerEvents"
+      },
+      "defaultValue": true
+    },
+    "bigdatapooldriverlogsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "BigDataPoolDriverLogs",
+        "description": "Enable or disable log category BigDataPoolDriverLogs"
+      },
+      "defaultValue": true
+    },
+    "bigdatapoolenvironmenteventsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "BigDataPoolEnvironmentEvents",
+        "description": "Enable or disable log category BigDataPoolEnvironmentEvents"
+      },
+      "defaultValue": true
+    },
+    "bigdatapoolexecutoreventsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "BigDataPoolExecutorEvents",
+        "description": "Enable or disable log category BigDataPoolExecutorEvents"
+      },
+      "defaultValue": true
+    },
+    "bigdatapoolexecutorlogsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "BigDataPoolExecutorLogs",
+        "description": "Enable or disable log category BigDataPoolExecutorLogs"
+      },
+      "defaultValue": true
+    },
+    "bigdatapooljobeventsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "BigDataPoolJobEvents",
+        "description": "Enable or disable log category BigDataPoolJobEvents"
+      },
+      "defaultValue": true
+    },
+    "bigdatapoolsqlexecutioneventsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "BigDataPoolSqlExecutionEvents",
+        "description": "Enable or disable log category BigDataPoolSqlExecutionEvents"
+      },
+      "defaultValue": true
+    },
+    "bigdatapoolstageeventsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "BigDataPoolStageEvents",
+        "description": "Enable or disable log category BigDataPoolStageEvents"
+      },
+      "defaultValue": true
+    },
+    "bigdatapooltaskeventsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "BigDataPoolTaskEvents",
+        "description": "Enable or disable log category BigDataPoolTaskEvents"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.Synapse/workspaces/bigDataPools"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.Synapse/workspaces/bigDataPools/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.Synapse/workspaces/bigDataPools, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "BigDataPoolAppEvents",
+                    "enabled": "[parameters('bigdatapoolappeventsEnabled')]"
+                  },
+                  {
+                    "category": "BigDataPoolAppsEnded",
+                    "enabled": "[parameters('bigdatapoolappsendedEnabled')]"
+                  },
+                  {
+                    "category": "BigDataPoolBlockManagerEvents",
+                    "enabled": "[parameters('bigdatapoolblockmanagereventsEnabled')]"
+                  },
+                  {
+                    "category": "BigDataPoolDriverLogs",
+                    "enabled": "[parameters('bigdatapooldriverlogsEnabled')]"
+                  },
+                  {
+                    "category": "BigDataPoolEnvironmentEvents",
+                    "enabled": "[parameters('bigdatapoolenvironmenteventsEnabled')]"
+                  },
+                  {
+                    "category": "BigDataPoolExecutorEvents",
+                    "enabled": "[parameters('bigdatapoolexecutoreventsEnabled')]"
+                  },
+                  {
+                    "category": "BigDataPoolExecutorLogs",
+                    "enabled": "[parameters('bigdatapoolexecutorlogsEnabled')]"
+                  },
+                  {
+                    "category": "BigDataPoolJobEvents",
+                    "enabled": "[parameters('bigdatapooljobeventsEnabled')]"
+                  },
+                  {
+                    "category": "BigDataPoolSqlExecutionEvents",
+                    "enabled": "[parameters('bigdatapoolsqlexecutioneventsEnabled')]"
+                  },
+                  {
+                    "category": "BigDataPoolStageEvents",
+                    "enabled": "[parameters('bigdatapoolstageeventsEnabled')]"
+                  },
+                  {
+                    "category": "BigDataPoolTaskEvents",
+                    "enabled": "[parameters('bigdatapooltaskeventsEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

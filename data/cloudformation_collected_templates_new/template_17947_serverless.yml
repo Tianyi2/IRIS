@@ -1,0 +1,72 @@
+service: qldb-apigw-demo
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  region: eu-west-2
+  stackName: ${self:service}-${self:provider.stage}
+  tracing:
+    apiGateway: true
+
+resources:
+  Resources:
+    QldbApiGW:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: QldbBicycleLicenceDemoApiGW
+
+    UserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UsernameConfiguration:
+          CaseSensitive: false
+        AutoVerifiedAttributes:
+          - email
+        UserPoolName: !Sub ${AWS::StackName}-user-pool
+        Schema:
+          - Name: email
+            AttributeDataType: String
+            Mutable: false
+            Required: true
+
+    UserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: !Sub ${AWS::StackName}-client
+        # GenerateSecret: false
+        UserPoolId: !Ref UserPool
+
+    ApiGatewayAuthorizer:
+      DependsOn:
+        - UserPool
+        - QldbApiGW
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        Name: !Sub ${AWS::StackName}-authorizer
+        IdentitySource: method.request.header.Authorization
+        RestApiId: !Ref QldbApiGW
+        Type: COGNITO_USER_POOLS
+        ProviderARNs: 
+          - !GetAtt UserPool.Arn
+
+  Outputs:
+    apiGatewayRestApiId:
+      Value:
+        Ref: QldbApiGW
+      Export:
+        Name: QldbApiGatewayDemo-restApiId-${self:provider.stage}
+
+    apiGatewayAuthorizerId:
+      Value: !Ref ApiGatewayAuthorizer
+      Export:
+        Name: QldbApiGatewayDemo-ApiGatewayAuthorizerId-${self:provider.stage}
+
+    apiGatewayRestApiRootResourceId:
+      Value:
+        Fn::GetAtt:
+          - QldbApiGW
+          - RootResourceId
+      Export:
+        Name: QldbApiGatewayDemo-rootResourceId-${self:provider.stage}

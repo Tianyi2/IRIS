@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/bc71cf84-c02c-4c0a-a64c-306d84f9ff89')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/bc71cf84-c02c-4c0a-a64c-306d84f9ff89')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "High",
+        "name": "Azure DevOps Audit Detection for known malicious tooling",
+        "description": "'Azure DevOps has been targeted over the years with a handful of toolkits.  This detection will look for some common signs known for a few of these tools.'\n",
+        "query": "ADOAuditLogs\n// Look for known bad user agents\n| where UserAgent has_any (\"ADOKit\")\n| extend timestamp = TimeGenerated\n| extend AccountName = tostring(split(ActorUPN, \"@\")[0]), AccountUPNSuffix = tostring(split(ActorUPN, \"@\")[1])\n",
+        "status": "Available",
+        "queryFrequency": "1d",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "ActorUPN",
+                "identifier": "FullName"
+              },
+              {
+                "columnName": "AccountName",
+                "identifier": "Name"
+              },
+              {
+                "columnName": "AccountUPNSuffix",
+                "identifier": "UPNSuffix"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "IpAddress",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "Collection"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1d"
+      }
+    }
+  ]
+}

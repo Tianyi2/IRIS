@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/976d2eee-51cb-11ec-bf63-0242ac130002')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/976d2eee-51cb-11ec-bf63-0242ac130002')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Low",
+        "name": "PaloAlto - MAC address conflict",
+        "description": "'Detects several users with the same MAC address.'\n",
+        "query": "let threshold = 2;\nPaloAltoCDLEvent\n| where EventResourceId =~ 'TRAFFIC'\n| where isnotempty(DestinationMACAddress) and isnotempty(DstUsername)\n| summarize UserSet = make_set(DstUsername) by DestinationMACAddress\n| extend Users = array_length(UserSet)\n| where Users >= threshold\n| extend AccountCustomEntity = UserSet, IPCustomEntity = DestinationMACAddress\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "AccountCustomEntity",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "IPCustomEntity",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "InitialAccess"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

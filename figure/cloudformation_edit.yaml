@@ -1,0 +1,16 @@
+Conditions:
+  IsProduction: !Equals [!Ref Environment, prod]
+Resources:
+  DbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0              # SMELL 1
+  Database:
+    Type: AWS::RDS::DBInstance
+    Condition: IsProduction
+  DbCpuAlarm:                            # SMELL 2
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      Dimensions:
+        - Value: !Ref Database

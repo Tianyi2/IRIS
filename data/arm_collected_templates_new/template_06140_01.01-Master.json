@@ -1,0 +1,96 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.3",
+    "parameters": {
+        "serviceLevel": {
+            "type": "string",
+            "allowedValues": [
+                "Gold",
+                "Diamond"
+            ]
+        },
+        "vnetName": {
+            "type": "string"
+        },
+        "publicIpName": {
+            "type": "string"
+        },
+        "nicName": {
+            "type": "string"
+        },
+        "vmName": {
+            "type": "string"
+        },
+        "vmOsSku": {
+            "type": "string",
+            "allowedValues": [
+                "2016-Datacenter"
+            ]
+        },
+        "dnsPrefix": {
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "templateUriBase": "https://raw.githubusercontent.com/peterschen/ARM/master/03-AdvancedTemplateDesigns/Templates",
+        "storageName": "[uniqueString(resourceGroup().id)]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2015-01-01",
+            "type": "Microsoft.Resources/deployments",
+            "name": "[concat('VM-', parameters('serviceLevel'))]",
+            "properties": {
+                "mode": "[deployment().properties.mode]",
+                "templateLink": {
+                    "uri": "[concat(variables('templateUriBase'), '/01.02-VM-', parameters('serviceLevel'), '.json')]",
+                    "contentVersion": "1.0.0.3"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "templateUriBase": {
+                        "value": "[variables('templateUriBase')]"
+                    },
+                    "storageName": {
+                        "value": "[variables('storageName')]"
+                    },
+                    "vnetName": {
+                        "value": "[parameters('vnetName')]"
+                    },
+                    "publicIpName": {
+                        "value": "[parameters('publicIpName')]"
+                    },
+                    "nicName": {
+                        "value": "[parameters('nicName')]"
+                    },
+                    "vmName": {
+                        "value": "[parameters('vmName')]"
+                    },
+                    "vmOsSku": {
+                        "value": "[parameters('vmOsSku')]"
+                    },
+                    "dnsPrefix": {
+                        "value": "[parameters('dnsPrefix')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

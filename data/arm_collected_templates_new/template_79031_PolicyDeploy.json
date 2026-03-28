@@ -1,0 +1,111 @@
+{
+  "properties": {
+    "displayName": "test5",
+    "policyType": "Custom",
+    "mode": "All",
+    "metadata": {
+      "version": "1.0.0"
+    },
+    "parameters": {
+      "tagName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Tag Name",
+          "description": "Name of the tag, such as 'environment'"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Resources/subscriptions/resourceGroups"
+          },
+          {
+            "field": "[concat('tags[', parameters('tagName'), ']')]",
+            "exists": "false"
+          }
+        ]
+      },
+      "then": {
+        "effect": "deployIfNotExists",
+        "details": {
+          "type": "Microsoft.Authorization/policyAssignments",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "existenceCondition": {
+                "field": "name",
+                "notEquals": "AutoTagAssignmentPolicy"
+          },
+          "deployment": {
+            "properties": {
+              "mode": "Incremental",
+              "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "resources": [
+                {
+                  "type": "Microsoft.Authorization/policyDefinitions",
+                  "name": "AutoTagAssignmentPolicy",
+                  "apiVersion": "2019-09-01",
+                  "properties": {
+                    "displayName": "AutoTagAssignmentPolicy",
+                    "policyType": "Custom",
+                    "mode": "Indexed",
+                    "description": "This is a test of an auto gen policy by resource creation",
+                    "metadata": {
+                      "version": "1.0.1",
+                      "category": "AutoTagAssignmentPolicy"
+                    },
+                    "parameters": {},
+                    "policyRule": {
+                      "if": {
+                        "allOf": [
+                          {
+                            "field": "type",
+                            "equals": "Microsoft.Resources/subscriptions/resourceGroups"
+                          },
+                          {
+                            "field": "[concat('tags[', parameters('tagName'), ']')]",
+                            "exists": "false"
+                          }
+                        ]
+                      },
+                      "then": {
+                        "effect": "modify",
+                        "details": {
+                          "roleDefinitionIds": [
+                            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+                          ],
+                          "operations": [
+                            {
+                              "operation": "add",
+                              "field": "[concat('tags[', parameters('tagName'), ']')]",
+                              "value": "[parameters('tagValue')]"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Microsoft.Authorization/policyAssignments",
+                  "name": "Policy080320201450PM-Assignment",
+                  "apiVersion": "2019-09-01",
+                  "dependsOn": [
+                    "[resourceId('Microsoft.Authorization/policyDefinitions/', variables('policyName'))]"
+                  ],
+                  "properties": {
+                    "policyDefinitionId": "[concat(subscription().id, '/providers/Microsoft.Authorization/policyDefinitions/', variables('policyName'))]"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

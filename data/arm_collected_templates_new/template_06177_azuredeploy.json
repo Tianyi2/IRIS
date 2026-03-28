@@ -1,0 +1,564 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "defaultValue": "simpleLinuxVM",
+      "metadata": {
+        "description": "The name of your Virtual Machine."
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "authenticationType": {
+      "type": "string",
+      "defaultValue": "password",
+      "allowedValues": [
+        "sshPublicKey",
+        "password"
+      ],
+      "metadata": {
+        "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
+      }
+    },
+    "adminPasswordOrKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
+      }
+    },
+    "dnsLabelPrefix": {
+      "type": "string",
+      "defaultValue": "[toLower(concat(parameters('vmName'), '-', uniqueString(resourceGroup().id)))]",
+      "metadata": {
+        "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "[toLower(concat('ladstorage', uniqueString(resourceGroup().id)))]",
+      "metadata": {
+        "description": "Globally Unique Name for the Azure Storage Account."
+      }
+    },
+    "eventHubNamespaceName": {
+      "type": "string",
+      "defaultValue": "[toLower(concat('ladehns', uniqueString(resourceGroup().id)))]",
+      "metadata": {
+        "description": "Globally Unique Name for the Event Hub Namespace."
+      }
+    },
+    "ubuntuOSVersion": {
+      "type": "string",
+      "defaultValue": "18.04-LTS",
+      "allowedValues": [
+        "12.04.5-LTS",
+        "14.04.5-LTS",
+        "16.04.0-LTS",
+        "18.04-LTS"
+      ],
+      "metadata": {
+        "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "VmSize": {
+      "type": "string",
+      "defaultValue": "Standard_B2s",
+      "metadata": {
+        "description": "The size of the VM"
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "defaultValue": "vNet",
+      "metadata": {
+        "description": "Name of the VNET"
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "Subnet",
+      "metadata": {
+        "description": "Name of the subnet in the virtual network"
+      }
+    },
+    "networkSecurityGroupName": {
+      "type": "string",
+      "defaultValue": "SecGroupNet",
+      "metadata": {
+        "description": "Name of the Network Security Group"
+      }
+    },
+    "accountSasProperties": {
+      "type": "object",
+      "defaultValue": {
+        "signedServices": "bt",
+        "signedPermission": "acluw",
+        // Defines the expiration date for the SAS token for account storage
+        "signedExpiry": "2023-02-01T00:00:01Z",
+        "signedResourceTypes": "co"
+      }
+    },
+    "eventHubSku": {
+      "type": "string",
+      "defaultValue": "Standard",
+      "allowedValues": [ "Basic", "Standard" ],
+      "metadata": {
+        "description": "Specifies the messaging tier for Event Hub Namespace."
+      }
+    }
+  },
+  "variables": {
+    "publicIpAddressName": "[concat(parameters('vmName'), 'PublicIP' )]",
+    "networkInterfaceName": "[concat(parameters('vmName'),'NetInt')]",
+    "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]",
+    "osDiskType": "Standard_LRS",
+    "subnetAddressPrefix": "10.1.0.0/24",
+    "addressPrefix": "10.1.0.0/16",
+    "linuxCpuEventHubName": "linuxCpu",
+    "linuxCpuEventHubSenderAuthRuleName": "[concat(variables('linuxCpuEventHubName'), 'Sender')]",
+    "linuxConfiguration": {
+      "disablePasswordAuthentication": true,
+      "ssh": {
+        "publicKeys": [
+          {
+            "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+            "keyData": "[parameters('adminPasswordOrKey')]"
+          }
+        ]
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('networkInterfaceName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
+        "[resourceId('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('networkSecurityGroupName'))]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2020-06-01",
+      "name": "[parameters('networkSecurityGroupName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH",
+            "properties": {
+              "priority": 1000,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2020-06-01",
+      "name": "[parameters('virtualNetworkName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetAddressPrefix')]",
+              "privateEndpointNetworkPolicies": "Enabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('publicIpAddressName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Basic",
+        "tier": "Regional"
+      },
+      "properties": {
+        "publicIpAllocationMethod": "Dynamic",
+        "publicIPAddressVersion": "IPv4",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsLabelPrefix')]"
+        },
+        "idleTimeoutInMinutes": 4
+      }
+    },
+    // Defines the storage account which Linux Azure Diagnostics will be configured to use
+    {
+      "name": "[parameters('storageAccountName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2019-06-01",
+      "tags": {
+        "displayName": "[parameters('storageAccountName')]"
+      },
+      "location": "[resourceGroup().location]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2020-06-01",
+      "name": "[parameters('vmName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('VmSize')]"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "fromImage",
+            "managedDisk": {
+              "storageAccountType": "[variables('osDiskType')]"
+            }
+          },
+          "imageReference": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "[parameters('ubuntuOSVersion')]",
+            "version": "latest"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPasswordOrKey')]",
+          "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+        }
+      }
+    },
+    // Defines the Event Hub Namespace which will contain the Event Hub instance
+    {
+      "type": "Microsoft.EventHub/namespaces",
+      "apiVersion": "2018-01-01-preview",
+      "name": "[parameters('eventHubNamespaceName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('eventHubSku')]",
+        "tier": "[parameters('eventHubSku')]",
+        "capacity": 1
+      },
+      "properties": {
+        "isAutoInflateEnabled": false,
+        "maximumThroughputUnits": 0
+      },
+      "resources": [
+        // Defines the Event Hub instance
+        {
+          "type": "eventhubs",
+          "apiVersion": "2017-04-01",
+          "name": "[variables('linuxCpuEventHubName')]",
+          "location": "[parameters('location')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.EventHub/namespaces', parameters('eventHubNamespaceName'))]"
+          ],
+          "properties": {
+            "messageRetentionInDays": 7,
+            "partitionCount": 1
+          },
+          "resources": [
+            /* 
+            *  Creates an authorization rule on the Event Hub. Adding "Send" rights to the rule
+            *  allows events to be sent to the Event Hub.
+            *
+            *  Later in the template, we will use the PrimaryKey from this rule to generate  
+            *  a SAS Token URL which the Linux Azure Diagnostics extension will need for authorization
+            *  when sending events to the Event Hub.
+            */ 
+            {
+              "apiVersion": "2017-04-01",
+              "name": "[variables('linuxCpuEventHubSenderAuthRuleName')]",
+              "type": "authorizationRules",
+              "dependsOn": [
+                "[variables('linuxCpuEventHubName')]"
+              ],
+              "properties": {
+                "rights": [ "Send" ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      /*
+        Use a Powershell script to generate a SAS Token from the PrimaryKey of the Authorization Rule in the Event Hub
+        we created. The script contents are defined near the beginning of the template in a variable.
+
+        For more on generating Event Hub SAS Tokens to use with Linux Azure Diagostics see:
+        * https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/diagnostics-linux#the-eventhub-sink
+        * https://docs.microsoft.com/en-us/rest/api/eventhub/generate-sas-token
+
+        For more on using Deployment Scripts in ARM templates see: 
+        * https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template
+      */
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2020-10-01",
+      "name": "generateLinuxCpuSASTokenScript",
+      "location": "[resourceGroup().location]",
+      "kind": "AzurePowerShell",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', parameters('eventHubNamespaceName'), variables('linuxCpuEventHubName'))]"
+      ],
+      "properties": {
+        "forceUpdateTag": "1", // Force this script to execute every time
+        "azPowerShellVersion": "3.0",
+        /*
+        Use the listKeys ARM template function to fetch the primaryKey from the Event Hub Authorization Rule and 
+        use it as a parameter when invoking the Powershell function.
+        */
+        "arguments": "[concat('-ehNamespace \\\"', parameters('eventHubNamespaceName'), '\\\" -ehName \\\"', variables('linuxCpuEventHubName'), '\\\" -Access_Policy_Name \\\"', variables('linuxCpuEventHubSenderAuthRuleName'), '\\\" -Access_Policy_Key \\\"', listkeys(resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', parameters('eventHubNamespaceName'), variables('linuxCpuEventHubName'), variables('linuxCpuEventHubSenderAuthRuleName')), '2017-04-01').primaryKey, '\\\"')]",
+        "scriptContent": "
+          param([string] $ehNamespace, [string] $ehName, [string] $Access_Policy_Name, [string] $Access_Policy_Key)
+          # Script based on https://docs.microsoft.com/en-us/rest/api/eventhub/generate-sas-token#powershell
+
+          [Reflection.Assembly]::LoadWithPartialName('System.Web')| out-null
+          $URI=\"$ehNamespace.servicebus.windows.net/$ehName\"
+
+          # Token expires in 1 year
+          $Expires=([DateTimeOffset]::Now.ToUnixTimeSeconds())+31622400
+          $SignatureString=[System.Web.HttpUtility]::UrlEncode($URI)+ \"`n\" + [string]$Expires
+          $HMAC = New-Object System.Security.Cryptography.HMACSHA256
+          $HMAC.key = [Text.Encoding]::ASCII.GetBytes($Access_Policy_Key)
+          $Signature = $HMAC.ComputeHash([Text.Encoding]::ASCII.GetBytes($SignatureString))
+          $Signature = [Convert]::ToBase64String($Signature)
+          $SASToken = \"sr=\" + [System.Web.HttpUtility]::UrlEncode($URI) + \"&sig=\" + [System.Web.HttpUtility]::UrlEncode($Signature) + \"&se=\" + $Expires + \"&skn=\" + $Access_Policy_Name
+          $DeploymentScriptOutputs = @{}
+          $DeploymentScriptOutputs['SASToken'] = $SASToken
+        ",
+        "timeout": "PT10S",
+        "cleanupPreference": "Always",
+        "retentionInterval": "PT1H"
+      }
+    },
+    // Defines the AzureDiagnostics extension for the VM.
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2017-12-01",
+      "name": "[concat(parameters('vmName'), '/AzureDiagnostics')]",
+      "tags": {
+        "displayName": "AzureDiagnostics"
+      },
+      "location": "[resourceGroup().location]",
+      // Prior to setting up the Linux Azure Diagnostics extension, we must first set up:
+      // * The virtual machine it will be installed on.
+      // * The storage account to use for Table/Blob storage
+      // * The script which will generate the SAS Token required for sending to the Event Hub sink.
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
+        "[resourceId('Microsoft.Resources/deploymentScripts', 'generateLinuxCpuSASTokenScript')]"
+      ],
+      // Define details of the VM Extension to install
+      "properties": {
+        "publisher": "Microsoft.Azure.Diagnostics",
+        "type": "LinuxDiagnostic",
+        "autoUpgradeMinorVersion": true,
+        "typeHandlerVersion": "3.0",
+        // Defines the protectedSettings for LAD installation. For more information on LAD protectedSettings see:
+        // * https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/diagnostics-linux#protected-settings
+        "protectedSettings": {
+          "storageAccountName": "[parameters('storageAccountName')]",
+          "storageAccountEndPoint": "https://core.windows.net",
+          // Use the listAccountSas ARM template function to generate a SAS token for access to Table/Blob storage.
+          // The expiration date for the token depends on what is defined in the accountSasProperties parameter.
+          // For more information on using the listAccountSas function see:
+          // * https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/template-functions-resource?tabs=json#list
+          // * https://docs.microsoft.com/en-us/rest/api/storagerp/storageaccounts/listaccountsas
+          "storageAccountSasToken": "[listAccountSas(parameters('storageAccountName'), '2019-06-01', parameters('accountSasProperties')).accountSasToken]",
+          "sinksConfig": {
+            "sink": [
+              {
+                "name": "SyslogJsonBlob",
+                "type": "JsonBlob"
+              },
+              {
+                "name": "FilelogJsonBlob",
+                "type": "JsonBlob"
+              },
+              {
+                "name": "LinuxCpuJsonBlob",
+                "type": "JsonBlob"
+              },
+              {
+                "name": "MyJsonMetricsBlob",
+                "type": "JsonBlob"
+              },
+              {
+                "name": "LinuxCpuEventHub",
+                "type": "EventHub",
+                // Construct the complete sasURL required for writing to the event hub. Refer to the output of the
+                // generateLinuxCpuSASTokenScript to get the SAS Token part of the URL.
+                //
+                // For more info on the sasURL format see:
+                // * https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/diagnostics-linux#the-eventhub-sink
+                "sasURL": "[concat('https://', parameters('eventHubNamespaceName') ,'.servicebus.windows.net/', variables('linuxCpuEventHubName'), '?', reference('generateLinuxCpuSASTokenScript').outputs.SASToken)]"
+              }
+            ]
+          }
+        },
+        // Defines the public settings for LAD installation. For more information on LAD public settings see:
+        // * https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/diagnostics-linux#public-settings
+        //
+        // The settings are based on the example LAD 3.0 configuration:
+        // * https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/diagnostics-linux#an-example-lad-30-configuration
+        "settings": {
+          "StorageAccount": "[parameters('storageAccountName')]",
+          "ladCfg": {
+            "sampleRateInSeconds": 15,
+            "diagnosticMonitorConfiguration": {
+              "performanceCounters": {
+                "sinks": "MyJsonMetricsBlob",
+                "performanceCounterConfiguration": [
+                  {
+                    "unit": "Percent",
+                    "type": "builtin",
+                    "counter": "PercentProcessorTime",
+                    "counterSpecifier": "/builtin/Processor/PercentProcessorTime",
+                    "annotation": [
+                      {
+                        "locale": "en-us",
+                        "displayName": "Aggregate CPU %utilization"
+                      }
+                    ],
+                    "condition": "IsAggregate=TRUE",
+                    "class": "Processor"
+                  },
+                  {
+                    "unit": "Bytes",
+                    "type": "builtin",
+                    "counter": "UsedSpace",
+                    "counterSpecifier": "/builtin/FileSystem/UsedSpace",
+                    "annotation": [
+                      {
+                        "locale": "en-us",
+                        "displayName": "Used disk space on /"
+                      }
+                    ],
+                    "condition": "Name=\"/\"",
+                    "class": "Filesystem"
+                  }
+                ]
+              },
+              "metrics": {
+                "metricAggregation": [
+                  {
+                    "scheduledTransferPeriod": "PT1H"
+                  },
+                  {
+                    "scheduledTransferPeriod": "PT1M"
+                  }
+                ],
+                // resourceId property must be set to the resourceId of the virtual machine
+                "resourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+              },
+              "eventVolume": "Large",
+              "syslogEvents": {
+                "sinks": "SyslogJsonBlob",
+                "syslogEventConfiguration": {
+                  "LOG_USER": "LOG_INFO"
+                }
+              }
+            }
+          },
+          "perfCfg": [
+            {
+              "query": "SELECT PercentProcessorTime, PercentIdleTime FROM SCX_ProcessorStatisticalInformation WHERE Name='_TOTAL'",
+              "table": "LinuxCpu",
+              "frequency": 60,
+              "sinks": "LinuxCpuJsonBlob,LinuxCpuEventHub"
+            }
+          ],
+          // Configure LAD to tail the file /var/log/myladtestlog and upload it 
+          // to the MyLadTestLog Azure table and the FilelogJsonBlob
+          "fileLogs": [
+            {
+              "file": "/var/log/myladtestlog",
+              "table": "MyLadTestLog",
+              "sinks": "FilelogJsonBlob"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "adminUsername": {
+      "type": "string",
+      "value": "[parameters('adminUsername')]"
+    },
+    "hostname": {
+      "type": "string",
+      "value": "[reference(variables('publicIPAddressName')).dnsSettings.fqdn]"
+    },
+    "sshCommand": {
+      "type": "string",
+      "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
+    }
+  }
+}

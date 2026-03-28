@@ -1,0 +1,108 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "dataFactoryName": {
+      "type": "string"
+    },
+    "gitHubAccountName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The name of the GitHub account or organisation, eg SkillsFundingAgency"
+      }
+    },
+    "gitHubCollaborationBranch": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The branch users will merge feature branches into, e.g Master"
+      }
+    },
+    "gitHubRepositoryName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The name of the GitHub repository, e.g das-data-factory"
+      }
+    },
+    "gitHubClientId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "A GitHub App with the permissions documented below on the repository specified in gitHubRepositoryName",
+        "notes": "Ensure that the GitHub App is Installed and Authorised",
+        "permissions": [
+          "Read access to metadata",
+          "Read and write access to code and pull requests (contents)"
+        ]
+      }
+    },
+    "gitHubClientSecretKeyVaultName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The name of the KeyVault Secret"
+      }
+    },
+    "gitHubClientSecretKeyVaultUrl": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "location": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "configureRepo": "[and(not(equals(parameters('gitHubClientId'), '')), not(equals(parameters('gitHubClientSecretKeyVaultName'), '')))]",
+    "dataFactoryProperties": "[if(variables('configureRepo'), variables('repoConfiguration'), json('{}'))]",
+    "repoConfiguration": {
+      "repoConfiguration": {
+        "accountName": "[parameters('gitHubAccountName')]",
+        "collaborationBranch": "[parameters('gitHubCollaborationBranch')]",
+        "repositoryName": "[parameters('gitHubRepositoryName')]",
+        "rootFolder": "/",
+        "type": "FactoryGitHubConfiguration",
+        "clientId": "[parameters('gitHubClientId')]",
+        "clientSecret": {
+          "byoaSecretAkvUrl": "[parameters('gitHubClientSecretKeyVaultUrl')]",
+          "byoaSecretName": "[parameters('gitHubClientSecretKeyVaultName')]"
+        }
+      }
+    }
+  },
+  "resources": [
+    {
+      "name": "[parameters('dataFactoryName')]",
+      "type": "Microsoft.DataFactory/factories",
+      "apiVersion": "2018-06-01",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": "[variables('dataFactoryProperties')]"
+    }
+  ],
+  "outputs": {
+    "datafactoryManagedIdentity": {
+      "type": "string",
+      "value": "[reference(concat('Microsoft.DataFactory/factories/', parameters('dataFactoryName')), '2018-06-01', 'Full').identity.principalId]"
+    },
+    "datafactoryKeyVaultAccessPolicy": {
+      "type": "array",
+      "value": [
+        {
+          "objectId": "[reference(concat('Microsoft.DataFactory/factories/', parameters('dataFactoryName')), '2018-06-01', 'Full').identity.principalId]",
+          "tenantId": "[reference(concat('Microsoft.DataFactory/factories/', parameters('dataFactoryName')), '2018-06-01', 'Full').identity.tenantId]",
+          "permissions": {
+            "secrets": [
+              "Get",
+              "List",
+              "Set"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

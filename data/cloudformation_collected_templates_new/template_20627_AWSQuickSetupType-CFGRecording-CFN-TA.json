@@ -1,0 +1,501 @@
+{
+  "schemaVersion": "1.0",
+  "templateBody": {
+    "Parameters": {
+      "QSType": {
+        "Type": "String",
+        "AllowedValues": [
+          "LA",
+          "TA",
+          "MA"
+        ],
+        "Description": "(Required) Specifies whether the Quick Setup applies to the local account or an AWS organization."
+      },
+      "QSConfigurationId": {
+        "Type": "String",
+        "Description": "(Required) Unique identifier of the deployed configuration."
+      },
+      "QSGlobalResourcesRegion": {
+        "Type": "String",
+        "Description": "(Required) Name of the AWS Region to deploy global resources such as S3 buckets."
+      },
+      "QSPrincipalOrgId": {
+        "Type": "String",
+        "Default": "",
+        "Description": "(Optional) The ID of the principal organization your management account operates in."
+      },
+      "QSAttachConfigurationPolicy": {
+        "Type": "String",
+        "Default": "false",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Description": "(Optional) Whether to attach Configuration permissions policy which sets boundaries of what configuration can do."
+      },
+      "RecordAllResources": {
+        "Type": "String",
+        "Default": "true",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Description": "(Optional) Specifies whether AWS Config includes all supported types of global resources (for example, IAM resources) with the resources that it records."
+      },
+      "RecordGlobalResourceTypes": {
+        "Type": "String",
+        "Default": "false",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Description": "(Optional) Specifies whether AWS Config includes global resource types in an 'all resources' configuration."
+      },
+      "GlobalResourceTypesRegion": {
+        "Type": "String",
+        "Default": "",
+        "Description": "(Optional) Specifies the Region where global resources are recorded."
+      },
+      "RecordResourceTypes": {
+        "Type": "CommaDelimitedList",
+        "Default": "",
+        "AllowedValues": [
+          "",
+          "AWS::ACM::Certificate",
+          "AWS::ApiGateway::RestApi",
+          "AWS::ApiGateway::Stage",
+          "AWS::ApiGatewayV2::Api",
+          "AWS::ApiGatewayV2::Stage",
+          "AWS::AutoScaling::AutoScalingGroup",
+          "AWS::AutoScaling::LaunchConfiguration",
+          "AWS::AutoScaling::ScalingPolicy",
+          "AWS::AutoScaling::ScheduledAction",
+          "AWS::CloudFormation::Stack",
+          "AWS::CloudFront::Distribution",
+          "AWS::CloudFront::StreamingDistribution",
+          "AWS::CloudTrail::Trail",
+          "AWS::CloudWatch::Alarm",
+          "AWS::CodeBuild::Project",
+          "AWS::CodePipeline::Pipeline",
+          "AWS::Config::ResourceCompliance",
+          "AWS::DynamoDB::Table",
+          "AWS::EC2::CustomerGateway",
+          "AWS::EC2::EIP",
+          "AWS::EC2::EgressOnlyInternetGateway",
+          "AWS::EC2::FlowLog",
+          "AWS::EC2::Host",
+          "AWS::EC2::Instance",
+          "AWS::EC2::InternetGateway",
+          "AWS::EC2::NatGateway",
+          "AWS::EC2::NetworkAcl",
+          "AWS::EC2::NetworkInterface",
+          "AWS::EC2::RegisteredHAInstance",
+          "AWS::EC2::RouteTable",
+          "AWS::EC2::SecurityGroup",
+          "AWS::EC2::Subnet",
+          "AWS::EC2::VPC",
+          "AWS::EC2::VPCEndpoint",
+          "AWS::EC2::VPCEndpointService",
+          "AWS::EC2::VPCPeeringConnection",
+          "AWS::EC2::VPNConnection",
+          "AWS::EC2::VPNGateway",
+          "AWS::EC2::Volume",
+          "AWS::ElasticBeanstalk::Application",
+          "AWS::ElasticBeanstalk::ApplicationVersion",
+          "AWS::ElasticBeanstalk::Environment",
+          "AWS::ElasticLoadBalancing::LoadBalancer",
+          "AWS::ElasticLoadBalancingV2::LoadBalancer",
+          "AWS::Elasticsearch::Domain",
+          "AWS::IAM::Group",
+          "AWS::IAM::Policy",
+          "AWS::IAM::Role",
+          "AWS::IAM::User",
+          "AWS::KMS::Key",
+          "AWS::Lambda::Function",
+          "AWS::QLDB::Ledger",
+          "AWS::RDS::DBCluster",
+          "AWS::RDS::DBClusterSnapshot",
+          "AWS::RDS::DBInstance",
+          "AWS::RDS::DBSecurityGroup",
+          "AWS::RDS::DBSnapshot",
+          "AWS::RDS::DBSubnetGroup",
+          "AWS::RDS::EventSubscription",
+          "AWS::Redshift::Cluster",
+          "AWS::Redshift::ClusterParameterGroup",
+          "AWS::Redshift::ClusterSecurityGroup",
+          "AWS::Redshift::ClusterSnapshot",
+          "AWS::Redshift::ClusterSubnetGroup",
+          "AWS::Redshift::EventSubscription",
+          "AWS::S3::AccountPublicAccessBlock",
+          "AWS::S3::Bucket",
+          "AWS::SNS::Topic",
+          "AWS::SQS::Queue",
+          "AWS::SSM::AssociationCompliance",
+          "AWS::SSM::FileData",
+          "AWS::SSM::ManagedInstanceInventory",
+          "AWS::SSM::PatchCompliance",
+          "AWS::SecretsManager::Secret",
+          "AWS::ServiceCatalog::CloudFormationProduct",
+          "AWS::ServiceCatalog::CloudFormationProvisionedProduct",
+          "AWS::ServiceCatalog::Portfolio",
+          "AWS::Shield::Protection",
+          "AWS::ShieldRegional::Protection",
+          "AWS::WAF::RateBasedRule",
+          "AWS::WAF::Rule",
+          "AWS::WAF::RuleGroup",
+          "AWS::WAF::WebACL",
+          "AWS::WAFRegional::RateBasedRule",
+          "AWS::WAFRegional::Rule",
+          "AWS::WAFRegional::RuleGroup",
+          "AWS::WAFRegional::WebACL",
+          "AWS::WAFv2::IPSet",
+          "AWS::WAFv2::ManagedRuleSet",
+          "AWS::WAFv2::RegexPatternSet",
+          "AWS::WAFv2::RuleGroup",
+          "AWS::WAFv2::WebACL",
+          "AWS::XRay::EncryptionConfig"
+        ],
+        "Description": "(Optional) A comma-separated list that specifies the types of AWS resources for which AWS Config records configuration changes (for example, AWS::EC2::Instance or AWS::CloudTrail::Trail )."
+      },
+      "UseCustomBucket": {
+        "Type": "String",
+        "Default": "false",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Description": "(Optional) Use custom delivery bucket."
+      },
+      "DeliveryBucketName": {
+        "Type": "String",
+        "Default": "",
+        "Description": "(Optional) The name of the Amazon S3 bucket to which AWS Config delivers configuration snapshots and configuration history files."
+      },
+      "DeliveryBucketPrefix": {
+        "Type": "String",
+        "Default": "",
+        "Description": "(Optional) The prefix for the specified Amazon S3 bucket."
+      },
+      "NotificationOptions": {
+        "Type": "String",
+        "Default": "NoStreaming",
+        "AllowedValues": [
+          "NoStreaming",
+          "UseExistingTopic",
+          "CreateTopic"
+        ],
+        "Description": "(Optional) Identifies whether to not stream SNS topics, to use existing topic or to create one."
+      },
+      "CustomDeliveryTopicAccountId": {
+        "Type": "String",
+        "Default": "",
+        "Description": "(Optional) The ID of the account where the custom SNS topics reside."
+      },
+      "CustomDeliveryTopicName": {
+        "Type": "String",
+        "Default": "",
+        "Description": "(Optional) The name of the custom SNS topic you want to use."
+      },
+      "RemediationSchedule": {
+        "Type": "String",
+        "Default": "none",
+        "AllowedValues": [
+          "rate(1 day)",
+          "rate(7 days)",
+          "rate(30 days)",
+          "none"
+        ],
+        "Description": "(Optional) Identifies the custom schedule for Config Recording Associations."
+      }
+    },
+    "Conditions": {
+      "ShouldAttachConfigurationPolicy": {
+        "Fn::Equals": [
+          {
+            "Ref": "QSAttachConfigurationPolicy"
+          },
+          "true"
+        ]
+      },
+      "IsRecurrenceDisabled": {
+        "Fn::Equals": [
+          {
+            "Ref": "RemediationSchedule"
+          },
+          "none"
+        ]
+      },
+      "RecordAllResources": {
+        "Fn::Equals": [
+          {
+            "Ref": "RecordAllResources"
+          },
+          "true"
+        ]
+      },
+      "StreamChangesToSNS": {
+        "Fn::Not": [
+          {
+            "Fn::Equals": [
+              {
+                "Ref": "NotificationOptions"
+              },
+              "NoStreaming"
+            ]
+          }
+        ]
+      },
+      "CustomTopicProvided": {
+        "Fn::Equals": [
+          {
+            "Ref": "NotificationOptions"
+          },
+          "UseExistingTopic"
+        ]
+      },
+      "CustomBucketProvided": {
+        "Fn::Equals": [
+          {
+            "Ref": "UseCustomBucket"
+          },
+          "true"
+        ]
+      }
+    },
+    "Resources": {
+      "RoleForAutomationV3": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "ssm.amazonaws.com"
+                  ]
+                },
+                "Action": [
+                  "sts:AssumeRole"
+                ],
+                "Condition": {
+                  "StringEquals": {
+                    "aws:SourceAccount": {
+                      "Fn::Sub": "${AWS::AccountId}"
+                    }
+                  },
+                  "ArnLike": {
+                    "aws:SourceArn": {
+                      "Fn::Sub": "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:automation-execution/*"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "ManagedPolicyArns": [
+            {
+              "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AWSSystemsManagerEnableConfigRecordingExecutionPolicy"
+            },
+            {
+              "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AWSSystemsManagerEnableExplorerExecutionPolicy"
+            }
+          ],
+          "RoleName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-EnableCRecording-V3-",
+                {
+                  "Ref": "QSType"
+                },
+                "_",
+                {
+                  "Ref": "AWS::Region"
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "QuickSetupEnableConfigRecordingAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "Name": "AWSQuickSetupType-EnableConfigRecording",
+          "AssociationName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-CFGRecording-EnableConfigRecording-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "Parameters": {
+            "ResourceTypes": {
+              "Fn::If": [
+                "RecordAllResources",
+                [
+                  "AWS::ALL"
+                ],
+                {
+                  "Ref": "RecordResourceTypes"
+                }
+              ]
+            },
+            "RecordGlobalResourceTypes": [
+              {
+                "Ref": "RecordGlobalResourceTypes"
+              }
+            ],
+            "GlobalResourceTypesRegion": [
+              {
+                "Ref": "GlobalResourceTypesRegion"
+              }
+            ],
+            "RecorderUpdateStrategy": [
+              "MERGE"
+            ],
+            "DeliveryChannelS3BucketName": [
+              {
+                "Fn::If": [
+                  "CustomBucketProvided",
+                  {
+                    "Ref": "DeliveryBucketName"
+                  },
+                  {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "aws-quick-setup-config-recording-",
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
+                        "-",
+                        {
+                          "Ref": "QSConfigurationId"
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ],
+            "DeliveryChannelS3KeyPrefix": [
+              {
+                "Fn::If": [
+                  "CustomBucketProvided",
+                  {
+                    "Ref": "DeliveryBucketPrefix"
+                  },
+                  ""
+                ]
+              }
+            ],
+            "StreamConfigurationChangesToSNS": [
+              {
+                "Fn::If": [
+                  "StreamChangesToSNS",
+                  true,
+                  false
+                ]
+              }
+            ],
+            "DeliveryChannelSNSTopicAccountID": [
+              {
+                "Fn::If": [
+                  "StreamChangesToSNS",
+                  {
+                    "Fn::If": [
+                      "CustomTopicProvided",
+                      {
+                        "Ref": "CustomDeliveryTopicAccountId"
+                      },
+                      ""
+                    ]
+                  },
+                  ""
+                ]
+              }
+            ],
+            "DeliveryChannelSNSTopicName": [
+              {
+                "Fn::If": [
+                  "StreamChangesToSNS",
+                  {
+                    "Fn::If": [
+                      "CustomTopicProvided",
+                      {
+                        "Ref": "CustomDeliveryTopicName"
+                      },
+                      ""
+                    ]
+                  },
+                  ""
+                ]
+              }
+            ],
+            "DeliveryChannelDeliveryFrequency": [
+              "TwentyFour_Hours"
+            ],
+            "DeliveryChannelUpdateStrategy": [
+              "FAIL"
+            ],
+            "AutomationAssumeRole": [
+              {
+                "Fn::GetAtt": [
+                  "RoleForAutomationV3",
+                  "Arn"
+                ]
+              }
+            ]
+          },
+          "ScheduleExpression": {
+            "Fn::If": [
+              "IsRecurrenceDisabled",
+              {
+                "Ref": "AWS::NoValue"
+              },
+              {
+                "Ref": "RemediationSchedule"
+              }
+            ]
+          }
+        }
+      },
+      "SystemAssociationForEnablingExplorer": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "Name": "AWS-EnableExplorer",
+          "AssociationName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-CFGRecording-EnableExplorer-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "Parameters": {
+            "AutomationAssumeRole": [
+              {
+                "Fn::GetAtt": [
+                  "RoleForAutomationV3",
+                  "Arn"
+                ]
+              }
+            ],
+            "OpsDataSources": [
+              "Association,ConfigCompliance"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

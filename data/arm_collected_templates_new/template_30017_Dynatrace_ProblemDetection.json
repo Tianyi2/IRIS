@@ -1,0 +1,61 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/415978ff-074e-4203-824a-b06153d77bf7')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/415978ff-074e-4203-824a-b06153d77bf7')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": false,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "PT5H",
+            "reopenClosedIncident": false
+          },
+          "createIncident": false
+        },
+        "severity": "Informational",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Dynatrace problem detected - {{DisplayId}} : {{Title}}",
+          "alertDescriptionFormat": "A application and/or infrastructure problem has been detected in your environment\n",
+          "alertSeverityColumnName": "Severity"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Dynatrace - Problem detection",
+        "description": "'Detect application & infrastructure problems in your environment'\n",
+        "query": "DynatraceProblems\n| summarize  arg_max(StartTime, *) by ProblemId\n",
+        "status": "Available",
+        "queryFrequency": "1d",
+        "triggerOperator": "gt",
+        "tactics": [
+          "DefenseEvasion",
+          "Execution",
+          "Impact",
+          "InitialAccess",
+          "LateralMovement",
+          "Persistence",
+          "PrivilegeEscalation"
+        ],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "DisplayIdentifier": "DisplayId",
+          "ProblemIdentifier": "ProblemId",
+          "SeverityLevel": "SeverityLevel",
+          "ImpactLevel": "ImpactLevel"
+        },
+        "queryPeriod": "1d"
+      }
+    }
+  ]
+}

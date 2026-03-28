@@ -1,0 +1,155 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "languageVersion": "2.0",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "5388746760334481607"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "baseName": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "useExistingPostgres": {
+      "type": "bool"
+    },
+    "existingPostgresHost": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "existingPostgresDatabase": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "existingPostgresUser": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "existingPostgresPassword": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
+    "postgresAdminPassword": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
+    "databaseName": {
+      "type": "string",
+      "defaultValue": "cipgraph"
+    },
+    "principalId": {
+      "type": "string"
+    },
+    "principalType": {
+      "type": "string",
+      "defaultValue": "ServicePrincipal"
+    }
+  },
+  "variables": {
+    "defaultAdminUsername": "pgadmin"
+  },
+  "resources": {
+    "postgresServer": {
+      "condition": "[not(parameters('useExistingPostgres'))]",
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers",
+      "apiVersion": "2023-03-01-preview",
+      "name": "[format('{0}-pgflex', parameters('baseName'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "sku": {
+        "name": "Standard_D2ds_v4",
+        "tier": "GeneralPurpose"
+      },
+      "properties": {
+        "administratorLogin": "[variables('defaultAdminUsername')]",
+        "administratorLoginPassword": "[parameters('postgresAdminPassword')]",
+        "version": "15",
+        "storage": {
+          "storageSizeGB": 256,
+          "autoGrow": "Enabled"
+        },
+        "backup": {
+          "backupRetentionDays": 14,
+          "geoRedundantBackup": "Disabled"
+        },
+        "highAvailability": {
+          "mode": "Disabled"
+        },
+        "network": {
+          "publicNetworkAccess": "Enabled"
+        }
+      }
+    },
+    "postgresExtensions": {
+      "condition": "[not(parameters('useExistingPostgres'))]",
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+      "apiVersion": "2023-03-01-preview",
+      "name": "[format('{0}/{1}', format('{0}-pgflex', parameters('baseName')), 'azure.extensions')]",
+      "properties": {
+        "value": "vector,pg_trgm,hstore,citext,age",
+        "source": "user-override"
+      },
+      "dependsOn": [
+        "postgresServer"
+      ]
+    },
+    "firewallRule": {
+      "condition": "[not(parameters('useExistingPostgres'))]",
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules",
+      "apiVersion": "2023-03-01-preview",
+      "name": "[format('{0}/{1}', format('{0}-pgflex', parameters('baseName')), 'AllowAzureServices')]",
+      "properties": {
+        "startIpAddress": "0.0.0.0",
+        "endIpAddress": "0.0.0.0"
+      },
+      "dependsOn": [
+        "postgresServer"
+      ]
+    },
+    "database": {
+      "condition": "[not(parameters('useExistingPostgres'))]",
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases",
+      "apiVersion": "2023-03-01-preview",
+      "name": "[format('{0}/{1}', format('{0}-pgflex', parameters('baseName')), parameters('databaseName'))]",
+      "properties": {
+        "charset": "UTF8",
+        "collation": "en_US.utf8"
+      },
+      "dependsOn": [
+        "postgresServer"
+      ]
+    }
+  },
+  "outputs": {
+    "host": {
+      "type": "string",
+      "value": "[if(parameters('useExistingPostgres'), parameters('existingPostgresHost'), reference('postgresServer').fullyQualifiedDomainName)]"
+    },
+    "databaseName": {
+      "type": "string",
+      "value": "[if(parameters('useExistingPostgres'), parameters('existingPostgresDatabase'), parameters('databaseName'))]"
+    },
+    "username": {
+      "type": "string",
+      "value": "[if(parameters('useExistingPostgres'), parameters('existingPostgresUser'), variables('defaultAdminUsername'))]"
+    },
+    "password": {
+      "type": "securestring",
+      "value": "[if(parameters('useExistingPostgres'), parameters('existingPostgresPassword'), parameters('postgresAdminPassword'))]"
+    },
+    "serverName": {
+      "type": "string",
+      "value": "[if(parameters('useExistingPostgres'), split(parameters('existingPostgresHost'), '.')[0], format('{0}-pgflex', parameters('baseName')))]"
+    }
+  }
+}

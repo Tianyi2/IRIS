@@ -1,0 +1,637 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vaults_Maa_Deploy_KeyVault_name": {
+            "defaultValue": "Maa-Deploy-KeyVault",
+            "type": "String"
+        },
+        "virtualNetworks_Deploy_ValVNet_name": {
+            "defaultValue": "Deploy-ValVNet",
+            "type": "String"
+        },
+        "components_Deploy_ValVmInsight_name": {
+            "defaultValue": "Deploy-ValVmInsight",
+            "type": "String"
+        },
+        "storageAccounts_deployvalvmstg1_name": {
+            "defaultValue": "deployvalvmstg1",
+            "type": "String"
+        },
+        "loadBalancers_Deploy_ValidationLB_name": {
+            "defaultValue": "Deploy-ValidationLB",
+            "type": "String"
+        },
+        "networkInterfaces_Deploy_valVm1Nic_name": {
+            "defaultValue": "Deploy-valVm1Nic",
+            "type": "String"
+        },
+        "networkSecurityGroups_Deploy_ValNsg_name": {
+            "defaultValue": "Deploy-ValNsg",
+            "type": "String"
+        },
+        "availabilitySets_DeployValidationVmAS_name": {
+            "defaultValue": "DeployValidationVmAS",
+            "type": "String"
+        },
+        "publicIPAddresses_Deploy_ValidationLBPip_name": {
+            "defaultValue": "Deploy-ValidationLBPip",
+            "type": "String"
+        },
+        "subnets_valSubnet_name": {
+            "defaultValue": "valSubnet",
+            "type": "String"
+        },
+        "securityRules_allowhttps_name": {
+            "defaultValue": "allowhttps",
+            "type": "String"
+        },
+        "securityRules_default_allow_rdp_name": {
+            "defaultValue": "default-allow-rdp",
+            "type": "String"
+        },
+        "loadBalancers_Deploy_ValidationLB_id": {
+            "defaultValue": "/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/loadBalancers/Deploy-ValidationLB/frontendIPConfigurations/lbFrontEnd",
+            "type": "String"
+        },
+        "loadBalancers_Deploy_ValidationLB_id_1": {
+            "defaultValue": "/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/loadBalancers/Deploy-ValidationLB/backendAddressPools/lbBackendPool",
+            "type": "String"
+        },
+        "loadBalancers_Deploy_ValidationLB_id_2": {
+            "defaultValue": "/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/loadBalancers/Deploy-ValidationLB/probes/webProbe",
+            "type": "String"
+        },
+        "loadBalancers_Deploy_ValidationLB_id_3": {
+            "defaultValue": "/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/loadBalancers/Deploy-ValidationLB/frontendIPConfigurations/lbFrontEnd",
+            "type": "String"
+        },
+        "loadBalancers_Deploy_ValidationLB_id_4": {
+            "defaultValue": "/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/loadBalancers/Deploy-ValidationLB/frontendIPConfigurations/lbFrontEnd",
+            "type": "String"
+        },
+        "loadBalancers_Deploy_ValidationLB_id_5": {
+            "defaultValue": "/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/loadBalancers/Deploy-ValidationLB/frontendIPConfigurations/lbFrontEnd",
+            "type": "String"
+        },
+        "loadBalancers_Deploy_ValidationLB_id_6": {
+            "defaultValue": "/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/loadBalancers/Deploy-ValidationLB/frontendIPConfigurations/lbFrontEnd",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "comments": "Generalized from resource: '/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Compute/availabilitySets/DeployValidationVmAS'.",
+            "type": "Microsoft.Compute/availabilitySets",
+            "sku": {
+                "name": "Classic"
+            },
+            "name": "[parameters('availabilitySets_DeployValidationVmAS_name')]",
+            "apiVersion": "2017-03-30",
+            "location": "eastus",
+            "tags": {
+                "displayName": "AvailabilitySet"
+            },
+            "scale": null,
+            "properties": {
+                "platformUpdateDomainCount": 2,
+                "platformFaultDomainCount": 2,
+                "virtualMachines": []
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/microsoft.insights/components/Deploy-ValVmInsight'.",
+            "type": "microsoft.insights/components",
+            "kind": "web",
+            "name": "[parameters('components_Deploy_ValVmInsight_name')]",
+            "apiVersion": "2014-04-01",
+            "location": "eastus",
+            "tags": {
+                "displayName": "AppInsightsComponent"
+            },
+            "scale": null,
+            "properties": {
+                "ApplicationId": "[parameters('components_Deploy_ValVmInsight_name')]"
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.KeyVault/vaults/Maa-Deploy-KeyVault'.",
+            "type": "Microsoft.KeyVault/vaults",
+            "name": "[parameters('vaults_Maa_Deploy_KeyVault_name')]",
+            "apiVersion": "2015-06-01",
+            "location": "eastus",
+            "tags": {
+                "displayName": "KeyVault"
+            },
+            "scale": null,
+            "properties": {
+                "sku": {
+                    "family": "A",
+                    "name": "standard"
+                },
+                "tenantId": "24ddc381-dd53-4030-88ee-4f8039efbd33",
+                "accessPolicies": [],
+                "enabledForDeployment": true
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/loadBalancers/Deploy-ValidationLB'.",
+            "type": "Microsoft.Network/loadBalancers",
+            "name": "[parameters('loadBalancers_Deploy_ValidationLB_name')]",
+            "apiVersion": "2017-06-01",
+            "location": "eastus",
+            "tags": {
+                "displayName": "LoadBalancer"
+            },
+            "scale": null,
+            "properties": {
+                "provisioningState": "Succeeded",
+                "resourceGuid": "dcbffcc9-dc68-4979-8ad2-4d63e0434069",
+                "frontendIPConfigurations": [
+                    {
+                        "name": "lbFrontEnd",
+                        "etag": "W/\"0a90b66b-a911-4ff3-9b12-f8a0ee4024d7\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_Deploy_ValidationLBPip_name'))]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "lbBackendPool",
+                        "etag": "W/\"0a90b66b-a911-4ff3-9b12-f8a0ee4024d7\"",
+                        "properties": {
+                            "provisioningState": "Succeeded"
+                        }
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "webRule",
+                        "etag": "W/\"0a90b66b-a911-4ff3-9b12-f8a0ee4024d7\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "frontendIPConfiguration": {
+                                "id": "[parameters('loadBalancers_Deploy_ValidationLB_id')]"
+                            },
+                            "frontendPort": 443,
+                            "backendPort": 443,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 5,
+                            "protocol": "Tcp",
+                            "loadDistribution": "Default",
+                            "backendAddressPool": {
+                                "id": "[parameters('loadBalancers_Deploy_ValidationLB_id_1')]"
+                            },
+                            "probe": {
+                                "id": "[parameters('loadBalancers_Deploy_ValidationLB_id_2')]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "webProbe",
+                        "etag": "W/\"0a90b66b-a911-4ff3-9b12-f8a0ee4024d7\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "protocol": "Http",
+                            "port": 443,
+                            "requestPath": "/ValidationSvc/Healthy.html",
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 2
+                        }
+                    }
+                ],
+                "inboundNatRules": [
+                    {
+                        "name": "RDP-VM1",
+                        "etag": "W/\"0a90b66b-a911-4ff3-9b12-f8a0ee4024d7\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "frontendIPConfiguration": {
+                                "id": "[parameters('loadBalancers_Deploy_ValidationLB_id_3')]"
+                            },
+                            "frontendPort": 5001,
+                            "backendPort": 3389,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "Tcp"
+                        }
+                    },
+                    {
+                        "name": "RDP-VM2",
+                        "etag": "W/\"0a90b66b-a911-4ff3-9b12-f8a0ee4024d7\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "frontendIPConfiguration": {
+                                "id": "[parameters('loadBalancers_Deploy_ValidationLB_id_4')]"
+                            },
+                            "frontendPort": 5002,
+                            "backendPort": 3389,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "Tcp"
+                        }
+                    },
+                    {
+                        "name": "RDP-VM3",
+                        "etag": "W/\"0a90b66b-a911-4ff3-9b12-f8a0ee4024d7\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "frontendIPConfiguration": {
+                                "id": "[parameters('loadBalancers_Deploy_ValidationLB_id_5')]"
+                            },
+                            "frontendPort": 5003,
+                            "backendPort": 3389,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "Tcp"
+                        }
+                    },
+                    {
+                        "name": "RDP-VM4",
+                        "etag": "W/\"0a90b66b-a911-4ff3-9b12-f8a0ee4024d7\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "frontendIPConfiguration": {
+                                "id": "[parameters('loadBalancers_Deploy_ValidationLB_id_6')]"
+                            },
+                            "frontendPort": 5004,
+                            "backendPort": 3389,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "Tcp"
+                        }
+                    }
+                ],
+                "outboundNatRules": [],
+                "inboundNatPools": []
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_Deploy_ValidationLBPip_name'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/networkInterfaces/Deploy-valVm1Nic'.",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[parameters('networkInterfaces_Deploy_valVm1Nic_name')]",
+            "apiVersion": "2017-06-01",
+            "location": "eastus",
+            "tags": {
+                "displayName": "NetworkInterface"
+            },
+            "scale": null,
+            "properties": {
+                "provisioningState": "Succeeded",
+                "resourceGuid": "e9585bc7-2282-4176-b135-633d6562b890",
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "etag": "W/\"12c722e0-abfb-44b0-b231-0ea219aaad47\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "privateIPAddress": "10.0.0.4",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_Deploy_ValVNet_name'), parameters('subnets_valSubnet_name'))]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4",
+                            "loadBalancerInboundNatRules": [
+                                {
+                                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_Deploy_ValidationLB_name')), '/inboundNatRules/RDP-VM1')]"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": [],
+                    "appliedDnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_Deploy_ValNsg_name'))]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_Deploy_ValVNet_name'), parameters('subnets_valSubnet_name'))]",
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_Deploy_ValidationLB_name'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_Deploy_ValNsg_name'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/networkSecurityGroups/Deploy-ValNsg'.",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[parameters('networkSecurityGroups_Deploy_ValNsg_name')]",
+            "apiVersion": "2017-06-01",
+            "location": "eastus",
+            "tags": {
+                "displayName": "NetSecurityGroup"
+            },
+            "scale": null,
+            "properties": {
+                "provisioningState": "Succeeded",
+                "resourceGuid": "362f11fe-bc67-4fbc-bbf8-a215f4a6e8a0",
+                "securityRules": [
+                    {
+                        "name": "default-allow-rdp",
+                        "etag": "W/\"7ae4a818-5c48-46bf-8529-6c416826e0ed\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3389",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1000,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "allowhttps",
+                        "etag": "W/\"7ae4a818-5c48-46bf-8529-6c416826e0ed\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "443",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1020,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ],
+                "defaultSecurityRules": [
+                    {
+                        "name": "AllowVnetInBound",
+                        "etag": "W/\"7ae4a818-5c48-46bf-8529-6c416826e0ed\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "description": "Allow inbound traffic from all VMs in VNET",
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "VirtualNetwork",
+                            "destinationAddressPrefix": "VirtualNetwork",
+                            "access": "Allow",
+                            "priority": 65000,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "AllowAzureLoadBalancerInBound",
+                        "etag": "W/\"7ae4a818-5c48-46bf-8529-6c416826e0ed\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "description": "Allow inbound traffic from azure load balancer",
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "AzureLoadBalancer",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 65001,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "DenyAllInBound",
+                        "etag": "W/\"7ae4a818-5c48-46bf-8529-6c416826e0ed\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "description": "Deny all inbound traffic",
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Deny",
+                            "priority": 65500,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "AllowVnetOutBound",
+                        "etag": "W/\"7ae4a818-5c48-46bf-8529-6c416826e0ed\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "description": "Allow outbound traffic from all VMs to all VMs in VNET",
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "VirtualNetwork",
+                            "destinationAddressPrefix": "VirtualNetwork",
+                            "access": "Allow",
+                            "priority": 65000,
+                            "direction": "Outbound",
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "AllowInternetOutBound",
+                        "etag": "W/\"7ae4a818-5c48-46bf-8529-6c416826e0ed\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "description": "Allow outbound traffic from all VMs to Internet",
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "Internet",
+                            "access": "Allow",
+                            "priority": 65001,
+                            "direction": "Outbound",
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "DenyAllOutBound",
+                        "etag": "W/\"7ae4a818-5c48-46bf-8529-6c416826e0ed\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "description": "Deny all outbound traffic",
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Deny",
+                            "priority": 65500,
+                            "direction": "Outbound",
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/publicIPAddresses/Deploy-ValidationLBPip'.",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[parameters('publicIPAddresses_Deploy_ValidationLBPip_name')]",
+            "apiVersion": "2017-06-01",
+            "location": "eastus",
+            "tags": {
+                "displayName": "LBPublicIPAddress"
+            },
+            "scale": null,
+            "properties": {
+                "provisioningState": "Succeeded",
+                "resourceGuid": "ae1d37c0-9484-4b1e-9e09-9e4c7e4bb861",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Dynamic",
+                "idleTimeoutInMinutes": 4,
+                "dnsSettings": {
+                    "domainNameLabel": "maa-deploy-valsvc01",
+                    "fqdn": "maa-deploy-valsvc01.eastus.cloudapp.azure.com"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/virtualNetworks/Deploy-ValVNet'.",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[parameters('virtualNetworks_Deploy_ValVNet_name')]",
+            "apiVersion": "2017-06-01",
+            "location": "eastus",
+            "tags": {
+                "displayName": "VirtualNetwork"
+            },
+            "scale": null,
+            "properties": {
+                "provisioningState": "Succeeded",
+                "resourceGuid": "c7652af2-7d4c-42cf-9ce5-4005ccf75a71",
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "valSubnet",
+                        "etag": "W/\"1334671e-b778-456a-9788-c1ec47c249de\"",
+                        "properties": {
+                            "provisioningState": "Succeeded",
+                            "addressPrefix": "10.0.0.0/24"
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": []
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/deploy-val/providers/Microsoft.Storage/storageAccounts/deployvalvmstg1'.",
+            "type": "Microsoft.Storage/storageAccounts",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "name": "[parameters('storageAccounts_deployvalvmstg1_name')]",
+            "apiVersion": "2017-06-01",
+            "location": "eastus",
+            "tags": {
+                "displayName": "StorageAccount(vhds)"
+            },
+            "scale": null,
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "defaultAction": "Allow",
+                    "ipRules": [],
+                    "virtualNetworkRules": []
+                },
+                "supportsHttpsTrafficOnly": false
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/networkSecurityGroups/Deploy-ValNsg/securityRules/default-allow-rdp'.",
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "name": "[concat(parameters('networkSecurityGroups_Deploy_ValNsg_name'), '/', parameters('securityRules_default_allow_rdp_name'))]",
+            "apiVersion": "2017-06-01",
+            "scale": null,
+            "properties": {
+                "provisioningState": "Succeeded",
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "destinationPortRange": "3389",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 1000,
+                "direction": "Inbound",
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_Deploy_ValNsg_name'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/networkSecurityGroups/Deploy-ValNsg/securityRules/allowhttps'.",
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "name": "[concat(parameters('networkSecurityGroups_Deploy_ValNsg_name'), '/', parameters('securityRules_allowhttps_name'))]",
+            "apiVersion": "2017-06-01",
+            "scale": null,
+            "properties": {
+                "provisioningState": "Succeeded",
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "destinationPortRange": "443",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 1020,
+                "direction": "Inbound",
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_Deploy_ValNsg_name'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/10185b92-8397-4ca8-9235-515c99af0782/resourceGroups/Deploy-Val/providers/Microsoft.Network/virtualNetworks/Deploy-ValVNet/subnets/valSubnet'.",
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "name": "[concat(parameters('virtualNetworks_Deploy_ValVNet_name'), '/', parameters('subnets_valSubnet_name'))]",
+            "apiVersion": "2017-06-01",
+            "scale": null,
+            "properties": {
+                "provisioningState": "Succeeded",
+                "addressPrefix": "10.0.0.0/24"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Deploy_ValVNet_name'))]"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,419 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": {
+      "type": "string",
+      "defaultValue": "dev",
+      "allowedValues": [
+        "dev",
+        "test",
+        "prod"
+      ]
+    },
+    "infront-sqlAdminLogin": {
+      "type": "string",
+      "minLength": 1
+    },
+    "infront-sqlAdminLoginPassword": {
+      "type": "securestring"
+    },
+    "InfrontDataName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "InfrontDataCollation": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+    },
+    "InfrontDataEdition": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "Standard",
+        "Premium"
+      ]
+    },
+    "InfrontDataRequestedServiceObjectiveName": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "S0",
+        "S1",
+        "S2",
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "metadata": {
+        "description": "Describes the performance level for Edition"
+      }
+    },
+    "InfrontHostingPlanName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "InfrontHostingPlanSkuName": {
+      "type": "string",
+      "defaultValue": "F1",
+      "allowedValues": [
+        "F1",
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "metadata": {
+        "description": "Describes plan's pricing tier and capacity. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
+      }
+    }
+  },
+  "variables": {
+    "infront-sqlName": "[concat('infront-sql', uniqueString(resourceGroup().id))]",
+    "InfrontWebName": "[concat('InfrontWeb', '-', parameters('environment'), '-', uniqueString(resourceGroup().id))]"},
+  "resources": [
+    {
+      "name": "[variables('infront-sqlName')]",
+      "type": "Microsoft.Sql/servers",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01-preview",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "infront-sql"
+      },
+      "properties": {
+        "administratorLogin": "[parameters('infront-sqlAdminLogin')]",
+        "administratorLoginPassword": "[parameters('infront-sqlAdminLoginPassword')]"
+      },
+      "resources": [
+        {
+          "name": "AllowAllWindowsAzureIps",
+          "type": "firewallrules",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Sql/servers', variables('infront-sqlName'))]"
+          ],
+          "properties": {
+            "startIpAddress": "0.0.0.0",
+            "endIpAddress": "0.0.0.0"
+          }
+        },
+        {
+          "name": "[parameters('InfrontDataName')]",
+          "type": "databases",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[resourceId('Microsoft.Sql/servers', variables('infront-sqlName'))]"
+          ],
+          "tags": {
+            "displayName": "InfrontData"
+          },
+          "properties": {
+            "collation": "[parameters('InfrontDataCollation')]",
+            "edition": "[parameters('InfrontDataEdition')]",
+            "maxSizeBytes": "1073741824",
+            "requestedServiceObjectiveName": "[parameters('InfrontDataRequestedServiceObjectiveName')]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "[parameters('InfrontHostingPlanName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "sku": {
+        "name": "[parameters('InfrontHostingPlanSkuName')]"
+      },
+      "dependsOn": [],
+      "tags": {
+        "displayName": "InfrontHostingPlan"
+      },
+      "properties": {
+        "name": "[parameters('InfrontHostingPlanName')]",
+        "numberOfWorkers": 1
+      }
+    },
+    {
+      "name": "[variables('InfrontWebName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('InfrontHostingPlanName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceId('Microsoft.Web/serverfarms', parameters('InfrontHostingPlanName')))]": "Resource",
+        "displayName": "InfrontWeb"
+      },
+      "properties": {
+        "name": "[variables('InfrontWebName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('InfrontHostingPlanName'))]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "Microsoft.ApplicationInsights.AzureWebSites",
+          "type": "siteextensions",
+          "tags": {
+            "displayName": "Application Insights Extension"
+          },
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites/', variables('InfrontWebName'))]",
+            "[resourceId('Microsoft.Insights/components/', 'InfrontAppInsights')]"
+          ],
+          "properties": {}
+        },
+        {
+          "apiVersion": "2015-08-01",
+          "name": "staging",
+          "type": "slots",
+          "tags": {
+            "displayName": "Deployment Slot: staging"
+          },
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites/', variables('InfrontWebName'))]"
+          ],
+          "properties": {
+          },
+          "resources": []
+        }
+      ]
+    },
+    {
+      "name": "[concat(parameters('InfrontHostingPlanName'), '-', resourceGroup().name)]",
+      "type": "Microsoft.Insights/autoscalesettings",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('InfrontHostingPlanName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceId('Microsoft.Web/serverfarms', parameters('InfrontHostingPlanName')))]": "Resource",
+        "displayName": "InfrontAppInsights AutoScale"
+      },
+      "properties": {
+        "name": "[concat(parameters('InfrontHostingPlanName'), '-', resourceGroup().name)]",
+        "profiles": [
+          {
+            "name": "Default",
+            "capacity": {
+              "minimum": 1,
+              "maximum": 2,
+              "default": 1
+            },
+            "rules": [
+              {
+                "metricTrigger": {
+                  "metricName": "CpuPercentage",
+                  "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', parameters('InfrontHostingPlanName'))]",
+                  "timeGrain": "PT1M",
+                  "statistic": "Average",
+                  "timeWindow": "PT10M",
+                  "timeAggregation": "Average",
+                  "operator": "GreaterThan",
+                  "threshold": 800
+                },
+                "scaleAction": {
+                  "direction": "Increase",
+                  "type": "ChangeCount",
+                  "value": 1,
+                  "cooldown": "PT10M"
+                }
+              },
+              {
+                "metricTrigger": {
+                  "metricName": "CpuPercentage",
+                  "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', parameters('InfrontHostingPlanName'))]",
+                  "timeGrain": "PT1M",
+                  "statistic": "Average",
+                  "timeWindow": "PT1H",
+                  "timeAggregation": "Average",
+                  "operator": "LessThan",
+                  "threshold": 600
+                },
+                "scaleAction": {
+                  "direction": "Decrease",
+                  "type": "ChangeCount",
+                  "value": 1,
+                  "cooldown": "PT1H"
+                }
+              }
+            ]
+          }
+        ],
+        "enabled": true,
+        "targetResourceUri": "[resourceId('Microsoft.Web/serverfarms', parameters('InfrontHostingPlanName'))]"
+      }
+    },
+    {
+      "name": "[concat('CPUHigh ', parameters('InfrontHostingPlanName'))]",
+      "type": "Microsoft.Insights/alertrules",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('InfrontHostingPlanName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceId('Microsoft.Web/serverfarms', parameters('InfrontHostingPlanName')))]": "Resource",
+        "displayName": "CPUHigh InfrontAppInsights"
+      },
+      "properties": {
+        "name": "[concat('CPUHigh ', parameters('InfrontHostingPlanName'))]",
+        "description": "[concat('The average CPU is high across all the instances of ', parameters('InfrontHostingPlanName'))]",
+        "isEnabled": false,
+        "condition": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+          "dataSource": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+            "resourceUri": "[resourceId('Microsoft.Web/serverfarms', parameters('InfrontHostingPlanName'))]",
+            "metricName": "CpuPercentage"
+          },
+          "operator": "GreaterThan",
+          "threshold": 90,
+          "windowSize": "PT15M"
+        },
+        "action": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+          "sendToServiceOwners": true,
+          "customEmails": []
+        }
+      }
+    },
+    {
+      "name": "[concat('LongHttpQueue ', parameters('InfrontHostingPlanName'))]",
+      "type": "Microsoft.Insights/alertrules",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('InfrontHostingPlanName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceId('Microsoft.Web/serverfarms', parameters('InfrontHostingPlanName')))]": "Resource",
+        "displayName": "LongHttpQueue InfrontAppInsights"
+      },
+      "properties": {
+        "name": "[concat('LongHttpQueue ', parameters('InfrontHostingPlanName'))]",
+        "description": "[concat('The HTTP queue for the instances of ', parameters('InfrontHostingPlanName'), ' has a large number of pending requests.')]",
+        "isEnabled": false,
+        "condition": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+          "dataSource": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+            "resourceUri": "[resourceId('Microsoft.Web/serverfarms', parameters('InfrontHostingPlanName'))]",
+            "metricName": "HttpQueueLength"
+          },
+          "operator": "GreaterThan",
+          "threshold": 1000,
+          "windowSize": "PT5M"
+        },
+        "action": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+          "sendToServiceOwners": true,
+          "customEmails": []
+        }
+      }
+    },
+    {
+      "name": "[concat('ServerErrors ', 'InfrontAppInsights')]",
+      "type": "Microsoft.Insights/alertrules",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('InfrontWebName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceId('Microsoft.Web/sites', variables('InfrontWebName')))]": "Resource",
+        "displayName": "ServerErrors InfrontAppInsights"
+      },
+      "properties": {
+        "name": "[concat('ServerErrors ', variables('InfrontWebName'))]",
+        "description": "[concat(variables('InfrontWebName'), ' has some server errors, status code 5xx.')]",
+        "isEnabled": false,
+        "condition": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+          "dataSource": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+            "resourceUri": "[resourceId('Microsoft.Web/sites', variables('InfrontWebName'))]",
+            "metricName": "Http5xx"
+          },
+          "operator": "GreaterThan",
+          "threshold": 0,
+          "windowSize": "PT5M"
+        },
+        "action": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+          "sendToServiceOwners": true,
+          "customEmails": []
+        }
+      }
+    },
+    {
+      "name": "[concat('ForbiddenRequests ', 'InfrontAppInsights')]",
+      "type": "Microsoft.Insights/alertrules",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('InfrontWebName'))]"
+      ],
+      "tags": {
+        "displayName": "ForbiddenRequests InfrontAppInsights"
+      },
+      "properties": {
+        "name": "[concat('ForbiddenRequests ', variables('InfrontWebName'))]",
+        "description": "[concat(variables('InfrontWebName'), ' has some requests that are forbidden, status code 403.')]",
+        "isEnabled": false,
+        "condition": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+          "dataSource": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+            "resourceUri": "[resourceId('Microsoft.Web/sites', variables('InfrontWebName'))]",
+            "metricName": "Http403"
+          },
+          "operator": "GreaterThan",
+          "threshold": 0,
+          "windowSize": "PT5M"
+        },
+        "action": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+          "sendToServiceOwners": true,
+          "customEmails": []
+        }
+      }
+    },
+    {
+      "name": "InfrontAppInsights",
+      "type": "Microsoft.Insights/components",
+      "location": "East US",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('InfrontWebName'))]"
+      ],
+      "tags": {
+        "displayName": "Component InfrontAppInsights"
+      },
+      "properties": {
+        "applicationId": "[resourceId('Microsoft.Web/sites', variables('InfrontWebName'))]"
+      }
+    }
+  ],
+  "outputs": {
+    "MyAppInsightsInstrumentationKey": {
+      "value": "[reference(resourceId('Microsoft.Insights/components', 'InfrontAppInsights'), '2014-04-01').InstrumentationKey]",
+      "type": "string"
+    }
+  }
+}

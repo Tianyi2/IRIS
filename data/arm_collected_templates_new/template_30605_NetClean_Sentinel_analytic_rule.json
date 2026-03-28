@@ -1,0 +1,79 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/77548170-5c60-42e5-bdac-b0360d0779bb')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/77548170-5c60-42e5-bdac-b0360d0779bb')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "NetClean {{value_agent_type_s}} {{type_s}}",
+          "alertDescriptionFormat": "A new NetClean {{value_agent_type_s}} {{key_type_s}} has been Created {{TimeGenerated}}"
+        },
+        "name": "NetClean ProActive Incidents",
+        "description": "'NetClean Incident'\n",
+        "suppressionDuration": "5h",
+        "query": "Netclean_Incidents_CL |  where value_incidentVersion_d == 1\n",
+        "status": "Available",
+        "queryFrequency": "10m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "value_file_calculatedHashes_sha1_s",
+                "identifier": "Value"
+              },
+              {
+                "columnName": "value_detectionHashType_s",
+                "identifier": "Algorithm"
+              }
+            ],
+            "entityType": "FileHash"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "value_file_owner_computerUser_domain_s",
+                "identifier": "DomainName"
+              }
+            ],
+            "entityType": "DNS"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "value_device_machineName_s",
+                "identifier": "HostName"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "value_device_networkInterfaces_s",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "severity": "High",
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "tactics": [
+          "Discovery"
+        ],
+        "queryPeriod": "10m"
+      }
+    }
+  ]
+}

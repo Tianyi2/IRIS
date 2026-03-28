@@ -1,0 +1,63 @@
+resources:
+  Resources:
+    ListenerDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:service}-${opt:stage}-listener-dlq
+        MessageRetentionPeriod: 1209600  # 14 days (longer than main queue)
+        # KmsMasterKeyId: alias/aws/sqs
+
+    ListenerQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:service}-${opt:stage}-listener
+        VisibilityTimeout: 180  # 3 minutes (6x Lambda timeout)
+        MessageRetentionPeriod: 345600  # 4 days
+        RedrivePolicy:
+          deadLetterTargetArn: !GetAtt ListenerDLQ.Arn
+          maxReceiveCount: 3  # After 3 failures, send to DLQ
+        # KmsMasterKeyId: alias/aws/sqs
+        # https://stackoverflow.com/questions/63808647/aws-forward-event-bridge-event-to-encrypted-sqs-amazon-managed-key
+
+    ListenerQueuePolicy:
+      Type: AWS::SQS::QueuePolicy
+      Properties:
+        Queues:
+          - Ref: ListenerQueue
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: events.amazonaws.com
+              Action: sqs:SendMessage
+              Resource:
+                Fn::GetAtt: [ ListenerQueue, Arn ]
+              Condition:
+                ArnEquals:
+                  aws:SourceArn:
+                    Fn::GetAtt: [ EventRule, Arn ]
+  
+    EventRule: 
+      Type: AWS::Events::Rule
+      Properties: 
+        EventBusName: ${cf:${self:custom.subsys}-event-hub-${opt:stage}.busName}
+        EventPattern: 
+          detail:
+            eventType:
+              - prefix: product-
+        State: ENABLED
+        Targets: 
+          - Id: Channel
+            Arn: 
+              Fn::GetAtt: [ ListenerQueue, Arn ]
+            InputPath: $.detail
+
+  Outputs:
+    ListenerQueue:
+      Value:
+        Ref: ListenerQueue
+    ListenerDLQ:
+      Value:
+        Ref: ListenerDLQ
+    ListenerDLQArn:
+      Value: !GetAtt ListenerDLQ.Arn

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/bb9051ef-0e72-4758-a143-80c25ee452f0')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/bb9051ef-0e72-4758-a143-80c25ee452f0')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "High",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Theom Alert ID: {{id_s}} ",
+          "alertDescriptionFormat": "\nSummary: {{summary_s}}  \nAdditional info: {{details_s}}\nPlease investigate further on Theom UI at {{deepLink_s}}\n"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Theom Critical Risks",
+        "description": "\"Creates Microsoft Sentinel incidents for critical risk Theom alerts.\"\n",
+        "query": "TheomAlerts_CL\n | where priority_s == \"P1\"\n",
+        "status": "Available",
+        "queryFrequency": "5m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "customProps_AssetName_s",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "CloudApplication"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "deepLink_s",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "Collection",
+          "CommandAndControl",
+          "CredentialAccess",
+          "DefenseEvasion",
+          "Discovery",
+          "Exfiltration",
+          "Impact",
+          "Reconnaissance"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "5m"
+      }
+    }
+  ]
+}

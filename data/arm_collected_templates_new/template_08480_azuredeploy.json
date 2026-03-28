@@ -1,0 +1,68 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        },
+        "diagStorageMode": {
+            "type": "string",
+            "defaultValue": "new",
+            "allowedValues": [ "new", "existing" ]
+        },
+        "diagStorageResourceGroup": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]"
+        },
+        "diagStorageName": {
+            "type": "string",
+            "defaultValue": "[concat(resourceGroup().name, 'diag')]"
+        },
+        "diagStorageType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_ZRS",
+                "Standard_RAGRS"
+            ]
+        }
+    },
+    "variables": {
+        "scriptsUri": "https://raw.githubusercontent.com/abombss/arm-dev-env/master/ARM-BigDev/Templates/",
+
+        "diagnosticStorageSettings": {
+            "name": "[parameters('diagStorageName')]",
+            "resourceGroup": "[parameters('diagStorageResourceGroup')]",
+            "location": "[parameters('location')]",
+            "type": "[parameters('diagStorageType')]"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "name": "vm-diagnostic-storage",
+            "properties": {
+                "mode": "incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('scriptsUri'), 'diagnostic-storage-', parameters('diagStorageMode'), '.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storageSettings": {
+                        "value": "[variables('diagnosticStorageSettings')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "diagnosticStorage": {
+            "type": "object",
+            "value": "[reference('vm-diagnostic-storage').outputs.storageAccountInfo]"
+        } 
+    }
+}

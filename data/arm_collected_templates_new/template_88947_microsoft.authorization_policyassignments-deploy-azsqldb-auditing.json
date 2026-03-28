@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deploy-AzSqlDb-Auditing",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "westeurope",
+      "identity": {
+        "principalId": "a5bde1dd-3640-4c4e-9566-bae94d71e010",
+        "tenantId": "dbbc60b0-7054-4f16-a0af-724750c58153",
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "description": "To ensure the operations performed against your SQL assets are captured, SQL servers should have auditing enabled. If auditing is not enabled, this policy will configure auditing events to flow to the specified Log Analytics workspace.",
+        "displayName": "Configure SQL servers to have auditing enabled to Log Analytics workspace",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "nonComplianceMessages": [
+          {
+            "message": "SQL servers must have auditing enabled to Log Analytics workspace."
+          }
+        ],
+        "parameters": {
+          "logAnalyticsWorkspaceId": {
+            "value": "/subscriptions/30aca850-a275-4d1a-a24b-68f7605f12d2/resourceGroups/contoso-mgmt/providers/Microsoft.OperationalInsights/workspaces/contoso-law"
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/25da7dfb-0666-4a15-a8f5-402127efd8bb",
+        "scope": "/providers/Microsoft.Management/managementGroups/contoso-landingzones"
+      }
+    }
+  ],
+  "outputs": {}
+}

@@ -1,0 +1,325 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.Devices/IotHubs to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.Devices/IotHubs to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "c2dcommandsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "C2DCommands",
+        "description": "Enable or disable log category C2DCommands"
+      },
+      "defaultValue": true
+    },
+    "c2dtwinoperationsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "C2DTwinOperations",
+        "description": "Enable or disable log category C2DTwinOperations"
+      },
+      "defaultValue": true
+    },
+    "configurationsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "Configurations",
+        "description": "Enable or disable log category Configurations"
+      },
+      "defaultValue": true
+    },
+    "connectionsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "Connections",
+        "description": "Enable or disable log category Connections"
+      },
+      "defaultValue": true
+    },
+    "d2ctwinoperationsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "D2CTwinOperations",
+        "description": "Enable or disable log category D2CTwinOperations"
+      },
+      "defaultValue": true
+    },
+    "deviceidentityoperationsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DeviceIdentityOperations",
+        "description": "Enable or disable log category DeviceIdentityOperations"
+      },
+      "defaultValue": true
+    },
+    "devicestreamsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DeviceStreams",
+        "description": "Enable or disable log category DeviceStreams"
+      },
+      "defaultValue": true
+    },
+    "devicetelemetryEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DeviceTelemetry",
+        "description": "Enable or disable log category DeviceTelemetry"
+      },
+      "defaultValue": true
+    },
+    "directmethodsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DirectMethods",
+        "description": "Enable or disable log category DirectMethods"
+      },
+      "defaultValue": true
+    },
+    "distributedtracingEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DistributedTracing",
+        "description": "Enable or disable log category DistributedTracing"
+      },
+      "defaultValue": true
+    },
+    "fileuploadoperationsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "FileUploadOperations",
+        "description": "Enable or disable log category FileUploadOperations"
+      },
+      "defaultValue": true
+    },
+    "jobsoperationsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "JobsOperations",
+        "description": "Enable or disable log category JobsOperations"
+      },
+      "defaultValue": true
+    },
+    "routesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "Routes",
+        "description": "Enable or disable log category Routes"
+      },
+      "defaultValue": true
+    },
+    "twinqueriesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "TwinQueries",
+        "description": "Enable or disable log category TwinQueries"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.Devices/IotHubs"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.Devices/IotHubs/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.Devices/IotHubs, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "C2DCommands",
+                    "enabled": "[parameters('c2dcommandsEnabled')]"
+                  },
+                  {
+                    "category": "C2DTwinOperations",
+                    "enabled": "[parameters('c2dtwinoperationsEnabled')]"
+                  },
+                  {
+                    "category": "Configurations",
+                    "enabled": "[parameters('configurationsEnabled')]"
+                  },
+                  {
+                    "category": "Connections",
+                    "enabled": "[parameters('connectionsEnabled')]"
+                  },
+                  {
+                    "category": "D2CTwinOperations",
+                    "enabled": "[parameters('d2ctwinoperationsEnabled')]"
+                  },
+                  {
+                    "category": "DeviceIdentityOperations",
+                    "enabled": "[parameters('deviceidentityoperationsEnabled')]"
+                  },
+                  {
+                    "category": "DeviceStreams",
+                    "enabled": "[parameters('devicestreamsEnabled')]"
+                  },
+                  {
+                    "category": "DeviceTelemetry",
+                    "enabled": "[parameters('devicetelemetryEnabled')]"
+                  },
+                  {
+                    "category": "DirectMethods",
+                    "enabled": "[parameters('directmethodsEnabled')]"
+                  },
+                  {
+                    "category": "DistributedTracing",
+                    "enabled": "[parameters('distributedtracingEnabled')]"
+                  },
+                  {
+                    "category": "FileUploadOperations",
+                    "enabled": "[parameters('fileuploadoperationsEnabled')]"
+                  },
+                  {
+                    "category": "JobsOperations",
+                    "enabled": "[parameters('jobsoperationsEnabled')]"
+                  },
+                  {
+                    "category": "Routes",
+                    "enabled": "[parameters('routesEnabled')]"
+                  },
+                  {
+                    "category": "TwinQueries",
+                    "enabled": "[parameters('twinqueriesEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

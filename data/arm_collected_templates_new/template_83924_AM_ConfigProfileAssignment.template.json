@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "machineName": {
+      "type": "string"
+    },
+    "resourceType": {
+      "type": "string",
+      "allowedValues": [
+        "Microsoft.Compute/virtualMachines",
+        "Microsoft.HybridCompute/machines"
+      ],
+      "metadata": {
+        "description": "The type of machine (Azure Virtual Machine or Arc for Servers)."
+      },
+      "defaultValue": "Microsoft.Compute/virtualMachines"
+    },
+    "configurationProfile": {
+      "type": "string",
+      "metadata": {
+        "description": "The resource ID of the configuration profile to use to manage the machine."
+      },
+      "defaultValue": "/providers/Microsoft.Automanage/bestPractices/AzureBestPracticesProduction"
+    }
+  },
+  "resources": [
+    {
+      "condition": "[equals(parameters('resourceType'), 'Microsoft.Compute/virtualMachines')]",
+      "type": "Microsoft.Compute/virtualMachines/providers/configurationProfileAssignments",
+      "apiVersion": "2022-05-04",
+      "name": "[concat(parameters('machineName'), '/Microsoft.Automanage/default')]",
+      "properties": {
+          "configurationProfile": "[parameters('configurationProfile')]"
+      }
+    },
+    {
+      "condition": "[equals(parameters('resourceType'), 'Microsoft.HybridCompute/machines')]",
+      "type": "Microsoft.HybridCompute/machines/providers/configurationProfileAssignments",
+      "apiVersion": "2022-05-04",
+      "name": "[concat(parameters('machineName'), '/Microsoft.Automanage/default')]",
+      "properties": {
+          "configurationProfile": "[parameters('configurationProfile')]"
+      }
+    }
+  ]
+}

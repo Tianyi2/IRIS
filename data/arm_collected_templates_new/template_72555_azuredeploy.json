@@ -1,0 +1,217 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "EnvironmentName": {
+            "type": "string",
+            "metadata": {
+                "description": "Prefix of the environment"
+            }
+        },
+        "AdminUsername": {
+            "type": "string",
+            "defaultValue": "labadmin",
+            "metadata": {
+                "description": "User name for the Linux Virtual Machines."
+            }
+        },
+        "AdminSshKey": {
+            "type": "string",
+            "metadata": {
+                "description": "RSA key to be configured on all nodes for direct access through ssh."
+            }
+        },
+        "ServicePrincipalClientId": {
+            "type": "string",
+            "metadata": {
+                "description": "The ID for the service principal."
+            }
+        },
+        "ServicePrincipalClientSecret": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The secret password associated with the service principal."
+            }
+        }
+    },
+    "variables": {
+        "gitBranch": "master",
+        "nameSample": "container-monitoring-demo",
+        "urlBase": "[concat('https://raw.githubusercontent.com/peterschen/blog/', variables('gitBranch'))]",
+        "urlTemplates": "[concat(variables('urlBase'), '/azure/templates')]",
+        "urlSamples": "[concat(variables('urlBase'), '/azure/samples/', variables('nameSample'))]",
+        "nameDeployment": "[deployment().name]",
+        "nameDeploymentLogAnalytics": "[concat(variables('nameDeployment'), '-LogAnalytics')]",
+        "nameDeploymentAcs": "[concat(variables('nameDeployment'), '-AzureContainerService')]",
+        "nameDeploymentAks": "[concat(variables('nameDeployment'), '-AzureKubernetesService')]",
+        "nameAcs": "[concat(parameters('EnvironmentName'), '-acs')]",
+        "nameAks": "[concat(parameters('EnvironmentName'), '-aks')]",
+        "nameLogAnalytics": "[parameters('EnvironmentName')]",
+        "regionLogAnalytics": "westeurope",
+        "regionAcs": "ukwest",
+        "regionAks": "westeurope",
+        "solutions": [
+            "ContainerInsights",
+            "Containers"
+        ]
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "[variables('nameDeploymentLogAnalytics')]",
+            "apiVersion": "2017-05-10",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('urlBase'), '/loganalytics/workspace.json')]"
+                },
+                "parameters": {
+                    "Name": {
+                        "value": "[variables('nameLogAnalytics')]"
+                    },
+                    "Region": {
+                        "value": "[variables('regionLogAnalytics')]"
+                    },
+                    "Tier": {
+                        "value": "Standalone"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "[concat(variables('nameDeployment'), '-', variables('solutions')[copyIndex()])]",
+            "apiVersion": "2017-05-10",
+            "copy": {
+                "name": "solutions",
+                "count": "[length(variables('solutions'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('urlBase'), '/loganalytics/solution.json')]"
+                },
+                "parameters": {
+                    "Name": {
+                        "value": "[variables('solutions')[copyIndex()]]"
+                    },
+                    "WorkspaceName": {
+                        "value": "[variables('nameLogAnalytics')]"
+                    },
+                    "Region": {
+                        "value": "[variables('regionLogAnalytics')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('nameDeploymentLogAnalytics'))]"
+            ]
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "type": "Microsoft.Resources/deployments",
+            "name": "[variables('nameDeploymentAcs')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('urlSamples'), '/acs.json')]"
+                },
+                "parameters": {
+                    "Name": {
+                        "value": "[variables('nameAcs')]"
+                    },
+                    "Region": {
+                        "value": "[variables('regionAcs')]"
+                    },
+                    "AdminUsername": {
+                        "value": "[parameters('AdminUsername')]"
+                    },
+                    "AdminSshKey": {
+                        "value": "[parameters('AdminSshKey')]"
+                    },
+                    "MasterCount": {
+                        "value": 1
+                    },
+                    "AgentCount": {
+                        "value": 1
+                    },
+                    "AgentVmSize": {
+                        "value": "Standard_DS2_v2"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "type": "Microsoft.Resources/deployments",
+            "name": "[variables('nameDeploymentAks')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('urlSamples'), '/aks.json')]"
+                },
+                "parameters": {
+                    "Name": {
+                        "value": "[variables('nameAks')]"
+                    },
+                    "WorkspaceName": {
+                        "value": "[variables('nameLogAnalytics')]"
+                    },
+                    "Region": {
+                        "value": "[variables('regionAks')]"
+                    },
+                    "AdminUsername": {
+                        "value": "[parameters('AdminUsername')]"
+                    },
+                    "AdminSshKey": {
+                        "value": "[parameters('AdminSshKey')]"
+                    },
+                    "Version": {
+                        "value": "1.10.3"
+                    },
+                    "AgentCount": {
+                        "value": 1
+                    },
+                    "AgentVmSize": {
+                        "value": "Standard_D2s_v3"
+                    },
+                    "ServicePrincipalClientId": {
+                        "value": "[parameters('ServicePrincipalClientId')]"
+                    },
+                    "ServicePrincipalClientSecret": {
+                        "value": "[parameters('ServicePrincipalClientSecret')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', variables('nameDeploymentLogAnalytics'))]"
+            ]
+        }
+    ],
+    "outputs": {
+        "ResourceGroup": {
+            "type": "string",
+            "value": "[resourceGroup().name]"
+        },
+        "LogAnalyticsPortal": {
+            "type": "string",
+            "value": "[reference(variables('nameDeploymentLogAnalytics')).outputs.Portal.value]"
+        },
+        "AcsFqdnMaster": {
+            "type": "string",
+            "value": "[reference(variables('nameDeploymentAcs')).outputs.FqdnMaster.value]"
+        },
+        "AcsFqdnAgent": {
+            "type": "string",
+            "value": "[reference(variables('nameDeploymentAcs')).outputs.FqdnAgent.value]"
+        },
+        "AksFqdn": {
+            "type": "string",
+            "value": "[reference(variables('nameDeploymentAks')).outputs.Fqdn.value]"
+        },
+        "AksName": {
+            "type": "string",
+            "value": "[variables('nameAks')]"
+        }
+    }
+}

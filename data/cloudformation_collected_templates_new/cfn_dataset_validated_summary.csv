@@ -1,0 +1,1825 @@
+﻿failure_type,count,percentage
+No 'Resources' section found or it is empty,2900,82.36
+No resource with valid Type (xxx::xxx::xxx) found,76,2.16
+Template root is not a dictionary,37,1.05
+Load error: Illegal trailing comma before end of object,25,0.71
+"Load error: while parsing a flow mapping
+  in ""<unicode string>"", line 3, column 15:
+    Description: {{ metadata['description'] }}
+                  ^
+expected ',' or '}', but got '['
+  in ""<unicode string>"", line 3, column 25:
+    Description: {{ metadata['description'] }}
+                            ^",24,0.68
+Load error: Expecting property name enclosed in double quotes,21,0.6
+"Load error: Expecting ',' delimiter",16,0.45
+"Load error: could not determine a constructor for the tag '!Include'
+  in ""<unicode string>"", line 4, column 15:
+    Organization: !Include ./organization.yml
+                  ^",15,0.43
+"Load error: mapping values are not allowed here
+  in ""<unicode string>"", line 47, column 17:
+        ""Parameters"": {
+                    ^",12,0.34
+"Load error: expected a single document in the stream
+  in ""<unicode string>"", line 1, column 1:
+    Resources:
+    ^
+but found another document
+  in ""<unicode string>"", line 5, column 1:
+    ---
+    ^",12,0.34
+"Load error: could not determine a constructor for the tag '!Include'
+  in ""<unicode string>"", line 5, column 15:
+    Organization: !Include ../organization.yml
+                  ^",11,0.31
+"Load error: mapping values are not allowed here
+  in ""<unicode string>"", line 24, column 17:
+        ""Parameters"": {
+                    ^",8,0.23
+"Load error: could not determine a constructor for the tag '!Include'
+  in ""<unicode string>"", line 3, column 15:
+    Organization: !Include ./organization.yml
+                  ^",7,0.2
+"Load error: could not determine a constructor for the tag '!Rain::S3'
+  in ""<unicode string>"", line 39, column 13:
+          Code: !Rain::S3
+                ^",5,0.14
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 7, column 1:
+    {{- if .SerializedManifest }}
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 8, column 3:
+      Manifest: |
+      ^",5,0.14
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 5, column 1:
+    {{- if .SerializedManifest }}
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 6, column 1:
+    Metadata:
+    ^",5,0.14
+"Load error: mapping values are not allowed here
+  in ""<unicode string>"", line 128, column 45:
+     ... ultLandingUri: app:JupyterServer:
+                                         ^",4,0.11
+Load error: Illegal trailing comma before end of array,4,0.11
+Load error: Expecting value,4,0.11
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 76, column 30:
+                AMI: ami-d44008b8	
+                                 ^",3,0.09
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 7, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 8, column 15:
+        Properties: {}
+                  ^",3,0.09
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 2, column 3:
+      App:
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 15, column 33:
+      {{logicalIDSafe .ClusterName}}DBName:
+                                    ^",3,0.09
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 2, column 3:
+      App:
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 12, column 33:
+      {{logicalIDSafe .ClusterName}}DBName:
+                                    ^",3,0.09
+"Load error: while parsing a flow mapping
+  in ""<unicode string>"", line 3, column 15:
+    Description: {{ metadata[""description""] }}
+                  ^
+expected ',' or '}', but got '['
+  in ""<unicode string>"", line 3, column 25:
+    Description: {{ metadata[""description""] }}
+                            ^",3,0.09
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 13, column 7:
+          RoleName: {{stackName}}-stepfunction
+          ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 13, column 30:
+          RoleName: {{stackName}}-stepfunction
+                                 ^",3,0.09
+"Load error: could not determine a constructor for the tag '!Include'
+  in ""<unicode string>"", line 3, column 15:
+    Organization: !Include ../organization.yml
+                  ^",3,0.09
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 165, column 22:
+            SecretToken: {{resolve:secretsmanager:MyGitHu ... 
+                         ^
+found unhashable key
+  in ""<unicode string>"", line 165, column 23:
+            SecretToken: {{resolve:secretsmanager:MyGitHub ... 
+                          ^",3,0.09
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 16, column 1:
+    {{include ""bootstrap-resources""  ... 
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 18, column 1:
+    Outputs:
+    ^",2,0.06
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 31, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 32, column 7:
+          # VpcId: !Ref MyVPC  # Reference ... 
+          ^",2,0.06
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 6, column 1:
+    {{- if .SerializedManifest }}
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 7, column 3:
+      Manifest: |
+      ^",2,0.06
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 18, column 7:
+          AttributeDefinitions:{{range .At ... 
+          ^
+could not find expected ':'
+  in ""<unicode string>"", line 19, column 24:
+            - AttributeName: {{.Name}}
+                           ^",2,0.06
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 2, column 1:
+    <<<<<<< adam-updates
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 3, column 1:
+    Description: 'CloudFormation Tem ... 
+    ^",2,0.06
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 507, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",2,0.06
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 18, column 40:
+     ... _NODEJS_CONNECTION_REUSE_ENABLED	: ""1""
+                                         ^",2,0.06
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 101, column 36:
+          ""3103"": ami-0e19b1335bc3654c3	 # seller account (shared with  ... 
+                                       ^",2,0.06
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 522, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",2,0.06
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 526, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",2,0.06
+Load error: Expecting ':' delimiter,2,0.06
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 69, column 11:
+              Environment:{{range $name, $valu ... 
+              ^
+could not find expected ':'
+  in ""<unicode string>"", line 70, column 11:
+              - Name: {{$name}}
+              ^",2,0.06
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 518, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",2,0.06
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 755, column 20:
+        RuleCondition: !EachMemberEquals [[!Ref MemberB ... 
+                       ^",2,0.06
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 83, column 22:
+            SecretToken: {{resolve:secretsmanager:MyGitHu ... 
+                         ^
+found unhashable key
+  in ""<unicode string>"", line 83, column 23:
+            SecretToken: {{resolve:secretsmanager:MyGitHub ... 
+                          ^",2,0.06
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 12, column 3:
+      {{logicalIDSafe .Name}}Bucket:
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 12, column 26:
+      {{logicalIDSafe .Name}}Bucket:
+                             ^",2,0.06
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 2, column 3:
+      {{ var.prefix }}LogGroup1:
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 2, column 19:
+      {{ var.prefix }}LogGroup1:
+                      ^",2,0.06
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 2, column 3:
+      App:
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 9, column 33:
+      {{logicalIDSafe .ClusterName}}DBName:
+                                    ^",2,0.06
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 3, column 1:
+    AWSTemplateFormatVersion: '2010- ... 
+    ^
+expected <block end>, but found '{'
+  in ""<unicode string>"", line 3, column 39:
+     ... plateFormatVersion: '2010-09-09'{{$accounts := .Accounts}}{{$app ... 
+                                         ^",2,0.06
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 729, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",2,0.06
+"Load error: while parsing a flow mapping
+  in ""<unicode string>"", line 2, column 15:
+    Description: {{ metadata[""description""] }}
+                  ^
+expected ',' or '}', but got '['
+  in ""<unicode string>"", line 2, column 25:
+    Description: {{ metadata[""description""] }}
+                            ^",2,0.06
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 3, column 3:
+      name: {{ env }}-test-stack
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 3, column 18:
+      name: {{ env }}-test-stack
+                     ^",2,0.06
+"Load error: while parsing a flow node
+expected the node content, but found '-'
+  in ""<unicode string>"", line 5, column 7:
+        {{- with $cr := index .CustomResou ... 
+          ^",2,0.06
+"Load error: while parsing a flow node
+expected the node content, but found '-'
+  in ""<unicode string>"", line 20, column 7:
+        {{- with $cr := index .CustomResou ... 
+          ^",2,0.06
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 1, column 11:
+    obsolete: {{ var.obsolete }}
+              ^
+found unhashable key
+  in ""<unicode string>"", line 1, column 12:
+    obsolete: {{ var.obsolete }}
+               ^",2,0.06
+"Load error: could not determine a constructor for the tag '!Rain::Constant'
+  in ""<unicode string>"", line 14, column 19:
+          BucketName: !Rain::Constant Test1
+                      ^",2,0.06
+"Load error: could not determine a constructor for the tag '!Include'
+  in ""<unicode string>"", line 4, column 15:
+    Organization: !Include ../organization.yml
+                  ^",2,0.06
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 26, column 17:
+          RoleName: {{ var.roleName }}
+                    ^
+found unhashable key
+  in ""<unicode string>"", line 26, column 18:
+          RoleName: {{ var.roleName }}
+                     ^",2,0.06
+"Load error: could not determine a constructor for the tag '!Rain::S3'
+  in ""<unicode string>"", line 5, column 13:
+          Code: !Rain::S3
+                ^",2,0.06
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 288, column 24:
+              Value: EC2-SG	            
+                           ^",2,0.06
+"Load error: could not determine a constructor for the tag '!$'
+  in ""<unicode string>"", line 39, column 22:
+          RedrivePolicy: !$ RedrivePolicy
+                         ^",1,0.03
+"Load error: could not determine a constructor for the tag '!$'
+  in ""<unicode string>"", line 79, column 16:
+          Handler: !$ Handler
+                   ^",1,0.03
+"Load error: could not determine a constructor for the tag '!$concatMap'
+  in ""<unicode string>"", line 91, column 25:
+    transformation_example: !$concatMap
+                            ^",1,0.03
+"Load error: could not determine a constructor for the tag '!$eq'
+  in ""<unicode string>"", line 181, column 12:
+        Value: !$eq [!$ services, !$ services]  ... 
+               ^",1,0.03
+"Load error: could not determine a constructor for the tag '!$eq'
+  in ""<unicode string>"", line 250, column 12:
+        Value: !$eq [!$ keyValuePairs, !$ keyVa ... 
+               ^",1,0.03
+"Load error: could not determine a constructor for the tag '!$eq'
+  in ""<unicode string>"", line 253, column 12:
+        Value: !$eq [!$ keyValuePairs, !$ keyVa ... 
+               ^",1,0.03
+"Load error: could not determine a constructor for the tag '!$eq'
+  in ""<unicode string>"", line 277, column 12:
+        Value: !$eq [!$ resources, !$ resources]
+               ^",1,0.03
+"Load error: could not determine a constructor for the tag '!$if'
+  in ""<unicode string>"", line 287, column 30:
+          BackupRetentionPeriod: !$if
+                                 ^",1,0.03
+"Load error: could not determine a constructor for the tag '!$if'
+  in ""<unicode string>"", line 29, column 21:
+      DatabaseInstance: !$if
+                        ^",1,0.03
+"Load error: could not determine a constructor for the tag '!$if'
+  in ""<unicode string>"", line 69, column 31:
+          DeleteAutomatedBackups: !$if
+                                  ^",1,0.03
+"Load error: could not determine a constructor for the tag '!$let'
+  in ""<unicode string>"", line 15, column 21:
+      LoadBalancerPort: !$let
+                        ^",1,0.03
+"Load error: could not determine a constructor for the tag '!$split'
+  in ""<unicode string>"", line 18, column 14:
+        Default: !$split ["","", ""apple,banana,cher ... 
+                 ^",1,0.03
+"Load error: could not determine a constructor for the tag '!$toJsonString'
+  in ""<unicode string>"", line 16, column 14:
+          Value: !$toJsonString
+                 ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Contains'
+  in ""<unicode string>"", line 300, column 25:
+        RuleCondition: !Or [!Contains [[m4.large, m4.xlarge, ... 
+                            ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Contains'
+  in ""<unicode string>"", line 382, column 17:
+            Assert: !Contains
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Contains'
+  in ""<unicode string>"", line 388, column 17:
+          - Assert: !Contains
+                    ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 231, column 24:
+              Value: EC2-SG	            
+                           ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 248, column 43:
+     ... y: tag:aws:autoscaling:groupName	
+                                         ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 256, column 24:
+              Value: EC2-SG	            
+                           ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 258, column 24:
+              Value: EC2-SG	            
+                           ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 266, column 24:
+              Value: EC2-SG	            
+                           ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 281, column 43:
+     ... y: tag:aws:autoscaling:groupName	
+                                         ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 285, column 24:
+              Value: EC2-SG	            
+                           ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 298, column 24:
+              Value: EC2-SG	            
+                           ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 3, column 1:
+    	""uri"": ""/"",
+    ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 3, column 1:
+    	""uri"": ""/vi/"",
+    ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 300, column 43:
+     ... y: tag:aws:autoscaling:groupName	
+                                         ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 36, column 28:
+                Encrypted: True	# https://aws.amazon.com/about- ... 
+                               ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 37, column 1:
+    	include:
+    ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 41, column 1:
+    	# add ID of virtual server and  ... 
+    ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 69, column 1:
+    	
+    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Rain::S3'
+  in ""<unicode string>"", line 15, column 13:
+          Code: !Rain::S3 
+                ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Rain::S3'
+  in ""<unicode string>"", line 37, column 13:
+          Code: !Rain::S3
+                ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Rain::S3'
+  in ""<unicode string>"", line 5, column 13:
+          Code: !Rain::S3 
+                ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Rain::S3'
+  in ""<unicode string>"", line 6, column 9:
+            !Rain::S3
+            ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Rain::S3'
+  in ""<unicode string>"", line 60, column 16:
+          Content: !Rain::S3 
+                   ^",1,0.03
+"Load error: could not determine a constructor for the tag '!ReadFile'
+  in ""<unicode string>"", line 17, column 13:
+              - !ReadFile 'bucketPolicyDoc.json'
+                ^",1,0.03
+"Load error: could not determine a constructor for the tag '!ReadFile'
+  in ""<unicode string>"", line 26, column 18:
+            ZipFile: !ReadFile './src/index.js'
+                     ^",1,0.03
+"Load error: could not determine a constructor for the tag '!ReadFile'
+  in ""<unicode string>"", line 29, column 18:
+            ZipFile: !ReadFile './lambda-using-read-f ... 
+                     ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Ref:'
+  in ""<unicode string>"", line 138, column 17:
+                  - !Ref: AWS::NoValue
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!sub'
+  in ""<unicode string>"", line 123, column 13:
+                !sub
+                ^",1,0.03
+"Load error: could not determine a constructor for the tag 'tag:yaml.org,2002:Ref'
+  in ""<unicode string>"", line 58, column 25:
+            CacheNamespace: !!Ref SMSResource
+                            ^",1,0.03
+"Load error: could not determine a constructor for the tag 'tag:yaml.org,2002:Ref'
+  in ""<unicode string>"", line 86, column 18:
+          RestApiId: !!Ref TemperatureApi
+                     ^",1,0.03
+"Load error: could not determine a constructor for the tag 'tag:yaml.org,2002:Ref'
+  in ""<unicode string>"", line 86, column 27:
+                  RegionName: !!Ref ClusterRegionName
+                              ^",1,0.03
+"Load error: expected '<document start>', but found '<block mapping start>'
+  in ""<unicode string>"", line 17, column 1:
+    Resources:
+    ^",1,0.03
+"Load error: expected '<document start>', but found '<block mapping start>'
+  in ""<unicode string>"", line 2, column 1:
+    Resources:
+    ^",1,0.03
+"Load error: expected a single document in the stream
+  in ""<unicode string>"", line 2, column 1:
+    name: s3-buckets
+    ^
+but found another document
+  in ""<unicode string>"", line 4, column 1:
+    ---
+    ^",1,0.03
+"Load error: mapping values are not allowed here
+  in ""<unicode string>"", line 11, column 21:
+            Type:   Type: AWS::IAM::Role
+                        ^",1,0.03
+"Load error: mapping values are not allowed here
+  in ""<unicode string>"", line 14, column 23:
+          BucketEncryption:
+                          ^",1,0.03
+"Load error: mapping values are not allowed here
+  in ""<unicode string>"", line 2, column 27:
+      AWSTemplateFormatVersion: ""2010-09-09""
+                              ^",1,0.03
+"Load error: mapping values are not allowed here
+  in ""<unicode string>"", line 2, column 29:
+      ""AWSTemplateFormatVersion"": ""2010-09-09"",
+                                ^",1,0.03
+"Load error: mapping values are not allowed here
+  in ""<unicode string>"", line 22, column 16:
+            Subnets: !Ref Subnets
+                   ^",1,0.03
+"Load error: mapping values are not allowed here
+  in ""<unicode string>"", line 255, column 27:
+          SecurityGroupIngress:
+                              ^",1,0.03
+"Load error: mapping values are not allowed here
+  in ""<unicode string>"", line 3, column 15:
+        MyKey: Ref: AWS::NoValue
+                  ^",1,0.03
+"Load error: mapping values are not allowed here
+  in ""<unicode string>"", line 38, column 14:
+          ImageId: 
+                 ^",1,0.03
+"Load error: mapping values are not allowed here
+  in ""<unicode string>"", line 5, column 9:
+        Type: String
+            ^",1,0.03
+"Load error: mapping values are not allowed here
+  in ""<unicode string>"", line 8, column 8:
+          X: Y
+           ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberIn'
+  in ""<unicode string>"", line 579, column 17:
+          - Assert: !EachMemberIn
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberIn'
+  in ""<unicode string>"", line 75, column 17:
+          - Assert: !EachMemberIn
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Equals:'
+  in ""<unicode string>"", line 10, column 5:
+        !Equals:
+        ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Equals:'
+  in ""<unicode string>"", line 9, column 5:
+        !Equals:
+        ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Include'
+  in ""<unicode string>"", line 14, column 15:
+    Organization: !Include ./organization.yml
+                  ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Include'
+  in ""<unicode string>"", line 5, column 7:
+          !Include http://localhost:9999/s ... 
+          ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Include'
+  in ""<unicode string>"", line 7, column 15:
+    Organization: !Include ./organization.yml
+                  ^",1,0.03
+"Load error: could not determine a constructor for the tag '!JsonString'
+  in ""<unicode string>"", line 17, column 13:
+              - !JsonString
+                ^",1,0.03
+"Load error: could not determine a constructor for the tag '!R'
+  in ""<unicode string>"", line 22, column 21:
+          RouteTableId: !R
+                        ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Rain::Env'
+  in ""<unicode string>"", line 5, column 19:
+          BucketName: !Rain::Env BUCKET_NAME
+                      ^",1,0.03
+"Load error: mapping values are not allowed here
+  in ""<unicode string>"", line 9, column 7:
+    Syntax:   tsc [options] [file...]
+          ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 1, column 11:
+    obsolete: {{ var.obsolete1 }}
+              ^
+found unhashable key
+  in ""<unicode string>"", line 1, column 12:
+    obsolete: {{ var.obsolete1 }}
+               ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 1, column 11:
+    obsolete: {{ var.obsolete2 }}
+              ^
+found unhashable key
+  in ""<unicode string>"", line 1, column 12:
+    obsolete: {{ var.obsolete2 }}
+               ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 1, column 11:
+    obsolete: {{ var.obsolete3 }}
+              ^
+found unhashable key
+  in ""<unicode string>"", line 1, column 12:
+    obsolete: {{ var.obsolete3 }}
+               ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 1, column 11:
+    obsolete: {{ var.obsolete4 }}
+              ^
+found unhashable key
+  in ""<unicode string>"", line 1, column 12:
+    obsolete: {{ var.obsolete4 }}
+               ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 1, column 14:
+    Description: {{ stack.name }}
+                 ^
+found unhashable key
+  in ""<unicode string>"", line 1, column 15:
+    Description: {{ stack.name }}
+                  ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 10, column 13:
+      greeting: {{ var.greeting }}
+                ^
+found unhashable key
+  in ""<unicode string>"", line 10, column 14:
+      greeting: {{ var.greeting }}
+                 ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 10, column 18:
+          CidrBlock: {{ .vpc.cidr }}
+                     ^
+found unhashable key
+  in ""<unicode string>"", line 10, column 19:
+          CidrBlock: {{ .vpc.cidr }}
+                      ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 12, column 22:
+          ServiceToken:  {{ .custom.lambda_arn }}
+                         ^
+found unhashable key
+  in ""<unicode string>"", line 12, column 23:
+          ServiceToken:  {{ .custom.lambda_arn }}
+                          ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 12, column 7:
+          <<: !Include ./includes/lambda.yml
+          ^
+expected a mapping or list of mappings for merging, but found scalar
+  in ""<unicode string>"", line 12, column 11:
+          <<: !Include ./includes/lambda.yml
+              ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 2, column 9:
+      Name: {{ var.name }}
+            ^
+found unhashable key
+  in ""<unicode string>"", line 2, column 10:
+      Name: {{ var.name }}
+             ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 2, column 9:
+      name: {{ var.name }}
+            ^
+found unhashable key
+  in ""<unicode string>"", line 2, column 10:
+      name: {{ var.name }}
+             ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 22, column 17:
+          RoleName: {{ var.roleName }}
+                    ^
+found unhashable key
+  in ""<unicode string>"", line 22, column 18:
+          RoleName: {{ var.roleName }}
+                     ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 27, column 20:
+              ImageId: {{ami_id}}
+                       ^
+found unhashable key
+  in ""<unicode string>"", line 27, column 21:
+              ImageId: {{ami_id}}
+                        ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 3, column 24:
+    terminationProtection: {{ var.terminationProtection }}
+                           ^
+found unhashable key
+  in ""<unicode string>"", line 3, column 25:
+    terminationProtection: {{ var.terminationProtection }}
+                            ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 3, column 8:
+      age: {{ var.age2 }}
+           ^
+found unhashable key
+  in ""<unicode string>"", line 3, column 9:
+      age: {{ var.age2 }}
+            ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 30, column 18:
+            ZipFile: {{ code('resource.py') }}
+                     ^
+found unhashable key
+  in ""<unicode string>"", line 30, column 19:
+            ZipFile: {{ code('resource.py') }}
+                      ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 34, column 18:
+            ZipFile: {{ GET .kmsLambda.code  | literal }}
+                     ^
+found unhashable key
+  in ""<unicode string>"", line 34, column 19:
+            ZipFile: {{ GET .kmsLambda.code  | literal }}
+                      ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 4, column 10:
+      Color: {{ var.color }}
+             ^
+found unhashable key
+  in ""<unicode string>"", line 4, column 11:
+      Color: {{ var.color }}
+              ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 4, column 10:
+      color: {{ var.color }}
+             ^
+found unhashable key
+  in ""<unicode string>"", line 4, column 11:
+      color: {{ var.color }}
+              ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 6, column 12:
+        Value: {{ hooks.first }}
+               ^
+found unhashable key
+  in ""<unicode string>"", line 6, column 13:
+        Value: {{ hooks.first }}
+                ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 6, column 12:
+        Value: {{ hooks.myHook }}
+               ^
+found unhashable key
+  in ""<unicode string>"", line 6, column 13:
+        Value: {{ hooks.myHook }}
+                ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 6, column 12:
+        Value: {{ hooks.one }}
+               ^
+found unhashable key
+  in ""<unicode string>"", line 6, column 13:
+        Value: {{ hooks.one }}
+                ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 6, column 12:
+        Value: {{ hooks.second }}
+               ^
+found unhashable key
+  in ""<unicode string>"", line 6, column 13:
+        Value: {{ hooks.second }}
+                ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 6, column 17:
+          RoleName: {{ var.roleName }}
+                    ^
+found unhashable key
+  in ""<unicode string>"", line 6, column 18:
+          RoleName: {{ var.roleName }}
+                     ^",1,0.03
+"Load error: while constructing a mapping
+  in ""<unicode string>"", line 77, column 27:
+                    Resource: {{dockerhub_secret_arn}}
+                              ^
+found unhashable key
+  in ""<unicode string>"", line 77, column 28:
+                    Resource: {{dockerhub_secret_arn}}
+                               ^",1,0.03
+"Load error: while constructing a mapping
+found unhashable key
+  in ""<unicode string>"", line 118, column 3:
+      {{BucketId}}:
+      ^",1,0.03
+"Load error: while constructing a mapping
+found unhashable key
+  in ""<unicode string>"", line 203, column 39:
+     ... AvailabilityZone: !Select ['0', !GetAZs Ref: 'AWS::Region']
+                                         ^",1,0.03
+"Load error: while constructing a mapping
+found unhashable key
+  in ""<unicode string>"", line 29, column 3:
+      {{DownloadACLArn}}:
+      ^",1,0.03
+"Load error: while constructing a mapping
+found unhashable key
+  in ""<unicode string>"", line 81, column 3:
+      {{BucketId}}:
+      ^",1,0.03
+"Load error: while parsing a block collection
+  in ""<unicode string>"", line 167, column 15:
+                  - !Sub ""arn:aws:sso:::instance/$ ... 
+                  ^
+expected <block end>, but found ','
+  in ""<unicode string>"", line 167, column 66:
+     ... :::instance/${IAMIdCInstanceID}"",
+                                         ^",1,0.03
+"Load error: while parsing a block collection
+  in ""<unicode string>"", line 38, column 19:
+                      - ""ecs:DescribeServices"",
+                      ^
+expected <block end>, but found ','
+  in ""<unicode string>"", line 38, column 43:
+     ...         - ""ecs:DescribeServices"",
+                                         ^",1,0.03
+"Load error: while parsing a block collection
+  in ""<unicode string>"", line 41, column 11:
+              - HasSortKey
+              ^
+expected <block end>, but found '?'
+  in ""<unicode string>"", line 44, column 11:
+              AttributeType: S  # String type  ... 
+              ^",1,0.03
+"Load error: while parsing a block collection
+  in ""<unicode string>"", line 48, column 9:
+            - {{allowed_ip}}/32
+            ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 48, column 25:
+            - {{allowed_ip}}/32
+                            ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 1, column 1:
+    AWSTemplateFormatVersion: '2010- ... 
+    ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 2, column 37:
+    Description: {{ .Context | title }} web application for {{ .StackName }}
+                                        ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 1, column 1:
+    AWSTemplateFormatVersion: '2010- ... 
+    ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 49, column 17:
+        MinLength: '9'
+                    ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 1, column 1:
+    Description: {{ code }} {{ other }}
+    ^
+expected <block end>, but found '{'
+  in ""<unicode string>"", line 1, column 25:
+    Description: {{ code }} {{ other }}
+                            ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 10, column 3:
+      {{logicalIDSafe .Name}}Bucket:
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 10, column 26:
+      {{logicalIDSafe .Name}}Bucket:
+                             ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 10, column 7:
+          AvailabilityZone: !Ref '<caret>
+          ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 11, column 22:
+          InstanceType: '1'
+                         ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 10, column 9:
+            Key: ThisIs
+            ^
+expected <block end>, but found '-'
+  in ""<unicode string>"", line 12, column 9:
+            - Key: ThisIs
+            ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 11, column 7:
+          Cluster: !Ref '<caret>
+          ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 12, column 22:
+          DesiredCount: '1'
+                         ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 12, column 3:
+      {{logicalIDSafe .Name}}BucketAcc ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 12, column 26:
+      {{logicalIDSafe .Name}}BucketAccessPolicy:
+                             ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 12, column 3:
+      {{logicalIDSafe .Name}}DdbTableA ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 12, column 26:
+      {{logicalIDSafe .Name}}DdbTableAccessPolicy:
+                             ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 13, column 9:
+          - Key: Name
+            ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 14, column 25:
+            Value: {{ env }}-vpc
+                            ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 15, column 3:
+      {{logicalIDSafe .ClusterName}}Cl ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 15, column 33:
+      {{logicalIDSafe .ClusterName}}ClusterSecurityGroupIngressFromW ... 
+                                    ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 16, column 3:
+      S3Bucket:
+      ^
+expected <block end>, but found '<tag>'
+  in ""<unicode string>"", line 49, column 31:
+      SecurityGroups: !$fromPairs !$map
+                                  ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 2, column 1:
+    name: {{ env }}-infra
+    ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 2, column 16:
+    name: {{ env }}-infra
+                   ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 2, column 3:
+      name: {{ var.name }}-eu-west-1
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 2, column 23:
+      name: {{ var.name }}-eu-west-1
+                          ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 2, column 3:
+      name: {{ var.name }}-us-east-1
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 2, column 23:
+      name: {{ var.name }}-us-east-1
+                          ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 2, column 3:
+      {{ module_name }}ModuleBucket:
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 2, column 20:
+      {{ module_name }}ModuleBucket:
+                       ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 2, column 3:
+      {{ module_name }}SubModuleBucket:
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 2, column 20:
+      {{ module_name }}SubModuleBucket:
+                       ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 23, column 3:
+      VPC:
+      ^
+expected <block end>, but found '<tag>'
+  in ""<unicode string>"", line 34, column 24:
+      Subnets: !$fromPairs !$concatMap
+                           ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 3, column 3:
+      Name: {{ var.name }}-eu-west-1
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 3, column 23:
+      Name: {{ var.name }}-eu-west-1
+                          ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 3, column 3:
+      Name: {{ var.name }}-us-east-1
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 3, column 23:
+      Name: {{ var.name }}-us-east-1
+                          ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 3, column 3:
+      TestS3:
+      ^
+expected <block end>, but found '<block mapping start>'
+  in ""<unicode string>"", line 9, column 5:
+        Properties:
+        ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 3, column 3:
+      name: {{ env }}-coreos
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 3, column 18:
+      name: {{ env }}-coreos
+                     ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 3, column 3:
+      name: {{ env }}-infra
+      ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 3, column 18:
+      name: {{ env }}-infra
+                     ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 47, column 3:
+      VPC:
+      ^
+expected <block end>, but found '<tag>'
+  in ""<unicode string>"", line 74, column 30:
+      PublicSubnets: !$fromPairs !$map
+                                 ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 5, column 7:
+          ManagedPolicyName: DynamoDB-inbox 
+          ^
+expected <block end>, but found '-'
+  in ""<unicode string>"", line 6, column 7:
+          - PolicyDocument: 
+          ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 5, column 7:
+          ManagedPolicyName: DynamoDB-outbox
+          ^
+expected <block end>, but found '-'
+  in ""<unicode string>"", line 6, column 7:
+          - PolicyDocument: 
+          ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 5, column 7:
+          ManagedPolicyName: DynamoDB-tempdata
+          ^
+expected <block end>, but found '-'
+  in ""<unicode string>"", line 6, column 7:
+          - PolicyDocument: 
+          ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 5, column 7:
+          ManagedPolicyName: DynamoDB-users
+          ^
+expected <block end>, but found '-'
+  in ""<unicode string>"", line 6, column 7:
+          - PolicyDocument: 
+          ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 6, column 7:
+          BucketName: !Sub ""my-bucket""
+          ^
+expected <block end>, but found '<tag>'
+  in ""<unicode string>"", line 7, column 22:
+          Enabled: !$not !$eq
+                         ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 78, column 7:
+          TemplateURL: !Join [/, 'S3Templa ... 
+          ^
+expected <block end>, but found '<block mapping start>'
+  in ""<unicode string>"", line 79, column 9:
+            Parameters:
+            ^",1,0.03
+"Load error: while parsing a block mapping
+  in ""<unicode string>"", line 9, column 5:
+        Type: String
+        ^
+expected <block end>, but found '<scalar>'
+  in ""<unicode string>"", line 10, column 38:
+     ... escription: {{.SourceProvider}} repository
+                                         ^",1,0.03
+"Load error: while parsing a block node
+expected the node content, but found '?'
+  in ""<unicode string>"", line 7, column 4:
+       Label:
+       ^",1,0.03
+"Load error: while parsing a flow mapping
+  in ""<unicode string>"", line 16, column 4:
+      {{#each stack.parameters}}
+       ^
+expected ',' or '}', but got ':'
+  in ""<unicode string>"", line 18, column 10:
+        Value: {{value}}
+             ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 625, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 626, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 634, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 635, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 770, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 832, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 852, column 20:
+        RuleCondition: !EachMemberEquals [[!Ref MemberB ... 
+                       ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberIn'
+  in ""<unicode string>"", line 498, column 17:
+          - Assert: !EachMemberIn
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberIn'
+  in ""<unicode string>"", line 500, column 17:
+          - Assert: !EachMemberIn
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberIn'
+  in ""<unicode string>"", line 509, column 17:
+          - Assert: !EachMemberIn
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberIn'
+  in ""<unicode string>"", line 518, column 17:
+          - Assert: !EachMemberIn
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberIn'
+  in ""<unicode string>"", line 561, column 17:
+          - Assert: !EachMemberIn
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberIn'
+  in ""<unicode string>"", line 569, column 17:
+          - Assert: !EachMemberIn
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberIn'
+  in ""<unicode string>"", line 570, column 17:
+          - Assert: !EachMemberIn
+                    ^",1,0.03
+"Load error: while parsing a flow mapping
+  in ""<unicode string>"", line 2, column 15:
+    Description: {{ metadata['description'] }}
+                  ^
+expected ',' or '}', but got '['
+  in ""<unicode string>"", line 2, column 25:
+    Description: {{ metadata['description'] }}
+                            ^",1,0.03
+"Load error: while parsing a flow mapping
+  in ""<unicode string>"", line 5, column 15:
+    Description: {{ metadata['description'] }}
+                  ^
+expected ',' or '}', but got '['
+  in ""<unicode string>"", line 5, column 25:
+    Description: {{ metadata['description'] }}
+                            ^",1,0.03
+"Load error: while parsing a flow mapping
+  in ""<unicode string>"", line 56, column 20:
+            S3Bucket: {{artifacts['build/code.py.zip']. ... 
+                       ^
+expected ',' or '}', but got '['
+  in ""<unicode string>"", line 56, column 30:
+            S3Bucket: {{artifacts['build/code.py.zip'].bucket}}
+                                 ^",1,0.03
+"Load error: while parsing a flow node
+expected the node content, but found '-'
+  in ""<unicode string>"", line 4, column 5:
+      {{- range $i, $_ := loop .stack.no ... 
+        ^",1,0.03
+"Load error: while parsing a flow node
+expected the node content, but found '-'
+  in ""<unicode string>"", line 4, column 5:
+      {{- range $i, $_ := loop .teststac ... 
+        ^",1,0.03
+"Load error: while parsing a flow node
+expected the node content, but found '-'
+  in ""<unicode string>"", line 6, column 5:
+      {{- if isCodeStarConnection .Source}}
+        ^",1,0.03
+"Load error: while parsing a flow node
+expected the node content, but found '-'
+  in ""<unicode string>"", line 8, column 5:
+      {{- if isCodeStarConnection .Source}}
+        ^",1,0.03
+"Load error: while parsing a flow sequence
+  in ""<unicode string>"", line 107, column 27:
+              Subnets: !Split [',', !ImportValue !Sub '${Envir ... 
+                              ^
+expected ',' or ']', but got '<tag>'
+  in ""<unicode string>"", line 107, column 46:
+     ... nets: !Split [',', !ImportValue !Sub '${EnvironmentName}-PublicS ... 
+                                         ^",1,0.03
+"Load error: while parsing a flow sequence
+  in ""<unicode string>"", line 33, column 33:
+          AvailabilityZone: !Select [0, !GetAZs]    # Get the first  ... 
+                                    ^
+expected ',' or ']', but got ':'
+  in ""<unicode string>"", line 34, column 11:
+          Tags:
+              ^",1,0.03
+"Load error: while parsing a flow sequence
+  in ""<unicode string>"", line 42, column 33:
+          AvailabilityZone: !Select [0, !GetAZs]    # Get the first  ... 
+                                    ^
+expected ',' or ']', but got ':'
+  in ""<unicode string>"", line 43, column 26:
+          MapPublicIpOnLaunch: true     
+                             ^",1,0.03
+"Load error: while parsing a flow sequence
+  in ""<unicode string>"", line 54, column 33:
+          AvailabilityZone: !Select [0, !GetAZs]    # Get the first  ... 
+                                    ^
+expected ',' or ']', but got ':'
+  in ""<unicode string>"", line 55, column 11:
+          Tags:
+              ^",1,0.03
+"Load error: while parsing a flow sequence
+  in ""<unicode string>"", line 61, column 25:
+          SubnetIds: !Split [',', !ImportValue !Sub '${Envir ... 
+                            ^
+expected ',' or ']', but got '<tag>'
+  in ""<unicode string>"", line 61, column 44:
+     ... tIds: !Split [',', !ImportValue !Sub '${EnvironmentName}-Private ... 
+                                         ^",1,0.03
+"Load error: while parsing a flow sequence
+  in ""<unicode string>"", line 99, column 33:
+          AvailabilityZone: !Select [0, !GetAZs]    # Get the first  ... 
+                                    ^
+expected ',' or ']', but got ':'
+  in ""<unicode string>"", line 100, column 11:
+          Tags:
+              ^",1,0.03
+"Load error: while scanning a quoted scalar
+  in ""<unicode string>"", line 11, column 21:
+          Cluster: !Ref ""<caret>
+                        ^
+found unexpected end of stream
+  in ""<unicode string>"", line 11, column 29:
+          Cluster: !Ref ""<caret>
+                                ^",1,0.03
+"Load error: while scanning a quoted scalar
+  in ""<unicode string>"", line 11, column 21:
+          Cluster: !Ref ""<caret>
+                        ^
+found unexpected end of stream
+  in ""<unicode string>"", line 13, column 25:
+          TaskDefinition: AA
+                            ^",1,0.03
+"Load error: while scanning a quoted scalar
+  in ""<unicode string>"", line 11, column 21:
+          Cluster: !Ref '<caret>
+                        ^
+found unexpected end of stream
+  in ""<unicode string>"", line 11, column 29:
+          Cluster: !Ref '<caret>
+                                ^",1,0.03
+"Load error: while scanning a quoted scalar
+  in ""<unicode string>"", line 6, column 19:
+          BucketName: ""test-bucket
+                      ^
+found unexpected end of stream
+  in ""<unicode string>"", line 7, column 15:
+          Tags: []
+                  ^",1,0.03
+"Load error: while scanning a quoted scalar
+  in ""<unicode string>"", line 86, column 25:
+          GroupDescription: 'Allow
+                            ^
+found unexpected end of stream
+  in ""<unicode string>"", line 88, column 1:
+    
+    ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 100, column 1:
+    {{- with $values := .Values }}
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 101, column 1:
+    {{- range $az := $values.availab ... 
+    ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 109, column 9:
+            WorkerInstanceProfileName
+            ^
+could not find expected ':'
+  in ""<unicode string>"", line 110, column 9:
+            RegisterNlbIpTargetsLambdaArn
+            ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 11, column 1:
+    $SOURCE
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 12, column 18:
+          Description: Cloudformation custom resource ... 
+                     ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 11, column 1:
+    {{ if eq .Cluster.Provider ""zala ... 
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 13, column 3:
+      {{- if eq .Cluster.ConfigItems.e ... 
+      ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 128, column 1:
+    {{- range $account := .AppDNSDel ... 
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 129, column 17:
+                    - !Sub arn:${AWS::Partition}:iam ... 
+                    ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 13, column 1:
+    {{#each sns}}
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 14, column 3:
+      {{name}}Sns:
+      ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 16, column 5:
+        {{- if .PermissionsBoundary}}
+        ^
+could not find expected ':'
+  in ""<unicode string>"", line 17, column 5:
+        PermissionsBoundary: !Sub 'arn:$ ... 
+        ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 16, column 7:
+          AttributeDefinitions:{{range .At ... 
+          ^
+could not find expected ':'
+  in ""<unicode string>"", line 17, column 24:
+            - AttributeName: {{.Name}}
+                           ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 17, column 1:
+    {{ with $data := . }}
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 18, column 1:
+    {{ with $azCount := len $data.Va ... 
+    ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 2, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 3, column 1:
+    Description: Deploys a Check Poi ... 
+    ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 2, column 1:
+    Hello1
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 3, column 1:
+    Test: 1
+    ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 20, column 17:
+                    {{- if .PublicHTTPConfig.ELBAcce ... 
+                    ^
+could not find expected ':'
+  in ""<unicode string>"", line 21, column 17:
+                    - '/'
+                    ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 20, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 21, column 3:
+      # PublicSubnet1Name:
+      ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 20, column 1:
+    {{ if eq .stack ""mainVPC"" }}
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 21, column 3:
+      vpcid:
+      ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 21, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 22, column 19:
+      SecurityGroupIds:
+                      ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 22, column 1:
+    {{- if or .PublicHTTPConfig.Impo ... 
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 23, column 9:
+            - Sid: ImportedCertificates
+            ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 22, column 1:
+    {{- range $listener := .NLB.List ... 
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 23, column 7:
+          - CidrIp: 0.0.0.0/0
+          ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 23, column 1:
+    {{- if eq .NLB.Listener.Protocol ... 
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 24, column 5:
+        Certificates:
+        ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 25, column 1:
+    {{ if gt (len .NodePool.Instance ... 
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 26, column 7:
+          MixedInstancesPolicy:
+          ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 27, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 28, column 15:
+        Properties: {}
+                  ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 27, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 28, column 7:
+          # VpcId: !Ref MyVPC
+          ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 27, column 3:
+      AnotherUnfinishedParameter
+      ^
+could not find expected ':'
+  in ""<unicode string>"", line 28, column 3:
+      OperatorEMail:
+      ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 3, column 1:
+    {{#if var.case1}}
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 4, column 1:
+    stackPolicy: |
+    ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 3, column 1:
+    {{#if vpc}}
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 4, column 1:
+    Parameters:
+    ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 34, column 7:
+          EnableKeyRotation
+          ^
+could not find expected ':'
+  in ""<unicode string>"", line 35, column 7:
+          KeyPolicy:
+          ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 359, column 9:
+            {{with .Environment}}
+            ^
+could not find expected ':'
+  in ""<unicode string>"", line 360, column 11:
+              {{range $key, $val := .}}
+              ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 36, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 37, column 1:
+    Outputs: {}
+    ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 371, column 7:
+          Blaa
+          ^
+could not find expected ':'
+  in ""<unicode string>"", line 372, column 7:
+          AWS::CloudFormation::Init:
+          ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 4, column 1:
+    {{- range .sqs.queues }}
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 5, column 3:
+      {{ .QueueName }}Queue:
+      ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 40, column 1:
+    {{ with $data := . }}
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 41, column 1:
+    {{ range $az := $data.Values.ava ... 
+    ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 41, column 1:
+    {{- range $index, $value := .sim ... 
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 42, column 3:
+      {{ range $access, $cidr := $value }}
+      ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 45, column 1:
+    {{#each lambdas}}
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 46, column 3:
+      {{#ifNotEquals this.handler ""fun ... 
+      ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 45, column 1:
+    {{#each lambdas}}
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 46, column 3:
+      {{@key}}LambdaFunction:
+      ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 45, column 7:
+          {{- if .PermissionsBoundary}}
+          ^
+could not find expected ':'
+  in ""<unicode string>"", line 46, column 7:
+          PermissionsBoundary: !Sub 'arn:$ ... 
+          ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 5, column 1:
+    {{/*
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 7, column 45:
+     ... dding resources to this template, make sure to add the resources to
+                                         ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 50, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 51, column 7:
+          # VpcId: !Ref VpcId
+          ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 53, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 54, column 7:
+          #ActivationKey: !Ref ActivationK ... 
+          ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 58, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 59, column 15:
+        Properties: {}
+                  ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 59, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 60, column 15:
+        Properties: {}
+                  ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 6, column 5:
+        <caret>
+        ^
+could not find expected ':'
+  in ""<unicode string>"", line 7, column 1:
+    
+    ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 64, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 65, column 11:
+              # - !Ref AWS::NoValue
+              ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 7, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 8, column 15:
+        Properties: 
+                  ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 7, column 5:
+        {{- if .HTTPHealthCheck.Port}}
+        ^
+could not find expected ':'
+  in ""<unicode string>"", line 8, column 5:
+        HealthCheckPort: {{.HTTPHealthCh ... 
+        ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 8, column 1:
+    {{- if .Aliases}}
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 9, column 5:
+        Aliases: {{ fmtSlice (quoteSlice ... 
+        ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 8, column 1:
+    {{- if and (and .ALBListener .AL ... 
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 9, column 5:
+        Aliases: {{ fmtSlice (quoteSlice ... 
+        ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 8, column 7:
+          <caret>
+          ^
+could not find expected ':'
+  in ""<unicode string>"", line 9, column 1:
+    
+    ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 852, column 5:
+        {{- if .UpdatePolicyEnabled }}
+        ^
+could not find expected ':'
+  in ""<unicode string>"", line 853, column 5:
+        UpdatePolicy:
+        ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 9, column 1:
+    $SOURCE
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 10, column 18:
+          Description: Cloudformation custom resource ... 
+                     ^",1,0.03
+"Load error: while scanning a simple key
+  in ""<unicode string>"", line 91, column 1:
+    <<<<<<< HEAD
+    ^
+could not find expected ':'
+  in ""<unicode string>"", line 92, column 15:
+        Properties: {}
+                  ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Contains'
+  in ""<unicode string>"", line 41, column 11:
+            - !Contains
+              ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Contains'
+  in ""<unicode string>"", line 419, column 17:
+          - Assert: !Contains
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Contains'
+  in ""<unicode string>"", line 53, column 11:
+            - !Contains
+              ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Contains'
+  in ""<unicode string>"", line 707, column 17:
+          - Assert: !Contains
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Contains'
+  in ""<unicode string>"", line 715, column 17:
+          - Assert: !Contains
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Contains'
+  in ""<unicode string>"", line 72, column 17:
+          - Assert: !Contains
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!Contains'
+  in ""<unicode string>"", line 778, column 17:
+          - Assert: !Contains
+                    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 129, column 11:
+              !EachMemberEquals [!ValueOfAll [ ... 
+              ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 530, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 615, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 618, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",1,0.03
+"Load error: could not determine a constructor for the tag '!EachMemberEquals'
+  in ""<unicode string>"", line 624, column 20:
+        RuleCondition: !EachMemberEquals [ [ !Ref Membe ... 
+                       ^",1,0.03
+"Load error: while scanning for the next token
+found character '%' that cannot start any token
+  in ""<unicode string>"", line 2, column 4:
+      {% for bucket in buckets %}
+       ^",1,0.03
+"Load error: while scanning for the next token
+found character '%' that cannot start any token
+  in ""<unicode string>"", line 274, column 16:
+                  {% if aws_elb_account_id %}
+                   ^",1,0.03
+"Load error: while scanning for the next token
+found character '%' that cannot start any token
+  in ""<unicode string>"", line 33, column 18:
+                    {% for action in actions %}
+                     ^",1,0.03
+"Load error: while scanning for the next token
+found character '%' that cannot start any token
+  in ""<unicode string>"", line 35, column 18:
+                    {% for action in actions %}
+                     ^",1,0.03
+"Load error: while scanning for the next token
+found character '%' that cannot start any token
+  in ""<unicode string>"", line 9, column 2:
+    {% set bucket = ""DeploymentBucket"" %}
+     ^",1,0.03
+"Load error: while scanning for the next token
+found character '@' that cannot start any token
+  in ""<unicode string>"", line 12, column 10:
+      Queue{{@index}}:
+             ^",1,0.03
+"Load error: while scanning for the next token
+found character '@' that cannot start any token
+  in ""<unicode string>"", line 5, column 10:
+      Topic{{@index}}:
+             ^",1,0.03
+"Load error: while scanning for the next token
+found character '@' that cannot start any token
+  in ""<unicode string>"", line 6, column 12:
+        Value: @var.ACCOUNT_1_ID@
+               ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 101, column 36:
+          ""3103"": ami-07414bc0b35a8a896	# partnership account (shared w ... 
+                                       ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 1581, column 58:
+     ... ary: !Ref QPermissionsBoundary  	
+                                         ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 2, column 1:
+    	""S3Stack"": {
+    ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 20, column 1:
+    	# ap-northeast-1 => ami-cbf90ecb
+    ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 20, column 1:
+    	# https://s3-eu-west-1.amazonaw ... 
+    ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 22, column 40:
+     ... _NODEJS_CONNECTION_REUSE_ENABLED	: ""1""
+                                         ^",1,0.03
+"Load error: could not determine a constructor for the tag '!$'
+  in ""<unicode string>"", line 22, column 22:
+          AccessControl: !$ AccessControl
+                         ^",1,0.03
+"Load error: while scanning for the next token
+found character '\t' that cannot start any token
+  in ""<unicode string>"", line 99, column 1:
+    			  - 'datazone:*'
+    ^",1,0.03
+"Load error: could not determine a constructor for the tag '!$'
+  in ""<unicode string>"", line 18, column 17:
+          RoleName: !$ RoleName
+                    ^",1,0.03
+Load error: Invalid control character at,1,0.03
+Load error: Extra data,1,0.03

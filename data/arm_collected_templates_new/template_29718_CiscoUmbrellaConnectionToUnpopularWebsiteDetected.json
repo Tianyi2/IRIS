@@ -1,0 +1,53 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/75297f62-10a8-4fc1-9b2a-12f25c6f05a7')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/75297f62-10a8-4fc1-9b2a-12f25c6f05a7')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "Cisco Cloud Security - Connection to Unpopular Website Detected",
+        "description": "'Detects first connection to an unpopular website (possible malicious payload delivery).'\n",
+        "query": "let top_million_list = Cisco_Umbrella\n| where EventType == \"proxylogs\"\n| extend Hostname = parse_url(UrlOriginal)[\"Host\"]\n| summarize count() by tostring(Hostname)\n| top 1000000 by count_\n| summarize make_list(Hostname);\nCisco_Umbrella\n| where EventType == \"proxylogs\"\n| extend Hostname = parse_url(UrlOriginal)[\"Host\"]\n| where Hostname !in (top_million_list)\n| extend Message = \"Connect to unpopular website (possible malicious payload delivery)\"\n| project TimeGenerated, Message, SrcIpAddr, DstIpAddr, UrlOriginal \n",
+        "status": "Available",
+        "queryFrequency": "1d",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "UrlOriginal",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SrcIpAddr",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "CommandAndControl",
+          "Exfiltration"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "14d"
+      }
+    }
+  ]
+}

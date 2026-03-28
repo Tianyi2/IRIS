@@ -1,0 +1,597 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "accessProxyToken": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Registration token for the Access Proxy."
+            }
+        },
+        "accessProxyLbPort": {
+            "defaultValue": 443,
+            "type": "int",
+            "minValue": 1,
+            "maxValue": 65535,
+            "metadata": {
+                "description": "Public port for the Access Proxy load balancer (defaults to '443')."
+            }
+        },
+        "accessProxyLbTimeout": {
+            "defaultValue": 15,
+            "type": "int",
+            "minValue": 1,
+            "maxValue": 60,
+            "metadata": {
+                "description": "Timeout in minutes for the Access Proxy load balancer connections (defaults to '15')."
+            }
+        },
+        "virtualMachineScaleSetInstanceCount": {
+            "defaultValue": 2,
+            "type": "int",
+            "metadata": {
+                "description": "Number of virtual machines to create. (defaults to 2)."
+            }
+        },
+        "virtualMachineScaleSetAvailabilityZones": {
+            "defaultValue": [],
+            "type": "array",
+            "metadata": {
+                "description": "Availability Zones to use for deployed instances (Cannot be changed after deploy)."
+            }
+        },
+        "virtualMachineScaleSetInstanceSize": {
+            "defaultValue": "Standard_B1s",
+            "type": "string",
+            "allowedValues": [
+                "Standard_B1s",
+                "Standard_B1ms",
+                "Standard_B2s"
+            ],
+            "metadata": {
+                "description": "Instance size for the Access Proxy virtual machines. (defaults to 'Standard_B1s')."
+            }
+        },
+        "virtualMachineScaleSetAuthUserName": {
+            "type": "string",
+            "defaultValue": "azureuser",
+            "metadata": {
+                "description": "Admin username to use for the Access Proxy Instances login (defaults to azureuser)."
+            }
+        },
+        "virtualMachineScaleSetAuthPublicKey": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Public Key to use for the Access Proxy Instances login (defaults to a placeholder when the value is not provided)."
+            }
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "metadata": {
+                "description": "New or Existing VNet Name"
+            }
+        },
+        "virtualNetworkNewOrExisting": {
+            "type": "string",
+            "metadata": {
+                "description": "Boolean indicating whether the VNet is new or existing"
+            }
+        },
+        "virtualNetworkAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "VNet address prefix"
+            }
+        },
+        "virtualNetworkResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource group of the VNet"
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "New or Existing subnet Name"
+            }
+        },
+        "subnetAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Subnet address prefix"
+            }
+        },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Specify custom tags to be included with default tags."
+            }
+        },
+        "location": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "string",
+            "metadata": {
+                "description": "Location to deploy resources (defaults to Resource Group location)."
+            }
+        }
+    },
+    "variables": {
+        "defaultTags": {
+            "service": "CloudGen Access",
+            "provider": "Barracuda"
+        },
+        "instanceTags": {
+            "keyVault": "[variables('keyVaultName')]",
+            "haEnabled": "[variables('haEnabled')]"
+        },
+        "customData": "IyEvdXNyL2Jpbi9lbnYgYmFzaAojCiMgQ29weXJpZ2h0IChjKSAyMDIwLXByZXNlbnQsIEJhcnJhY3VkYSBOZXR3b3JrcyBJbmMuCiMKCiMgU2V0IGVycm9yIGhhbmRsaW5nCnNldCAtZXVvIHBpcGVmYWlsCgojIEZ1bmN0aW9ucwoKZnVuY3Rpb24gbG9nX2VudHJ5KCkgewogICAgbG9jYWwgTE9HX1RZUEU9IiR7MTo/TmVlZHMgbG9nIHR5cGV9IgogICAgbG9jYWwgTE9HX01TRz0iJHsyOj9OZWVkcyBsb2cgbWVzc2FnZX0iCiAgICBsb2NhbCBMT0dfU0VQPSI9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0iCgogICAgZWNobyAtZSAiJHtMT0dfU0VQfVxuJChkYXRlICIrJVktJW0tJWQgJUg6JU06JVMiKSBbJExPR19UWVBFXSAke0xPR19NU0d9XG4ke0xPR19TRVB9Igp9CgpmdW5jdGlvbiBnZXRfc2VjcmV0KCkgewogICAgbG9jYWwgVE9LRU49IiR7MX0iCiAgICBsb2NhbCBWQVVMVD0iJHsyfSIKICAgIGxvY2FsIFNFQ1JFVD0iJHszfSIKCiAgICBjdXJsIC1zIC1IICJBdXRob3JpemF0aW9uOiBCZWFyZXIgJHtUT0tFTn0iIFwKICAgICAgICAiaHR0cHM6Ly8ke1ZBVUxUfS52YXVsdC5henVyZS5uZXQvc2VjcmV0cy8ke1NFQ1JFVH0/YXBpLXZlcnNpb249MjAxNi0xMC0wMSIgfAogICAgICAgIGpxIC1yIC52YWx1ZQp9Cgpsb2dfZW50cnkgIklORk8iICJJbnN0YWxsIHN1cHBvcnQgdG9vbHMiCnl1bSAteSBpbnN0YWxsIGN1cmwganEgb3BlbnNzbAoKbG9nX2VudHJ5ICJJTkZPIiAiR2V0IGluc3RhbmNlIHRva2VuIgpBWlVSRV9UT0tFTj0iJChjdXJsIC1zIC1IIE1ldGFkYXRhOnRydWUgXAogICAgImh0dHA6Ly8xNjkuMjU0LjE2OS4yNTQvbWV0YWRhdGEvaWRlbnRpdHkvb2F1dGgyL3Rva2VuP2FwaS12ZXJzaW9uPTIwMTgtMDItMDEmcmVzb3VyY2U9aHR0cHMlM0ElMkYlMkZ2YXVsdC5henVyZS5uZXQiIHwKICAgIGpxIC1yIC5hY2Nlc3NfdG9rZW4pIgoKbG9nX2VudHJ5ICJJTkZPIiAiR2V0IGluc3RhbmNlIHRhZ3MiCklGUz0iOyIgcmVhZCAtciAtYSBUQUdTIDw8PCIkKGN1cmwgLXMgLUggTWV0YWRhdGE6dHJ1ZSBcCiAgICAiaHR0cDovLzE2OS4yNTQuMTY5LjI1NC9tZXRhZGF0YS9pbnN0YW5jZS9jb21wdXRlP2FwaS12ZXJzaW9uPTIwMTgtMTAtMDEiIHwKICAgIGpxIC1yIC50YWdzKSIKCmxvZ19lbnRyeSAiSU5GTyIgIlByb2Nlc3MgaW5zdGFuY2UgdGFncyIKZm9yIFRBRyBpbiAiJHtUQUdTW0BdfSI7IGRvCiAgICBpZiBbWyAiJHtUQUd9IiA9fiBea2V5VmF1bHQgXV07IHRoZW4KICAgICAgICBLRVlfVkFVTFRfTkFNRT0iJHtUQUcjKjp9IgogICAgZmkKICAgIGlmIFtbICIke1RBR30iID1+IF5oYUVuYWJsZWQgXV07IHRoZW4KICAgICAgICBIQV9FTkFCTEVEPSIke1RBRyMqOn0iCiAgICBmaQpkb25lCgojIFRyeSB0b2tlbiB1bnRpbCBpdCdzIHZhbGlkIG9yIFZNU1MgcmVwbGFjZXMgdGhlIGluc3RhbmNlCiMgTmVlZHMgVk1TUyBpZGVudGl0eSBhZGRlZCB0byB2YXVsdCAobWlnaHQgdGFrZSBhIHdoaWxlKQpsb2dfZW50cnkgIklORk8iICJHZXQgZW5yb2xsbWVudCB0b2tlbiIKZm9yICgoUlVOID0gMTsgOyBSVU4rKykpOyBkbwogICAgQ0dBX1RPS0VOPSIkKGdldF9zZWNyZXQgIiR7QVpVUkVfVE9LRU59IiAiJHtLRVlfVkFVTFRfTkFNRX0iIGNnYS1wcm94eS10b2tlbikiCiAgICBpZiBbWyAiJHtDR0FfVE9LRU46LX0iID1+IF5odHRwW3NdPzovL1teL10rL3Byb3hpZXMvdlswLTldKy9lbnJvbGxtZW50L1swLTlhLWYtXStcP3Byb3h5X2F1dGhfdG9rZW49W15cJl0rXCZ0ZW5hbnRfaWQ9WzAtOWEtZi1dKyQgXV07IHRoZW4KICAgICAgICBsb2dfZW50cnkgIklORk8iICJFbnJvbGxtZW50IHRva2VuIGlzIHZhbGlkIgogICAgICAgIGJyZWFrCiAgICBmaQogICAgbG9nX2VudHJ5ICJJTkZPIiAiUmV0cnlpbmcgZW5yb2xsbWVudCB0b2tlbiByZXF1ZXN0IGZyb20gdmF1bHQgaW4gNSBzZWNvbmRzLiBBdHRlbXB0ICR7UlVOfSIKICAgIHNsZWVwIDUKZG9uZQoKIyBTZXQgcmVkaXMgaW5zdGFuY2Ugd2hlbiBuZWNlc3NhcnkKRVhUUkFfQVJHUz0oKQppZiBbWyAiJHtIQV9FTkFCTEVEOi19IiA9PSAidHJ1ZSIgXV07IHRoZW4KCiAgICBsb2dfZW50cnkgIklORk8iICJIQSBpcyBlbmFibGVkIgoKICAgIGxvZ19lbnRyeSAiSU5GTyIgIkdldCBNaWNyb3NvZnQgcm9vdCBDQXMiCiAgICAjIGh0dHBzOi8vZG9jcy5taWNyb3NvZnQuY29tL2VuLXVzL2F6dXJlL2F6dXJlLWNhY2hlLWZvci1yZWRpcy9jYWNoZS13aGF0cy1uZXcKICAgICMgaHR0cHM6Ly93d3cuZGlnaWNlcnQuY29tL2tiL2RpZ2ljZXJ0LXJvb3QtY2VydGlmaWNhdGVzLmh0bQogICAgY3VybCAtcyBodHRwczovL2NhY2VydHMuZGlnaWNlcnQuY29tL0JhbHRpbW9yZUN5YmVyVHJ1c3RSb290LmNydC5wZW0gPi9ldGMvc3NsL2NlcnRzL2F6dXJlLXJlZGlzLWNhLnBlbQogICAgY3VybCAtcyBodHRwczovL2NhY2VydHMuZGlnaWNlcnQuY29tL0RpZ2lDZXJ0R2xvYmFsUm9vdEcyLmNydC5wZW0gPj4vZXRjL3NzbC9jZXJ0cy9henVyZS1yZWRpcy1jYS5wZW0KICAgICMgaHR0cHM6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2lvcHMvRG9jcy9SZXBvc2l0b3J5Lmh0bQogICAgb3BlbnNzbCB4NTA5IC1pbmZvcm0gREVSIC1pbiBcCiAgICAgICAgPChjdXJsIC1zICJodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpb3BzL2NlcnRzL01pY3Jvc29mdCUyMFJTQSUyMFJvb3QlMjBDZXJ0aWZpY2F0ZSUyMEF1dGhvcml0eSUyMDIwMTcuY3J0IiAtLW91dHB1dCAtKSBcCiAgICAgICAgPj4vZXRjL3NzbC9jZXJ0cy9henVyZS1yZWRpcy1jYS5wZW0KCiAgICBsb2dfZW50cnkgIklORk8iICJHZXQgcmVkaXMgc2VjcmV0cyIKICAgIEVYVFJBX0FSR1MrPSgiLWUiICJSRURJU19IT1NUPSQoZ2V0X3NlY3JldCAiJHtBWlVSRV9UT0tFTn0iICIke0tFWV9WQVVMVF9OQU1FfSIgcmVkaXMtaG9zdCkiKQogICAgRVhUUkFfQVJHUys9KCItZSIgIlJFRElTX1BPUlQ9JChnZXRfc2VjcmV0ICIke0FaVVJFX1RPS0VOfSIgIiR7S0VZX1ZBVUxUX05BTUV9IiByZWRpcy1wb3J0KSIpCiAgICBFWFRSQV9BUkdTKz0oIi1lIiAiUkVESVNfQVVUSD0kKGdldF9zZWNyZXQgIiR7QVpVUkVfVE9LRU59IiAiJHtLRVlfVkFVTFRfTkFNRX0iIHJlZGlzLWF1dGgpIikKICAgIEVYVFJBX0FSR1MrPSgiLWUiICJSRURJU19TU0w9VFJVRSIpCgplbHNlCiAgICBsb2dfZW50cnkgIklORk8iICJIQSBpcyBub3QgZW5hYmxlZCIKZmkKCmxvZ19lbnRyeSAiSU5GTyIgIkluc3RhbGwgcHJveHkiCmN1cmwgLXNMICJodHRwczovL3VybC5hY2Nlc3MuYmFycmFjdWRhLmNvbS9wcm94eS1saW51eCIgfCBiYXNoIC1zIC0tIC11IC1wICI0NDMiIC16IFwKICAgIC10ICIke0NHQV9UT0tFTn0iIFwKICAgICIke0VYVFJBX0FSR1NbQF19IgoKbG9nX2VudHJ5ICJJTkZPIiAiSGFyZGVuIGluc3RhbmNlIgpjdXJsIC1zTCAiaHR0cHM6Ly91cmwuYWNjZXNzLmJhcnJhY3VkYS5jb20vaGFyZGVuLWxpbnV4IiB8IGJhc2ggLXMgLS0KCmxvZ19lbnRyeSAiSU5GTyIgIlJlYm9vdCIKc2h1dGRvd24gLXIgbm93Cg==",
+        "haEnabled": "[if(greater(parameters('virtualMachineScaleSetInstanceCount'), 1), 'true', 'false')]",
+        "keyVaultName": "[substring(concat(variables('namePrefix'), 'vault', variables('nameSuffix')), 0, 24)]",
+        "loadBalancerBackendName": "[concat(variables('namePrefix'), 'lb-backend', variables('nameSuffix'))]",
+        "loadBalancerFrontendName": "[concat(variables('namePrefix'), 'lb-frontend', variables('nameSuffix'))]",
+        "loadBalancerHealthProbeName": "[concat(variables('namePrefix'), 'lb-health-probe', variables('nameSuffix'))]",
+        "loadBalancerName": "[concat(variables('namePrefix'), 'lb', variables('nameSuffix'))]",
+        "loadBalancerRuleName": "[concat(variables('namePrefix'), 'lb-rule', variables('nameSuffix'))]",
+        "namePrefix": "cga-proxy-",
+        "nameSuffix": "[concat('-', uniqueString(resourceGroup().id))]",
+        "networkSecurityGroupName": "[concat(variables('namePrefix'), 'nsg', variables('nameSuffix'))]",
+        "placeholderPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCzjQ+NvXCkEcxJaZDGBB0mFXyzM2NDBf4I1XMGB5gUeqGn6AuQcAAxL0F6BZLFY1gWLmFx7d7mEeOvykZTrX/prTbjHwd78CqUzzdLSdCBFpKYGBdaDlqi7QaVddzlB8rrCwPkOsWPC+e7izpaIObl+URjYQd/dhD3D77dgIz0LnGZDVPSKUnmS3rQA3STnQCoMqJ1Mv7ctcZEFwgQYzrX/vHcLz1+QgIotkQtarOi2HGNLExJGzYCtKBPaTJYrxTQwuv+qa9THnafzlHqmwvskU+QUJ6rqcpXfZs5Biw7pBS+vY7ZwzO7EayLC+gPULcO00ZNTJPTZ6vJ2NGH7OIr this-is-a-placeholder",
+        "publicIPAddressName": "[concat(variables('namePrefix'), 'ip', variables('nameSuffix'))]",
+        "redisCacheName": "[concat(variables('namePrefix'), 'redis', variables('nameSuffix'))]",
+        "storageAccountName": "[substring(replace(concat(variables('namePrefix'), 'logs', variables('nameSuffix')), '-', ''), 0, 24)]",
+        "virtualMachineScaleSetInstanceName": "[concat(variables('namePrefix'), 'vmss', variables('nameSuffix'), '-')]",
+        "virtualMachineScaleSetName": "[concat(variables('namePrefix'), 'vmss', variables('nameSuffix'))]",
+        "vnetId": {
+            "new": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+            "existing": "[resourceId(parameters('virtualNetworkResourceGroup'),'Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]"
+        },
+        "subnetId": "[concat(variables('vnetId')[parameters('virtualNetworkNewOrExisting')],'/subnets/', parameters('subnetName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2021-10-01",
+            "name": "[variables('keyVaultName')]",
+            "location": "[parameters('location')]",
+            "tags": "[union(variables('defaultTags'), if(contains(parameters('tagsByResource'), 'Microsoft.KeyVault/vaults'), parameters('tagsByResource')['Microsoft.KeyVault/vaults'], json('{}')))]",
+            "properties": {
+                "sku": {
+                    "family": "A",
+                    "name": "Standard"
+                },
+                "accessPolicies": [],
+                "tenantId": "[subscription().tenantId]",
+                "enabledForDeployment": false,
+                "enabledForDiskEncryption": false,
+                "enabledForTemplateDeployment": false,
+                "enableSoftDelete": false
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2021-10-01",
+            "name": "[concat(variables('keyVaultName'), '/cga-proxy-token')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+            ],
+            "properties": {
+                "value": "[parameters('accessProxyToken')]",
+                "contentType": "string",
+                "attributes": {
+                    "enabled": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/accessPolicies",
+            "apiVersion": "2021-10-01",
+            "name": "[concat(variables('KeyVaultName'), '/add')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+                "[resourceId('Microsoft.Compute/virtualMachineScaleSets', variables('virtualMachineScaleSetName'))]"
+            ],
+            "properties": {
+                "accessPolicies": [
+                    {
+                        "tenantId": "[subscription().tenantId]",
+                        "objectId": "[reference(resourceId('Microsoft.Compute/virtualMachineScaleSets', variables('virtualMachineScaleSetName')), '2021-11-01', 'full').identity.principalId]",
+                        "permissions": {
+                            "secrets": [
+                                "Get",
+                                "List"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('loadBalancerName')]",
+            "location": "[parameters('location')]",
+            "tags": "[union(variables('defaultTags'), if(contains(parameters('tagsByResource'), 'Microsoft.Network/loadBalancers'), parameters('tagsByResource')['Microsoft.Network/loadBalancers'], json('{}')))]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "[variables('loadBalancerFrontendName')]",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+                            },
+                            "privateIPAddressVersion": "[reference(variables('publicIPAddressName')).publicIPAddressVersion]"
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "[variables('loadBalancerBackendName')]"
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "[variables('loadBalancerRuleName')]",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', variables('loadBalancerName'), variables('loadBalancerFrontendName'))]"
+                            },
+                            "frontendPort": "[parameters('accessProxyLbPort')]",
+                            "backendPort": 443,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": "[reference(variables('publicIPAddressName')).idleTimeoutInMinutes]",
+                            "protocol": "Tcp",
+                            "enableTcpReset": false,
+                            "loadDistribution": "Default",
+                            "disableOutboundSnat": false,
+                            "backendAddressPool": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('loadBalancerName'), variables('loadBalancerBackendName'))]"
+                            },
+                            "probe": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('loadBalancerName'), variables('loadBalancerHealthProbeName'))]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "[variables('loadBalancerHealthProbeName')]",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "port": 443,
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 5
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('publicIPAddressName')]",
+            "location": "[parameters('location')]",
+            "tags": "[union(variables('defaultTags'), if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')))]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": "[parameters('accessProxyLbTimeout')]"
+            }
+        },
+        {
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'),'new')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('virtualNetworkName')]",
+            "location": "[parameters('location')]",
+            "tags": "[union(variables('defaultTags'), if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks'), parameters('tagsByResource')['Microsoft.Network/virtualNetworks'], json('{}')))]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('virtualNetworkAddressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetAddressPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachineScaleSets",
+            "apiVersion": "2021-11-01",
+            "name": "[variables('virtualMachineScaleSetName')]",
+            "location": "[parameters('location')]",
+            "tags": "[union(variables('defaultTags'), variables('instanceTags'), if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachineScaleSets'), parameters('tagsByResource')['Microsoft.Compute/virtualMachineScaleSets'], json('{}')))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+                "[resourceId('Microsoft.Cache/Redis', variables('redisCacheName'))]"
+            ],
+            "sku": {
+                "name": "[parameters('virtualMachineScaleSetInstanceSize')]",
+                "tier": "Standard",
+                "capacity": "[parameters('virtualMachineScaleSetInstanceCount')]"
+            },
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "zones": "[parameters('virtualMachineScaleSetAvailabilityZones')]",
+            "properties": {
+                "singlePlacementGroup": false,
+                "platformFaultDomainCount": 1,
+                "zoneBalance": "[if(greater(length(parameters('virtualMachineScaleSetAvailabilityZones')), 1), true(), '')]",
+                "upgradePolicy": {
+                    "mode": "Automatic"
+                },
+                "scaleInPolicy": {
+                    "rules": [
+                        "OldestVM"
+                    ]
+                },
+                "overprovision": false,
+                "automaticRepairsPolicy": {
+                    "enabled": true,
+                    "gracePeriod": "PT30M"
+                },
+                "virtualMachineProfile": {
+                    "osProfile": {
+                        "computerNamePrefix": "[variables('virtualMachineScaleSetInstanceName')]",
+                        "customData": "[variables('customData')]",
+                        "adminUsername": "[parameters('virtualMachineScaleSetAuthUserName')]",
+                        "linuxConfiguration": {
+                            "disablePasswordAuthentication": true,
+                            "provisionVMAgent": true,
+                            "ssh": {
+                                "publicKeys": [
+                                    {
+                                        "path": "[concat('/home/', parameters('virtualMachineScaleSetAuthUserName'), '/.ssh/authorized_keys')]",
+                                        "keyData": "[if(empty(parameters('virtualMachineScaleSetAuthPublicKey')), variables('placeholderPublicKey'), parameters('virtualMachineScaleSetAuthPublicKey'))]"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "storageProfile": {
+                        "osDisk": {
+                            "osType": "Linux",
+                            "createOption": "FromImage",
+                            "caching": "ReadWrite",
+                            "managedDisk": {
+                                "storageAccountType": "StandardSSD_LRS"
+                            },
+                            "diskSizeGB": 30
+                        },
+                        "imageReference": {
+                            "publisher": "OpenLogic",
+                            "offer": "CentOS",
+                            "sku": "8_2",
+                            "version": "latest"
+                        }
+                    },
+                    "networkProfile": {
+                        "healthProbe": {
+                            "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('loadBalancerName'), variables('loadBalancerHealthProbeName'))]"
+                        },
+                        "networkInterfaceConfigurations": [
+                            {
+                                "name": "[concat(variables('virtualMachineScaleSetName'), '-vnet-nic01')]",
+                                "properties": {
+                                    "primary": true,
+                                    "enableAcceleratedNetworking": false,
+                                    "networkSecurityGroup": {
+                                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                                    },
+                                    "ipConfigurations": [
+                                        {
+                                            "name": "[concat(variables('virtualMachineScaleSetName'), '-vnet-nic01-defaultIpConfiguration')]",
+                                            "properties": {
+                                                "primary": true,
+                                                "subnet": {
+                                                    "id": "[variables('subnetId')]"
+                                                },
+                                                "privateIPAddressVersion": "IPv4",
+                                                "loadBalancerBackendAddressPools": [
+                                                    {
+                                                        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('loadBalancerName'), variables('loadBalancerBackendName'))]"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "diagnosticsProfile": {
+                        "bootDiagnostics": {
+                            "enabled": true,
+                            "storageUri": "[reference(variables('storageAccountName')).primaryEndpoints.blob]"
+                        }
+                    },
+                    "priority": "Regular"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "name": "[variables('networkSecurityGroupName')]",
+            "location": "[parameters('location')]",
+            "tags": "[union(variables('defaultTags'), if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')))]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "port-443",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "443",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-09-01",
+            "name": "[variables('storageAccountName')]",
+            "location": "[parameters('location')]",
+            "tags": "[union(variables('defaultTags'), if(contains(parameters('tagsByResource'), 'Microsoft.Storage/storageAccounts'), parameters('tagsByResource')['Microsoft.Storage/storageAccounts'], json('{}')))]",
+            "properties": {
+                "accessTier": "Hot",
+                "minimumTlsVersion": "TLS1_2",
+                "supportsHttpsTrafficOnly": true,
+                "allowBlobPublicAccess": false,
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "defaultAction": "Allow"
+                }
+            },
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "StorageV2"
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/managementPolicies",
+            "apiVersion": "2021-09-01",
+            "name": "[concat(variables('storageAccountName'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ],
+            "properties": {
+                "policy": {
+                    "rules": [
+                        {
+                            "enabled": true,
+                            "name": "DeleteOlderThan7Days",
+                            "type": "Lifecycle",
+                            "definition": {
+                                "actions": {
+                                    "baseBlob": {
+                                        "delete": {
+                                            "daysAfterModificationGreaterThan": 7
+                                        }
+                                    }
+                                },
+                                "filters": {
+                                    "blobTypes": [
+                                        "blockBlob"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "condition": "[equals(variables('haEnabled'),'true')]",
+            "type": "Microsoft.Cache/Redis",
+            "apiVersion": "2021-06-01",
+            "name": "[variables('redisCacheName')]",
+            "location": "[parameters('location')]",
+            "tags": "[union(variables('defaultTags'), if(contains(parameters('tagsByResource'), 'Microsoft.Cache/Redis'), parameters('tagsByResource')['Microsoft.Cache/Redis'], json('{}')))]",
+            "properties": {
+                "enableNonSslPort": false,
+                "minimumTlsVersion": "1.2",
+                "sku": {
+                    "capacity": 1,
+                    "family": "C",
+                    "name": "Standard"
+                }
+            }
+        },
+        {
+            "condition": "[equals(variables('haEnabled'),'true')]",
+            "name": "[concat(variables('redisCacheName'), '/firewallrule01')]",
+            "type": "Microsoft.Cache/Redis/firewallRules",
+            "apiVersion": "2021-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cache/Redis', variables('redisCacheName'))]"
+            ],
+            "properties": {
+                "startIP": "[reference(variables('publicIPAddressName')).ipAddress]",
+                "endIP": "[reference(variables('publicIPAddressName')).ipAddress]"
+            }
+        },
+        {
+            "condition": "[equals(variables('haEnabled'),'true')]",
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2021-10-01",
+            "name": "[concat(variables('keyVaultName'), '/redis-host')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+                "[resourceId('Microsoft.Cache/Redis', variables('redisCacheName'))]"
+            ],
+            "properties": {
+                "value": "[if(equals(variables('haEnabled'),'true'), reference(variables('redisCacheName')).hostName, '')]",
+                "contentType": "string",
+                "attributes": {
+                    "enabled": true
+                }
+            }
+        },
+        {
+            "condition": "[equals(variables('haEnabled'),'true')]",
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2021-10-01",
+            "name": "[concat(variables('keyVaultName'), '/redis-port')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+                "[resourceId('Microsoft.Cache/Redis', variables('redisCacheName'))]"
+            ],
+            "properties": {
+                "value": "[if(equals(variables('haEnabled'),'true'), reference(variables('redisCacheName')).sslPort, '')]",
+                "contentType": "string",
+                "attributes": {
+                    "enabled": true
+                }
+            }
+        },
+        {
+            "condition": "[equals(variables('haEnabled'),'true')]",
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2021-10-01",
+            "name": "[concat(variables('keyVaultName'), '/redis-auth')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+                "[resourceId('Microsoft.Cache/Redis', variables('redisCacheName'))]"
+            ],
+            "properties": {
+                "value": "[if(equals(variables('haEnabled'),'true'), listKeys(resourceId('Microsoft.Cache/Redis', variables('redisCacheName')), '2021-06-01').primaryKey, '')]",
+                "contentType": "string",
+                "attributes": {
+                    "enabled": true
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "ipAddress": {
+            "type": "string",
+            "value": "[reference(variables('publicIPAddressName')).ipAddress]"
+        }
+    }
+}

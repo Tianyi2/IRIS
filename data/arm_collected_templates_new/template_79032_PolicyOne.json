@@ -1,0 +1,71 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "OutterTagName": {
+          "type": "String",
+          "metadata": {
+              "displayName": "Outter Tag Name",
+              "description": "Tag to look for in the subscription policy"
+          }
+        },
+        "OutterTagValue": {
+          "type": "String",
+          "metadata": {
+              "displayName": "Outter Tag Value",
+              "description": "Value of the outter tag"
+          }
+        }
+    },
+    "functions": [],
+    "variables": {
+      "outterPolicyName": "[concat('OutterPolicy', uniqueString('OtterTagPolicy1234'))]"
+    },
+    "resources": [
+      {
+         "type": "Microsoft.Authorization/policyDefinitions",
+         "name": "[variables('outterPolicyName')]",
+         "apiVersion": "2019-09-01",
+        "properties": {
+          "displayName": "[variables('outterPolicyName')]",
+          "policyType": "Custom",
+          "mode": "Indexed",
+          "description": "This is policy test 1",
+          "metadata": {
+            "version": "1.0.1",
+            "category": "PolicyCategory1"
+          },
+          "parameters": {
+          },
+          "if": {
+                "allOf": [{
+                        "field": "type",
+                        "equals": "Microsoft.Resources/subscriptions/resourceGroups"
+                    },
+                    {
+                        "field": "[concat('tags[', parameters('OutterTagName'), ']')]",
+                        "equals": "[parameters('OutterTagValue')]"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "DeployIfNotExists",
+                "deployment":{
+                    "properties": "Incremental",
+                    "template":  {
+                         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                         "contentVersion": "1.0.0.0"
+                    }
+                }
+            }
+          }
+        }
+       
+    ],
+    "outputs": {
+      "policyName": {
+        "type": "string",
+        "value": "[variables('outterPolicyName')]"
+      }
+    }
+  }

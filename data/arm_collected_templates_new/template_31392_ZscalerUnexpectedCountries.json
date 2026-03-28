@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/b3d112b4-3e1e-11ec-9bbc-0242ac130002')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/b3d112b4-3e1e-11ec-9bbc-0242ac130002')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "High",
+        "name": "Zscaler - Forbidden countries",
+        "description": "'Detects suspicious ZPA connections from forbidden countries.'\n",
+        "query": "let bl_countries = dynamic(['CH', 'RU']);       //List of countries from which you do not expect connections\nZPAEvent \n| where DvcAction == 'open'\n| where SrcGeoCountry in~ (bl_countries)\n| extend IPCustomEntity = SrcIpAddr, AccountCustomEntity = DstUserName\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "AccountCustomEntity",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "IPCustomEntity",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "InitialAccess"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

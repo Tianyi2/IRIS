@@ -1,0 +1,53 @@
+{
+ "$schema": "https://schema.management.azure.com/schemas/2019-08-01/subscriptionDeploymentTemplate.json#",
+ "contentVersion": "1.0.0.0",
+ "parameters": {},
+ "variables": {
+    "mspOfferDescription": "Manage your Azure WAF policies from a dedicated portal where you can easily check logs, use dashboards to overview your WAF infrastrucutre and whitelist false positives.",
+    "mspOfferName": "Azure WAF Manager",
+  "mspRegistrationName": "[guid(variables('mspOfferName'))]",
+    "mspAssignmentName": "[guid(variables('mspOfferName'))]",
+  "managedByTenantId": "43e87b69-f0ad-485c-b58d-1e75b2737658",
+    "authorizations": [
+        {
+            "principalId": "51e4d3cb-52cd-42ef-b196-c82452773358",
+            "roleDefinitionId": "73c42c96-874c-492b-b04d-ab87d138a893",
+            "principalIdDisplayName": "Azure WAF Manager"
+        }
+    ]
+ },
+ "resources": [
+  {
+   "type": "Microsoft.ManagedServices/registrationDefinitions",
+   "apiVersion": "2020-02-01-preview",
+   "name": "[variables('mspRegistrationName')]",
+   "properties": {
+    "registrationDefinitionName": "[variables('mspOfferName')]",
+    "description": "[variables('mspOfferDescription')]",
+    "managedByTenantId": "[variables('managedByTenantId')]",
+    "authorizations": "[variables('authorizations')]"
+   }
+  },
+  {
+   "type": "Microsoft.ManagedServices/registrationAssignments",
+   "apiVersion": "2020-02-01-preview",
+   "name": "[variables('mspAssignmentName')]",
+   "dependsOn": [
+    "[resourceId('Microsoft.ManagedServices/registrationDefinitions/', variables('mspRegistrationName'))]"
+   ],
+   "properties": {
+    "registrationDefinitionId": "[resourceId('Microsoft.ManagedServices/registrationDefinitions/', variables('mspRegistrationName'))]"
+   }
+  }
+ ],
+ "outputs": {
+  "mspOfferName": {
+   "type": "string",
+   "value": "[concat('Managed by', ' ', variables('mspOfferName'))]"
+  },
+  "authorizations": {
+   "type": "array",
+   "value": "[variables('authorizations')]"
+  }
+ }
+}

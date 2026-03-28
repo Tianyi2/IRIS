@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deploy-Budget",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "westeurope",
+      "identity": {
+        "principalId": "60e04f7a-3538-4495-a286-a63934c0d392",
+        "tenantId": "5663f39e-feb1-4303-a1f9-cf20b702de61",
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "description": "Ensure there is a budget on all subscriptions under the assigned scope to control cost and spending.",
+        "displayName": "Ensure there is a budget associated with the subscription",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "parameters": {
+          "amount": {
+            "value": "1000"
+          },
+          "budgetName": {
+            "value": "DefaultBudget"
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Management/managementGroups/saturn/providers/Microsoft.Authorization/policyDefinitions/Deploy-Budget",
+        "scope": "/providers/Microsoft.Management/managementGroups/saturn-playground"
+      }
+    }
+  ],
+  "outputs": {}
+}

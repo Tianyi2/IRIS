@@ -1,0 +1,156 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.3",
+    "parameters": {
+        "location": {
+            "type": "string"
+        },
+        "templateUriBase": {
+            "type": "string"
+        },
+        "storageName": {
+            "type": "string"
+        },
+        "storageType": {
+            "type": "string"
+        },
+        "vnetName": {
+            "type": "string"
+        },
+        "publicIpName": {
+            "type": "string"
+        },
+        "nicName": {
+            "type": "string"
+        },
+        "vmName": {
+            "type": "string"
+        },
+        "vmSize": {
+            "type": "string"
+        },
+        "vmOsPublisher": {
+            "type": "string"
+        },
+        "vmOsOffer": {
+            "type": "string"
+        },
+        "vmOsSku": {
+            "type": "string"
+        },
+        "dnsPrefix": {
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        }
+    },
+    "variables": {
+        "osDiskName": "[concat('disk-os-', parameters('vmName'))]",
+        "dataDiskName": "[concat('disk-data-', parameters('vmName'), '-01')]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2015-01-01",
+            "type": "Microsoft.Resources/deployments",
+            "name": "VM-Dependencies",
+            "properties": {
+                "mode": "[deployment().properties.mode]",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateUriBase'), '/01.03-VM-Dependencies.json')]",
+                    "contentVersion": "1.0.0.3"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "templateUriBase": {
+                        "value": "[parameters('templateUriBase')]"
+                    },
+                    "storageName": {
+                        "value": "[parameters('storageName')]"
+                    },
+                    "storageType": {
+                        "value": "[parameters('storageType')]"
+                    },
+                    "vnetName": {
+                        "value": "[parameters('vnetName')]"
+                    },
+                    "publicIpName": {
+                        "value": "[parameters('publicIpName')]"
+                    },
+                    "nicName": {
+                        "value": "[parameters('nicName')]"
+                    },
+                    "dnsPrefix": {
+                        "value": "[parameters('dnsPrefix')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('vmName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'VM-Dependencies')]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[parameters('vmOsPublisher')]",
+                        "offer": "[parameters('vmOsOffer')]",
+                        "sku": "[parameters('vmOsSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[variables('osDiskName')]",
+                        "vhd": {
+                            "uri": "[concat(reference('VM-Dependencies').outputs.storageUriVhdContainer.value, '/', variables('osDiskName'), '.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "dataDisks": [
+                        {
+                            "name": "[variables('dataDiskName')]",
+                            "diskSizeGB": "50",
+                            "lun": 0,
+                            "vhd": {
+                                "uri": "[concat(reference('VM-Dependencies').outputs.storageUriVhdContainer.value, '/', variables('dataDiskName'), '.vhd')]"
+                            },
+                            "createOption": "Empty"
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[reference('VM-Dependencies').outputs.nicId.value]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": "true",
+                        "storageUri": "[reference('VM-Dependencies').outputs.storageUriBase.value]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

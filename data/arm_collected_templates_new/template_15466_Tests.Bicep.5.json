@@ -1,0 +1,228 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.7.4.23292",
+      "templateHash": "3750075182322944077"
+    }
+  },
+  "variables": {
+    "subnets": [
+      {
+        "subnetName": "subnet-001",
+        "addressPrefix": "10.0.1.0/24"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "copy": {
+        "name": "route",
+        "count": "[length(variables('subnets'))]"
+      },
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2021-08-01",
+      "name": "[format('route-{0}', variables('subnets')[copyIndex()].subnetName)]",
+      "properties": {
+        "routes": [
+          {
+            "name": "[format('route-{0}', reference(resourceId('Microsoft.Resources/deployments', 'vnet_deploy')).outputs.snet.value[copyIndex()].name)]",
+            "properties": {
+              "nextHopType": "VirtualNetworkGateway",
+              "addressPrefix": "[reference(resourceId('Microsoft.Resources/deployments', 'vnet_deploy')).outputs.snet.value[copyIndex()].addressPrefix]",
+              "nextHopIpAddress": "[reference(resourceId('Microsoft.Resources/deployments', 'fw_deploy')).outputs.azureFirewallPrivateIPAddress.value]"
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'fw_deploy')]",
+        "[resourceId('Microsoft.Resources/deployments', 'vnet_deploy')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "fw_deploy",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.7.4.23292",
+              "templateHash": "2505355825156073653"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/azureFirewalls",
+              "apiVersion": "2021-05-01",
+              "name": "firewall-001"
+            }
+          ],
+          "outputs": {
+            "azureFirewallPrivateIPAddress": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/azureFirewalls', 'firewall-001')).ipConfigurations[0].properties.privateIPAddress]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "vnet_deploy",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "addressPrefixes": {
+            "value": [
+              "10.0.0.0/8"
+            ]
+          },
+          "firewallDeployment": {
+            "value": "fw_deploy"
+          },
+          "subnets": {
+            "copy": [
+              {
+                "name": "value",
+                "count": "[length(variables('subnets'))]",
+                "input": "[createObject('name', variables('subnets')[copyIndex('value')].subnetName, 'addressPrefix', variables('subnets')[copyIndex('value')].addressPrefix, 'networkSecurityGroupId', reference(resourceId('Microsoft.Resources/deployments', format('nsg_deploy_{0}', variables('subnets')[copyIndex('value')].subnetName))).outputs.networkSecurityGroupResourceId.value)]"
+              }
+            ]
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.7.4.23292",
+              "templateHash": "14769735689857484688"
+            }
+          },
+          "parameters": {
+            "addressPrefixes": {
+              "type": "array"
+            },
+            "firewallDeployment": {
+              "type": "string"
+            },
+            "subnets": {
+              "type": "array"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks",
+              "apiVersion": "2021-05-01",
+              "name": "vnet-001",
+              "properties": {
+                "copy": [
+                  {
+                    "name": "subnets",
+                    "count": "[length(parameters('subnets'))]",
+                    "input": {
+                      "name": "[parameters('subnets')[copyIndex('subnets')].name]",
+                      "properties": {
+                        "addressPrefix": "[parameters('subnets')[copyIndex('subnets')].addressPrefix]",
+                        "networkSecurityGroup": {
+                          "id": "[parameters('subnets')[copyIndex('subnets')].networkSecurityGroupId]"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "addressSpace": {
+                  "addressPrefixes": "[parameters('addressPrefixes')]"
+                },
+                "dhcpOptions": {
+                  "dnsServers": "[array(reference(resourceId('Microsoft.Resources/deployments', parameters('firewallDeployment')), '2021-04-01').outputs.azureFirewallPrivateIPAddress)]"
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "snet": {
+              "type": "array",
+              "copy": {
+                "count": "[length(range(0, length(parameters('subnets'))))]",
+                "input": {
+                  "name": "[parameters('subnets')[range(0, length(parameters('subnets')))[copyIndex()]].name]",
+                  "addressPrefix": "[parameters('subnets')[range(0, length(parameters('subnets')))[copyIndex()]].addressPrefix]"
+                }
+              }
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'fw_deploy')]",
+        "nsg"
+      ]
+    },
+    {
+      "copy": {
+        "name": "nsg",
+        "count": "[length(variables('subnets'))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('nsg_deploy_{0}', variables('subnets')[copyIndex()].subnetName)]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[format('nsg-{0}', variables('subnets')[copyIndex()].subnetName)]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.7.4.23292",
+              "templateHash": "9763875382852696246"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/networkSecurityGroups",
+              "apiVersion": "2021-05-01",
+              "name": "[parameters('name')]"
+            }
+          ],
+          "outputs": {
+            "networkSecurityGroupResourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('name'))]"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

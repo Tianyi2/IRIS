@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deploy-Log-Analytics",
+      "apiVersion": "2020-09-01",
+      "location": "[deployment().location]",
+      "properties": {
+        "Scope": "/providers/Microsoft.Management/managementGroups/bugbash-management",
+        "NotScopes": null,
+        "DisplayName": "Deploy-Log-Analytics",
+        "Description": "Deploy-Log-Analytics",
+        "EnforcementMode": 0,
+        "PolicyDefinitionId": "/providers/Microsoft.Management/managementGroups/bugbash/providers/Microsoft.Authorization/policyDefinitions/Deploy-Log-Analytics",
+        "Parameters": {
+          "workspaceName": {
+            "value": "bugbash-la-dddbadc2-9d31-43f4-a7e3-ae83c9da646a"
+          },
+          "automationAccountName": {
+            "value": "bugbash-a-dddbadc2-9d31-43f4-a7e3-ae83c9da646a"
+          },
+          "workspaceRegion": {
+            "value": "northeurope"
+          },
+          "automationRegion": {
+            "value": "northeurope"
+          },
+          "rgName": {
+            "value": "bugbash-mgmt"
+          },
+          "retentionInDays": {
+            "value": "30"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

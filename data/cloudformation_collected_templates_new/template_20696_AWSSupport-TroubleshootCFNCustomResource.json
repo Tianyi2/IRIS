@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "0.3",
+  "description": "The **AWSSupport-TroubleshootCFNCustomResource** runbook helps diagnose why an AWS CloudFormation stack failed in creating, updating, or deleting a [custom resource](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources.html). This automation checks the service token used for the custom resource along with the error message returned.\nFor AWS Lambda-backed custom resources, the runbook checks if the AWS Lambda is able to reach the Amazon Simple Storage Service (Amazon S3) endpoint in order to send a response back to AWS CloudFormation. The runbook also checks the AWS Lambda Amazon Virtual Private Cloud (Amazon VPC) network configuration and security groups.\n\n\n### Important:\n\n* This runbook doesn't make any changes to your AWS CloudFormation stack.\n* This runbook doesn't check your AWS Lambda function logic, your service provider, or application logs.\n\n### Required IAM permissions:\n\n The ```AutomationAssumeRole``` parameter requires the following actions to successfully use the runbook:\n\n        - cloudformation:DescribeStacks\n        - cloudformation:DescribeStackEvents\n        - cloudformation:ListStackResources\n        - ec2:DescribeRouteTables\n        - ec2:DescribeNatGateways\n        - ec2:DescribeSecurityGroups\n        - ec2:DescribeVpcs\n        - ec2:DescribeVpcEndpoints\n        - ec2:DescribeSubnets\n        - logs:FilterLogEvents\n\n\n\nPlease visit the documentation on [Automation Setup](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-setup.html) for more information.",
+  "assumeRole": "{{ AutomationAssumeRole }}",
+  "parameters": {
+    "AutomationAssumeRole": {
+      "type": "AWS::IAM::Role::Arn",
+      "description": "(Optional) The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that allows AWS Systems Manager Automation to perform the actions on your behalf. If no role is specified, AWS Systems Manager Automation uses the permissions of the user that starts this runbook.",
+      "default": ""
+    },
+    "StackName": {
+      "type": "String",
+      "maxChars": 128,
+      "description": "(Required) The name of the AWS CloudFormation stack in which the custom Resource Failed.",
+      "allowedPattern": "[-a-zA-Z0-9]{1,128}$"
+    }
+  },
+  "mainSteps": [
+    {
+      "name": "ValidateCloudFormationStack",
+      "description": "Validates that the specified AWS CloudFormation stack exists and is accessible in the current AWS account and Region. Fails the automation if the stack cannot be found or accessed.",
+      "action": "aws:executeAwsApi",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "nextStep": "CheckCustomResource",
+      "inputs": {
+        "Service": "cloudformation",
+        "Api": "DescribeStacks",
+        "StackName": "{{StackName}}"
+      }
+    },
+    {
+      "name": "CheckCustomResource",
+      "description": "Performs comprehensive analysis of the AWS CloudFormation stack to diagnose custom resource failures. Identifies the resource type (SNS or Lambda-backed), checks for permission issues, and provides specific troubleshooting guidance. For Lambda-backed resources, evaluates VPC configurations, security groups, and network connectivity to Amazon S3 endpoints. Analyzes Amazon CloudWatch logs for error details when available.",
+      "action": "aws:executeScript",
+      "isCritical": true,
+      "onFailure": "Abort",
+      "timeoutSeconds": 300,
+      "maxAttempts": 3,
+      "isEnd": true,
+      "inputs": {
+        "InputPayload": {
+          "StackName": "{{StackName}}"
+        },
+        "Handler": "main.script_handler",
+        "Runtime": "python3.11",
+        "Attachment": "artifact.zip"
+      },
+      "outputs": [
+        {
+          "Name": "Message",
+          "Selector": "$.Payload.Message",
+          "Type": "String"
+        }
+      ]
+    }
+  ],
+  "outputs": [
+    "CheckCustomResource.Message"
+  ],
+  "files": {
+    "artifact.zip": {
+      "checksums": {
+        "SHA256": "41e388aedf037b64d372ee3d67c7c0e8c38a84ccd84e6b956e9e07ad9407c22c"
+      }
+    }
+  }
+}

@@ -1,0 +1,384 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        },
+        "owner": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "A project owner's email address"
+            }
+        },
+        "ownerId": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "A owner's object ID"
+            }
+        },
+        "projectName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "A project name"
+            }
+        },
+        "projectCode": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "A project code"
+            }
+        },
+        "creationDate": {
+            "type": "string",
+            "defaultValue": "[utcNow()]",
+            "metadata": {
+                "description": "Creation Date"
+            }
+        },
+        "addressPrefix": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "A primary address scope in this Virtual Networks"
+            }
+        },
+        "time": {
+            "type": "string",
+            "defaultValue": "1900",
+            "metadata": {
+                "description": "A time to shutdown VMs with 'HHmm'"
+            }
+        },
+        "timeZoneId": {
+            "type": "string",
+            "minLength": 3,
+            "defaultValue": "Tokyo Standard Time",
+            "metadata": {
+                "description": "The Windows time zone id associated with labVmShutDownTime (E.g. UTC, Pacific Standard Time, Central Europe Standard Time)."
+            }
+        },
+        "maxAllowedVmsPerUser": {
+            "type": "int",
+            "minValue": 0,
+            "defaultValue": 12,
+            "metadata": {
+                "description": "The maximum number of VMs allowed per user."
+            }
+        },
+        "maxAllowedVmsPerLab": {
+            "type": "int",
+            "minValue": 0,
+            "defaultValue": 31,
+            "metadata": {
+                "description": "The maximum number of VMs allowed per lab."
+            }
+        }
+    },
+    "variables": {
+        "primarySubnetIps": "[split(parameters('addressPrefix'), '.')]",
+        "primarySubnetCidr": "[concat(first(split(parameters('addressPrefix'), '/')), '/27')]",
+        "bastionSubnetCidr": "[format('{0}.{1}.{2}.{3}/27', variables('primarySubnetIps')[0], variables('primarySubnetIps')[1], variables('primarySubnetIps')[2], add(int(first(split(variables('primarySubnetIps')[3], '/'))), 32))]"
+    },
+    "resources": [
+        {
+            "name": "01-devtest-labs-minimum",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/0x6797/azure-rm-templates/master/devtest_labs/01-devtest-labs-minimum.json"
+                },
+                "parameters": {
+                    "name": {
+                        "value": "[parameters('name')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "owner": {
+                        "value": "[parameters('owner')]"
+                    },
+                    "projectName": {
+                        "value": "[parameters('projectName')]"
+                    },
+                    "projectCode": {
+                        "value": "[parameters('projectCode')]"
+                    },
+                    "creationDate": {
+                        "value": "[parameters('creationDate')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "02-vnet",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "dependsOn": [
+                "01-devtest-labs-minimum"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/0x6797/azure-rm-templates/master/devtest_labs/02-vnet.json"
+                },
+                "parameters": {
+                    "name": {
+                        "value": "[parameters('name')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "owner": {
+                        "value": "[parameters('owner')]"
+                    },
+                    "projectName": {
+                        "value": "[parameters('projectName')]"
+                    },
+                    "projectCode": {
+                        "value": "[parameters('projectCode')]"
+                    },
+                    "creationDate": {
+                        "value": "[parameters('creationDate')]"
+                    },
+                    "devTestLabsName": {
+                        "value": "[reference('01-devtest-labs-minimum').outputs.devTestLabsName.value]"
+                    },
+                    "addressPrefix": {
+                        "value": "[parameters('addressPrefix')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "03-devtest-labs-vm-shutdown-schedule",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "dependsOn": [
+                "01-devtest-labs-minimum"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/0x6797/azure-rm-templates/master/devtest_labs/03-devtest-labs-vm-shutdown-schedule.json"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "owner": {
+                        "value": "[parameters('owner')]"
+                    },
+                    "devTestLabsName": {
+                        "value": "[reference('01-devtest-labs-minimum').outputs.devTestLabsName.value]"
+                    },
+                    "time": {
+                        "value": "[parameters('time')]"
+                    },
+                    "timeZoneId": {
+                        "value": "[parameters('timeZoneId')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "04-devtest-labs-artifacts",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "dependsOn": [
+                "01-devtest-labs-minimum"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/0x6797/azure-rm-templates/master/devtest_labs/04-devtest-labs-artifacts.json"
+                },
+                "parameters": {
+                    "devTestLabsName": {
+                        "value": "[reference('01-devtest-labs-minimum').outputs.devTestLabsName.value]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "05-resource-group-owner",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/0x6797/azure-rm-templates/master/devtest_labs/05-resource-group-owner.json"
+                },
+                "parameters": {
+                    "owner": {
+                        "value": "[parameters('owner')]"
+                    },
+                    "projectName": {
+                        "value": "[parameters('projectName')]"
+                    },
+                    "projectCode": {
+                        "value": "[parameters('projectCode')]"
+                    },
+                    "creationDate": {
+                        "value": "[parameters('creationDate')]"
+                    },
+                    "ownerId": {
+                        "value": "[parameters('ownerId')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "06-devtest-labs-blob.json",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "dependsOn": [
+                "01-devtest-labs-minimum"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/0x6797/azure-rm-templates/master/devtest_labs/06-devtest-labs-blob.json"
+                },
+                "parameters": {
+                    "storageAccountName": {
+                        "value": "[reference('01-devtest-labs-minimum').outputs.storageAccountName.value]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "07-devtest-labs-file.json",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "dependsOn": [
+                "01-devtest-labs-minimum"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/0x6797/azure-rm-templates/master/devtest_labs/07-devtest-labs-file.json"
+                },
+                "parameters": {
+                    "storageAccountName": {
+                        "value": "[reference('01-devtest-labs-minimum').outputs.storageAccountName.value]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "08-azure-bastion-subnet",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "dependsOn": [
+                "02-vnet"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/0x6797/azure-rm-templates/master/devtest_labs/08-azure-bastion-subnet.json"
+                },
+                "parameters": {
+                    "vnetName": {
+                        "value": "[reference('02-vnet').outputs.vnetName.value]"
+                    },
+                    "addressPrefix": {
+                        "value": "[parameters('addressPrefix')]"
+                    },
+                    "subnetCidr": {
+                        "value": "[variables('bastionSubnetCidr')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "09-primary-subnet",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "dependsOn": [
+                "02-vnet",
+                "08-azure-bastion-subnet"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/0x6797/azure-rm-templates/master/devtest_labs/09-primary-subnet.json"
+                },
+                "parameters": {
+                    "name": {
+                        "value": "[parameters('name')]"
+                    },
+                    "vnetName": {
+                        "value": "[reference('02-vnet').outputs.vnetName.value]"
+                    },
+                    "subnetCidr": {
+                        "value": "[variables('primarySubnetCidr')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "10-subnet-override",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "dependsOn": [
+                "02-vnet",
+                "08-azure-bastion-subnet",
+                "09-primary-subnet"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/0x6797/azure-rm-templates/master/devtest_labs/10-subnet-override.json"
+                },
+                "parameters": {
+                    "devTestLabsName": {
+                        "value": "[reference('01-devtest-labs-minimum').outputs.devTestLabsName.value]"
+                    },
+                    "vnetName": {
+                        "value": "[reference('02-vnet').outputs.vnetName.value]"
+                    },
+                    "primarySubnetName": {
+                        "value": "[reference('09-primary-subnet').outputs.primarySubnetName.value]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "11-devtest-labs-vm-limits",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "dependsOn": [
+                "01-devtest-labs-minimum"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/0x6797/azure-rm-templates/master/devtest_labs/11-devtest-labs-vm-limits.json"
+                },
+                "parameters": {
+                    "devTestLabsName": {
+                        "value": "[reference('01-devtest-labs-minimum').outputs.devTestLabsName.value]"
+                    },
+                    "maxAllowedVmsPerUser": {
+                        "value": "[parameters('maxAllowedVmsPerUser')]"
+                    },
+                    "maxAllowedVmsPerLab": {
+                        "value": "[parameters('maxAllowedVmsPerLab')]"
+                    }
+                }
+            }
+        }
+    ]
+}

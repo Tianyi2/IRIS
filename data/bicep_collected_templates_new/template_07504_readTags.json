@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "3779448690782534905"
+    }
+  },
+  "parameters": {
+    "name": {
+      "type": "string",
+      "defaultValue": "default",
+      "metadata": {
+        "description": "Optional. The name of the tags resource."
+      }
+    }
+  },
+  "resources": [],
+  "outputs": {
+    "existingTags": {
+      "type": "object",
+      "metadata": {
+        "description": "Tags currently applied to the subscription level."
+      },
+      "value": "[if(contains(reference(subscriptionResourceId('Microsoft.Resources/tags', parameters('name')), '2021-04-01'), 'tags'), reference(subscriptionResourceId('Microsoft.Resources/tags', parameters('name')), '2021-04-01').tags, createObject())]"
+    }
+  }
+}

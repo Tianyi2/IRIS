@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/d3c658bd-8da9-4372-82e4-aaffa922f428')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/d3c658bd-8da9-4372-82e4-aaffa922f428')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "name": "Alsid DCSync",
+        "description": "'Searches for DCSync attacks'\n",
+        "query": "afad_parser\n| where MessageType == 2 and Codename == \"DCSync\"\n| extend HostName = tostring(split(Host, '.', 0)[0]), DnsDomain = tostring(strcat_array(array_slice(split(Host, '.'), 1, -1), '.'))\n",
+        "status": "Available",
+        "queryFrequency": "2h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "HostName",
+                "identifier": "HostName"
+              },
+              {
+                "columnName": "DnsDomain",
+                "identifier": "DnsDomain"
+              }
+            ],
+            "entityType": "Host"
+          }
+        ],
+        "severity": "High",
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "tactics": [
+          "CredentialAccess"
+        ],
+        "queryPeriod": "2h"
+      }
+    }
+  ]
+}

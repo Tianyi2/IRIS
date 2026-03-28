@@ -1,0 +1,167 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "keyVaultName": {
+      "type": "string"
+    },
+    "keyVaultAccessPolicies": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Array of objects with the following schema: https://docs.microsoft.com/en-us/azure/templates/microsoft.keyvault/2018-02-14/vaults#AccessPolicyEntry"
+      }
+    },
+    "enableRbacAuthorization": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "enabledForDiskEncryption": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "enabledForTemplateDeployment": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "enableSoftDelete": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "enableFirewall": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "subnetResourceIdList": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "A list of subnet resource ids to whitelist on the Key Vault"
+      }
+    },
+    "allowedIpAddressesList": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "A list of allowed IPs"
+      }
+    },
+    "allowTrustedMicrosoftServices": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Allow trusted Microsoft services to bypass the firewall of the Key Vault"
+      }
+    },
+    "logAnalyticsWorkspaceName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Log analytics workspace to send logs to (leave blank to disable)"
+      }
+    },
+    "logAnalyticsWorkspaceResourceGroupName": {
+      "type": "string",
+      "defaultValue": ""
+    }
+  },
+  "variables": {
+    "virtualNetworkRules": {
+      "copy": [
+        {
+          "name": "virtualNetworkRules",
+          "count": "[length(parameters('subnetResourceIdList'))]",
+          "input": {
+            "id": "[parameters('subnetResourceIdList')[copyIndex('virtualNetworkRules')]]",
+            "action": "Allow"
+          }
+        }
+      ]
+    },
+    "ipRules": {
+      "copy": [
+        {
+          "name": "ipRules",
+          "count": "[length(parameters('allowedIpAddressesList'))]",
+          "input": {
+            "value": "[parameters('allowedIpAddressesList')[copyIndex('ipRules')]]",
+            "action": "Allow"
+          }
+        }
+      ]
+    },
+    "networkAclObject": {
+      "bypass": "[if(parameters('allowTrustedMicrosoftServices'), 'AzureServices', 'None')]",
+      "virtualNetworkRules": "[variables('virtualNetworkRules').virtualNetworkRules]",
+      "ipRules": "[variables('ipRules').ipRules]",
+      "defaultAction": "[if(parameters('enableFirewall'), 'Deny', 'Allow')]"
+    },
+    "logDiagnosticSettingsEnabled": "[not(empty(parameters('logAnalyticsWorkspaceName')))]",
+    "logAnalyticsWorkspaceResourceId": "[resourceId(parameters('logAnalyticsWorkspaceResourceGroupName'), 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "name": "[parameters('keyVaultName')]",
+      "apiVersion": "2018-02-14",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enableRbacAuthorization": "[parameters('enableRbacAuthorization')]",
+        "enabledForDiskEncryption": "[parameters('enabledForDiskEncryption')]",
+        "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
+        "enableSoftDelete": true,
+        "enablePurgeProtection": true,
+        "accessPolicies": "[parameters('keyVaultAccessPolicies')]",
+        "tenantId": "[subscription().tenantId]",
+        "sku": {
+          "name": "Standard",
+          "family": "A"
+        },
+        "networkAcls": "[variables('networkAclObject')]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2021-05-01-preview",
+          "type": "providers/diagnosticSettings",
+          "name": "Microsoft.Insights/service",
+          "condition": "[variables('logDiagnosticSettingsEnabled')]",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+          ],
+          "properties": {
+            "workspaceId": "[variables('logAnalyticsWorkspaceResourceId')]",
+            "logs": [
+              {
+                "category": "AuditEvent",
+                "enabled": true,
+                "retentionPolicy": {
+                  "enabled": true,
+                  "days": 90
+                }
+              },
+              {
+                "category": "AzurePolicyEvaluationDetails",
+                "enabled": true,
+                "retentionPolicy": {
+                  "enabled": true,
+                  "days": 90
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "KeyVaultUri": {
+      "type": "string",
+      "value": "[reference(parameters('keyVaultName')).vaultUri]"
+    },
+    "KeyVaultResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+    }
+  }
+}

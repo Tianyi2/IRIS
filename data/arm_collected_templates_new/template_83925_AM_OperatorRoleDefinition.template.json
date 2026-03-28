@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "assignableAtRootManagementGroup": {
+      "type": "bool",
+      "defaultValue": false
+    }
+  },
+  "variables": {
+    "role_automanageOperator_id": "86e2bb0f-e840-45c4-a22c-e8096f2a34a7",
+    "baseScopes": [
+      "[subscription().id]"
+    ],
+    "assignableScopes": "[if(parameters('assignableAtRootManagementGroup'),
+        concat(variables('baseScopes'), concat('/providers/Microsoft.Management/managementGroups/', subscription().tenantId)),
+        variables('baseScopes'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleDefinitions",
+      "apiVersion": "2022-04-01",
+      "name": "[variables('role_automanageOperator_id')]",
+      "properties": {
+        "roleName": "Automanage Operator",
+        "assignableScopes": "[variables('assignableScopes')]",
+        "description": "Allows you to create and assign configuration profiles",
+        "permissions": [
+          {
+            "actions": [
+              "Microsoft.Automanage/configurationProfiles/*",
+              "Microsoft.Automanage/configurationProfileAssignments/*",
+              "Microsoft.Compute/virtualMachines/read",
+              "Microsoft.HybridCompute/machines/read",
+              "Microsoft.OperationalInsights/workspaces/read"
+            ],
+            "dataActions": [],
+            "notActions": [],
+            "notDataActions": []
+          }
+        ]
+      }
+    }
+  ]
+}

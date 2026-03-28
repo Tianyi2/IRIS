@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deploy-LX-Arc-Monitoring",
+      "apiVersion": "2021-06-01",
+      "location": "westeurope",
+      "identity": {
+        "PrincipalId": "53fa1fd7-58bc-460b-8fad-1f1609b2f0cb",
+        "TenantId": "3114ebe8-8d3f-4bac-b3ce-59b4210a1287",
+        "Type": "SystemAssigned"
+      },
+      "properties": {
+        "Scope": "/providers/Microsoft.Management/managementGroups/gotOps",
+        "NotScopes": null,
+        "DisplayName": "Deploy-Linux-Arc-Monitoring",
+        "Description": "Deploy-Linux-Arc-Monitoring",
+        "EnforcementMode": "Default",
+        "PolicyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/9d2b61b4-1d14-4a63-be30-d4498e7ad2cf",
+        "Parameters": {
+          "logAnalytics": {
+            "value": "/subscriptions/04248a84-9f56-4541-ad07-f357ac99d483/resourcegroups/gotops-mgmt/providers/microsoft.operationalinsights/workspaces/gotops-la-04248a84-9f56-4541-ad07-f357ac99d483"
+          }
+        },
+        "NonComplianceMessages": null
+      }
+    }
+  ],
+  "outputs": {}
+}

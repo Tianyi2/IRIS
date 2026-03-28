@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deny-RDP-from-internet",
+      "apiVersion": "2021-06-01",
+      "location": null,
+      "properties": {
+        "Scope": "/providers/Microsoft.Management/managementGroups/gotOps-landingzones",
+        "NotScopes": [],
+        "DisplayName": "Deny-RDP-from-Internet",
+        "Description": "Deny-RDP-from-Internet",
+        "EnforcementMode": "DoNotEnforce",
+        "PolicyDefinitionId": "/providers/Microsoft.Management/managementGroups/gotOps/providers/Microsoft.Authorization/policyDefinitions/Deny-RDP-From-Internet",
+        "Parameters": {},
+        "NonComplianceMessages": null
+      }
+    }
+  ],
+  "outputs": {}
+}

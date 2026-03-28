@@ -1,0 +1,229 @@
+service: streams-dynmamodb
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  memorySize: 512
+  stage: ${opt:stage, 'dev'}
+  region: eu-west-1
+  logRetentionInDays: 7 # Set the default RetentionInDays for a CloudWatch LogGroup
+  tracing:
+    lambda: true # Optional, can be true (true equals 'Active'), 'Active' or 'PassThrough'
+  apiGateway:
+    restApiId: !ImportValue QldbApiGatewayDemo-restApiId
+    restApiRootResourceId: !ImportValue QldbApiGatewayDemo-rootResourceId
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED	: "1"
+    TABLE_NAME: 
+      Ref: bicycleLicenceLedgerTable
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-api-gateway-throttling
+
+custom:
+  # Configures throttling settings for the API Gateway stage
+  # They apply to all http endpoints, unless specifically overridden
+  apiGatewayThrottling:
+    maxRequestsPerSecond: 1000
+    maxConcurrentRequests: 500
+
+functions:
+  qldbStreamsDynamoDB:
+    name: qldb-streams-dynamodb-${self:provider.stage}
+    handler: functions/qldb-streams-dynamodb.handler
+    iamRoleStatementsName: qldb-streams-dynamodb-role-${self:provider.stage}
+    iamRoleStatements: # Grant privilege read from Kinesis work stream 
+    - Effect: Allow 
+      Action: 
+        - kinesis:GetRecords 
+        - kinesis:GetShardIterator 
+        - kinesis:DescribeStream 
+        - kinesis:ListStreams 
+        - kinesis:PutRecord 
+        - kinesis:PutRecords 
+      Resource: 
+        Fn::GetAtt: [licenceQldbStreamsDynamodb, Arn]
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: 
+        Fn::GetAtt: [bicycleLicenceLedgerTable, Arn]
+    - Effect: "Allow"
+      Action:
+        - "xray:PutTraceSegments"
+        - "xray:PutTelemetryRecords"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "sqs:SendMessage"
+      Resource:
+        Fn::GetAtt: [StreamsFailureQueue, Arn]
+
+  DynamoDBGetLicence:
+    name: dynamodb-get-licence-demo-${self:provider.stage}
+    handler: functions/dynamodb-search.handler
+    events:
+      - http:
+          path: /dynamodb/{licenceid}
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !ImportValue QldbApiGatewayDemo-ApiGatewayAuthorizerId
+          throttling:
+            maxRequestsPerSecond: 100
+            maxConcurrentRequests: 50
+    iamRoleStatementsName: dynamodb-get-licence-${self:provider.stage}
+    iamRoleStatements: # Grant privilege read from Kinesis work stream 
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+      Resource: 
+        Fn::GetAtt: [bicycleLicenceLedgerTable, Arn]
+    - Effect: "Allow"
+      Action:
+        - "xray:PutTraceSegments"
+        - "xray:PutTelemetryRecords"
+      Resource: "*"
+
+  DynamoDBFindAllLicence:
+    name: dynamodb-find-licence-${self:provider.stage}
+    handler: functions/dynamodb-findall.handler
+    events:
+      - http:
+          path: /dynamodb/licences
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !ImportValue QldbApiGatewayDemo-ApiGatewayAuthorizerId
+          throttling:
+            maxRequestsPerSecond: 100
+            maxConcurrentRequests: 50
+    iamRoleStatementsName: dynamodb-find-licence-${self:provider.stage}
+    iamRoleStatements: # Grant privilege read from Kinesis work stream 
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+      Resource:
+        - Fn::GetAtt:
+          - bicycleLicenceLedgerTable
+          - Arn
+        - Fn::Join: 
+          - "/"
+          - - Fn::GetAtt:
+              - bicycleLicenceLedgerTable
+              - Arn
+            - "index/GSI1"
+    - Effect: "Allow"
+      Action:
+        - "xray:PutTraceSegments"
+        - "xray:PutTelemetryRecords"
+      Resource: "*"
+
+
+resources:
+  Resources:
+
+    licenceQldbStreamsDynamodb: 
+      Type: AWS::Kinesis::Stream
+      Properties: 
+        Name: QLDBBicycleLicence-dynamodb-${self:provider.stage}
+        ShardCount: 1
+    
+    QldbStreamsDynamoDBLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        TracingConfig:
+          Mode: "Active"
+    
+    bicycleLicenceLedgerTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Delete
+      Properties:
+        TableName: qldb-bicycle-licence-${self:provider.stage}
+        AttributeDefinitions: 
+          - AttributeName: "pk"
+            AttributeType: "S"
+          - AttributeName: "sk"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "pk"
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: 'GSI1'
+            KeySchema:
+            - AttributeName: "sk"
+              KeyType: "HASH"
+            Projection:
+              ProjectionType: ALL
+
+    StreamsFailureQueue:
+      Type: AWS::SQS::Queue        
+
+    qldbStreamRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                - qldb.amazonaws.com
+              Action:
+                - 'sts:AssumeRole'
+        Path: /
+        Policies:
+          - PolicyName: qldb-bicycle-dynamodb-policy-${self:provider.stage}
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - 'kinesis:PutRecord**'
+                    - 'kinesis:DescribeStream'
+                    - 'kinesis:ListShards'
+                  Resource:
+                    Fn::GetAtt: [licenceQldbStreamsDynamodb, Arn]
+        RoleName: qldb-bicycle-dynamodb-role-${self:provider.stage}
+
+    myQLDBStream:
+      Type: "AWS::QLDB::Stream"
+      DependsOn: qldbStreamRole
+      Properties:
+        InclusiveStartTime: "2020-05-29T00:00:00Z"
+        KinesisConfiguration:
+          AggregationEnabled: true
+          StreamArn: 
+            Fn::GetAtt: [licenceQldbStreamsDynamodb, Arn]
+        LedgerName: !ImportValue qldb-bicycle-licence-demo
+        RoleArn: 
+          Fn::GetAtt: [qldbStreamRole, Arn]
+        StreamName: qldb-dynamodb-stream-${self:provider.stage}
+        Tags:
+          - Key: name
+            Value: qldb-bicycle-licence-demo
+    
+    MyEventSourceMapping:
+      Type: AWS::Lambda::EventSourceMapping
+      Properties:
+        BatchSize: 50
+        BisectBatchOnFunctionError: true
+        DestinationConfig: 
+          OnFailure: 
+            Destination: !GetAtt StreamsFailureQueue.Arn
+        Enabled: true
+        EventSourceArn: !GetAtt licenceQldbStreamsDynamodb.Arn
+        FunctionName: !GetAtt QldbStreamsDynamoDBLambdaFunction.Arn
+        MaximumRetryAttempts: 1
+        StartingPosition: "TRIM_HORIZON"

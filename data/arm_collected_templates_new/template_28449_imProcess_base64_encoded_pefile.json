@@ -1,0 +1,84 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/f8b3c49c-4087-499b-920f-0dcfaff0cbca')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/f8b3c49c-4087-499b-920f-0dcfaff0cbca')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "triggerThreshold": 0,
+        "queryFrequency": "1d",
+        "description": "'Identifies instances of a base64 encoded PE file header seen in the process command line parameter.\nTo use this analytics rule, make sure you have deployed the [ASIM normalization parsers](https://aka.ms/ASimProcessEvent)'\n",
+        "metadata": {
+          "author": {
+            "name": "Yuval Naor"
+          },
+          "categories": {
+            "domains": [
+              "Security - Threat Protection"
+            ]
+          },
+          "source": {
+            "kind": "Community"
+          },
+          "support": {
+            "tier": "Community"
+          }
+        },
+        "severity": "Medium",
+        "tactics": [
+          "Execution",
+          "DefenseEvasion"
+        ],
+        "queryPeriod": "1d",
+        "name": "Base64 encoded Windows process command-lines (Normalized Process Events)",
+        "triggerOperator": "gt",
+        "query": "imProcessCreate\n| where CommandLine contains \"TVqQAAMAAAAEAAA\"\n| where isnotempty(Process)\n| summarize StartTime = min(TimeGenerated), EndTime = max(TimeGenerated), count() by Dvc, ActorUsername, Process, CommandLine, ActingProcessName, EventVendor, EventProduct\n| extend AccountName = tostring(split(ActorUsername, @'\\')[1]), AccountNTDomain = tostring(split(ActorUsername, @'\\')[0])\n| extend HostName = tostring(split(Dvc, \".\")[0]), DomainIndex = toint(indexof(Dvc, '.'))\n| extend HostNameDomain = iff(DomainIndex != -1, substring(Dvc, DomainIndex + 1), Dvc)\n| project-away DomainIndex\n",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "ActorUsername"
+              },
+              {
+                "identifier": "Name",
+                "columnName": "AccountName"
+              },
+              {
+                "identifier": "NTDomain",
+                "columnName": "AccountNTDomain"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "Dvc"
+              },
+              {
+                "identifier": "HostName",
+                "columnName": "HostName"
+              },
+              {
+                "identifier": "DnsDomain",
+                "columnName": "HostNameDomain"
+              }
+            ],
+            "entityType": "Host"
+          }
+        ]
+      }
+    }
+  ]
+}

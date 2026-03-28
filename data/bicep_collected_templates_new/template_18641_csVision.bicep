@@ -1,0 +1,135 @@
+param csSKU string = 'S0'
+param location string
+param name string
+param kind string = 'ComputerVision'
+param publicNetworkAccess bool = true
+param vnetRules array = []
+param ipRules array = []
+param pendCogSerName string
+param vnetName string
+param subnetName string
+param restore bool
+param keyvaultName string
+param vnetResourceGroupName string
+param enablePublicAccessWithPerimeter bool = false
+
+var nameCleaned = toLower(replace(name, '-', ''))
+
+resource vnet 'Microsoft.Network/virtualNetworks@2024-05-01' existing = {
+  name: vnetName
+  scope: resourceGroup(vnetResourceGroupName)
+}
+
+resource subnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' existing = {
+  name: subnetName
+  parent: vnet
+}
+
+var rules = [for rule in vnetRules: {
+  id: rule
+  ignoreMissingVnetServiceEndpoint: true
+}]
+
+resource visionAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
+  name: name
+  location: location
+  kind: kind
+  identity: {
+    type: 'SystemAssigned'
+  }
+  sku: {
+    name: csSKU
+  }
+  properties: {
+    customSubDomainName: nameCleaned
+    publicNetworkAccess: publicNetworkAccess || enablePublicAccessWithPerimeter? 'Enabled': 'Disabled'
+    restore: restore
+    restrictOutboundNetworkAccess: publicNetworkAccess || enablePublicAccessWithPerimeter? false:true
+    apiProperties: {
+      responsibleAiNotice: 'Acknowledged'
+    }
+    networkAcls: !enablePublicAccessWithPerimeter ? {
+      //bypass:'AzureServices'
+      defaultAction: 'Deny'
+      virtualNetworkRules: rules
+      ipRules: ipRules
+    }: null
+  }
+  
+}
+
+resource pendCognitiveServices 'Microsoft.Network/privateEndpoints@2023-04-01' = if(!enablePublicAccessWithPerimeter){
+  location: location
+  name: '${nameCleaned}-pend'
+  properties: {
+    subnet: {
+      id: subnet.id
+    }
+    customNetworkInterfaceName: '${nameCleaned}-pend-nic'
+    privateLinkServiceConnections: [
+      {
+        name: '${nameCleaned}-pend'
+        properties: {
+          privateLinkServiceId: visionAccount.id
+          groupIds: [
+            'account'
+          ]
+          privateLinkServiceConnectionState: {
+            status: 'Approved'
+            description: 'Auto-Approved'
+            actionsRequired: 'None'
+          }
+        }
+      }
+    ]
+  }
+}
+
+// listKeys(visionAccount.id, '2022-11-01').keys[0].value
+// storageAccount.listKeys().keys[0].value
+// visionAccount.listKeys().key1
+//listKeys(visionAccount.id, '2024-10-01').key1
+
+resource keyVault4Vision 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+  name: keyvaultName
+  scope: resourceGroup()
+}
+
+@description('Key Vault: Computer Vision K in vault as S')
+resource kValueVision 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault4Vision
+  name: 'aifactory-proj-vision-api-key'
+  properties: {
+    value:visionAccount.listKeys().key1
+    contentType: 'text/plain'
+    attributes: {
+      enabled: true
+    }
+  }
+}
+@description('Key Vault: Computer Vision Endpoint in vault as S')
+resource kValueVisionEP 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault4Vision
+  name: 'aifactory-proj-vision-api-endpoint'
+  properties: {
+    value:visionAccount.properties.endpoint
+    contentType: 'text/plain'
+    attributes: {
+      enabled: true
+    }
+  }
+}
+
+output name string = visionAccount.name
+output resourceId string = visionAccount.id
+output principalId string = visionAccount.identity.principalId // Error, "The template output 'principalId' is not valid: The language expression property 'identity' doesn't exist,
+output computerVisionEndpoint string = visionAccount.properties.endpoint
+
+output dnsConfig array = [
+  {
+    name: !enablePublicAccessWithPerimeter? pendCognitiveServices.name: ''
+    type: 'cognitiveservices'
+    id:visionAccount.id
+    groupid:'account'
+  }
+]

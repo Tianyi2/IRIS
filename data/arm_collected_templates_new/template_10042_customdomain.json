@@ -1,0 +1,61 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sites_school_experience_name": {
+            "type": "String"
+        },
+        "serverfarms_serviceplan_name": {
+            "type": "String"
+        },
+        "customDomainsWithCerts": {
+            "type": "array",
+            "defaultValue": []
+        },
+        "sslCertificates": {
+            "type": "array",
+            "defaultValue": []
+        },
+        "existingKeyVaultId": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "type":"Microsoft.Web/certificates",
+            "name":"[parameters('sslCertificates')[copyIndex()].certificateName]",
+            "apiVersion":"2016-03-01",
+            "location":"[resourceGroup().location]",
+            "copy": {
+                "name": "domains",
+                "count": "[length(parameters('sslCertificates'))]"
+            },
+            "properties":{
+                "keyVaultId": "[parameters('existingKeyVaultId')]",
+                "keyVaultSecretName":"[parameters('sslCertificates')[copyIndex()].certificateSecretName]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverFarms',parameters('serverfarms_serviceplan_name'))]"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_school_experience_name'), '/', parameters('customDomainsWithCerts')[copyIndex()].customDomain)]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "domains",
+                "count": "[length(parameters('customDomainsWithCerts'))]",
+                "mode": "serial",
+                "batchSize": 1
+            },
+            "properties": {
+                "siteName": "[parameters('sites_school_experience_name')]",
+                "hostNameType": "Verified",
+                "sslState": "SniEnabled",
+                "thumbprint":"[reference(resourceId('Microsoft.Web/certificates', parameters('customDomainsWithCerts')[copyIndex()].certificateName)).Thumbprint]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/certificates', parameters('customDomainsWithCerts')[copyIndex()].certificateName)]"
+            ]
+        }
+    ]
+}

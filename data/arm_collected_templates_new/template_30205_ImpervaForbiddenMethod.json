@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/7ebc9e24-319c-4786-9151-c898240463bc')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/7ebc9e24-319c-4786-9151-c898240463bc')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "Imperva - Forbidden HTTP request method in request",
+        "description": "'Detects connections with unexpected HTTP request method.'\n",
+        "query": "let bl_http_methods = dynamic(['PUT', 'HEAD', 'OPTIONS', 'TRACE', 'POST']);\nImpervaWAFCloud\n| where HttpRequestMethod in~ (bl_http_methods)\n| extend IPCustomEntity = SrcIpAddr, UrlCustomEntity = UrlOriginal\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "IPCustomEntity",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "UrlCustomEntity",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "InitialAccess"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

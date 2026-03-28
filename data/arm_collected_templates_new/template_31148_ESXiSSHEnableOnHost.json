@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/4f5b5d79-ff4e-4edd-ae3e-9e1187f0b924')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/4f5b5d79-ff4e-4edd-ae3e-9e1187f0b924')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "High",
+        "name": "VMware ESXi - SSH Enable on ESXi Host",
+        "description": "'Detects when vim-cmd is used to enable SSH on an ESXi host'\n",
+        "query": "VMwareESXi\n| where SyslogMessage has_all (\"vim-cmd\",\"hostsvc/enable_ssh\")\n| extend SrcUsername = extract(@'\\[info\\]\\s+\\[(.*?)\\]', 1, SyslogMessage)\n| extend DstHostname = extract(@'\\[\\d+\\]\\s+\\[(.*?)\\s+on', 1, SyslogMessage)\n",
+        "status": "Available",
+        "queryFrequency": "10m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DstHostname",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SrcUsername",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "LateralMovement"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "10m"
+      }
+    }
+  ]
+}

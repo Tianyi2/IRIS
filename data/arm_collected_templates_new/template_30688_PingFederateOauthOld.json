@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/85f70197-4865-4635-a4b2-a9c57e8fea1b')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/85f70197-4865-4635-a4b2-a9c57e8fea1b')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "Ping Federate - OAuth old version",
+        "description": "'Detects requests using not the latest version of OAuth protocol.'\n",
+        "query": "PingFederateEvent\n| where isnotempty(DeviceCustomString3)\n| extend proto = extract(@'(OAuth)', 1, DeviceCustomString3)\n| extend ver = extract(@'(\\d+)', 1, DeviceCustomString3)\n| where proto =~ 'OAuth'\n| where ver !~ '20'\n| extend AccountCustomEntity = DstUserName\n| extend IpCustomEntity = SrcIpAddr\n",
+        "status": "Available",
+        "queryFrequency": "1d",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "AccountCustomEntity",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "IpCustomEntity",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "InitialAccess"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1d"
+      }
+    }
+  ]
+}

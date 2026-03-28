@@ -1,0 +1,229 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.Synapse/workspaces/sqlPools to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.Synapse/workspaces/sqlPools to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "dmsworkersEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DmsWorkers",
+        "description": "Enable or disable log category DmsWorkers"
+      },
+      "defaultValue": true
+    },
+    "execrequestsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "ExecRequests",
+        "description": "Enable or disable log category ExecRequests"
+      },
+      "defaultValue": true
+    },
+    "requeststepsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "RequestSteps",
+        "description": "Enable or disable log category RequestSteps"
+      },
+      "defaultValue": true
+    },
+    "sqlrequestsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SqlRequests",
+        "description": "Enable or disable log category SqlRequests"
+      },
+      "defaultValue": true
+    },
+    "sqlsecurityauditeventsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SQLSecurityAuditEvents",
+        "description": "Enable or disable log category SQLSecurityAuditEvents"
+      },
+      "defaultValue": true
+    },
+    "waitsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "Waits",
+        "description": "Enable or disable log category Waits"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.Synapse/workspaces/sqlPools"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.Synapse/workspaces/sqlPools/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.Synapse/workspaces/sqlPools, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "DmsWorkers",
+                    "enabled": "[parameters('dmsworkersEnabled')]"
+                  },
+                  {
+                    "category": "ExecRequests",
+                    "enabled": "[parameters('execrequestsEnabled')]"
+                  },
+                  {
+                    "category": "RequestSteps",
+                    "enabled": "[parameters('requeststepsEnabled')]"
+                  },
+                  {
+                    "category": "SqlRequests",
+                    "enabled": "[parameters('sqlrequestsEnabled')]"
+                  },
+                  {
+                    "category": "SQLSecurityAuditEvents",
+                    "enabled": "[parameters('sqlsecurityauditeventsEnabled')]"
+                  },
+                  {
+                    "category": "Waits",
+                    "enabled": "[parameters('waitsEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

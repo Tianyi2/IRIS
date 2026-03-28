@@ -1,0 +1,232 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Compliant-Corp-Lz",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "westeurope",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-policy-identity/providers/Microsoft.ManagedIdentity/userAssignedIdentities/saturn-policy-identity": {
+            "clientId": "3af92696-7908-4732-bb6b-9f96fb6432f6",
+            "principalId": "bee3d72e-1c84-46a5-a0a5-79c0cd4a9ec7"
+          }
+        }
+      },
+      "properties": {
+        "description": "This policy initiative is a group of policies that ensures Corp Connected Landing Zones are compliant per Financial Services Industry requirements",
+        "displayName": "Enforce secure-by-default Corp Connected Landing Zones for Financial Services Industry",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "parameters": {
+          "aaPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "aaPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.azure-automation.net"
+          },
+          "adfPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "adfPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.datafactory.azure.net"
+          },
+          "appServiceAppsPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "appServiceAppsPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.azurewebsites.net"
+          },
+          "asrPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "asrPrivateDnsZone-Backup": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.westeurope.backup.windowsazure.com"
+          },
+          "asrPrivateDnsZone-Blob": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net"
+          },
+          "asrPrivateDnsZone-Queue": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.queue.core.windows.net"
+          },
+          "avdHostPoolPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "avdHostPoolPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.wvd.microsoft.com"
+          },
+          "avdHostPoolPrivateEndpointGroupId": {
+            "value": "connection"
+          },
+          "avdWorkspacePrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "avdWorkspacePrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.wvd.microsoft.com"
+          },
+          "avdWorkspacePrivateEndpointGroupId": {
+            "value": "feed"
+          },
+          "cognitiveServicesPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "cognitiveServicesPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.cognitiveservices.azure.com"
+          },
+          "containerRegistryPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "containerRegistryPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/westeurope.privatelink.azurecr.io"
+          },
+          "cosmosDbPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "cosmosDbPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.documents.azure.com"
+          },
+          "cosmosDbPrivateEndpointGroupId": {
+            "value": "Sql"
+          },
+          "diskPrivateDns": {
+            "value": "DeployIfNotExists"
+          },
+          "diskPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net"
+          },
+          "eventGridDomainPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "eventGridDomainPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.eventgrid.azure.net"
+          },
+          "eventGridTopicPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "eventGridTopicPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.eventgrid.azure.net"
+          },
+          "eventHubNamespacesPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "eventHubNamespacesPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.servicebus.windows.net"
+          },
+          "keyVaultPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "keyVaultPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.vaultcore.azure.net"
+          },
+          "mlPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "mlPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.api.azureml.ms"
+          },
+          "mlSecondPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.notebooks.azure.net"
+          },
+          "serviceBusDinePrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "serviceBusPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.servicebus.windows.net"
+          },
+          "storageBlobPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "storageBlobPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net"
+          },
+          "storageDfsPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "storageDfsPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.dfs.core.windows.net"
+          },
+          "storageFileDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "storageFileDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.file.core.windows.net"
+          },
+          "storageFileSyncPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "storageFileSyncPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/westeurope.privatelink.afs.azure.net"
+          },
+          "storageQueuePrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "storageQueuePrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.queue.core.windows.net"
+          },
+          "storageSecondaryBlobPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "storageSecondaryBlobPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net"
+          },
+          "storageSecondaryDfsPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "storageSecondaryDfsPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.dfs.core.windows.net"
+          },
+          "storageSecondaryQueuePrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "storageSecondaryQueuePrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.queue.core.windows.net"
+          },
+          "storageSecondaryTablePrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "storageSecondaryTablePrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.table.core.windows.net"
+          },
+          "storageSecondaryWebPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "storageSecondaryWebPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.web.core.windows.net"
+          },
+          "storageTablePrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "storageTablePrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.table.core.windows.net"
+          },
+          "storageWebPrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "storageWebPrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.web.core.windows.net"
+          },
+          "synapsePrivateDnsZone": {
+            "value": "DeployIfNotExists"
+          },
+          "synapsePrivateDnsZoneId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-privatedns/providers/Microsoft.Network/privateDnsZones/privatelink.servicebus.windows.net"
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Management/managementGroups/saturn/providers/Microsoft.Authorization/policySetDefinitions/Compliant-Corp-Lz",
+        "scope": "/providers/Microsoft.Management/managementGroups/saturn-corp"
+      }
+    }
+  ],
+  "outputs": {}
+}

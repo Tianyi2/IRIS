@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "d396477f-28d2-5ef5-97bc-75c22d7cec8a",
+      "apiVersion": "2022-01-01-preview",
+      "properties": {
+        "DisplayName": "Deploy-VMSS-Monitoring",
+        "ObjectType": "ServicePrincipal",
+        "PrincipalId": "85003f8d-fcf0-4673-89ec-56c158ec6e11",
+        "RoleDefinitionId": "/providers/Microsoft.Authorization/RoleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+        "RoleDefinitionName": "Owner"
+      }
+    }
+  ],
+  "outputs": {}
+}

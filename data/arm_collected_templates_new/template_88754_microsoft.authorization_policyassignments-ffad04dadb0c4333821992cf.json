@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "ffad04dadb0c4333821992cf",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "global",
+      "properties": {
+        "displayName": "Uday-Deny or Audit service endpoints on subnets",
+        "enforcementMode": "Default",
+        "metadata": {
+          "parameterScopes": {}
+        },
+        "nonComplianceMessages": [],
+        "notScopes": [],
+        "overrides": [],
+        "parameters": {},
+        "policyDefinitionId": "/subscriptions/2b20fbc5-3fba-4d81-b2ff-594113dac038/providers/Microsoft.Authorization/policyDefinitions/de67e1fb-71fc-4ec3-80b8-f04d7d324412",
+        "resourceSelectors": [],
+        "scope": "/subscriptions/2b20fbc5-3fba-4d81-b2ff-594113dac038"
+      }
+    }
+  ],
+  "outputs": {}
+}

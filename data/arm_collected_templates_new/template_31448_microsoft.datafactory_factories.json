@@ -1,0 +1,349 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.DataFactory/factories to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.DataFactory/factories to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "activityrunsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "ActivityRuns",
+        "description": "Enable or disable log category ActivityRuns"
+      },
+      "defaultValue": true
+    },
+    "airflowdagprocessinglogsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AirflowDagProcessingLogs",
+        "description": "Enable or disable log category AirflowDagProcessingLogs"
+      },
+      "defaultValue": true
+    },
+    "airflowschedulerlogsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AirflowSchedulerLogs",
+        "description": "Enable or disable log category AirflowSchedulerLogs"
+      },
+      "defaultValue": true
+    },
+    "airflowtasklogsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AirflowTaskLogs",
+        "description": "Enable or disable log category AirflowTaskLogs"
+      },
+      "defaultValue": true
+    },
+    "airflowweblogsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AirflowWebLogs",
+        "description": "Enable or disable log category AirflowWebLogs"
+      },
+      "defaultValue": true
+    },
+    "airflowworkerlogsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AirflowWorkerLogs",
+        "description": "Enable or disable log category AirflowWorkerLogs"
+      },
+      "defaultValue": true
+    },
+    "pipelinerunsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "PipelineRuns",
+        "description": "Enable or disable log category PipelineRuns"
+      },
+      "defaultValue": true
+    },
+    "sandboxactivityrunsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SandboxActivityRuns",
+        "description": "Enable or disable log category SandboxActivityRuns"
+      },
+      "defaultValue": true
+    },
+    "sandboxpipelinerunsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SandboxPipelineRuns",
+        "description": "Enable or disable log category SandboxPipelineRuns"
+      },
+      "defaultValue": true
+    },
+    "ssisintegrationruntimelogsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SSISIntegrationRuntimeLogs",
+        "description": "Enable or disable log category SSISIntegrationRuntimeLogs"
+      },
+      "defaultValue": true
+    },
+    "ssispackageeventmessagecontextEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SSISPackageEventMessageContext",
+        "description": "Enable or disable log category SSISPackageEventMessageContext"
+      },
+      "defaultValue": true
+    },
+    "ssispackageeventmessagesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SSISPackageEventMessages",
+        "description": "Enable or disable log category SSISPackageEventMessages"
+      },
+      "defaultValue": true
+    },
+    "ssispackageexecutablestatisticsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SSISPackageExecutableStatistics",
+        "description": "Enable or disable log category SSISPackageExecutableStatistics"
+      },
+      "defaultValue": true
+    },
+    "ssispackageexecutioncomponentphasesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SSISPackageExecutionComponentPhases",
+        "description": "Enable or disable log category SSISPackageExecutionComponentPhases"
+      },
+      "defaultValue": true
+    },
+    "ssispackageexecutiondatastatisticsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SSISPackageExecutionDataStatistics",
+        "description": "Enable or disable log category SSISPackageExecutionDataStatistics"
+      },
+      "defaultValue": true
+    },
+    "triggerrunsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "TriggerRuns",
+        "description": "Enable or disable log category TriggerRuns"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.DataFactory/factories"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.DataFactory/factories/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.DataFactory/factories, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "ActivityRuns",
+                    "enabled": "[parameters('activityrunsEnabled')]"
+                  },
+                  {
+                    "category": "AirflowDagProcessingLogs",
+                    "enabled": "[parameters('airflowdagprocessinglogsEnabled')]"
+                  },
+                  {
+                    "category": "AirflowSchedulerLogs",
+                    "enabled": "[parameters('airflowschedulerlogsEnabled')]"
+                  },
+                  {
+                    "category": "AirflowTaskLogs",
+                    "enabled": "[parameters('airflowtasklogsEnabled')]"
+                  },
+                  {
+                    "category": "AirflowWebLogs",
+                    "enabled": "[parameters('airflowweblogsEnabled')]"
+                  },
+                  {
+                    "category": "AirflowWorkerLogs",
+                    "enabled": "[parameters('airflowworkerlogsEnabled')]"
+                  },
+                  {
+                    "category": "PipelineRuns",
+                    "enabled": "[parameters('pipelinerunsEnabled')]"
+                  },
+                  {
+                    "category": "SandboxActivityRuns",
+                    "enabled": "[parameters('sandboxactivityrunsEnabled')]"
+                  },
+                  {
+                    "category": "SandboxPipelineRuns",
+                    "enabled": "[parameters('sandboxpipelinerunsEnabled')]"
+                  },
+                  {
+                    "category": "SSISIntegrationRuntimeLogs",
+                    "enabled": "[parameters('ssisintegrationruntimelogsEnabled')]"
+                  },
+                  {
+                    "category": "SSISPackageEventMessageContext",
+                    "enabled": "[parameters('ssispackageeventmessagecontextEnabled')]"
+                  },
+                  {
+                    "category": "SSISPackageEventMessages",
+                    "enabled": "[parameters('ssispackageeventmessagesEnabled')]"
+                  },
+                  {
+                    "category": "SSISPackageExecutableStatistics",
+                    "enabled": "[parameters('ssispackageexecutablestatisticsEnabled')]"
+                  },
+                  {
+                    "category": "SSISPackageExecutionComponentPhases",
+                    "enabled": "[parameters('ssispackageexecutioncomponentphasesEnabled')]"
+                  },
+                  {
+                    "category": "SSISPackageExecutionDataStatistics",
+                    "enabled": "[parameters('ssispackageexecutiondatastatisticsEnabled')]"
+                  },
+                  {
+                    "category": "TriggerRuns",
+                    "enabled": "[parameters('triggerrunsEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

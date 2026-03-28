@@ -1,0 +1,24 @@
+@description('Azure region to deploy to')
+param region string = 'uksouth'
+
+@description('Azure region naming prefix')
+param regionNamePrefix string = 'uks'
+
+@description('Tags to apply to applicable resources')
+param defaultTags object = {
+  'IaC-Source': 'Azure/CAE-Bits'
+}
+
+resource vwan 'Microsoft.Network/virtualWans@2021-02-01' = {
+  name: 'vwan-${regionNamePrefix}'
+  location: region
+  tags: defaultTags
+  properties: {
+    allowBranchToBranchTraffic: true
+    allowVnetToVnetTraffic: true
+    disableVpnEncryption: false
+    type: 'Standard'
+  }
+}
+
+output vwanName string = vwan.name

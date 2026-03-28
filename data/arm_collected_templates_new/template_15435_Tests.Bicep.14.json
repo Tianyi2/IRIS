@@ -1,0 +1,90 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "languageVersion": "2.0",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.23.1.45101",
+      "templateHash": "1423150262937573918"
+    }
+  },
+  "definitions": {
+    "keyValue": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "value": {
+              "type": "int"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          }
+        }
+      ],
+      "items": false
+    },
+    "enabled": {
+      "type": "bool",
+      "allowedValues": [
+        false,
+        true
+      ]
+    },
+    "custom": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "properties": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/enabled"
+            },
+            "settings": {
+              "$ref": "#/definitions/keyValue"
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "props": {
+      "$ref": "#/definitions/custom",
+      "defaultValue": {
+        "name": "abc",
+        "properties": {
+          "enabled": true,
+          "settings": [
+            {
+              "name": "key1",
+              "value": 1
+            },
+            {
+              "name": "key2",
+              "value": "value2"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "resources": {}
+}

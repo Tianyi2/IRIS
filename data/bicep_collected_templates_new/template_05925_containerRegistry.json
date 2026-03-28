@@ -1,0 +1,135 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "11901383258788676807"
+    }
+  },
+  "parameters": {
+    "name": {
+      "type": "string",
+      "defaultValue": "[format('acr{0}', uniqueString(resourceGroup().id))]",
+      "minLength": 5,
+      "maxLength": 50,
+      "metadata": {
+        "description": "Name of your Azure Container Registry"
+      }
+    },
+    "adminUserEnabled": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable admin user that have push / pull permission to the registry."
+      }
+    },
+    "sku": {
+      "type": "string",
+      "defaultValue": "Premium",
+      "allowedValues": [
+        "Basic",
+        "Standard",
+        "Premium"
+      ],
+      "metadata": {
+        "description": "Tier of your Azure Container Registry."
+      }
+    },
+    "workspaceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the resource id of the Log Analytics workspace."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Specifies the location."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "metadata": {
+        "description": "Specifies the resource tags."
+      }
+    }
+  },
+  "variables": {
+    "copy": [
+      {
+        "name": "logs",
+        "count": "[length(variables('logCategories'))]",
+        "input": {
+          "category": "[variables('logCategories')[copyIndex('logs')]]",
+          "enabled": true,
+          "retentionPolicy": {
+            "enabled": true,
+            "days": 0
+          }
+        }
+      },
+      {
+        "name": "metrics",
+        "count": "[length(variables('metricCategories'))]",
+        "input": {
+          "category": "[variables('metricCategories')[copyIndex('metrics')]]",
+          "enabled": true,
+          "retentionPolicy": {
+            "enabled": true,
+            "days": 0
+          }
+        }
+      }
+    ],
+    "diagnosticSettingsName": "diagnosticSettings",
+    "logCategories": [
+      "ContainerRegistryRepositoryEvents",
+      "ContainerRegistryLoginEvents"
+    ],
+    "metricCategories": [
+      "AllMetrics"
+    ]
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ContainerRegistry/registries",
+      "apiVersion": "2021-12-01-preview",
+      "name": "[parameters('name')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "sku": {
+        "name": "[parameters('sku')]"
+      },
+      "properties": {
+        "adminUserEnabled": "[parameters('adminUserEnabled')]"
+      }
+    },
+    {
+      "type": "Microsoft.Insights/diagnosticSettings",
+      "apiVersion": "2021-05-01-preview",
+      "scope": "[resourceId('Microsoft.ContainerRegistry/registries', parameters('name'))]",
+      "name": "[variables('diagnosticSettingsName')]",
+      "properties": {
+        "workspaceId": "[parameters('workspaceId')]",
+        "logs": "[variables('logs')]",
+        "metrics": "[variables('metrics')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ContainerRegistry/registries', parameters('name'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "id": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.ContainerRegistry/registries', parameters('name'))]"
+    },
+    "name": {
+      "type": "string",
+      "value": "[parameters('name')]"
+    }
+  }
+}

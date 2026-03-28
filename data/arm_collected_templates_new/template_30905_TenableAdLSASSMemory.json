@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/6f7fa5f9-7d21-42c1-bc52-ac355b87c6cf')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/6f7fa5f9-7d21-42c1-bc52-ac355b87c6cf')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "name": "Tenable.ad LSASS Memory",
+        "description": "'Searches for OS Credentials dumping attacks.'\n",
+        "query": "// For the query to work properly, make sure you have imported the afad_parser.kql parser into the workspace\n// Retrieve the parser here: https://raw.githubusercontent.com/tenable/Azure-Sentinel/Tenable.ad-connector/Solutions/TenableAD/Parsers/afad_parser.kql\n// Then, create the Kusto Function with alias afad_parser\nafad_parser\n  | where MessageType == 2 and Codename == \"OS Credential Dumping: LSASS Memory\"\n  | extend HostName = tostring(split(Host, '.', 0)[0]), DnsDomain = tostring(strcat_array(array_slice(split(Host, '.'), 1, -1), '.'))\n",
+        "queryFrequency": "2h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "HostName",
+                "identifier": "HostName"
+              },
+              {
+                "columnName": "DnsDomain",
+                "identifier": "DnsDomain"
+              }
+            ],
+            "entityType": "Host"
+          }
+        ],
+        "severity": "High",
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "tactics": [
+          "CredentialAccess"
+        ],
+        "queryPeriod": "2h"
+      }
+    }
+  ]
+}

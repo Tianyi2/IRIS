@@ -1,0 +1,5 @@
+Resources:
+  {{ module_name }}ModuleBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: {{ BucketName | novalue }}

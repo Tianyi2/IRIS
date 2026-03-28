@@ -1,0 +1,777 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "LogicAppName": {
+            "defaultValue": "Enrich-DDoSAlert",
+            "type": "String"
+        },
+        "alertName": {
+            "defaultValue": "DDoS Mitigation Started - Potential Attack",
+            "type": "String"
+        },
+        "securityTeamEmail": {
+            "type": "String",
+            "metadata": {
+                "Description": "This is the email address of the security team, which will be the recipient of the email alert along with the resource owner."
+            }
+        },
+        "companyDomain": {
+            "type": "String",
+            "metadata": {
+                "Description": "In the form of @company.com - this will be used to compose the email address of the resource owner."
+            }
+        },
+        "workspaceName": {
+            "type": "String",
+            "metadata": {
+                "Description": "Name of the existing Log Analytics workspace"
+            }
+        }
+    },
+    "variables": {
+        "Office365ConnectionName": "[concat('office365-', parameters('LogicAppName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Insights/actionGroups",
+            "apiVersion": "2018-03-01",
+            "name": "[parameters('LogicAppName')]",
+            "location": "Global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Logic/workflows', parameters('LogicAppName'))]"
+            ],
+            "properties": {
+                "groupShortName": "DDoSLogicApp",
+                "enabled": true,
+                "smsReceivers": [],
+                "emailReceivers": [],
+                "webhookReceivers": [
+                    {
+                        "name": "[concat(parameters('LogicAppName'), '-webhook')]",
+                        "serviceUri": "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows', parameters('LogicAppName')), '/triggers/manual'), '2016-06-01').value]"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Insights/scheduledQueryRules",
+            "apiVersion": "2018-04-16",
+            "name": "[parameters('alertName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Insights/actionGroups', parameters('LogicAppName'))]"
+            ],
+            "properties": {
+                "description": "This alert detects a MitigationStarted event logged by Azure DDoS Protection Standard.",
+                "enabled": "true",
+                "source": {
+                    "Query": "AzureDiagnostics | where Category == \"DDoSProtectionNotifications\" | where type_s == \"MitigationStarted\" | project ResourceId, SubscriptionId, Message, publicIpAddress_s",
+                    "dataSourceId": "[resourceId('Microsoft.OperationalInsights/workspaces',parameters('workspaceName'))]",
+                    "queryType": "ResultCount"
+                },
+                "schedule": {
+                    "frequencyInMinutes": 5,
+                    "timeWindowInMinutes": 5
+                },
+                "action": {
+                    "odata.type": "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.AlertingAction",
+                    "severity": "2",
+                    "aznsAction": {
+                        "actionGroup": [
+                            "[resourceId('Microsoft.Insights/actiongroups', parameters('LogicAppName'))]"
+                        ]
+                    },
+                    "trigger": {
+                        "thresholdOperator": "GreaterThan",
+                        "threshold": 0
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2018-07-01-preview",
+            "name": "[variables('Office365ConnectionName')]",
+            "location": "[resourceGroup().location]",
+            "kind": "V1",
+            "properties": {
+                "displayName": "<username>@<domain>",
+                "parameterValues": {},
+                "customParameterValues": {},
+                "api": {
+                    "displayName": "Office 365 Outlook",
+                    "description": "Microsoft Office 365 is a cloud-based service that is designed to help meet your organization's needs for robust security, reliability, and user productivity.",
+                    "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/office365')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2018-07-01-preview",
+            "name": "azuremonitorlogs",
+            "location": "[resourceGroup().location]",
+            "kind": "V1",
+            "properties": {
+                "displayName": "azuremonitorlogs",
+                "parameterValues": {},
+                "api": {
+                    "displayName": "Azure Monitor Logs",
+                    "description": "Use this connector to query your Azure Monitor Logs across Log Analytics workspace and Application Insights component, to list or visualize results.",
+                    "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuremonitorlogs')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2016-06-01",
+            "name": "[parameters('LogicAppName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/connections', variables('Office365ConnectionName'))]",
+                "[resourceId('Microsoft.Web/connections', 'azuremonitorlogs')]"
+            ],
+            "tags": {
+                "createddate": "11/03/2020",
+                "owner": "anroma"
+            },
+            "identity": {
+                "principalId": "",
+                "tenantId": "",
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "triggers": {
+                        "manual": {
+                            "type": "Request",
+                            "kind": "Http",
+                            "inputs": {
+                                "schema": {
+                                    "properties": {
+                                        "AlertRuleName": {
+                                            "type": "string"
+                                        },
+                                        "AlertThresholdOperator": {
+                                            "type": "string"
+                                        },
+                                        "AlertThresholdValue": {
+                                            "type": "integer"
+                                        },
+                                        "AlertType": {
+                                            "type": "string"
+                                        },
+                                        "Description": {
+                                            "type": "string"
+                                        },
+                                        "LinkToFilteredSearchResultsAPI": {
+                                            "type": "string"
+                                        },
+                                        "LinkToFilteredSearchResultsUI": {
+                                            "type": "string"
+                                        },
+                                        "LinkToSearchResults": {
+                                            "type": "string"
+                                        },
+                                        "LinkToSearchResultsAPI": {
+                                            "type": "string"
+                                        },
+                                        "ResourceId": {
+                                            "type": "string"
+                                        },
+                                        "ResultCount": {
+                                            "type": "integer"
+                                        },
+                                        "SearchIntervalEndtimeUtc": {
+                                            "type": "string"
+                                        },
+                                        "SearchIntervalInSeconds": {
+                                            "type": "integer"
+                                        },
+                                        "SearchIntervalStartTimeUtc": {
+                                            "type": "string"
+                                        },
+                                        "SearchQuery": {
+                                            "type": "string"
+                                        },
+                                        "SearchResult": {
+                                            "properties": {
+                                                "dataSources": {
+                                                    "items": {
+                                                        "properties": {
+                                                            "region": {
+                                                                "type": "string"
+                                                            },
+                                                            "resourceId": {
+                                                                "type": "string"
+                                                            },
+                                                            "tables": {
+                                                                "items": {
+                                                                    "type": "string"
+                                                                },
+                                                                "type": "array"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "resourceId",
+                                                            "region",
+                                                            "tables"
+                                                        ],
+                                                        "type": "object"
+                                                    },
+                                                    "type": "array"
+                                                },
+                                                "statistics": {
+                                                    "properties": {
+                                                        "query": {
+                                                            "properties": {
+                                                                "datasetStatistics": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "tableRowCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "tableSize": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "tableRowCount",
+                                                                            "tableSize"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                },
+                                                                "executionTime": {
+                                                                    "type": "number"
+                                                                },
+                                                                "inputDatasetStatistics": {
+                                                                    "properties": {
+                                                                        "extents": {
+                                                                            "properties": {
+                                                                                "scanned": {
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "scannedMaxDatetime": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "scannedMinDatetime": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "total": {
+                                                                                    "type": "integer"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
+                                                                        "rows": {
+                                                                            "properties": {
+                                                                                "scanned": {
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "total": {
+                                                                                    "type": "integer"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
+                                                                        "rowstores": {
+                                                                            "properties": {
+                                                                                "scannedRows": {
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "scannedValuesSize": {
+                                                                                    "type": "integer"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
+                                                                        "shards": {
+                                                                            "properties": {
+                                                                                "queriesGeneric": {
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "queriesSpecialized": {
+                                                                                    "type": "integer"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                },
+                                                                "resourceUsage": {
+                                                                    "properties": {
+                                                                        "cache": {
+                                                                            "properties": {
+                                                                                "disk": {
+                                                                                    "properties": {
+                                                                                        "hits": {
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "misses": {
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "total": {
+                                                                                            "type": "integer"
+                                                                                        }
+                                                                                    },
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "memory": {
+                                                                                    "properties": {
+                                                                                        "hits": {
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "misses": {
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "total": {
+                                                                                            "type": "integer"
+                                                                                        }
+                                                                                    },
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "shards": {
+                                                                                    "properties": {
+                                                                                        "bypassbytes": {
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "cold": {
+                                                                                            "properties": {
+                                                                                                "hitbytes": {
+                                                                                                    "type": "integer"
+                                                                                                },
+                                                                                                "missbytes": {
+                                                                                                    "type": "integer"
+                                                                                                },
+                                                                                                "retrievebytes": {
+                                                                                                    "type": "integer"
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "hot": {
+                                                                                            "properties": {
+                                                                                                "hitbytes": {
+                                                                                                    "type": "integer"
+                                                                                                },
+                                                                                                "missbytes": {
+                                                                                                    "type": "integer"
+                                                                                                },
+                                                                                                "retrievebytes": {
+                                                                                                    "type": "integer"
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        }
+                                                                                    },
+                                                                                    "type": "object"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
+                                                                        "cpu": {
+                                                                            "properties": {
+                                                                                "kernel": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "totalCpu": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "user": {
+                                                                                    "type": "string"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
+                                                                        "memory": {
+                                                                            "properties": {
+                                                                                "peakPerNode": {
+                                                                                    "type": "integer"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "tables": {
+                                                    "items": {
+                                                        "properties": {
+                                                            "columns": {
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "name": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "type": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "name",
+                                                                        "type"
+                                                                    ],
+                                                                    "type": "object"
+                                                                },
+                                                                "type": "array"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "rows": {
+                                                                "items": {
+                                                                    "type": "array"
+                                                                },
+                                                                "type": "array"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "name",
+                                                            "columns",
+                                                            "rows"
+                                                        ],
+                                                        "type": "object"
+                                                    },
+                                                    "type": "array"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "Severity": {
+                                            "type": "string"
+                                        },
+                                        "SubscriptionId": {
+                                            "type": "string"
+                                        },
+                                        "WorkspaceId": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "actions": {
+                        "For_each": {
+                            "foreach": "@triggerBody()?['SearchResult']?['tables']",
+                            "actions": {
+                                "Set_variable": {
+                                    "type": "SetVariable",
+                                    "inputs": {
+                                        "name": "Rows",
+                                        "value": "@items('For_each')?['rows']"
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "Initialize_variable": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Foreach"
+                        },
+                        "HTTP": {
+                            "runAfter": {
+                                "For_each": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Http",
+                            "inputs": {
+                                "uri": "https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2019-04-01",
+                                "method": "POST",
+                                "body": {
+                                    "query": "where toupper(id) == '@{first(skip(first(variables('Rows')), 0))}' | extend publicipaddress = properties.ipAddress | extend ipConfiguration = parse_json(properties.ipConfiguration.id) | extend BrkipConfig = split(ipConfiguration, '/') | extend typeassetassociatedwith = tostring(BrkipConfig[7]) | extend nameassetassociatedwith = tostring(BrkipConfig[8]) | extend owner = parse_json(tags.owner) | extend dnsname = parse_json(properties.dnsSettings.fqdn) | project id, name, publicipaddress,  dnsname, typeassetassociatedwith, nameassetassociatedwith, location, resourceGroup, managedBy, tags, owner",
+                                    "subscriptions": [
+                                        "@{first(skip(first(variables('Rows')), 1))}"
+                                    ]
+                                },
+                                "authentication": {
+                                    "type": "ManagedServiceIdentity"
+                                }
+                            }
+                        },
+                        "HTTP_2": {
+                            "runAfter": {
+                                "Parse_JSON": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Http",
+                            "inputs": {
+                                "uri": "http://@{first(skip(first(variables('Rows')), 3))}",
+                                "method": "GET"
+                            }
+                        },
+                        "Initialize_variable": {
+                            "runAfter": {},
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "Rows",
+                                        "type": "array"
+                                    }
+                                ]
+                            }
+                        },
+                        "Parse_JSON": {
+                            "runAfter": {
+                                "HTTP": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ParseJson",
+                            "inputs": {
+                                "content": "@body('HTTP')",
+                                "schema": {
+                                    "properties": {
+                                        "count": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "columns": {
+                                                    "items": {
+                                                        "properties": {
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "type": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "name",
+                                                            "type"
+                                                        ],
+                                                        "type": "object"
+                                                    },
+                                                    "type": "array"
+                                                },
+                                                "rows": {
+                                                    "items": {
+                                                        "type": "array"
+                                                    },
+                                                    "type": "array"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "facets": {
+                                            "type": "array"
+                                        },
+                                        "resultTruncated": {
+                                            "type": "string"
+                                        },
+                                        "totalRecords": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "Initialize_variables_when_succeeded": {
+                            "runAfter": {
+                                "HTTP_2": [
+                                    "Succeeded",
+                                    "TimedOut",
+                                    "Skipped",
+                                    "Failed"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "Emailbody",
+                                        "type": "string",
+                                        "value": "<p>An ongoing DDoS mitigation event has been detected against the following resource:<br>\n<br>\n<strong>Target Public IP:</strong> @{first(skip(first(body('Parse_JSON')?['data']?['rows']), 2))}<br>\n<strong>Public IP Name:</strong> @{first(skip(first(body('Parse_JSON')?['data']?['rows']), 1))}<br>\n<strong>DNS Name:</strong> @{first(skip(first(body('Parse_JSON')?['data']?['rows']), 3))}<br>\n<strong>Attached Resource Type: </strong><br>\n<strong>Attached Resource Name:</strong> @{first(skip(first(body('Parse_JSON')?['data']?['rows']), 5))}<br>\n<strong>Region: </strong>@{first(skip(first(body('Parse_JSON')?['data']?['rows']), 6))}<br>\n<strong>Resource Group: </strong>@{first(skip(first(body('Parse_JSON')?['data']?['rows']), 7))}<br>\n<strong>Tags:</strong> @{first(skip(first(body('Parse_JSON')?['data']?['rows']), 9))}<br>\n<strong>Public IP Resource ID:</strong> @{first(skip(first(body('Parse_JSON')?['data']?['rows']), 0))}<br>\n<strong>Attached Resource ID:</strong> @{first(skip(first(body('Parse_JSON')?['data']?['rows']), 8))}<br>\n<strong>Resource Owner: </strong>@{first(skip(first(body('Parse_JSON')?['data']?['rows']), 10))}@{parameters('companyDomain')}<br>\n<br>\n<strong>Message</strong>: @{first(skip(first(variables('Rows')), 2))}<br>\n<br>\n<strong>Link to search results:</strong> @{triggerBody()?['LinkToSearchResults']}<br>\n<br>\nIf DDoS Rapid Response support is necessary, visit the <a href=\"https://docs.microsoft.com/en-us/azure/azure-portal/supportability/how-to-create-azure-support-request\">general support docs here</a>&nbsp;and the <a href=\"https://docs.microsoft.com/en-us/azure/ddos-protection/ddos-rapid-response\">DDoS Rapid Response instructions here</a>.<br>\n<br>\n<strong>Result of test</strong> against http://@{first(skip(first(variables('Rows')), 3))}<br>\n<strong>Status</strong>: @{outputs('HTTP_2')['statusCode']}<br>\n<strong>Headers</strong>: @{outputs('HTTP_2')['headers']}<br>\n<strong>Body</strong>: @{body('HTTP_2')}<br>\n</p>"
+                                    }
+                                ]
+                            }
+                        },
+                        "Run_query_and_list_results_2": {
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azuremonitorlogs']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "body": "AzureDiagnostics\n| where Category == \"DDoSMitigationFlowLogs\"\n| where isnotempty(sourcePublicIpAddress_s)\n| distinct sourcePublicIpAddress_s\n| summarize SourceIPs = strcat_array(make_list(sourcePublicIpAddress_s), \", \")\n",
+                                "path": "/queryData",
+                                "queries": {
+                                    "subscriptions": "@split(triggerBody()?['ResourceId'], '/')[2]",
+                                    "resourcegroups": "@split(triggerBody()?['ResourceId'], '/')[4]",
+                                    "resourcetype": "Log Analytics Workspace",
+                                    "resourcename": "@split(triggerBody()?['ResourceId'], '/')[8]",
+                                    "timerange": "Last hour"
+                                }
+                            },
+                            "runAfter": {
+                                "Initialize_variables_when_succeeded": [
+                                    "Succeeded"
+                                ]
+                            }
+                        },
+                        "Send_an_email_(V2)": {
+                            "runAfter": {
+                                    "Run_query_and_list_results_2": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['office365-1']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "body": {
+                                    "To": "@{parameters('securityTeamEmail')}; @{first(skip(first(body('Parse_JSON')?['data']?['rows']), 10))}@{parameters('companyDomain')}",
+                                    "Subject": "Potential DDoS Attack",
+                                    "Body": "<p class=\"editor-paragraph\"><b><strong class=\"editor-text-bold\">An ongoing DDoS mitigation event has been detected:</strong></b><br><b><strong class=\"editor-text-bold\">Top Attacking IPs:</strong></b><br>@{replace(body('Run_query_and_list_results_2')?['value'][0]['SourceIPs'], ',', ', ')\r\n}<br>@{variables('Emailbody')}</p>",
+                                    "Importance": "High"
+                                },
+                                "path": "/v2/Mail"
+                            }
+                        },
+                        "Delay": {
+                            "runAfter": {
+                                "Send_an_email_(V2)": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Wait",
+                            "inputs": {
+                                "interval": {
+                                    "count": 50,
+                                    "unit": "Minute"
+                                }
+                            }
+                        },
+                        "Run_query_and_list_results": {
+                            "runAfter": {
+                                "Delay": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azuremonitorlogs']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "body": "{\"query\":\"AzureDiagnostics | where Category == \\\"DDoSMitigationReports\\\" | sort by TimeGenerated desc | take 1\"}",
+                                "path": "/queryData",
+                                "queries": {
+                                    "subscriptions": "@split(triggerBody()?['ResourceId'], '/')[2]",
+                                    "resourcegroups": "@split(triggerBody()?['ResourceId'], '/')[4]",
+                                    "resourcetype": "Log Analytics Workspace",
+                                    "resourcename": "@split(triggerBody()?['ResourceId'], '/')[8]",
+                                    "timerange": "Last hour"
+                                }
+                            }
+                        },
+                        "Initialize_variables": {
+                            "runAfter": {
+                                "Run_query_and_list_results": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "Body2",
+                                        "type": "string",
+                                        "value": "<hr><strong>Post-Mitigation DDoS Report</strong><br>\n<strong>Report Time:</strong> @{body('Run_query_and_list_results')?['value'][0]['TimeGenerated']}<br>\n<strong>Target IP:</strong> @{body('Run_query_and_list_results')?['value'][0]['IPAddress']}<br>\n<strong>Mitigation Start:</strong> @{body('Run_query_and_list_results')?['value'][0]['MitigationPeriodStart_t']}<br>\n<strong>Mitigation End:</strong> @{body('Run_query_and_list_results')?['value'][0]['MitigationPeriodEnd_t']}<br>\n<strong>Top ASNs:</strong> @{replace(replace(replace(replace(replace(replace(body('Run_query_and_list_results')?['value'][0]['TopSourceASNs_s'], '{', ''), '}', ''), '\"', ''), ':1.00', ''), ':0.00', ''), ',', ', ')}<br>\n<strong>Top Countries:</strong> @{replace(replace(replace(replace(replace(replace(body('Run_query_and_list_results')?['value'][0]['TopSourceCountries_s'], '{', ''), '}', ''), '\"', ''), ':1.00', ''), ':0.00', ''), ',', ', ')\r\n}<br>\n<strong>Top Continents:</strong> @{replace(replace(replace(replace(replace(replace(body('Run_query_and_list_results')?['value'][0]['SourceContinents_s'], '{', ''), '}', ''), '\"', ''), ':1.00', ''), ':0.00', ''), ',', ', ')}\n @{replace(replace(replace(replace(replace(body('Run_query_and_list_results')?['value'][0]['TrafficOverview_s'], '{', ''), '}', ''), '\"', ''), ',', '<br>'), ':', ': ')}"
+                                    }
+                                ]
+                            }
+                        },
+                        "Post_DDoS_Attack_Analysis": {
+                            "runAfter": {
+                                "Initialize_variables": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['office365-1']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "body": {
+                                    "To": "@{parameters('securityTeamEmail')},@{parameters('companyDomain')}",
+                                    "Subject": "DDOS Specific Details",
+                                    "Body": "<p class=\"editor-paragraph\">@{variables('Body2')}<br><b><strong class=\"editor-text-bold\">Top Attacking IPs:</strong></b><br>@{replace(body('Run_query_and_list_results_2')?['value'][0]['SourceIPs'], ',', ', ')}</p><br>",
+                                    "Importance": "Normal"
+                                },
+                                "path": "/v2/Mail"
+                            }
+                        }
+                    },
+                    "outputs": {},
+					"parameters": {
+            "companyDomain": {
+                "defaultValue": {},
+                "type": "String"
+            },
+            "securityTeamEmail": {
+                "defaultValue": {},
+                "type": "String"
+            },
+            "$connections": {
+                "type": "Object",
+                "defaultValue": {}
+            }
+        }
+    },
+    "parameters": {
+        "companyDomain": {
+            "value": "[parameters('securityTeamEmail')]"
+                },
+        "securityTeamEmail": {
+            "value": "[parameters('companyDomain')]"
+                },
+        "$connections": {
+            "type": "Object",
+                "value": {
+                    "office365-1": {
+                    "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/office365')]",
+                                    "connectionId": "[resourceId('Microsoft.Web/connections', variables('Office365ConnectionName'))]",
+                                    "connectionName": "[variables('Office365ConnectionName')]"
+                                },
+                                "azuremonitorlogs": {
+                                    "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/azuremonitorlogs')]",
+                                    "connectionId": "[resourceId('Microsoft.Web/connections', 'azuremonitorlogs')]",
+                                    "connectionName": "azuremonitorlogs"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+    ]
+}

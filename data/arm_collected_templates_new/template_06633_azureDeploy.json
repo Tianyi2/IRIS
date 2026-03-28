@@ -1,0 +1,25 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.1",
+    "parameters": {
+        "resourceGroups": {
+            "type": "array"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "apiVersion": "2018-05-01",
+            "copy": {
+                "name": "resourceGroups",
+                "count": "[length(parameters('resourceGroups'))]"
+            },
+            "name": "[parameters('resourceGroups')[copyIndex('resourceGroups')].name]",
+            "location": "[parameters('resourceGroups')[copyIndex('resourceGroups')].location]",
+            "type": "Microsoft.Resources/resourceGroups",
+            "properties": {},
+            "tags": "[parameters('resourceGroups')[copyIndex('resourceGroups')].tags]"
+        }
+    ],
+    "outputs": {}
+}

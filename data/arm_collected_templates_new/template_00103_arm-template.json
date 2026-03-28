@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/Microsoft.Resources.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "organizationName": {
+            "type": "string",
+            "defaultValue": "[concat('calabs-',uniqueString(resourceGroup().name, utcNow()))]"
+		},
+		"ownerUpn": {
+			"type": "string",
+			"defaultValue": "user@domain.onmicrosoft.com",
+			"metadata": {
+				"description": "The email address of the organization owner"
+			}
+		}
+    },
+    "resources": [
+        {
+            "name": "[parameters('organizationName')]",
+            "type": "microsoft.visualstudio/account",
+            "location": "Central US",
+            "apiVersion": "2014-02-26",
+            "properties": {
+                "operationType": "Create",
+                "accountName": "[parameters('organizationName')]",
+                "ownerUpn": "[parameters('ownerUpn')]"
+            }
+        }
+    ]
+}

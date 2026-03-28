@@ -1,0 +1,44 @@
+construct_id,construct_name,mapped_cfn_id,ontology_id,ontology_name
+ir_1,metadata,cfn_5,,Resources
+ir_2,parameters,"cfn_2, cfn_4",,Parameters
+ir_3,conditions,"cfn_7, cfn_6",,Outputs
+ir_4,resources,cfn_1,,Mappings
+ir_5,outputs,cfn_3,,Metadata
+ir_8,metadata.cloud_service_provider,cfn_9,,Rules
+ir_10,metadata.description,cfn_10,,Conditions
+ir_11,metadata.additional_info,"cfn_9, cfn_36",cfn_8,Transform
+ir_13,parameters.name,"cfn_11, cfn_41",,Format_version
+ir_14,parameters.type,cfn_13,,Description
+ir_15,parameters.param_type,,,Parameters.LogicalID
+ir_16,parameters.default,cfn_14,,Parameters.Description
+ir_17,parameters.constraints,"cfn_15, cfn_16, cfn_17, cfn_18, cfn_19, cfn_20, cfn_21, cfn_22",,Parameters.Type
+ir_18,parameters.description,cfn_12,,Parameters.Default
+ir_23,conditions.name,"cfn_42, cfn_43",,Parameters.AllowedPattern
+ir_24,conditions.condition,cfn_37,,Parameters.AllowedValues
+ir_25,conditions.ruled_para,cfn_37,,Parameters.ConstraintDescription
+ir_26,conditions.constraint,cfn_38,,Parameters.MaxLength
+ir_27,conditions.description,cfn_38,,Parameters.MaxValue
+ir_31,resources.name,cfn_39,,Parameters.MinLength
+ir_32,resources.type,cfn_23,,Parameters.MinValue
+ir_34,resources.arguments.depends_on,cfn_26,,Parameters.NoEcho
+ir_35,resources.arguments.condition,cfn_25,,Resources.Type
+ir_40,resources.arguments.value,"cfn_27, cfn_28, cfn_29, cfn_30",,Resources.Properties
+ir_43,resources.properties,cfn_24,,Resources.Condition
+ir_50,outputs.name,cfn_40,,Resources.DependsOn
+ir_51,outputs.description,cfn_32,,Resources.CreationPolicy
+ir_53,outputs.value.value,cfn_33,,Resources.DeletionPolicy
+ir_58,outputs.export_name.name,cfn_34,,Resources.UpdatePolicy
+ir_62,outputs.depend_conditions,cfn_35,,Resources.UpdateReplacePolicy
+,,,cfn_31,Resources.Metadata
+,,,,Outputs.Description
+,,,,Outputs.Value
+,,,,Outputs.Export
+,,,,Outputs.Condition
+,,,,Metadata.AWS::CloudFormation::Interface
+,,,,Rules.RuleCondition
+,,,,Rules.Assertions
+,,,,Resources.LogicalID
+,,,,Outputs.LogicalID
+,,,,Mapping.LogicalID
+,,,,Rules.logicalRuleName
+,,,,Conditions.LogicalConditionName

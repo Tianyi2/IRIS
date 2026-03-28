@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/66c4cd4c-d391-47e8-b4e6-93e55d86ca9f')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/66c4cd4c-d391-47e8-b4e6-93e55d86ca9f')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "AnyAlert",
+            "lookbackDuration": "5m",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "severity": "Medium",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Netskope Error at {{TimeGenerated}}",
+          "alertDescriptionFormat": "Error Message: {{error_s}}"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Netskope - WebTransaction Error Detection",
+        "description": "'Rule helps to track error occurred in Netskope WebTransaction Data Connector.'\n",
+        "query": "NetskopeWebtxErrors_CL\n|where error_s has_any (\"Invalid Netskope Hostname\", \"Webtx Authentication\", \"Webtx Token Empty\", \"Webtx Exponential Backoff\", \"Webtx Idle Time\")\n",
+        "status": "Available",
+        "queryFrequency": "5m",
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "Execution"
+        ],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "ErrorMessage": "error_s",
+          "Time": "TimeGenerated"
+        },
+        "queryPeriod": "5m"
+      }
+    }
+  ]
+}

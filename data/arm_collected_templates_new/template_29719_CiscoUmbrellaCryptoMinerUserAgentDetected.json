@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/b619d1f1-7f39-4c7e-bf9e-afbb46457997')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/b619d1f1-7f39-4c7e-bf9e-afbb46457997')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "Cisco Cloud Security - Crypto Miner User-Agent Detected",
+        "description": "'Detects suspicious user agent strings used by crypto miners in proxy logs.'\n",
+        "query": "Cisco_Umbrella\n| where EventType == \"proxylogs\"\n| where HttpUserAgentOriginal contains \"XMRig\" or HttpUserAgentOriginal contains \"ccminer\"\n| extend Message = \"Crypto Miner User Agent\"\n| project TimeGenerated, Message, SrcIpAddr, DstIpAddr, UrlOriginal, HttpUserAgentOriginal\n",
+        "status": "Available",
+        "queryFrequency": "15m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "UrlOriginal",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SrcIpAddr",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "Impact",
+          "CommandAndControl",
+          "Exfiltration"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "15m"
+      }
+    }
+  ]
+}

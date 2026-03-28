@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "ddosPlanName": {
+      "type": "string",
+      "defaultValue": "ddos%UID%",
+      "metadata": {
+        "description": "Name of the DDoS Standard Plan."
+      }
+    },
+    "ddosLocation": {
+      "type": "string",
+      "defaultValue": "%LOCATION%",
+      "metadata": {
+        "description": "DDoS Location."
+      }
+    },
+    "ddosTags": {
+      "type": "object",
+      "defaultValue": {
+        "Date": "%DATE%"
+      },
+      "metadata": {
+        "description": "DDoS Tags."
+      }
+    }
+  },
+  "variables": {
+    "ddosLocation": "[if(empty(parameters('ddosLocation')), resourceGroup().location, parameters('ddosLocation'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2018-02-01",
+      "type": "Microsoft.Network/ddosProtectionPlans",
+      "name": "[parameters('ddosPlanName')]",
+      "location": "[variables('ddosLocation')]",
+      "tags": "[parameters('ddosTags')]"
+    }
+  ],
+  "outputs": {}
+}

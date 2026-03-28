@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deploy-Log-Analytics",
+      "apiVersion": "2021-06-01",
+      "location": "westeurope",
+      "identity": {
+        "PrincipalId": "ad5fb210-5554-4253-95ea-52a9e8810989",
+        "TenantId": "3114ebe8-8d3f-4bac-b3ce-59b4210a1287",
+        "Type": "SystemAssigned"
+      },
+      "properties": {
+        "Scope": "/providers/Microsoft.Management/managementGroups/gotOps-management",
+        "NotScopes": null,
+        "DisplayName": "Deploy-Log-Analytics",
+        "Description": "Deploy-Log-Analytics",
+        "EnforcementMode": "Default",
+        "PolicyDefinitionId": "/providers/Microsoft.Management/managementGroups/gotOps/providers/Microsoft.Authorization/policyDefinitions/Deploy-Log-Analytics",
+        "Parameters": {
+          "workspaceName": {
+            "value": "gotOps-la-04248a84-9f56-4541-ad07-f357ac99d483"
+          },
+          "automationAccountName": {
+            "value": "gotOps-a-04248a84-9f56-4541-ad07-f357ac99d483"
+          },
+          "workspaceRegion": {
+            "value": "westeurope"
+          },
+          "automationRegion": {
+            "value": "westeurope"
+          },
+          "rgName": {
+            "value": "gotOps-mgmt"
+          },
+          "retentionInDays": {
+            "value": "30"
+          }
+        },
+        "NonComplianceMessages": null
+      }
+    }
+  ],
+  "outputs": {}
+}

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webAppName": {
+      "type": "string",
+      "defaultValue": "webApp%UID%",
+      "metadata": {
+        "description": "The Web App Name"
+      }
+    },
+    "webAppLocation": {
+      "type": "string",
+      "defaultValue": "%LOCATION%",
+      "metadata": {
+        "description": "Web App Location."
+      }
+    },
+    "webAppAppInsightsInstrumentationKey": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The Web App App Insights Instrumentation Key"
+      }
+    },
+    "aspName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The App Service Plan Name"
+      }
+    },
+    "aseName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of the App Service Environment"
+      }
+    },
+    "aspResourceGroupName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Resource Group Name of the App Service Environment"
+      }
+    },
+    "webAppTags": {
+      "type": "object",
+      "defaultValue": {
+        "Date": "%DATE%"
+      },
+      "metadata": {
+        "description": "Web App Tags."
+      }
+    }
+  },
+  "variables": {
+    "aspResourceID": "[resourceId(parameters('aspResourceGroupName'), 'Microsoft.Web/serverfarms/', parameters('aspName'))]",
+    "webAppLocation": "[if(empty(parameters('webAppLocation')), resourceGroup().location, parameters('webAppLocation'))]",
+    "webAppAppSettings": "[if(empty(parameters('webAppAppInsightsInstrumentationKey')), json('[]'), json(concat('[{\"name\": \"APPINSIGHTS_INSTRUMENTATIONKEY\", \"value\": \"', parameters('webAppAppInsightsInstrumentationKey'), '\"},{\"name\": \"ApplicationInsightsAgent_EXTENSION_VERSION\", \"value\": \"~2\"}, {\"name\": \"DiagnosticServices_EXTENSION_VERSION\", \"value\": \"~3\"}, {\"name\": \"APPINSIGHTS_PROFILERFEATURE_VERSION\", \"value\": \"1.0.0\"}]')))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2016-08-01",
+      "type": "Microsoft.Web/sites",
+      "name": "[parameters('webAppName')]",
+      "location": "[variables('webAppLocation')]",
+      "tags": "[parameters('webAppTags')]",
+      "properties": {
+        "name": "[parameters('webAppName')]",
+        "serverFarmId": "[variables('aspResourceID')]",
+        "hostingEnvironment": "[if(empty(parameters('aseName')), json('null'), parameters('aseName'))]",
+        "siteConfig": {
+          "appSettings": "[variables('webAppAppSettings')]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

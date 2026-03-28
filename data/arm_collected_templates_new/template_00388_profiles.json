@@ -1,0 +1,196 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "audit": {
+            "defaultValue": {},
+            "metadata": {
+                "description": "An object that encapsulates the audit settings that will be applied to the Azure CDN Profile."
+            },
+            "type": "object"
+        },
+        "endpoints": {
+            "defaultValue": [],
+            "metadata": {
+                "description": "An array of endpoints that will be linked with the Azure CDN Profile."
+            },
+            "type": "array"
+        },
+        "name": {
+            "maxLength": 260,
+            "metadata": {
+                "description": "Specifies the name of the Azure CDN Profile."
+            },
+            "minLength": 1,
+            "type": "string"
+        },
+        "skuName": {
+            "allowedValues": [
+                "Premium_AzureFrontDoor",
+                "Premium_Verizon",
+                "Standard_AzureFrontDoor",
+                "Standard_Microsoft",
+                "Standard_Verizon"
+            ],
+            "defaultValue": "Standard_Microsoft",
+            "metadata": {
+                "description": "Specifies the SKU name of the Azure CDN Profile."
+            },
+            "type": "string"
+        },
+        "tags": {
+            "defaultValue": {},
+            "metadata": {
+                "description": "Specifies the set of tag key-value pairs that will be assigned to the Azure CDN Profile."
+            },
+            "type": "object"
+        }
+    },
+    "variables": {
+        "apiVersions": {
+            "cdnEndpoints": "2020-09-01",
+            "cdnProfiles": "2020-09-01",
+            "diagnosticSettings": "2017-05-01-preview"
+        },
+        "audit": "[union(variables('defaultResourceProperties').audit, parameters('audit'))]",
+        "defaultResourceProperties": {
+            "audit": {
+                "isEnabled": true,
+                "logAnalyticsWorkspace": {
+                    "name": "",
+                    "resourceGroupName": "[variables('resourceGroupName')]",
+                    "subscriptionId": "[variables('subscriptionId')]"
+                },
+                "retentionPolicy": {
+                    "days": 137,
+                    "isEnabled": true
+                }
+            },
+            "endpoint": {
+                "contentTypesToCompress": [
+                    "application/x-javascript",
+                    "text/css",
+                    "text/html",
+                    "text/javascript",
+                    "text/plain"
+                ],
+                "isCompressionEnabled": true,
+                "isHttpEnabled": false,
+                "isHttpsEnabled": true,
+                "originHostHeader": "",
+                "originPath": "[null()]",
+                "queryStringCachingBehavior": "IgnoreQueryString",
+                "rules": []
+            }
+        },
+        "frontDoorDiagnosticsLogs": [
+            {
+                "category": "FrontDoorAccessLog",
+                "enabled": "[variables('isAuditEnabled')]",
+                "retentionPolicy": {
+                    "days": "[variables('audit').retentionPolicy.days]",
+                    "enabled": "[variables('audit').retentionPolicy.isEnabled]"
+                }
+            },
+            {
+                "category": "FrontDoorHealthProbeLog",
+                "enabled": "[variables('isAuditEnabled')]",
+                "retentionPolicy": {
+                    "days": "[variables('audit').retentionPolicy.days]",
+                    "enabled": "[variables('audit').retentionPolicy.isEnabled]"
+                }
+            },
+            {
+                "category": "FrontDoorWebApplicationFirewallLog",
+                "enabled": "[variables('isAuditEnabled')]",
+                "retentionPolicy": {
+                    "days": "[variables('audit').retentionPolicy.days]",
+                    "enabled": "[variables('audit').retentionPolicy.isEnabled]"
+                }
+            }
+        ],
+        "isAuditEnabled": "[variables('audit').isEnabled]",
+        "isAuditLogAnalyticsWorkspaceNameNotEmpty": "[not(empty(variables('audit').logAnalyticsWorkspace.name))]",
+        "isVerizonCdn": "[endsWith(parameters('skuName'), 'Verizon')]",
+        "microsoftDiagnosticsLogs": [
+            {
+                "category": "AzureCdnAccessLog",
+                "enabled": "[variables('isAuditEnabled')]",
+                "retentionPolicy": {
+                    "days": "[variables('audit').retentionPolicy.days]",
+                    "enabled": "[variables('audit').retentionPolicy.isEnabled]"
+                }
+            }
+        ],
+        "resourceGroupName": "[resourceGroup().name]",
+        "resourceIds": {
+            "auditLogAnalyticsWorkspace": "[resourceId(variables('audit').logAnalyticsWorkspace.subscriptionId, variables('audit').logAnalyticsWorkspace.resourceGroupName, 'Microsoft.OperationalInsights/workspaces', if(variables('isAuditLogAnalyticsWorkspaceNameNotEmpty'), variables('audit').logAnalyticsWorkspace.name, '<NULL>'))]",
+            "cdnProfile": "[resourceId('Microsoft.Cdn/profiles', parameters('name'))]"
+        },
+        "subscriptionId": "[subscription().subscriptionId]"
+    },
+    "resources": [
+        {
+            "apiVersion": "[variables('apiVersions').cdnProfiles]",
+            "location": "global",
+            "name": "[parameters('name')]",
+            "properties": {},
+            "sku": {
+                "name": "[parameters('skuName')]"
+            },
+            "tags": "[parameters('tags')]",
+            "type": "Microsoft.Cdn/profiles"
+        },
+        {
+            "apiVersion": "[variables('apiVersions').cdnEndpoints]",
+            "copy": {
+                "count": "[length(parameters('endpoints'))]",
+                "mode": "Parallel",
+                "name": "endpointsCopy"
+            },
+            "dependsOn": [
+                "[variables('resourceIds').cdnProfile]"
+            ],
+            "location": "global",
+            "name": "[format('{0}/{1}', parameters('name'), parameters('endpoints')[copyIndex()].name)]",
+            "properties": {
+                "contentTypesToCompress": "[if(variables('isVerizonCdn'), null(), union(variables('defaultResourceProperties').endpoint, parameters('endpoints')[copyIndex()]).contentTypesToCompress)]",
+                "copy": [
+                    {
+                        "count": "[length(parameters('endpoints')[copyIndex()].origins)]",
+                        "input": {
+                            "name": "[if(empty(union(createObject('name', ''), parameters('endpoints')[copyIndex()].origins[copyIndex('origins')]).name), replace(parameters('endpoints')[copyIndex()].origins[copyIndex('origins')].hostName, '.', '-'), parameters('endpoints')[copyIndex()].origins[copyIndex('origins')].name)]",
+                            "properties": {
+                                "hostName": "[parameters('endpoints')[copyIndex()].origins[copyIndex('origins')].hostName]"
+                            }
+                        },
+                        "name": "origins"
+                    }
+                ],
+                "deliveryPolicy": "[if(variables('isVerizonCdn'), null(), createObject('rules', union(variables('defaultResourceProperties').endpoint, parameters('endpoints')[copyIndex()]).rules))]",
+                "isCompressionEnabled": "[if(variables('isVerizonCdn'), null(), union(variables('defaultResourceProperties').endpoint, parameters('endpoints')[copyIndex()]).isCompressionEnabled)]",
+                "isHttpAllowed": "[if(variables('isVerizonCdn'), null(), union(variables('defaultResourceProperties').endpoint, parameters('endpoints')[copyIndex()]).isHttpEnabled)]",
+                "isHttpsAllowed": "[if(variables('isVerizonCdn'), null(), union(variables('defaultResourceProperties').endpoint, parameters('endpoints')[copyIndex()]).isHttpsEnabled)]",
+                "originHostHeader": "[union(variables('defaultResourceProperties').endpoint, parameters('endpoints')[copyIndex()]).originHostHeader]",
+                "originPath": "[union(variables('defaultResourceProperties').endpoint, parameters('endpoints')[copyIndex()]).originPath]",
+                "queryStringCachingBehavior": "[if(variables('isVerizonCdn'), null(), union(variables('defaultResourceProperties').endpoint, parameters('endpoints')[copyIndex()]).queryStringCachingBehavior)]"
+            },
+            "tags": "[parameters('tags')]",
+            "type": "Microsoft.Cdn/profiles/endpoints"
+        },
+        {
+            "apiVersion": "[variables('apiVersions').diagnosticSettings]",
+            "condition": "[or(variables('isAuditEnabled'), variables('isAuditLogAnalyticsWorkspaceNameNotEmpty'))]",
+            "dependsOn": [
+                "[variables('resourceIds').cdnProfile]"
+            ],
+            "location": "global",
+            "name": "[format('{0}/Microsoft.Insights/audit', parameters('name'))]",
+            "properties": {
+                "logs": "[if(variables('isVerizonCdn'), createArray(), if(endsWith(parameters('skuName'), 'AzureFrontDoor'), variables('frontDoorDiagnosticsLogs'), variables('microsoftDiagnosticsLogs')))]",
+                "workspaceId": "[variables('resourceIds').auditLogAnalyticsWorkspace]"
+            },
+            "type": "Microsoft.Cdn/profiles/providers/diagnosticsettings"
+        }
+    ]
+}

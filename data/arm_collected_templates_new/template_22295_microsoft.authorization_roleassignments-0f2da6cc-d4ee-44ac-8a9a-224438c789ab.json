@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "0f2da6cc-d4ee-44ac-8a9a-224438c789ab",
+      "apiVersion": "2022-01-01-preview",
+      "properties": {
+        "DisplayName": "85b613a961f44dd4855561c9",
+        "ObjectType": "ServicePrincipal",
+        "PrincipalId": "3df0485f-3c77-4bdf-b830-e242db29f9c1",
+        "RoleDefinitionId": "/providers/Microsoft.Authorization/RoleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7",
+        "RoleDefinitionName": "Network Contributor"
+      }
+    }
+  ],
+  "outputs": {}
+}

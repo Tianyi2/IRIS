@@ -1,0 +1,142 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namingPrefix": {
+      "defaultValue": "contoso",
+      "type": "string"
+    },
+    "todayYYYY-MM-DD": {
+      "type": "string",
+      "metadata": {
+        "description": "Today's date, used to set the automation job start date."
+      }
+    },
+    "aaRunAsAppId": {
+      "type": "string"
+    },
+    "aaRunAsTenantId": {
+      "type": "string"
+    },
+    "aaRunAsCertThumbprint": {
+      "type": "string"
+    },
+    "aaRunAsCertBase64Value": {
+      "type": "securestring"
+    }
+  },
+  "variables": {
+    "aaName": "[concat(parameters('namingPrefix'),'-automation')]",
+    "rbAutoShutdownName": "[concat(parameters('namingPrefix'),'-rb-autoshutdown')]",
+    "schEndworkdayName": "[concat(parameters('namingPrefix'),'-sch-endworkday')]",
+    "schStartTime": "[concat(parameters('todayYYYY-MM-DD'), 'T19:00:00-05:00')]",
+    "jschAutoShutdownEndOfWorkdayName": "[guid(parameters('namingPrefix'),'-jsch-endworkday-', deployment().name)]",
+    "azureEnvironment": "AzureUSGovernment"
+  },
+  "resources": [
+    {
+      "comments": "",
+      "type": "Microsoft.Automation/automationAccounts",
+      "name": "[variables('aaName')]",
+      "apiVersion": "2015-10-31",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "sku": {
+          "name": "Basic"
+        }
+      },
+      "dependsOn": []
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Automation/automationAccounts/runbooks",
+      "name": "[concat(variables('aaName'), '/', variables('rbAutoShutdownName'))]",
+      "apiVersion": "2015-10-31",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "runbookType": "PowerShell",
+        "publishContentLink": {
+          "uri": "https://raw.githubusercontent.com/gsacavdm/gov-arm-devops/master/automation/auto-shutdown-tagged-vm.ps1",
+          "version": "1.0.0.0"
+        },
+        "logVerbose": false,
+        "logProgress": false
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Automation/automationAccounts', variables('aaName'))]"
+      ]
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Automation/automationAccounts/schedules",
+      "name": "[concat(variables('aaName'), '/', variables('schEndworkdayName'))]",
+      "apiVersion": "2015-10-31",
+      "properties": {
+        "description": "",
+        "startTime": "[variables('schStartTime')]",
+        "expiryTime": "9999-12-31T18:59:00-05:00",
+        "isEnabled": true,
+        "interval": 1,
+        "frequency": "Day"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Automation/automationAccounts', variables('aaName'))]"
+      ]
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Automation/automationAccounts/jobSchedules",
+      "name": "[concat(variables('aaName'), '/', variables('jschAutoShutdownEndOfWorkdayName'))]",
+      "apiVersion": "2015-10-31",
+      "properties": {
+        "runbook": {
+          "name": "[variables('rbAutoShutdownName')]"
+        },
+        "schedule": {
+          "name": "[variables('schEndworkdayName')]"
+        },
+        "parameters": {
+          "Subscription": "[subscription().subscriptionId]",
+          "Environment": "[variables('azureEnvironment')]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Automation/automationAccounts/runbooks', variables('aaName'), variables('rbAutoShutdownName'))]",
+        "[resourceId('Microsoft.Automation/automationAccounts/schedules', variables('aaName'), variables('schEndworkdayName'))]"
+      ]
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Automation/automationAccounts/certificates",
+      "name": "[concat(variables('aaName'), '/AzureRunAsCertificate')]",
+      "apiVersion": "2015-10-31",
+      "properties": {
+        "base64Value": "[parameters('aaRunAsCertBase64Value')]",
+        "isExportable": true
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Automation/automationAccounts', variables('aaName'))]"
+      ]
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Automation/automationAccounts/connections",
+      "name": "[concat(variables('aaName'), '/AzureRunAsConnection')]",
+      "apiVersion": "2015-10-31",
+      "properties": {
+        "connectionType": {
+          "name": "AzureServicePrincipal"
+        },
+        "fieldDefinitionValues": {
+          "ApplicationId": "[parameters('aaRunAsAppId')]",
+          "TenantId": "[parameters('aaRunAsTenantId')]",
+          "CertificateThumbprint": "[parameters('aaRunAsCertThumbprint')]",
+          "SubscriptionId": "[subscription().subscriptionId]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Automation/automationAccounts', variables('aaName'))]"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/0012714c-c595-4dcd-8949-4a5c1d49aaa8')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/0012714c-c595-4dcd-8949-4a5c1d49aaa8')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": false,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "PT5H",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "enabled": true,
+        "severity": "Low",
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Cyble Vision Alerts Assets",
+        "description": "'Scheduled rule that creates incidents for asset alerts using saved parser Alerts_assets. Mandatory custom details: MappedSeverity, Status, AlertID, Service.'\n",
+        "query": "Alerts_assets\n| where Service == \"assets\"\n| extend MappedSeverity = Severity\n",
+        "status": "Available",
+        "queryfrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "AA_Value",
+                "identifier": "HostName"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "AA_Value",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "Url"
+          }
+        ],
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "Reconnaissance"
+        ],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "MappedSeverity": "Severity",
+          "AlertID": "AlertID",
+          "AA_KeywordID": "AA_KeywordID",
+          "AA_LastDetected": "AA_LastDetected",
+          "AA_Value": "AA_Value",
+          "Service": "Service",
+          "Status": "Status"
+        },
+        "queryPeriod": "30m"
+      }
+    }
+  ]
+}

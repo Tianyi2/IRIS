@@ -1,0 +1,236 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccounts_pihole_name": {
+            "defaultValue": "pihole",
+            "type": "String",
+            "metadata": {
+                "description": "The name of the storage account that will be created to contain the needed volumes"
+            }
+        },
+        "containerGroups_pihole_with_ssl_container_group_name": {
+            "defaultValue": "pihole-with-ssl-container-group",
+            "type": "String",
+            "metadata": {
+                "description": "The name of the container group that will be created to contain the Pi-hole and the nginx sidecar volume"
+            }
+        },
+        "dnsPrefixString": {
+            "defaultValue": "pihole",
+            "type": "string",
+            "maxLength": 50,
+            "metadata": {
+                "description": "The DNS label for the public IP address. It must be lowercase. It should match the following regular expression, or it will raise an error: ^[a-z][a-z0-9-]{1,61}[a-z0-9]$"
+         }
+        },
+        "pihole_container_WEBPASSWORD": {
+            "defaultValue": "",
+            "minLength": "12",
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for the Pi-hole admin account. At least 12 characters long. Keep note of it, you can not retrieve it later on."
+            }
+        }        
+    },
+  "variables": {
+    "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_pihole_name'))]",
+    "dnsPrefix": "[concat(parameters('dnsPrefixString'),uniquestring(resourceGroup().id))]"
+},
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-04-01",
+            "name": "[parameters('storageAccounts_pihole_name')]",
+            "location": "[resourceGroup().location]",
+            "comments": "This storage account is used to store the Pi-hole and nginx sidecard volumes",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "accessTier": "Hot"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(parameters('storageAccounts_pihole_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_pihole_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "protocolSettings": {
+                    "smb": {}
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(parameters('storageAccounts_pihole_name'), '/default/etc-dnsmasq')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccounts_pihole_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_pihole_name'))]"
+            ],
+            "properties": {
+                "accessTier": "TransactionOptimized",
+                "shareQuota": 5120,
+                "enabledProtocols": "SMB"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2019-04-01",
+            "name": "[concat(parameters('storageAccounts_pihole_name'), '/default/etc-pihole')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccounts_pihole_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_pihole_name'))]"
+            ],
+            "properties": {
+                "accessTier": "TransactionOptimized",
+                "shareQuota": 5120,
+                "enabledProtocols": "SMB"
+            }
+        },        
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2019-12-01",
+            "name": "[parameters('containerGroups_pihole_with_ssl_container_group_name')]",
+            "location": "northeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_pihole_name'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccounts_pihole_name'), 'default')]"
+            ],            
+            "properties": {
+                "sku": "Standard",
+                "containers": [
+                    {
+                        "name": "pihole-container",
+                        "properties": {
+                            "image": "pihole/pihole:latest",
+                            "ports": [
+                                {
+                                    "protocol": "UDP",
+                                    "port": 53
+                                },
+                                {
+                                    "protocol": "UDP",
+                                    "port": 67
+                                },
+                                {
+                                    "protocol": "TCP",
+                                    "port": 80
+                                }
+                            ],
+                            "environmentVariables": [
+                                {
+                                    "name": "TZ",
+                                    "value": "Europe/Zurich"
+                                },
+                                {
+                                    "name": "WEBPASSWORD",
+                                    "value": "[parameters('pihole_container_WEBPASSWORD')]"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 1,
+                                    "cpu": 1
+                                }
+                            },
+                            "volumeMounts": [
+                                {
+                                    "name": "pihole",
+                                    "mountPath": "/etc/pihole/",
+                                    "readOnly": false
+                                },
+                                {
+                                    "name": "dnsmasq",
+                                    "mountPath": "/etc/dnsmasq.d/",
+                                    "readOnly": false
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "nginx-with-ssl",
+                        "properties": {
+                            "image": "nginx",
+                            "ports": [
+                                {
+                                    "protocol": "TCP",
+                                    "port": 443
+                                }
+                            ],
+                            "environmentVariables": [],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 1.5,
+                                    "cpu": 1
+                                }
+                            },
+                            "volumeMounts": [
+                                {
+                                    "name": "nginx-config",
+                                    "mountPath": "/etc/nginx"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "initContainers": [],
+                "restartPolicy": "Always",
+                "ipAddress": {
+                    "ports": [
+                        {
+                            "protocol": "UDP",
+                            "port": 53
+                        },
+                        {
+                            "protocol": "TCP",
+                            "port": 443
+                        }
+                    ],
+                    "type": "Public",
+                    "dnsNameLabel": "[variables('dnsPrefix')]"
+                },
+                "osType": "Linux",
+                "volumes": [
+                    {
+                        "name": "pihole",
+                        "azureFile": {
+                            "shareName": "etc-pihole",
+                            "readOnly": false,
+                            "storageAccountName": "[parameters('storageAccounts_pihole_name')]",
+                            "storageAccountKey": "[listKeys(variables('storageAccountId'), '2019-04-01').keys[0].value]"
+                        }
+                    },
+                    {
+                        "name": "dnsmasq",
+                        "azureFile": {
+                            "shareName": "etc-dnsmasq",
+                            "readOnly": false,
+                            "storageAccountName": "[parameters('storageAccounts_pihole_name')]",
+                            "storageAccountKey": "[listKeys(variables('storageAccountId'), '2019-04-01').keys[0].value]"
+                        }
+                    },
+                    {
+                        "name": "nginx-config",
+                        "secret": {
+                            "ssl.crt": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURXRENDQWtBQ0NRQ3pZRVRLa3F4Q0tqQU5CZ2txaGtpRzl3MEJBUXNGQURCdU1Rc3dDUVlEVlFRR0V3SmoKYURFTk1Bc0dBMVVFQ0F3RVFtVnliakVQTUEwR0ExVUVCd3dHVkc5bVptVnVNUkF3RGdZRFZRUUtEQWR4Y25segpMbU5vTVJBd0RnWURWUVFEREFkeGNubHpMbU5vTVJzd0dRWUpLb1pJaHZjTkFRa0JGZ3hqWlhKMFFIRnllWE11ClkyZ3dIaGNOTWpBeE1USTRNVEl3T1RNNFdoY05NakV4TVRJNE1USXdPVE00V2pCdU1Rc3dDUVlEVlFRR0V3SmoKYURFTk1Bc0dBMVVFQ0F3RVFtVnliakVQTUEwR0ExVUVCd3dHVkc5bVptVnVNUkF3RGdZRFZRUUtEQWR4Y25segpMbU5vTVJBd0RnWURWUVFEREFkeGNubHpMbU5vTVJzd0dRWUpLb1pJaHZjTkFRa0JGZ3hqWlhKMFFIRnllWE11ClkyZ3dnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFEcVJ5SVZCNE54U1F6VTllRzgKL3FZUHBrREZTU2JKdlJobFBFbGpBTmdVY3NQUjFPVzZvSFlZaDhsYjRZeFdZVk5EK3RuWm5jbVFxMEJXMkhIUgpDd3REc25SYVhFTXhMUkdwM1JuY0t2dkVRVC8yemkrYzhDMzZQcENFekpHZ3pzdHFnTjdEVDBsb0MyZGU0Y2RnCjJnaEtWQzVmQ2dTTDZScHFyMkQ0THg0cVFLWGE2OHhTOEtYLzJ2YnRmRzJLTVM0MlFSazlOYjRDWWFBV2pzZm4KOTRlMG05blVCQzJRNVlaTDZIbTVwSHpzcUlQRnV0MGtrTjdTWmkvWE1QaXZySGdKcTBXNkc4R0RWaE9CRjJkUgpYbm9HUU1pZUhERGFCeTdscCtOcWxzZUM2dHh4VjRPdHRXYjRYZHJBNjV3RUt3TkwwdmdzTWJHYXZqR052QmVhCjBoQ0RBZ01CQUFFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFBRVRLQW9iQ0MxejN6UmdWUi93UEhBSWFadXUKT2p0b1BKUHBta2g1NlUrd0FCM3BndzJabnpUd0JNZmVxbnZaMTU2ekN1RDdPN0ozZXUrS3hRUnIrTTZJV09QTAp3K1dHeitZdmZBVlJLWWZvaTF6WXBJL2JSMHZleUE4NGZiN0NXamxobU8wb0d2MVYvQzl0ZFYrMGl6SnJ3NjlNCm9YeUFOeHNiOHhMT0w2VVIwSkc0cVJJOXdSRElrdHlWQmErRVpkdm5MZnA3bUd4TVN1Sm9wTWdodnc2Z0RlMHEKSkcyRERXckRDTHROWnFUKzc3WUYyZitWOU5uNTJXYWVBUTViMjVVTWVMRUFtMVQ3M09NWG9Sd1A2TFMrZ1FoUgpGai9ROGM5eW43WjJzZ0k3YkJMMWVhTmtid3JEdXplb2RFR0IxWG5mbjh2ZjU1ak9QUE16SFFybXlKdz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=",
+                            "ssl.key" : "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2UUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktjd2dnU2pBZ0VBQW9JQkFRRHFSeUlWQjROeFNRelUKOWVHOC9xWVBwa0RGU1NiSnZSaGxQRWxqQU5nVWNzUFIxT1c2b0hZWWg4bGI0WXhXWVZORCt0blpuY21RcTBCVwoySEhSQ3d0RHNuUmFYRU14TFJHcDNSbmNLdnZFUVQvMnppK2M4QzM2UHBDRXpKR2d6c3RxZ043RFQwbG9DMmRlCjRjZGcyZ2hLVkM1ZkNnU0w2UnBxcjJENEx4NHFRS1hhNjh4UzhLWC8ydmJ0ZkcyS01TNDJRUms5TmI0Q1lhQVcKanNmbjk0ZTBtOW5VQkMyUTVZWkw2SG01cEh6c3FJUEZ1dDBra043U1ppL1hNUGl2ckhnSnEwVzZHOEdEVmhPQgpGMmRSWG5vR1FNaWVIRERhQnk3bHArTnFsc2VDNnR4eFY0T3R0V2I0WGRyQTY1d0VLd05MMHZnc01iR2F2akdOCnZCZWEwaENEQWdNQkFBRUNnZ0VBV0ZYZjlQdnpSTmpkZk1NRmplU2FxdFh1SURWWDZjTmlHbkhqM2Urb2lmVkgKL3F0K3Y2TFhSS0tXZXcyTmc5aUlzOTQzSEVYUmhibjh0WUpCVUNnUTVFSzZlb1BGVmhwL1NZUXp4djl5Rk9yaAplbWIrTHZlazduRit2b1AvK1JsZ085VkJxWFVRNGFsREhkU1YvOS9XTm1pTlg0cUFjbHkvZURDT3FLWGpndHhLCnRjcE5idFJaV0h2SFdQZFR4L2c5ZE9BNC9oZWtjRm1FQzYwZVBJdGVNeXN2MTdkenBvOHdBWlJmRkR2cEZSaFEKeGY3T2N2V1l5UHRFRndRTndSTmcyaUM1Q0NPZjA1MzRJZEQzbG1JaTZUdFcxazhWQVMzc3dQaktGSXNMTVpVZgpYN2JwaUJpUVJWdEROMklxWEh6d3RyN3RFMDUwTGFTMnJFOHVEbTFrK1FLQmdRRDVwa2RZeVRzWGppUm04cEhXCmt4cTR3czg5ZHQ5Y2djVzVlMEgwL2F4bnIxQVFMR3c5K2ZkQ1dtOTFmWjVZT2dPWTluL2x3UG51ZVZGZW4wSXAKYU9oeXRhaHgwYjV6eXRtUm91VElDLzZ0VTFvNHdXbEZ5N3MrTzNNMmtFdzBNSTVYb3Z1Sm5oNVpBSGxxVWlCawpsaEd5S1lxa0V5QjBOWnFrNnZnMVF5QmhIUUtCZ1FEd1BNRUN4K3Y4R3A0SzZXUWFHSTlWQU1QN1RuMDVka1U2CkdyUGszMFpYYmZKQ01RTTlES1BWeFFhRGYzSUd6MU9GbjF5OERQM3RpTlF6NUd2ZFhVYXR5SEE4UzBYTU0xQlQKVllxSDUvYVA1MmxpWUVUSHhJNTk2OWJ0NEtGVXNNUkFZYTYxRUpnT1A3WUZnMjB2QXR5bDZUd3RxU3FGNFp6TAo5RlErWEt3bUh3S0JnUURuc1Vsdi9qcG9ieFFic3k1a2ZWd0VjMUJRMC8wU1pxSXh0VklPWkV2WVlwMGtsWVhUCnN5U21JVFptVFRKaTRWeXJYc0p1WWIzVGRDWnZjZEMraTgySGdFNlhhN2ljMEh0QnJYTTBzZVVueVQ3bmc2RUgKRk1CdlRrOXNLVmwvNmp5QTJ4TWxzbWlwNDBYTHhmS29SNXFleGUwVXYyZVVVcGQyVFZnVVhuc3poUUtCZ0hWaQp5bERvalVlL1hkQXBJSyticHBXN2JRZmozMDV2bXYzOFJFQ21WTUd0eUgxTlk2NjErV3dmL01IT1NWSkloaUE1CnNWOTEzYkh1ZFBueU9ENlBNRlVFSnN0ZllIaVo3anI2QmxuSUgzTkxlUFFINURQVXVHZVJFSkZsZkk5Y1hGaTEKSWwvNC9zT2ZuL3Byc0xNUzYrdnAzbXpWUnlEcUQrcWN0WGxQWVJLekFvR0FTckR5K3VZYzE2S3FQT2tXVnR0TAovY0dGRUFhTEJGKzFZYzQ0U1ZhbzhXdHN0c1RMbFpCTXhuckNWaEZHYTVOYlhaY2ZjV0FKVGRQWmtnSDIxcDZnClFtb2JpM0kwUVM4a1RDWU5LbTloVzN4Tmh4L0VCR004N2owN0k4WTdyYXRpSlFMYzZ5K0dNVFBPM3NMWWc4TE0KWVJXVWIzVkt1SWVsUk9iN3RKbjNlcm89Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+                            "nginx.conf" : "IyBuZ2lueCBDb25maWd1cmF0aW9uIEZpbGUKIyBodHRwczovL3dpa2kubmdpbngub3JnL0NvbmZpZ3VyYXRpb24KCiMgUnVuIGFzIGEgbGVzcyBwcml2aWxlZ2VkIHVzZXIgZm9yIHNlY3VyaXR5IHJlYXNvbnMuCnVzZXIgbmdpbng7Cgp3b3JrZXJfcHJvY2Vzc2VzIGF1dG87CgpldmVudHMgewogIHdvcmtlcl9jb25uZWN0aW9ucyAxMDI0Owp9CgpwaWQgICAgICAgIC92YXIvcnVuL25naW54LnBpZDsKCmh0dHAgewoKICAgICNSZWRpcmVjdCB0byBodHRwcywgdXNpbmcgMzA3IGluc3RlYWQgb2YgMzAxIHRvIHByZXNlcnZlIHBvc3QgZGF0YQoKICAgIHNlcnZlciB7CiAgICAgICAgbGlzdGVuIFs6Ol06NDQzIHNzbDsKICAgICAgICBsaXN0ZW4gNDQzIHNzbDsKCiAgICAgICAgc2VydmVyX25hbWUgbG9jYWxob3N0OwoKICAgICAgICAjIFByb3RlY3QgYWdhaW5zdCB0aGUgQkVBU1QgYXR0YWNrIGJ5IG5vdCB1c2luZyBTU0x2MyBhdCBhbGwuIElmIHlvdSBuZWVkIHRvIHN1cHBvcnQgb2xkZXIgYnJvd3NlcnMgKElFNikgeW91IG1heSBuZWVkIHRvIGFkZAogICAgICAgICMgU1NMdjMgdG8gdGhlIGxpc3Qgb2YgcHJvdG9jb2xzIGJlbG93LgogICAgICAgIHNzbF9wcm90b2NvbHMgICAgICAgICAgICAgIFRMU3YxLjI7CgogICAgICAgICMgQ2lwaGVycyBzZXQgdG8gYmVzdCBhbGxvdyBwcm90ZWN0aW9uIGZyb20gQmVhc3QsIHdoaWxlIHByb3ZpZGluZyBmb3J3YXJkaW5nIHNlY3JlY3ksIGFzIGRlZmluZWQgYnkgTW96aWxsYSAtIGh0dHBzOi8vd2lraS5tb3ppbGxhLm9yZy9TZWN1cml0eS9TZXJ2ZXJfU2lkZV9UTFMjTmdpbngKICAgICAgICBzc2xfY2lwaGVycyAgICAgICAgICAgICAgICBFQ0RIRS1SU0EtQUVTMTI4LUdDTS1TSEEyNTY6RUNESEUtRUNEU0EtQUVTMTI4LUdDTS1TSEEyNTY6RUNESEUtUlNBLUFFUzI1Ni1HQ00tU0hBMzg0OkVDREhFLUVDRFNBLUFFUzI1Ni1HQ00tU0hBMzg0OkRIRS1SU0EtQUVTMTI4LUdDTS1TSEEyNTY6REhFLURTUy1BRVMxMjgtR0NNLVNIQTI1NjprRURIK0FFU0dDTTpFQ0RIRS1SU0EtQUVTMTI4LVNIQTI1NjpFQ0RIRS1FQ0RTQS1BRVMxMjgtU0hBMjU2OkVDREhFLVJTQS1BRVMxMjgtU0hBOkVDREhFLUVDRFNBLUFFUzEyOC1TSEE6RUNESEUtUlNBLUFFUzI1Ni1TSEEzODQ6RUNESEUtRUNEU0EtQUVTMjU2LVNIQTM4NDpFQ0RIRS1SU0EtQUVTMjU2LVNIQTpFQ0RIRS1FQ0RTQS1BRVMyNTYtU0hBOkRIRS1SU0EtQUVTMTI4LVNIQTI1NjpESEUtUlNBLUFFUzEyOC1TSEE6REhFLURTUy1BRVMxMjgtU0hBMjU2OkRIRS1SU0EtQUVTMjU2LVNIQTI1NjpESEUtRFNTLUFFUzI1Ni1TSEE6REhFLVJTQS1BRVMyNTYtU0hBOkFFUzEyOC1HQ00tU0hBMjU2OkFFUzI1Ni1HQ00tU0hBMzg0OkVDREhFLVJTQS1SQzQtU0hBOkVDREhFLUVDRFNBLVJDNC1TSEE6QUVTMTI4OkFFUzI1NjpSQzQtU0hBOkhJR0g6IWFOVUxMOiFlTlVMTDohRVhQT1JUOiFERVM6ITNERVM6IU1ENTohUFNLOwogICAgICAgIHNzbF9wcmVmZXJfc2VydmVyX2NpcGhlcnMgIG9uOwoKICAgICAgICAjIE9wdGltaXplIFRMUy9TU0wgYnkgY2FjaGluZyBzZXNzaW9uIHBhcmFtZXRlcnMgZm9yIDEwIG1pbnV0ZXMuIFRoaXMgY3V0cyBkb3duIG9uIHRoZSBudW1iZXIgb2YgZXhwZW5zaXZlIFRMUy9TU0wgaGFuZHNoYWtlcy4KICAgICAgICAjIFRoZSBoYW5kc2hha2UgaXMgdGhlIG1vc3QgQ1BVLWludGVuc2l2ZSBvcGVyYXRpb24sIGFuZCBieSBkZWZhdWx0IGl0IGlzIHJlLW5lZ290aWF0ZWQgb24gZXZlcnkgbmV3L3BhcmFsbGVsIGNvbm5lY3Rpb24uCiAgICAgICAgIyBCeSBlbmFibGluZyBhIGNhY2hlIChvZiB0eXBlICJzaGFyZWQgYmV0d2VlbiBhbGwgTmdpbnggd29ya2VycyIpLCB3ZSB0ZWxsIHRoZSBjbGllbnQgdG8gcmUtdXNlIHRoZSBhbHJlYWR5IG5lZ290aWF0ZWQgc3RhdGUuCiAgICAgICAgIyBGdXJ0aGVyIG9wdGltaXphdGlvbiBjYW4gYmUgYWNoaWV2ZWQgYnkgcmFpc2luZyBrZWVwYWxpdmVfdGltZW91dCwgYnV0IHRoYXQgc2hvdWxkbid0IGJlIGRvbmUgdW5sZXNzIHlvdSBzZXJ2ZSBwcmltYXJpbHkgSFRUUFMuCiAgICAgICAgc3NsX3Nlc3Npb25fY2FjaGUgICAgc2hhcmVkOlNTTDoxMG07ICMgYSAxbWIgY2FjaGUgY2FuIGhvbGQgYWJvdXQgNDAwMCBzZXNzaW9ucywgc28gd2UgY2FuIGhvbGQgNDAwMDAgc2Vzc2lvbnMKICAgICAgICBzc2xfc2Vzc2lvbl90aW1lb3V0ICAyNGg7CgoKICAgICAgICAjIFVzZSBhIGhpZ2hlciBrZWVwYWxpdmUgdGltZW91dCB0byByZWR1Y2UgdGhlIG5lZWQgZm9yIHJlcGVhdGVkIGhhbmRzaGFrZXMKICAgICAgICBrZWVwYWxpdmVfdGltZW91dCAzMDA7ICMgdXAgZnJvbSA3NSBzZWNzIGRlZmF1bHQKCiAgICAgICAgIyByZW1lbWJlciB0aGUgY2VydGlmaWNhdGUgZm9yIGEgeWVhciBhbmQgYXV0b21hdGljYWxseSBjb25uZWN0IHRvIEhUVFBTCiAgICAgICAgYWRkX2hlYWRlciBTdHJpY3QtVHJhbnNwb3J0LVNlY3VyaXR5ICdtYXgtYWdlPTMxNTM2MDAwOyBpbmNsdWRlU3ViRG9tYWlucyc7CgogICAgICAgIHNzbF9jZXJ0aWZpY2F0ZSAgICAgIC9ldGMvbmdpbngvc3NsLmNydDsKICAgICAgICBzc2xfY2VydGlmaWNhdGVfa2V5ICAvZXRjL25naW54L3NzbC5rZXk7CgogICAgICAgIGxvY2F0aW9uIC8gewogICAgICAgICAgICBwcm94eV9wYXNzIGh0dHA6Ly9sb2NhbGhvc3Q6ODA7ICMgSFRUUAogICAgICAgICAgICAKICAgICAgICAgICAgcHJveHlfc2V0X2hlYWRlciBDb25uZWN0aW9uICIiOwogICAgICAgICAgICBwcm94eV9zZXRfaGVhZGVyIEhvc3QgJGhvc3Q7CiAgICAgICAgICAgIHByb3h5X3NldF9oZWFkZXIgWC1SZWFsLUlQICRyZW1vdGVfYWRkcjsKICAgICAgICAgICAgcHJveHlfc2V0X2hlYWRlciBYLUZvcndhcmRlZC1Gb3IgJHJlbW90ZV9hZGRyOwogICAgICAgIH0KICAgIH0KfQo="
+                        }
+                    }
+                ]
+            }
+        }
+
+    ]
+}

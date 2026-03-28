@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyExemptions",
+      "name": "c6983127b5b1468fbf4dcbfa",
+      "apiVersion": "2022-07-01-preview",
+      "properties": {
+        "Description": null,
+        "DisplayName": "saturn-landingzones - Enforce secure-by-default Storage for Financial Services Industry",
+        "ExemptionCategory": "Waiver",
+        "ExpiresOn": null,
+        "Metadata": {},
+        "PolicyAssignmentId": "/providers/Microsoft.Management/managementGroups/saturn-landingzones/providers/Microsoft.Authorization/policyAssignments/Compliant-Storage",
+        "PolicyDefinitionReferenceIds": [
+          "Deny-Storage-Account-Msft-Trusted"
+        ]
+      }
+    }
+  ],
+  "outputs": {}
+}

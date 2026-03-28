@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "4d908ad8-78c8-5bba-9a6d-41e9539b88f9",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "principalId": "a5bde1dd-3640-4c4e-9566-bae94d71e010",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/056cd41c-7e88-42e1-933e-88ba6a50c9c3",
+        "scope": "/providers/Microsoft.Management/managementGroups/contoso-landingzones"
+      }
+    }
+  ],
+  "outputs": {}
+}

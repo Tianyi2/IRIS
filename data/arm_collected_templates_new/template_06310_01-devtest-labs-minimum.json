@@ -1,0 +1,105 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        },
+        "owner": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": ""
+            }
+        },
+        "projectName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": ""
+            }
+        },
+        "projectCode": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": ""
+            }
+        },
+        "creationDate": {
+            "type": "string",
+            "defaultValue": ""
+        }
+    },
+    "variables": {
+        "dtlName": "[concat('dtl-', parameters('name'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.DevTestLab/labs",
+            "apiVersion": "2018-09-15",
+            "name": "[variables('dtlName')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "ProjectOwner": "[parameters('owner')]",
+                "ProjectName": "[parameters('projectName')]",
+                "ProjectCode": "[parameters('projectCode')]",
+                "CreationDate": "[parameters('creationDate')]"
+            },
+            "properties": {
+                "labStorageType": "Premium",
+                "mandatoryArtifactsResourceIdsLinux": [
+                ],
+                "mandatoryArtifactsResourceIdsWindows": [
+                ],
+                "premiumDataDisks": "Disabled",
+                "environmentPermission": "Contributor",
+                "announcement": {
+                    "enabled": "Disabled",
+                    "expired": false
+                },
+                "support": {
+                    "enabled": "Disabled"
+                },
+                "extendedProperties": {
+                    "RdpConnectionType": "7"
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "DevTestLabsId": {
+            "value": "[resourceId('Microsoft.DevTestLab/labs', variables('dtlName'))]",
+            "type": "string"
+        },
+        "DevTestLabsName": {
+            "value": "[variables('dtlName')]",
+            "type": "string"
+        },
+        "DevTestLabsUId": {
+            "value": "[reference(variables('dtlName')).uniqueIdentifier]",
+            "type": "string"
+        },
+        "StorageAccountId": {
+            "value": "[reference(variables('dtlName')).defaultStorageAccount]",
+            "type": "string"
+        },
+        "StorageAccountName": {
+            "value": "[last(split(reference(variables('dtlName')).defaultStorageAccount, '/'))]",
+            "type": "string"
+        },
+        "KeyVaultId": {
+            "value": "[reference(variables('dtlName')).vaultName]",
+            "type": "string"
+        },
+        "KeyVaultName": {
+            "value": "[last(split(reference(variables('dtlName')).vaultName, '/'))]",
+            "type": "string"
+        }
+    }
+}

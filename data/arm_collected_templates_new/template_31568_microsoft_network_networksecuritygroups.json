@@ -1,0 +1,190 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Network Security Group to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "Diagnostic Setting Name"
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "networkSecurityGroupEvent": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Enable Network Security Group Event",
+          "description": "Enable diagnostic setting for NetworkSecurityGroupEvent category"
+        },
+        "defaultValue": true
+      },
+      "networkSecurityGroupRuleCounter": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Enable Network Security Group Rule Counter",
+          "description": "Enable diagnostic setting for NetworkSecurityGroupRuleCounter category"
+        },
+        "defaultValue": true
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "Resource Location List to send logs to nearby Log Analytics. A single entry \"*\" selects all locations (default)."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/networkSecurityGroups"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[first(parameters('resourceLocationList'))]",
+                "equals": "*"
+              },
+              {
+                "field": "location",
+                "in": "[parameters('resourceLocationList')]"
+               }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "count": {
+                  "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                  "where": {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                        "equals": true
+                      }
+                    ]
+                  }
+                },
+                "greaterOrEquals": 1
+              },
+              {
+                "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+                "equals": "[parameters('dynatraceResource')]"
+              }
+            ]
+          },          
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "diagnosticSettingName": {
+                    "type": "string"
+                  },
+                  "dynatraceResource": {
+                    "type": "string"
+                  },
+                  "resourceName": {
+                    "type": "string"
+                  },
+                  "networkSecurityGroupEvent": {
+                    "type": "bool"
+                  },
+                  "networkSecurityGroupRuleCounter": {
+                    "type": "bool"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "microsoft.network/networkSecurityGroups/providers/diagnosticSettings",
+                    "apiVersion": "2021-05-01-preview",
+                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('diagnosticSettingName'))]",
+                    "properties": {
+                      "marketplacePartnerId": "[parameters('dynatraceResource')]",
+                      "logs": [
+                        {
+                          "category": "NetworkSecurityGroupEvent",
+                          "enabled": "[parameters('networkSecurityGroupEvent')]"
+                        },
+                        {
+                          "category": "NetworkSecurityGroupRuleCounter",
+                          "enabled": "[parameters('networkSecurityGroupRuleCounter')]"
+                        }
+                      ],
+                      "metrics": []
+                    }
+                  }
+                ],
+                "outputs": {
+                  "policy": {
+                    "type": "string",
+                    "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Network Security Group (microsoft.network/networkSecurityGroups), resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                  }
+                }
+              },
+              "parameters": {
+                "diagnosticSettingName": {
+                  "value": "[parameters('diagnosticSettingName')]"
+                },
+                "dynatraceResource": {
+                  "value": "[parameters('dynatraceResource')]"
+                },
+                "resourceName": {
+                  "value": "[field('name')]"
+                },
+                "networkSecurityGroupEvent": {
+                  "value": "[parameters('networkSecurityGroupEvent')]"
+                },
+                "networkSecurityGroupRuleCounter": {
+                  "value": "[parameters('networkSecurityGroupRuleCounter')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  }
+}

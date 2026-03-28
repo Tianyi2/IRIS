@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deploy-WS-Arc-Monitoring",
+      "apiVersion": "2020-09-01",
+      "location": "[deployment().location]",
+      "properties": {
+        "Scope": "/providers/Microsoft.Management/managementGroups/bugbash",
+        "NotScopes": null,
+        "DisplayName": "Deploy-Windows-Arc-Monitoring",
+        "Description": "Deploy-Windows-Arc-Monitoring",
+        "EnforcementMode": 0,
+        "PolicyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/69af7d4a-7b18-4044-93a9-2651498ef203",
+        "Parameters": {
+          "logAnalytics": {
+            "value": "/subscriptions/dddbadc2-9d31-43f4-a7e3-ae83c9da646a/resourcegroups/bugbash-mgmt/providers/microsoft.operationalinsights/workspaces/bugbash-la-dddbadc2-9d31-43f4-a7e3-ae83c9da646a"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

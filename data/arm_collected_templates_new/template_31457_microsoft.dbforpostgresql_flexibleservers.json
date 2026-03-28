@@ -1,0 +1,229 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.DBforPostgreSQL/flexibleServers to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.DBforPostgreSQL/flexibleServers to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "postgresqlflexdatabasexactsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "PostgreSQLFlexDatabaseXacts",
+        "description": "Enable or disable log category PostgreSQLFlexDatabaseXacts"
+      },
+      "defaultValue": true
+    },
+    "postgresqlflexquerystoreruntimeEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "PostgreSQLFlexQueryStoreRuntime",
+        "description": "Enable or disable log category PostgreSQLFlexQueryStoreRuntime"
+      },
+      "defaultValue": true
+    },
+    "postgresqlflexquerystorewaitstatsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "PostgreSQLFlexQueryStoreWaitStats",
+        "description": "Enable or disable log category PostgreSQLFlexQueryStoreWaitStats"
+      },
+      "defaultValue": true
+    },
+    "postgresqlflexsessionsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "PostgreSQLFlexSessions",
+        "description": "Enable or disable log category PostgreSQLFlexSessions"
+      },
+      "defaultValue": true
+    },
+    "postgresqlflextablestatsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "PostgreSQLFlexTableStats",
+        "description": "Enable or disable log category PostgreSQLFlexTableStats"
+      },
+      "defaultValue": true
+    },
+    "postgresqllogsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "PostgreSQLLogs",
+        "description": "Enable or disable log category PostgreSQLLogs"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.DBforPostgreSQL/flexibleServers"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.DBforPostgreSQL/flexibleServers/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.DBforPostgreSQL/flexibleServers, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "PostgreSQLFlexDatabaseXacts",
+                    "enabled": "[parameters('postgresqlflexdatabasexactsEnabled')]"
+                  },
+                  {
+                    "category": "PostgreSQLFlexQueryStoreRuntime",
+                    "enabled": "[parameters('postgresqlflexquerystoreruntimeEnabled')]"
+                  },
+                  {
+                    "category": "PostgreSQLFlexQueryStoreWaitStats",
+                    "enabled": "[parameters('postgresqlflexquerystorewaitstatsEnabled')]"
+                  },
+                  {
+                    "category": "PostgreSQLFlexSessions",
+                    "enabled": "[parameters('postgresqlflexsessionsEnabled')]"
+                  },
+                  {
+                    "category": "PostgreSQLFlexTableStats",
+                    "enabled": "[parameters('postgresqlflextablestatsEnabled')]"
+                  },
+                  {
+                    "category": "PostgreSQLLogs",
+                    "enabled": "[parameters('postgresqllogsEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

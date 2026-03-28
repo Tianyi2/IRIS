@@ -1,0 +1,457 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.Communication/CommunicationServices to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.Communication/CommunicationServices to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "advancedmessagingoperationalEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AdvancedMessagingOperational",
+        "description": "Enable or disable log category AdvancedMessagingOperational"
+      },
+      "defaultValue": true
+    },
+    "authoperationalEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AuthOperational",
+        "description": "Enable or disable log category AuthOperational"
+      },
+      "defaultValue": true
+    },
+    "callautomationmediasummaryEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallAutomationMediaSummary",
+        "description": "Enable or disable log category CallAutomationMediaSummary"
+      },
+      "defaultValue": true
+    },
+    "callautomationoperationalEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallAutomationOperational",
+        "description": "Enable or disable log category CallAutomationOperational"
+      },
+      "defaultValue": true
+    },
+    "callautomationstreamingusageEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallAutomationStreamingUsage",
+        "description": "Enable or disable log category CallAutomationStreamingUsage"
+      },
+      "defaultValue": true
+    },
+    "callclientmediastatstimeseriesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallClientMediaStatsTimeSeries",
+        "description": "Enable or disable log category CallClientMediaStatsTimeSeries"
+      },
+      "defaultValue": true
+    },
+    "callclientoperationsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallClientOperations",
+        "description": "Enable or disable log category CallClientOperations"
+      },
+      "defaultValue": true
+    },
+    "callclientservicerequestandoutcomeEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallClientServiceRequestAndOutcome",
+        "description": "Enable or disable log category CallClientServiceRequestAndOutcome"
+      },
+      "defaultValue": true
+    },
+    "callclosedcaptionssummaryEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallClosedCaptionsSummary",
+        "description": "Enable or disable log category CallClosedCaptionsSummary"
+      },
+      "defaultValue": true
+    },
+    "calldiagnosticsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallDiagnostics",
+        "description": "Enable or disable log category CallDiagnostics"
+      },
+      "defaultValue": true
+    },
+    "calldiagnosticsupdatesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallDiagnosticsUpdates",
+        "description": "Enable or disable log category CallDiagnosticsUpdates"
+      },
+      "defaultValue": true
+    },
+    "callingmetricsEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallingMetrics",
+        "description": "Enable or disable log category CallingMetrics"
+      },
+      "defaultValue": true
+    },
+    "callrecordingoperationalEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallRecordingOperational",
+        "description": "Enable or disable log category CallRecordingOperational"
+      },
+      "defaultValue": true
+    },
+    "callrecordingsummaryEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallRecordingSummary",
+        "description": "Enable or disable log category CallRecordingSummary"
+      },
+      "defaultValue": true
+    },
+    "callsummaryEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallSummary",
+        "description": "Enable or disable log category CallSummary"
+      },
+      "defaultValue": true
+    },
+    "callsummaryupdatesEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallSummaryUpdates",
+        "description": "Enable or disable log category CallSummaryUpdates"
+      },
+      "defaultValue": true
+    },
+    "callsurveyEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "CallSurvey",
+        "description": "Enable or disable log category CallSurvey"
+      },
+      "defaultValue": true
+    },
+    "chatoperationalEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "ChatOperational",
+        "description": "Enable or disable log category ChatOperational"
+      },
+      "defaultValue": true
+    },
+    "emailsendmailoperationalEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "EmailSendMailOperational",
+        "description": "Enable or disable log category EmailSendMailOperational"
+      },
+      "defaultValue": true
+    },
+    "emailstatusupdateoperationalEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "EmailStatusUpdateOperational",
+        "description": "Enable or disable log category EmailStatusUpdateOperational"
+      },
+      "defaultValue": true
+    },
+    "emailuserengagementoperationalEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "EmailUserEngagementOperational",
+        "description": "Enable or disable log category EmailUserEngagementOperational"
+      },
+      "defaultValue": true
+    },
+    "jobrouteroperationalEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "JobRouterOperational",
+        "description": "Enable or disable log category JobRouterOperational"
+      },
+      "defaultValue": true
+    },
+    "roomsoperationalEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "RoomsOperational",
+        "description": "Enable or disable log category RoomsOperational"
+      },
+      "defaultValue": true
+    },
+    "smsoperationalEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SMSOperational",
+        "description": "Enable or disable log category SMSOperational"
+      },
+      "defaultValue": true
+    },
+    "usageEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "Usage",
+        "description": "Enable or disable log category Usage"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.Communication/CommunicationServices"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.Communication/CommunicationServices/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.Communication/CommunicationServices, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "AdvancedMessagingOperational",
+                    "enabled": "[parameters('advancedmessagingoperationalEnabled')]"
+                  },
+                  {
+                    "category": "AuthOperational",
+                    "enabled": "[parameters('authoperationalEnabled')]"
+                  },
+                  {
+                    "category": "CallAutomationMediaSummary",
+                    "enabled": "[parameters('callautomationmediasummaryEnabled')]"
+                  },
+                  {
+                    "category": "CallAutomationOperational",
+                    "enabled": "[parameters('callautomationoperationalEnabled')]"
+                  },
+                  {
+                    "category": "CallAutomationStreamingUsage",
+                    "enabled": "[parameters('callautomationstreamingusageEnabled')]"
+                  },
+                  {
+                    "category": "CallClientMediaStatsTimeSeries",
+                    "enabled": "[parameters('callclientmediastatstimeseriesEnabled')]"
+                  },
+                  {
+                    "category": "CallClientOperations",
+                    "enabled": "[parameters('callclientoperationsEnabled')]"
+                  },
+                  {
+                    "category": "CallClientServiceRequestAndOutcome",
+                    "enabled": "[parameters('callclientservicerequestandoutcomeEnabled')]"
+                  },
+                  {
+                    "category": "CallClosedCaptionsSummary",
+                    "enabled": "[parameters('callclosedcaptionssummaryEnabled')]"
+                  },
+                  {
+                    "category": "CallDiagnostics",
+                    "enabled": "[parameters('calldiagnosticsEnabled')]"
+                  },
+                  {
+                    "category": "CallDiagnosticsUpdates",
+                    "enabled": "[parameters('calldiagnosticsupdatesEnabled')]"
+                  },
+                  {
+                    "category": "CallingMetrics",
+                    "enabled": "[parameters('callingmetricsEnabled')]"
+                  },
+                  {
+                    "category": "CallRecordingOperational",
+                    "enabled": "[parameters('callrecordingoperationalEnabled')]"
+                  },
+                  {
+                    "category": "CallRecordingSummary",
+                    "enabled": "[parameters('callrecordingsummaryEnabled')]"
+                  },
+                  {
+                    "category": "CallSummary",
+                    "enabled": "[parameters('callsummaryEnabled')]"
+                  },
+                  {
+                    "category": "CallSummaryUpdates",
+                    "enabled": "[parameters('callsummaryupdatesEnabled')]"
+                  },
+                  {
+                    "category": "CallSurvey",
+                    "enabled": "[parameters('callsurveyEnabled')]"
+                  },
+                  {
+                    "category": "ChatOperational",
+                    "enabled": "[parameters('chatoperationalEnabled')]"
+                  },
+                  {
+                    "category": "EmailSendMailOperational",
+                    "enabled": "[parameters('emailsendmailoperationalEnabled')]"
+                  },
+                  {
+                    "category": "EmailStatusUpdateOperational",
+                    "enabled": "[parameters('emailstatusupdateoperationalEnabled')]"
+                  },
+                  {
+                    "category": "EmailUserEngagementOperational",
+                    "enabled": "[parameters('emailuserengagementoperationalEnabled')]"
+                  },
+                  {
+                    "category": "JobRouterOperational",
+                    "enabled": "[parameters('jobrouteroperationalEnabled')]"
+                  },
+                  {
+                    "category": "RoomsOperational",
+                    "enabled": "[parameters('roomsoperationalEnabled')]"
+                  },
+                  {
+                    "category": "SMSOperational",
+                    "enabled": "[parameters('smsoperationalEnabled')]"
+                  },
+                  {
+                    "category": "Usage",
+                    "enabled": "[parameters('usageEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

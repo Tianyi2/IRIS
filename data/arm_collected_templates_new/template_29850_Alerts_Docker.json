@@ -1,0 +1,83 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/47dee28d-fa74-49cd-b5fb-397b047a73c0')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/47dee28d-fa74-49cd-b5fb-397b047a73c0')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "alertDetailsOverride": null,
+          "alertDisplayNameFormat": "Docker Image Identified {{DK_Title}}",
+          "alertDescriptionFormat": "A Docker Hub image related to monitored entity {{KeywordName}} was discovered. Developer {{DK_Developer}}. Downloads {{DK_Downloads}}. Review metadata and verify if the image poses supply chain or impersonation risk.\n",
+          "groupingConfiguration": {
+            "enabled": false,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "PT5H",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "enabled": true,
+        "severity": "Low",
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Cyble Vision Alerts Docker",
+        "description": "'Detects Docker Hub container entries related to monitored keywords. Uses Alerts_docker parser. Includes metadata such as developer, stars, downloads, and image URL. Raises one incident per alert.'\n",
+        "query": "Alerts_docker  \n| where Service == \"docker\" \n| extend MappedSeverity = Severity\n",
+        "status": "Available",
+        "queryfrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DK_Url",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "Url"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "KeywordName",
+                "identifier": "HostName"
+              }
+            ],
+            "entityType": "Host"
+          }
+        ],
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "Exfiltration",
+          "Execution",
+          "Discovery"
+        ],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "DK_Title": "DK_Title",
+          "MappedSeverity": "Severity",
+          "AlertID": "AlertID",
+          "DK_description": "DK_Description",
+          "DK_Url": "DK_Url",
+          "DK_Stars": "DK_Stars",
+          "DK_Developer": "DK_Developer",
+          "DK_DeveloperUrl": "DK_DeveloperUrl",
+          "DK_Downloads": "DK_Downloads",
+          "Service": "Service",
+          "Status": "Status"
+        },
+        "queryPeriod": "30m"
+      }
+    }
+  ]
+}

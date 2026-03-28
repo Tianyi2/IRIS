@@ -1,0 +1,113 @@
+{
+  "basics": [{
+    "name": "synopsis",
+    "template": {
+      "Fn::Merge": [{
+        "SubnetA": {
+          "Type": "AWS::EC2::Subnet"
+        }
+      }, {
+        "SubnetA": {
+          "Metadata": {}
+        },
+        "SubnetB": {
+          "Type": "AWS::EC2::Subnet"
+        }
+      }]
+    },
+    "output": {
+      "SubnetA": {
+        "Type": "AWS::EC2::Subnet",
+        "Metadata": {}
+      },
+      "SubnetB": {
+        "Type": "AWS::EC2::Subnet"
+      }
+    }
+  }, {
+    "name": "merge into existing object",
+    "template": {
+      "Resources": {
+        "OtherSecurityGroup": {"Type":"AWS::EC2::SecurityGroup"},
+        "Fn::Merge": {
+          "Fn::Flatten": [{
+            "SecurityGroup": {"Type":"AWS::EC2::SecurityGroup"}
+          }, {"Fn::Map": [["A","B"],"AZ", {
+            "Subnet${AZ}":{"Type":"AWS::EC2::Subnet"}
+          }]}
+          ]
+        }
+      }
+    },
+    "output": {
+      "Resources": {
+        "OtherSecurityGroup": {
+          "Type":"AWS::EC2::SecurityGroup"
+        },
+        "SecurityGroup": {
+          "Type":"AWS::EC2::SecurityGroup"
+        },
+        "SubnetA": {
+          "Type": "AWS::EC2::Subnet"
+        },
+        "SubnetB": {
+          "Type": "AWS::EC2::Subnet"
+        }
+      }
+    }
+  }, {
+    "name": "merge into existing object",
+    "template": {
+      "Resources": {
+        "IAMUser": {"Type":"AWS::IAM::User"},
+        "Fn::Merge": {"Fn::Map": [["A","B"],"AZ", {
+            "Subnet${AZ}":{"Type":"AWS::EC2::Subnet"}
+          }]
+        }
+      }
+    },
+    "output": {
+      "Resources": {
+        "IAMUser": {
+          "Type":"AWS::IAM::User"
+        },
+        "SubnetA": {
+          "Type": "AWS::EC2::Subnet"
+        },
+        "SubnetB": {
+          "Type": "AWS::EC2::Subnet"
+        }
+      }
+    }
+  },{
+    "name": "merge into existing object w/ include",
+    "template": {
+      "Resources": {
+        "Grabbed": {
+          "Fn::Include": "./fixtures/foobar.json"
+        },
+        "IAMUser": {"Type":"AWS::IAM::User"},
+        "Fn::Merge": {"Fn::Map": [["A","B"],"AZ", {
+            "Subnet${AZ}":{"Type":"AWS::EC2::Subnet"}
+          }]
+        }
+      }
+    },
+    "output": {
+      "Resources": {
+        "Grabbed": {
+          "foo": "bar"
+        },
+        "IAMUser": {
+          "Type":"AWS::IAM::User"
+        },
+        "SubnetA": {
+          "Type": "AWS::EC2::Subnet"
+        },
+        "SubnetB": {
+          "Type": "AWS::EC2::Subnet"
+        }
+      }
+    }
+  }]
+}

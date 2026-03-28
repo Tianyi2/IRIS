@@ -1,0 +1,54 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+         },
+        "sku": {
+            "type": "string",
+            "allowedValues": [ 
+                "Free", 
+                "Standard", 
+                "Premium", 
+                "PerNode", 
+                "PerGB2018", 
+                "Standalone", 
+                "CapacityReservation"
+                ],
+            "defaultValue": "Free"
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue" : {}
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2020-03-01-preview",
+            "name": "[parameters('name')]",
+            "location": "[resourceGroup().location]",
+            "tags": "[parameters('tags')]",
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "properties": {
+                "sku": {
+                    "name": "[parameters('sku')]"
+                }
+            },
+            "resources": [
+                {
+                    "name": "AzureActivityLog",
+                    "type": "datasources",
+                    "apiVersion": "2015-11-01-preview",
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('name'))]"
+                    ],
+                    "kind": "AzureActivityLog",
+                    "properties": {
+                        "linkedResourceId": "[concat(subscription().id, '/providers/Microsoft.Insights/eventTypes/management')]"
+                    }
+                }
+            ]
+        }
+    ]
+}

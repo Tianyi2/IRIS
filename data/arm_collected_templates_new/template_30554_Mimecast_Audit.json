@@ -1,0 +1,81 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/f00197ab-491f-41e7-9e22-a7003a4c1e54')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/f00197ab-491f-41e7-9e22-a7003a4c1e54')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "P7D",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "enabled": true,
+        "severity": "High",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "name": "Mimecast Audit - Logon Authentication Failed",
+        "alertRuleTemplateName": null,
+        "description": "Detects threat when logon authentication failure found in audit",
+        "alertDetailsOverride": null,
+        "suppressionDuration": "5h",
+        "query": "MimecastAudit \n| where ['Source IP'] !=\"\" and ['Audit Type'] == \"Logon Authentication Failed\"\n| extend   SourceIp = ['Source IP'] \n",
+        "queryFrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SourceIp",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "User",
+                "identifier": "MailboxPrimaryAddress"
+              }
+            ],
+            "entityType": "Mailbox"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Application",
+                "identifier": "AppId"
+              }
+            ],
+            "entityType": "CloudApplication"
+          }
+        ],
+        "suppressionEnabled": false,
+        "triggerOperator": "gt",
+        "tactics": [
+          "Discovery",
+          "InitialAccess",
+          "CredentialAccess"
+        ],
+        "triggerThreshold": 3,
+        "displayName": "Mimecast Audit - Logon Authentication Failed",
+        "customDetails": null,
+        "queryPeriod": "30m"
+      }
+    }
+  ]
+}

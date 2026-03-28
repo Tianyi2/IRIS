@@ -1,0 +1,56 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/de339761-2298-4b37-8f1b-80ebd4f0b5f6')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/de339761-2298-4b37-8f1b-80ebd4f0b5f6')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "Sentinel One - Blacklist hash deleted",
+        "description": "'Detects when blacklist hash was deleted.'\n",
+        "query": "SentinelOne\n| where ActivityType == 3020\n| project EventCreationTime, SrcUserName, Hash=EventSubStatus\n| extend AccountCustomEntity = SrcUserName, HashCustomEntity = Hash, HashAlgorithmCustomEntity = \"SHA1\"\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "AccountCustomEntity",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "HashCustomEntity",
+                "identifier": "Value"
+              },
+              {
+                "columnName": "HashAlgorithmCustomEntity",
+                "identifier": "Algorithm"
+              }
+            ],
+            "entityType": "FileHash"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "DefenseEvasion"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

@@ -1,0 +1,373 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "logicAppName": {
+      "type": "string",
+      "defaultValue": "UpgradePricingTierForSubs",
+      "metadata": {
+        "description": "Name of the Logic App."
+      }
+    }
+  },
+  "variables": {
+    "o365APIConnectionName" : "office365",
+    "AzDevOpsAPIConnectionName" : "azdevops",
+    "SenderAddress": "EmailAddressToEstablishTheOffice365Connection"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2016-06-01",
+      "name": "[parameters('logicAppName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', variables('o365APIConnectionName'))]",
+        "[resourceId('Microsoft.Web/connections', variables('AzDevOpsAPIConnectionName'))]"
+      ],
+      "properties": {
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "manual": {
+              "type": "Request",
+              "kind": "Http",
+              "inputs": {
+                "schema": {}
+              }
+            }
+          },
+          "actions": {
+            "Create_a_work_item": {
+              "runAfter": {
+                "For_each": [
+                  "Succeeded"
+                ]
+              },
+              "type": "ApiConnection",
+              "inputs": {
+                "body": {
+                  "area": "Azure Operations Support Tickets",
+                  "description": "Successfully Upgraded pricing tier of Subscriptions to standard tier.",
+                  "iteration": "@{concat('Azure Operations Support Tickets',utcNow('MMMM'),' ',utcNow('yyyy'))}",
+                  "priority": 1,
+                  "title": "Upgrade pricing tier of Subscriptions",
+                  "userEnteredFields": {
+                    "Resolution": "Fixed",
+                    "Resolution Type": "Request Complete",
+                    "Root Cause": "User Request",
+                    "Severity": "3 - Medium"
+                  }
+                },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azdevops']['connectionId']"
+                  }
+                },
+                "method": "patch",
+                "path": "/@{encodeURIComponent('Azure_Operations_Support_Tickets')}/_apis/wit/workitems/$@{encodeURIComponent('Support')}",
+                "queries": {
+                  "account": "azureSupportAccount"
+                }
+              }
+            },
+            "Create_a_work_item_2": {
+              "runAfter": {
+                "For_each": [
+                  "Failed"
+                ]
+              },
+              "type": "ApiConnection",
+              "inputs": {
+                "body": {
+                  "area": "Azure Operations Support Tickets",
+                  "description": "Failed to Upgrade pricing tier of Subscriptions to standard tier.",
+                  "iteration": "@{concat('Azure Operations Support Tickets',utcNow('MMMM'),' ',utcNow('yyyy'))}",
+                  "priority": 1,
+                  "title": "Upgrade pricing tier of Subscriptions"
+                },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azdevops']['connectionId']"
+                  }
+                },
+                "method": "patch",
+                "path": "/@{encodeURIComponent('Azure_Operations_Support_Tickets')}/_apis/wit/workitems/$@{encodeURIComponent('Support')}",
+                "queries": {
+                  "account": "azureSupportAccount"
+                }
+              }
+            },
+            "For_each": {
+              "foreach": "@body('HTTP')['value']",
+              "actions": {
+                "Condition": {
+                  "actions": {
+                    "For_each_2": {
+                      "foreach": "@body('HTTP_to_get_all_pricing_tiers')['value']",
+                      "actions": {
+                        "Condition_to_check_whether_its_standard_or_not": {
+                          "actions": {
+                            "HTTP_2": {
+                              "runAfter": {},
+                              "type": "Http",
+                              "inputs": {
+                                "authentication": {
+                                  "type": "ManagedServiceIdentity"
+                                },
+                                "body": {
+                                  "properties": {
+                                    "pricingTier": "Standard"
+                                  }
+                                },
+                                "method": "PUT",
+                                "uri": "https://management.azure.com@{items('For_each_2')['id']}?api-version=2018-06-01"
+                              }
+                            }
+                          },
+                          "runAfter": {},
+                          "expression": {
+                            "and": [
+                              {
+                                "not": {
+                                  "equals": [
+                                    "@toLower(items('For_each_2')['properties']['pricingTier'])",
+                                    "standard"
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "type": "If"
+                        }
+                      },
+                      "runAfter": {
+                        "HTTP_to_get_all_pricing_tiers": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Foreach"
+                    },
+                    "HTTP_to_get_all_pricing_tiers": {
+                      "runAfter": {},
+                      "type": "Http",
+                      "inputs": {
+                        "authentication": {
+                          "type": "ManagedServiceIdentity"
+                        },
+                        "method": "GET",
+                        "uri": "https://management.azure.com/subscriptions/@{items('For_each')['subscriptionId']}/providers/Microsoft.Security/pricings?api-version=2018-06-01"
+                      },
+                      "runtimeConfiguration": {
+                        "paginationPolicy": {
+                          "minimumItemCount": 6000
+                        }
+                      }
+                    }
+                  },
+                  "runAfter": {},
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@items('For_each')['state']",
+                          "Enabled"
+                        ]
+                      },
+                      {
+                        "not": {
+                          "contains": [
+                            "@items('For_each')['displayName']",
+                            "Pay-As-You-Go"
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "contains": [
+                            "@items('For_each')['displayName']",
+                            "Visual Studio"
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "contains": [
+                            "@items('For_each')['displayName']",
+                            "Free Trial"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "HTTP": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Foreach"
+            },
+            "HTTP": {
+              "runAfter": {
+                "Initialize_variable_MailBody": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "authentication": {
+                  "type": "ManagedServiceIdentity"
+                },
+                "method": "GET",
+                "uri": "https://management.azure.com/subscriptions?api-version=2016-06-01"
+              },
+              "runtimeConfiguration": {
+                "paginationPolicy": {
+                  "minimumItemCount": 6000
+                }
+              }
+            },
+            "Initialize_variable_Date": {
+              "runAfter": {},
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "Date",
+                    "type": "string",
+                    "value": "@{formatDateTime(utcNow(),'dd/MM/yyyy')}"
+                  }
+                ]
+              }
+            },
+            "Initialize_variable_MailBody": {
+              "runAfter": {
+                "Initialize_variable_TodaysDate": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "MailBody",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "Initialize_variable_TodaysDate": {
+              "runAfter": {
+                "Initialize_variable_Date": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "TodaysDate",
+                    "type": "string",
+                    "value": "@{utcNow('D')}"
+                  }
+                ]
+              }
+            },
+            "Send_an_email_(V2)": {
+              "runAfter": {
+                "Set_variable_MailBody": [
+                  "Succeeded"
+                ]
+              },
+              "type": "ApiConnection",
+              "inputs": {
+                "body": {
+                  "Body": "<p>@{variables('MailBody')}</p>",
+                  "Importance": "High",
+                  "Subject": "Support task : @{body('Create_a_work_item_2')?['id']} - Upgrade Pricing Tier of Subscriptions",
+                  "To": "[variables('SenderAddress')]"
+                },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['office365']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/v2/Mail"
+              }
+            },
+            "Set_variable_MailBody": {
+              "runAfter": {
+                "Create_a_work_item_2": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "MailBody",
+                "value": "\n             <html>\n<head>\n\n</head>\n<body>\n          \n            \n            <HR WIDTH=\"100%\" COLOR=\"#94d506\" SIZE=\"3\">\n            <tr>\n            \n                <td>\n                    <table width=\"100%\">\n                        <tbody>\n                            <tr>\n       <td align=\"left\" style=\"text-align:start; font-f <td align=\"Right\" style=\"text-align:start; font-family:Arial; font-size:0.9em; color:dimgray;padding-bottom:5px; padding-right:5px; padding-top:10px\">        @{variables('TodaysDate')}\n</td>\n                           \n                            </tr>\n                            <tr>\n                      <td align=\"left\" style=\"text-align:start; font-family:Arial; font-size:0.9em; color:dimgray; padding-bottom:5px; padding-left:5px; padding-top:10px\">From: Azure Internal Notifications Team</td>\n                            </tr>\n                        </tbody>\n                    </table>\n                </td>\n            </tr>\n            <HR WIDTH=\"100%\" COLOR=\"#94d506\" SIZE=\"1\">\n     \n            <p><b><font color=\"darkgreen\" size=\"3\" >Hi Team,</font></b></p>\n\n<p><b><font color=\"darkgreen\" size=\"3\" >Execution of  'UpgradePricingTierForSubs' logic app failed due to some reasons. Please check.</font></b></p>\n\n      <p><b><font color=\"darkgreen\" size=\"3\" >Thanks and Regards,</font></b></p>\n      \n<p><b><font color=\"darkgreen\" size=\"3\" >Azure Internal Notifications Team</font></b></p>\n\n        </tbody>\n    </table>\n    <small>\n                        <i>\n                            **Automated email generated. Do not reply.\n                        </i>\n                    </small>\n\n\n</body>\n</html>\n\n"
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "office365": {
+                "id": "[concat('/subscriptions/',subscription().subscriptionId,'/providers/Microsoft.Web/locations/',resourceGroup().location,'/managedApis/office365')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('o365APIConnectionName'))]",
+                "connectionName": "[variables('o365APIConnectionName')]"
+              },
+              "azdevops": {
+                "id": "[concat('/subscriptions/',subscription().subscriptionId,'/providers/Microsoft.Web/locations/',resourceGroup().location,'/managedApis/visualstudioteamservices')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('AzDevOpsAPIConnectionName'))]",
+                "connectionName": "[variables('AzDevOpsAPIConnectionName')]"
+              }
+            }
+          }
+        }
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      }
+    },
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "location": "[resourceGroup().location]",
+      "name": "[variables('AzDevOpsAPIConnectionName')]",
+      "properties": {
+        "displayName": "[variables('SenderAddress')]",
+        "customParameterValues": {},
+        "api": {
+          "id": "[concat('/subscriptions/',subscription().subscriptionId,'/providers/Microsoft.Web/locations/',resourceGroup().location,'/managedApis/visualstudioteamservices')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "location": "[resourceGroup().location]",
+      "name": "[variables('o365APIConnectionName')]",
+      "properties": {
+        "displayName": "[variables('SenderAddress')]",
+        "customParameterValues": {},
+        "api": {
+          "id": "[concat('/subscriptions/',subscription().subscriptionId,'/providers/Microsoft.Web/locations/',resourceGroup().location,'/managedApis/office365')]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

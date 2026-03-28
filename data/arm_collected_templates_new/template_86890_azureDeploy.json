@@ -1,0 +1,61 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[deployment().location]"
+    },
+    "logAnalyticsSubscription": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "logAnalyticsResourceGroup": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "logAnalyticsWorkspace": {
+      "type": "string",
+      "defaultValue": ""
+    }
+  },
+  "variables": {
+    "policyAssignmentName": "[substring(replace(guid(format('Diagnostics & Metrics (MG {0})', managementGroup().name)), '-', ''), 0, 24)]"
+  },
+  "resources": [
+    {
+      "name": "[variables('policyAssignmentName')]",
+      "type": "Microsoft.Authorization/policyAssignments",
+      "apiVersion": "2024-04-01",
+      "location": "[parameters('location')]",
+      "scope": "[tenantResourceId('Microsoft.Management/managementGroups', managementGroup().name)]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "displayName": "[format('Diagnostics & Metrics (MG {0})', managementGroup().name)]",
+        "description": "Apply diagnostic & metric settings for Azure Resources to stream data to a Log Analytics workspace when any Azure Resource which is missing this diagnostic settings is created or updated.",
+        "policyDefinitionId": "[extensionResourceId(tenantResourceId('Microsoft.Management/managementGroups', managementGroup().name), 'Microsoft.Authorization/policySetDefinitions', 'diagnostics-loganalytics-deploy-initiative')]",
+        "parameters": {
+          "logAnalytics": {
+            "value": "[concat('/subscriptions/', parameters('logAnalyticsSubscription'), '/resourceGroups/', parameters('logAnalyticsResourceGroup'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('logAnalyticsWorkspace'))]"
+          }
+        }
+      }
+    },
+    {
+      "name": "[guid(format('Diagnostics & Metrics (MG {0}) Contributor Assignment', managementGroup().id))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "dependsOn": [
+        "[variables('policyAssignmentName')]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[tenantResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+        "principalId": "[reference(tenantResourceId('Microsoft.Authorization/policyAssignments', variables('policyAssignmentName')), '2024-04-01', 'Full').identity.principalId]",
+        "principalType": "ServicePrincipal",
+        "scope": "[managementGroup().id]"
+      }
+    }
+  ]
+}

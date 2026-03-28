@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/c1fcbbd7-74f8-4f32-8116-0a533ebd3878')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/c1fcbbd7-74f8-4f32-8116-0a533ebd3878')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "name": "CyberArkEPM - Unexpected executable location",
+        "description": "'Detects program run from unexpected location.'\n",
+        "query": "let susp_exe_folders = dynamic([@'\\tmp\\', @'\\TEMP\\', @'/tmp/', @'\\Users\\Public\\', @'\\$Recycle.bin', @'\\Windows\\Fonts\\', @'$']);\nCyberArkEPM\n| where EventSubType != 'AttackAttempt'\n| where ActingProcessName has_any (susp_exe_folders)\n| project EventEndTime, EventMessage, ActorUsername, ActingProcessFileInternalName\n| extend AccountCustomEntity = ActorUsername\n",
+        "queryFrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "AccountCustomEntity",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "severity": "Medium",
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "tactics": [
+          "Execution",
+          "DefenseEvasion"
+        ],
+        "queryPeriod": "30m"
+      }
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+service: sparcs-events-api
+frameworkVersion: "^3.40.0"
+
+custom:
+  projectName: sparcs-events
+  serviceName: events
+  stage: ${opt:stage, self:provider.stage}
+  paymentQueue: ${self:custom.stage}-${self:custom.projectName}-payment-queue.fifo
+  entities: ${self:custom.stage}-${self:custom.projectName}-entities
+  events: ${self:custom.stage}-${self:custom.projectName}
+  bucket: ${self:custom.stage}-${self:custom.projectName}-file-bucket
+  registrations: ${self:custom.stage}-${self:custom.projectName}-registrations
+  preregistrations: ${self:custom.stage}-${self:custom.projectName}-preregistrations
+  evaluations: ${self:custom.stage}-${self:custom.projectName}-evaluations
+  frontendUrl: ${ssm:/techtix/frontend-url-${self:custom.stage}}
+  # konfHubApiKey: ${ssm:/konfhub/api-key-${self:custom.stage}}
+  betterCredentials:
+    enabled: true
+  emailQueue: !ImportValue EmailQueue-${self:custom.stage}
+  certificateQueue: !ImportValue CertificateQueue-${self:custom.stage}
+  basicAuthorizerARN: !ImportValue BasicAuthAuthorizerARN-${self:custom.stage}
+  pythonRequirements:
+    dockerizePip: true
+    usePoetry: false
+    noDeploy:
+      - requests
+      - boto3
+      - botocore
+    layer:
+      name: sparcs-events-${self:custom.stage}-python-requirements
+      compatibleRuntimes:
+        - python3.11
+    slim: true
+
+package: ${file(resources/package.yml)}
+
+provider:
+  name: aws
+  runtime: python3.11
+  stage: dev
+  region: ap-southeast-1
+  memorySize: 3008
+  versionFunctions: false
+  timeout: 30
+  apiGateway:
+    resourcePolicy:
+      - Effect: Allow
+        Action: execute-api:Invoke
+        Principal: "*"
+        Resource: execute-api:/*/*/*
+  environment:
+    REGION: ${self:provider.region}
+    STAGE: ${self:custom.stage}
+    FRONTEND_URL: ${self:custom.frontendUrl}
+    ENTITIES_TABLE: ${self:custom.entities}
+    REGISTRATIONS_TABLE: ${self:custom.registrations}
+    PREREGISTRATIONS_TABLE: ${self:custom.preregistrations}
+    EVALUATIONS_TABLE: ${self:custom.evaluations}
+    EVENTS_TABLE: ${self:custom.events}
+    EMAIL_QUEUE: ${self:custom.emailQueue}
+    PAYMENT_QUEUE: ${self:custom.paymentQueue}
+    CERTIFICATE_QUEUE: ${self:custom.certificateQueue}
+    S3_BUCKET: ${self:custom.bucket}
+    # KONFHUB_API_KEY: ${self:custom.konfHubApiKey}
+    USER_POOL_ID: !ImportValue UserPoolId-${self:custom.stage}
+    USER_POOL_CLIENT_ID: !ImportValue AppClientId-${self:custom.stage}
+    SPARCS_GMAIL: sparcsup@gmail.com
+  logs:
+    restApi:
+      role: !GetAtt ApiGatewayCloudWatchRole.Arn
+
+resources:
+  - ${file(resources/dynamodb.yml)}
+  - ${file(resources/api_gateway.yml)}
+  - ${file(resources/s3.yml)}
+  - ${file(resources/sqs.yml)}
+  - ${file(resources/frontend_role.yml)}
+  - ${file(resources/frontend_urls.yml)}
+  - Resources:
+      ApiGatewayCloudWatchRole:
+        Type: AWS::IAM::Role
+        Properties:
+          RoleName: serverlessApiGatewayCloudWatchRole-${self:custom.serviceName}-${self:custom.stage}
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Principal:
+                  Service: apigateway.amazonaws.com
+                Action: sts:AssumeRole
+          Policies:
+            - PolicyName: AllowCloudWatchLogs
+              PolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                  - Effect: Allow
+                    Action:
+                      - logs:CreateLogGroup
+                      - logs:CreateLogStream
+                      - logs:DescribeLogGroups
+                      - logs:DescribeLogStreams
+                      - logs:PutLogEvents
+                    Resource: "*"
+      EventServiceApiEndpointParameter:
+        Type: AWS::SSM::Parameter
+        Properties:
+          Name: /techtix/events-api-url-${self:custom.stage}
+          Type: String
+          Value:
+            Fn::Join:
+              - ""
+              - - "https://"
+                - Ref: ApiGatewayRestApi
+                - ".execute-api."
+                - ${self:provider.region}
+                - ".amazonaws.com/"
+                - ${self:custom.stage}
+
+    Outputs:
+      ApiGatewayCloudWatchRoleArn:
+        Value: !GetAtt ApiGatewayCloudWatchRole.Arn
+        Export:
+          Name: ApiGatewayCloudWatchRole-${self:custom.serviceName}-${self:custom.stage}
+
+functions:
+  - ${file(resources/api.yml)}
+  - ${file(resources/functions.yml)}
+
+plugins:
+  - serverless-better-credentials
+  - serverless-python-requirements
+  - serverless-iam-roles-per-function

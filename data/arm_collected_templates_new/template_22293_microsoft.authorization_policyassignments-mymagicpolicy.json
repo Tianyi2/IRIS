@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "MyMagicPolicy",
+      "apiVersion": "2021-06-01",
+      "location": "eastus",
+      "identity": {
+        "PrincipalId": "c5a8398b-80bf-4f22-8943-0d10338009dc",
+        "TenantId": "3114ebe8-8d3f-4bac-b3ce-59b4210a1287",
+        "Type": "SystemAssigned"
+      },
+      "properties": {
+        "Scope": "/providers/Microsoft.Management/managementGroups/gotOps",
+        "NotScopes": [],
+        "DisplayName": "Deploy a user defined route to a VNET with specific routes.",
+        "Description": "",
+        "EnforcementMode": "Default",
+        "PolicyDefinitionId": "/providers/Microsoft.Management/managementGroups/gotOps/providers/Microsoft.Authorization/policyDefinitions/LZ-UserDefinedRoute",
+        "Parameters": {
+          "defaultRoute": {
+            "value": "10.232.1.254"
+          },
+          "vnetRegion": {
+            "value": "asiapacific"
+          }
+        },
+        "NonComplianceMessages": []
+      }
+    }
+  ],
+  "outputs": {}
+}

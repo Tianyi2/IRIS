@@ -1,0 +1,106 @@
+{
+	"properties": {
+		"displayName": "ConfidentialityPolicy",
+		"policyType": "Custom",
+		"mode": "Indexed",
+		"metadata": {
+			"version": "1.0.1"
+		},
+		"parameters": {
+
+		},
+		"policyRule": {
+			"if": {
+				"allOf": [
+					{
+						"field": "type",
+						"equals": "Microsoft.Resources/subscriptions/resourceGroups"
+					},
+					{
+						"field": "tags[Confidentiality]",
+						"exists": "false"
+					}
+				]
+			},
+			"then": {
+				"effect": "deployIfNotExists",
+				"details": {
+					"type": "Microsoft.Authorization/policyAssignments",
+					"roleDefinitionIds": [
+						"/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+					],
+					"deployment": {
+						"properties": {
+							"mode": "incremental",
+							"template": {
+								"$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+								"contentVersion": "1.0.0.0",
+								"parameters": {
+
+								},
+								"variables": {
+									"policyName": "[concat('crodriguezde', uniqueString('PolicyTest12345'))]",
+									"tagName": "Inner-Confidentiality",
+									"tagDefaultValue": "Sensitive"
+								},
+								"resources": [
+									{
+										"type": "Microsoft.Authorization/policyDefinitions",
+										"apiVersion": "2018-05-01",
+										"name": "[variables('policyName')]",
+										"properties": {
+											"policyType": "Custom",
+											"mode": "Indexed",
+											"parameters": {
+
+											},
+											"policyRule": {
+												"if": {
+
+															"field": "[concat('tags[', variables('tagName'), ']')]",
+															"exists": "false"
+
+												},
+												"then": {
+													"effect": "modify",
+													"details": {
+														"roleDefinitionIds": [
+															"/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+														],
+														"operations": [
+															{
+																"operation": "add",
+																"field": "[concat('tags[', variables('tagName'), ']')]",
+																"value": "[variables('tagDefaultValue')]"
+															}
+														]
+													}
+												}
+											}
+										}
+									},
+									{
+										"type": "Microsoft.Authorization/policyAssignments",
+										"apiVersion": "2018-05-01",
+										"name": "[concat(variables('policyName'), '-assignment')]",
+										"dependsOn": [
+											"[variables('policyName')]"
+										],
+										"identity": {
+											"type": "SystemAssigned"
+										},
+										"location": "eastus",
+										"properties": {
+											"scope": "[subscription().id]",
+											"policyDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/policyDefinitions', variables('policyName') )]"
+										}
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

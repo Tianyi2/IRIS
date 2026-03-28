@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "9d7b64bc-d595-4ff2-aa79-4b7f72ba556d",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "principalId": "bed77485-120e-4343-beed-87dfc7df98d1",
+        "principalType": "User",
+        "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+        "scope": "/providers/Microsoft.Management/managementGroups/contoso-online"
+      }
+    }
+  ],
+  "outputs": {}
+}

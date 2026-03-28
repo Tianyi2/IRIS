@@ -1,0 +1,53 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/8c8de3fa-6425-4623-9cd9-45de1dd0569a')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/8c8de3fa-6425-4623-9cd9-45de1dd0569a')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "Cisco Cloud Security - Rare User Agent Detected",
+        "description": "'Rule helps to detect a rare user-agents indicating web browsing activity by an unusual process other than a web browser.'\n",
+        "query": "let user_agents_list = Cisco_Umbrella\n| where EventType == \"proxylogs\"\n| summarize count() by HttpUserAgentOriginal\n| summarize make_list(HttpUserAgentOriginal);\nCisco_Umbrella\n| where EventType == \"proxylogs\"\n| where HttpUserAgentOriginal !in (user_agents_list)\n| extend Message = \"Rare User Agent\"\n| project TimeGenerated, Message, SrcIpAddr, DstIpAddr, UrlOriginal, HttpUserAgentOriginal\n",
+        "status": "Available",
+        "queryFrequency": "1d",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "UrlOriginal",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SrcIpAddr",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "CommandAndControl",
+          "Exfiltration"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "14d"
+      }
+    }
+  ]
+}

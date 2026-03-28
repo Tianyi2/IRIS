@@ -1,0 +1,74 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/af6f2812-0187-4cc9-822a-952f8b5b6b7e')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/af6f2812-0187-4cc9-822a-952f8b5b6b7e')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "P7D",
+            "reopenClosedIncident": true
+          },
+          "createIncident": true
+        },
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Vectra AI Incident- {{name}}",
+          "alertDescriptionFormat": "An incident has been generated for Vectra AI entity {{name}} that is presenting an urgency score of {{urgency_score}}.",
+          "alertDynamicProperties": [
+            {
+              "alertProperty": "AlertLink",
+              "value": "url"
+            }
+          ]
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Vectra Create Incident Based on Priority for Accounts",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "name",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "description": "Create an incident when an identity is suspected to be compromised. Vectra is using AI to prioritize an entity based on multiple factors (attack rating, velocity, breadth, importance.etc.). This layer of aggregation at the entity level provides a greater signal-to-noise ratio and help analyst focus on what matters.",
+        "suppressionDuration": "PT1H",
+        "query": "Entities_Data_CL\n| where entity_type == \"account\" and is_prioritized == true\n| summarize arg_max(['last_modified_timestamp'], *) by ['name']\n",
+        "status": "Available",
+        "queryFrequency": "10m",
+        "suppressionEnabled": false,
+        "severity": "Medium",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "tactics": [
+          "Persistence"
+        ],
+        "customDetails": {
+          "attack_profile": "attack_profile",
+          "tags": "tags",
+          "entity_id": "id",
+          "entity_type": "entity_type",
+          "ip_address": "ip"
+        },
+        "queryPeriod": "10m"
+      }
+    }
+  ]
+}

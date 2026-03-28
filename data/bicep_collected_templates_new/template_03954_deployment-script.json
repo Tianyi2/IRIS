@@ -1,0 +1,89 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "646472511689915837"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for the deployment."
+      }
+    },
+    "deploymentScriptName": {
+      "type": "string",
+      "metadata": {
+        "description": "Deployment Script Name."
+      }
+    },
+    "deploymentScript": {
+      "type": "string",
+      "metadata": {
+        "description": "Deployment Script"
+      }
+    },
+    "deploymentScriptIdentityId": {
+      "type": "string",
+      "metadata": {
+        "description": "Identity for the deployment script to execute in Azure Container Instance."
+      }
+    },
+    "azCliVersion": {
+      "type": "string",
+      "defaultValue": "2.32.0",
+      "metadata": {
+        "description": "Azure CLI Version.  Default: 2.32.0"
+      }
+    },
+    "forceUpdateTag": {
+      "type": "string",
+      "defaultValue": "[utcNow()]",
+      "metadata": {
+        "description": "Force Update Tag.  Default:  utcNow()"
+      }
+    },
+    "timeout": {
+      "type": "string",
+      "defaultValue": "PT1H",
+      "metadata": {
+        "description": "Script timeout in ISO 8601 format.  Default is 1 hour."
+      }
+    },
+    "retentionInterval": {
+      "type": "string",
+      "defaultValue": "PT1H",
+      "metadata": {
+        "description": "Script retention in ISO 8601 format.  Default is 1 hour."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2020-10-01",
+      "name": "[parameters('deploymentScriptName')]",
+      "location": "[parameters('location')]",
+      "kind": "AzureCLI",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[format('{0}', parameters('deploymentScriptIdentityId'))]": {}
+        }
+      },
+      "properties": {
+        "forceUpdateTag": "[parameters('forceUpdateTag')]",
+        "azCliVersion": "[parameters('azCliVersion')]",
+        "retentionInterval": "[parameters('retentionInterval')]",
+        "timeout": "[parameters('timeout')]",
+        "cleanupPreference": "OnExpiration",
+        "scriptContent": "[parameters('deploymentScript')]"
+      }
+    }
+  ]
+}

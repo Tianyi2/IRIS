@@ -1,0 +1,60 @@
+{
+"StackName" : "<AWS_STACK_NAME>",
+"TemplateBody" : {
+    "Type" : "AWS::CloudFormation::Stack",
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Description" : "AWS CloudFormation Template Batch Setup: Create a Batch stack for job processing.",
+    "Resources" : {
+        "<AWS_JOB_DEFINITION_RESOURCE_NAME>" : {
+            "Type" : "AWS::Batch::JobDefinition",
+            "Properties" : {
+                "JobDefinitionName": "jd-<AWS_JOB_DEFINITION_RESOURCE_NAME>",
+                "Type": "container",
+                "Parameters": { },
+                "ContainerProperties": {
+                    "Image": "alpine:3.7",
+                    "Vcpus": 4,
+                    "Memory": 8128,
+                    "Command": [ "sleep 30" ],
+                    "Volumes": [ ],
+                    "Environment": [ ],
+                    "MountPoints": [ ],
+                    "Ulimits": [ ]
+                },
+                "RetryStrategy": { "Attempts": 1 }
+            }
+        },
+        "<AWS_JOB_QUEUE_RESOURCE_NAME>" : {
+            "Type" : "AWS::Batch::JobQueue",
+            "Properties" : {
+                "JobQueueName": "jq-<AWS_JOB_QUEUE_RESOURCE_NAME>",
+                "State": "ENABLED",
+                "Priority": 1,
+                "ComputeEnvironmentOrder": [
+                    { "Order": 0, "ComputeEnvironment": { "Ref" : "<AWS_COMPUTE_ENVIRONMENT_RESOURCE_NAME>" } }
+                ]
+            }
+        },
+        "<AWS_COMPUTE_ENVIRONMENT_RESOURCE_NAME>" : {
+            "Type" : "AWS::Batch::ComputeEnvironment",
+            "Properties" : {
+                "ComputeEnvironmentName" : "ce-<AWS_COMPUTE_ENVIRONMENT_RESOURCE_NAME>",
+                "Type" : "MANAGED",
+                "State" : "ENABLED",
+                "ComputeResources": {
+                    "Type" : "EC2",
+                    "MinvCpus" : <AWS_COMPUTE_RESOURCES_MIN_VCPUS>,
+                    "MaxvCpus" : <AWS_COMPUTE_RESOURCES_MAX_VCPUS>,
+                    "DesiredvCpus" : <AWS_COMPUTE_RESOURCES_DESIRED_VCPUS>,
+                    "InstanceTypes" : [ <AWS_INSTANCE_TYPES> ],
+                    "Subnets" : [ <AWS_SUBNETS> ],
+                    "SecurityGroupIds" : [ <AWS_SECURITY_GROUPS> ],
+                    "InstanceRole" : <AWS_INSTANCE_ROLE>,
+                    "BidPercentage" : 0
+                },
+                "ServiceRole": <AWS_SERVICE_ROLE>
+            }
+        }
+    }
+}
+}

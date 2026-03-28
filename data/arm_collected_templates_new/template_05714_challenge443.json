@@ -1,0 +1,95 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "metadata": {
+        "comments": "$resourceGroup ='dsrgab19-rg'; $environment = 'dev'; $administratorLogin = 'dscottraynsford'; New-AzResourceGroup -Name $resourceGroup -Location $location -Force; New-AzResourceGroupDeployment -ResourceGroupName $resourceGroup -TemplateFile ./challenge443.json -appName 'dsrgab19' -environment $environment -administratorLogin $administratorLogin -vaultResourceGroupName 'dsrgabkv-dev-rg' -vaultName 'dsrgabkv-dev-kv'"
+    },
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "appName": {
+            "maxLength": 8,
+            "type": "string"
+        },
+        "environment": {
+            "allowedValues": ["dev", "test", "prod"],
+            "type": "string"
+        },
+        "administratorLogin": {
+            "type": "string"
+        },
+        "vaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the keyvault that contains the secret."
+            }
+        },
+        "secretName": {
+            "type": "string",
+            "defaultValue": "DatabasePassword",
+            "metadata": {
+                "description": "The name of the secret."
+            }
+        },
+        "vaultResourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the resource group that contains the keyvault."
+            }
+        },
+        "vaultSubscription": {
+            "type": "string",
+            "defaultValue": "[subscription().subscriptionId]",
+            "metadata": {
+                "description": "The name of the subscription that contains the keyvault."
+            }
+        },
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+            },
+            "defaultValue": "https://raw.githubusercontent.com/PlagueHO/Workshop-ARM-Templates/master/src/important/"
+        },
+        "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated."
+            },
+            "defaultValue": ""
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "apiVersion": "2018-05-01",
+            "name": "dynamicSecret",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "contentVersion": "1.0.0.0",
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('./sqlserver.json', parameters('_artifactsLocationSasToken')))]"
+                },
+                "parameters": {
+                    "appName": {
+                        "value": "[parameters('appName')]"
+                    },
+                    "environment": {
+                        "value": "[parameters('environment')]"
+                    },
+                    "administratorLogin": {
+                        "value": "[parameters('administratorLogin')]"
+                    },
+                    "administratorLoginPassword": {
+                        "reference": {
+                            "keyVault": {
+                                "id": "[resourceId(parameters('vaultSubscription'), parameters('vaultResourceGroupName'), 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
+                            },
+                            "secretName": "[parameters('secretName')]"
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

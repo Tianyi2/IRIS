@@ -1,0 +1,197 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "siteName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Web App to deploy."
+      }
+    },
+    "appServicePlanName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the App Service Plan to deploy the Web App into, or to create if it does not already exist."
+      }
+    },
+    "siteLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "The region location to use, if creating an App Service Plan"
+      }
+    },
+    "sku": {
+      "type": "string",
+      "allowedValues": [
+        "F1",
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "defaultValue": "F1",
+      "metadata": {
+        "description": "The SKU of the App Service Plan to use, if creating an App Service Plan."
+      }
+    },
+    "workerSize": {
+      "type": "string",
+      "allowedValues": [
+        "0",
+        "1",
+        "2"
+      ],
+      "defaultValue": "0",
+      "metadata": {
+        "description": "The VM size of the workers to use in the App Service Plan, if creating an App Service Plan."
+      }
+    },
+    "clientId": {
+      "type": "string",
+      "metadata": {
+        "description": "The client ID configured in your AAD tenant for this application."
+      }
+    },
+    "authorityUriBase": {
+      "type": "string",
+      "defaultValue": "https://login.windows.net/<tenantID>",
+      "metadata": {
+        "description": "The base uri for your AAD authority including your AAD tenant ID, typically https://login.windows.net/<tenantID>."
+      }
+    },
+    "postLogoutRedirectUri": {
+      "type": "string",
+      "defaultValue": "https://azure.microsoft.com/",
+      "metadata": {
+        "description": "The Uri to redirect to when logging out."
+      }
+    },
+    "domainHint": {
+      "type": "string",
+      "metadata": {
+        "description": "The DNS domain hint for the AAD tenant domain to use. typically <something>.onmicrosoft.com."
+      }
+    },
+    "clientSecret": {
+      "type": "string",
+      "metadata": {
+        "description": "The client secret registered in AAD for this application to access Azure Service Management."
+      }
+    },
+    "tokenResource": {
+      "type": "string",
+      "defaultValue": "https://management.core.windows.net/",
+      "metadata": {
+        "description": "The base Uri for Azure subscription management, typically https://management.core.windows.net/."
+      }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "metadata": {
+        "description": "The subscription ID containing the VMs to manage."
+      }
+    },
+    "deploymentResourceGroup": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the resource group containing the managed VMs."
+      }
+    },
+    "repoUrl": {
+      "type": "string",
+      "defaultValue": "https://github.com/rupertbenbrook/AzureVmProvisioningSite",
+      "metadata": {
+        "description": "The GitHub repository URL to deploy the site from."
+      }
+    },
+    "branch": {
+      "type": "string",
+      "defaultValue": "release",
+      "metadata": {
+        "description": "The GitHub repository branch to deploy the site from."
+      }
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[parameters('appServicePlanName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[parameters('siteLocation')]",
+      "sku": {
+        "name": "[parameters('sku')]"
+      },
+      "properties": {
+        "name": "[parameters('appServicePlanName')]",
+        "workerSize": "[parameters('workerSize')]",
+        "numberOfWorkers": 1
+      }
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[parameters('siteName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[parameters('siteLocation')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+      ],
+      "properties": {
+        "name": "[parameters('siteName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "web",
+          "type": "config",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
+          ],
+          "properties": {
+            "netFrameworkVersion": "v4.0",
+            "phpVersion": "",
+            "defaultDocuments": [ ]
+          }
+        },
+        {
+          "apiVersion": "2015-08-01",
+          "name": "appsettings",
+          "type": "config",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
+          ],
+          "properties": {
+            "ClientId": "[parameters('clientId')]",
+            "AuthorityUriBase": "[parameters('authorityUriBase')]",
+            "RedirectUri": "[concat('https://', toLower(parameters('siteName')), '.azurewebsites.net')]",
+            "PostLogoutRedirectUri": "[parameters('postLogoutRedirectUri')]",
+            "DomainHint": "[parameters('domainHint')]",
+            "ClientSecret": "[parameters('clientSecret')]",
+            "TokenResource": "[parameters('tokenResource')]",
+            "SubscriptionId": "[parameters('subscriptionId')]",
+            "DeploymentResourceGroup": "[parameters('deploymentResourceGroup')]"
+          }
+        },
+        {
+          "apiVersion": "2015-08-01",
+          "name": "web",
+          "type": "sourcecontrols",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
+          ],
+          "properties": {
+            "repoUrl": "[parameters('repoUrl')]",
+            "branch": "[parameters('branch')]",
+            "IsManualIntegration": true
+          }
+        }
+      ]
+    }
+  ]
+}

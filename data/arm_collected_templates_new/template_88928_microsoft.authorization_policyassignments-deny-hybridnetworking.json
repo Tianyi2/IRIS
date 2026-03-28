@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deny-HybridNetworking",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "global",
+      "properties": {
+        "description": "Denies deployment of vWAN/ER/VPN gateway resources in the Corp landing zone.",
+        "displayName": "Deny the deployment of vWAN/ER/VPN gateway resources",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "nonComplianceMessages": [
+          {
+            "message": "vWAN/ER/VPN gateway resources must be deployed in the Corp landing zone."
+          }
+        ],
+        "parameters": {
+          "effect": {
+            "value": "Deny"
+          },
+          "listOfResourceTypesNotAllowed": {
+            "value": [
+              "microsoft.network/expressroutecircuits",
+              "microsoft.network/expressroutegateways",
+              "microsoft.network/expressrouteports",
+              "microsoft.network/virtualwans",
+              "microsoft.network/vpngateways",
+              "microsoft.network/p2svpngateways",
+              "microsoft.network/vpnsites",
+              "microsoft.network/virtualnetworkgateways"
+            ]
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/6c112d4e-5bc7-47ae-a041-ea2d9dccd749",
+        "scope": "/providers/Microsoft.Management/managementGroups/contoso-corp"
+      }
+    }
+  ],
+  "outputs": {}
+}

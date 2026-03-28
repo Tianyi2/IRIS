@@ -1,0 +1,117 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Service Bus Namespace"
+            }
+        },
+        "sku": {
+            "type": "string",
+            "allowedValues": [
+                "Basic",
+                "Standard",
+                "Premium"
+            ]
+        },
+        "skuCapacity": {
+            "type": "int",
+            "defaultValue": 1,
+            "allowedValues": [
+                1,
+                2,
+                4
+            ],
+            "metadata": {
+                "description": "Applies only for Premium. Leave default otherwise."
+            }
+        },
+        "zoneRedundant": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Applies only for Premium. Leave default otherwise."
+            }
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue": {
+            }
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-04-01",
+            "name": "[parameters('name')]",
+            "type": "Microsoft.ServiceBus/namespaces",
+            "tags": "[parameters('tags')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "[parameters('sku')]",
+                "tier": "[parameters('sku')]",
+                "capacity": "[parameters('skuCapacity')]"
+            },
+            "properties": {
+                "zoneRedundant": "[parameters('zoneRedundant')]"
+            },
+            "resources": [
+            ]
+        },
+        {
+            "apiVersion": "2017-04-01",
+            "name": "[concat(parameters('name'), '/SendOnlyKey')]",
+            "type": "Microsoft.ServiceBus/namespaces/authorizationRules",
+            "dependsOn": [
+                "[concat('Microsoft.ServiceBus/namespaces/', parameters('name'))]"
+            ],
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "KeyName": "SendOnlyKey",
+                "ClaimType": "SendSharedAccessKey",
+                "ClaimValue": "None",
+                "Rights": [
+                    "Send"
+                ]
+            }
+        },
+        {
+            "apiVersion": "2017-04-01",
+            "name": "[concat(parameters('name'), '/ListenOnlyKey')]",
+            "type": "Microsoft.ServiceBus/namespaces/authorizationRules",
+            "dependsOn": [
+                "[concat('Microsoft.ServiceBus/namespaces/', parameters('name'))]"
+            ],
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "KeyName": "ListenOnlyKey",
+                "ClaimType": "SharedAccessKey",
+                "ClaimValue": "None",
+                "Rights": [
+                    "Listen"
+                ]
+            }
+        }
+    ],
+    "outputs": {
+        "sbEndPoint": {
+            "type": "string",
+            "value": "[reference(parameters('name'), '2017-04-01', 'Full').properties.serviceBusEndpoint]"
+        },
+        "SendOnlyConnectionString": {
+            "type": "string",
+            "value": "[listkeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('name'), 'SendOnlyKey'), '2017-04-01').primaryConnectionString]"
+        },
+        "ListenOnlyConnectionString": {
+            "type": "string",
+            "value": "[listkeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('name'), 'ListenOnlyKey'), '2017-04-01').primaryConnectionString]"
+        },
+        "RootConnectionString": {
+            "type": "string",
+            "value": "[listkeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('name'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString]"
+        }
+    }
+}

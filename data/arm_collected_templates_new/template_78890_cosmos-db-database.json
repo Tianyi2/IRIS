@@ -1,0 +1,61 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "cosmosDatabase": {
+      "type": "string"
+    },
+    "cosmosDbAccountName": {
+      "type": "string"
+    },
+    "cosmosDBType": {
+      "type": "string",
+      "allowedValues": [
+        "GlobalDocumentDB",
+        "MongoDB",
+        "Gremlin"
+      ]
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/apis/databases",
+      "condition": "[equals(parameters('cosmosDBType'), 'GlobalDocumentDB')]",
+      "name": "[concat(parameters('cosmosDbAccountName'), '/sql/', parameters('CosmosDatabase'))]",
+      "apiVersion": "2016-03-31",
+      "properties": {
+        "resource": {
+          "id": "[parameters('cosmosDatabase')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/apis/databases",
+      "condition": "[equals(parameters('cosmosDBType'), 'MongoDB')]",
+      "name": "[concat(parameters('cosmosDbAccountName'), '/mongodb/', parameters('CosmosDatabase'))]",
+      "apiVersion": "2016-03-31",
+      "properties": {
+        "resource": {
+          "id": "[parameters('cosmosDatabase')]"
+        }
+      }
+    },
+    {
+        "type": "Microsoft.DocumentDB/databaseAccounts/gremlinDatabases",
+        "condition": "[equals(parameters('cosmosDBType'), 'Gremlin')]",      
+        "apiVersion": "2020-03-01",
+        "name": "[concat(parameters('cosmosDbAccountName'), '/', parameters('cosmosDatabase'))]",
+        "dependsOn": [],
+        "properties": {
+            "resource": {
+                "id": "[parameters('cosmosDatabase')]"
+            },
+            "options": {}
+        }
+    }
+  ],
+  "outputs": {
+  }
+}

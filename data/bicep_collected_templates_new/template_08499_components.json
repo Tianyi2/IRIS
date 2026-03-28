@@ -1,0 +1,171 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "15725148162038305850"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Optional. Location of all the Azure resources. Default: resourceGroup().location"
+      }
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 260,
+      "metadata": {
+        "description": "Required. Name of the Application Insights."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Optional. Tags of the Application Insights. Default: {}"
+      }
+    },
+    "kind": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. Kind of the Application Insights."
+      }
+    },
+    "applicationType": {
+      "type": "string",
+      "defaultValue": "web",
+      "metadata": {
+        "description": "Optional. Type of application monitored by the Application Insights. Default: web"
+      }
+    },
+    "disableIpMasking": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Optional. Whether the disable IP masking functionality is enabled on the Application Insights. Default: false"
+      }
+    },
+    "disableLocalAuth": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Optional. Whether the disable local authentication functionality is enabled on the Application Insights. Default: false"
+      }
+    },
+    "forceCustomerStorageForProfiler": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Optional. Whether the customer storage for profiler functionality is enabled on the Application Insights. Default: false"
+      }
+    },
+    "hockeyAppId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional. Id of the HockeyApp that can be integrated with the Application Insights. Default: empty string"
+      }
+    },
+    "ingestionMode": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. Ingestion mode of the Application Insights."
+      }
+    },
+    "publicNetworkAccessForIngestion": {
+      "type": "string",
+      "defaultValue": "Enabled",
+      "metadata": {
+        "description": "Optional. Whether the public network access for ingestion functionality is enabled on the Application Insights. Default: Enabled"
+      }
+    },
+    "publicNetworkAccessForQuery": {
+      "type": "string",
+      "defaultValue": "Enabled",
+      "metadata": {
+        "description": "Optional. Whether the public network access for query functionality is enabled on the Application Insights. Default: Enabled"
+      }
+    },
+    "retentionInDays": {
+      "type": "int",
+      "metadata": {
+        "description": "Required. Retention in days of the Application Insights."
+      }
+    },
+    "samplingPercentage": {
+      "type": "int",
+      "minValue": 0,
+      "maxValue": 100,
+      "metadata": {
+        "description": "Required. Sampling percentage of the Application Insights."
+      }
+    },
+    "workspaceResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. Id of the Log Analytics workspace associated to the Application Insights."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[parameters('name')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "kind": "[parameters('kind')]",
+      "properties": {
+        "Application_Type": "[parameters('applicationType')]",
+        "DisableIpMasking": "[parameters('disableIpMasking')]",
+        "DisableLocalAuth": "[parameters('disableLocalAuth')]",
+        "Flow_Type": "Bluefield",
+        "ForceCustomerStorageForProfiler": "[parameters('forceCustomerStorageForProfiler')]",
+        "HockeyAppId": "[if(not(empty(parameters('hockeyAppId'))), parameters('hockeyAppId'), null())]",
+        "IngestionMode": "[parameters('ingestionMode')]",
+        "publicNetworkAccessForIngestion": "[parameters('publicNetworkAccessForIngestion')]",
+        "publicNetworkAccessForQuery": "[parameters('publicNetworkAccessForQuery')]",
+        "Request_Source": "rest",
+        "RetentionInDays": "[parameters('retentionInDays')]",
+        "SamplingPercentage": "[parameters('samplingPercentage')]",
+        "WorkspaceResourceId": "[parameters('workspaceResourceId')]"
+      }
+    }
+  ],
+  "outputs": {
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "The Resource Group of the Application Insights."
+      },
+      "value": "[resourceGroup().name]"
+    },
+    "name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Application Insights."
+      },
+      "value": "[parameters('name')]"
+    },
+    "resourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The resource Id of the Application Insights."
+      },
+      "value": "[resourceId('Microsoft.Insights/components', parameters('name'))]"
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "The location of the Application Insights."
+      },
+      "value": "[reference(resourceId('Microsoft.Insights/components', parameters('name')), '2020-02-02', 'full').location]"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/8e0403b1-07f8-4865-b2e9-74d1e83200a4')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/8e0403b1-07f8-4865-b2e9-74d1e83200a4')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "High",
+        "name": "High Urgency IONIX Action Items",
+        "description": "'This query creates an alert for active IONIX Action Items with high urgency (9-10).\n Urgency can be altered using the \"min_urgency\" variable in the query.'\n",
+        "query": "let timeframe = 14d;\nlet min_urgency = 9;\nCyberpionActionItems_CL\n | where TimeGenerated > ago(timeframe)\n | summarize arg_max(TimeGenerated, *) by id_s\n | where is_open_b == true\n | where urgency_d >= min_urgency\n | extend timestamp = opening_datetime_t\n | extend DNSCustomEntity = host_s\n",
+        "status": "Available",
+        "queryFrequency": "1d",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DNSCustomEntity",
+                "identifier": "DomainName"
+              }
+            ],
+            "entityType": "DNS"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "InitialAccess"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "14d"
+      }
+    }
+  ]
+}

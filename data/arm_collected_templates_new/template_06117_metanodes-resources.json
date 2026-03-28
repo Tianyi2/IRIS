@@ -1,0 +1,260 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Admin username used when provisioning virtual machines"
+            }
+        },
+        "password": {
+            "type": "secureObject",
+            "metadata": {
+                "description": "Admin password used when provisioning virtual machines"
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location where resources will be provisioned"
+            }
+        },
+        "namespace": {
+            "type": "string",
+            "metadata": {
+                "description": "The namespace for resources created by this template"
+            }
+        },
+        "networkSettings": {
+            "type": "object",
+            "metadata": {
+                "description": "Network settings"
+            }
+        },
+        "osSettings": {
+            "type": "object",
+            "metadata": {
+                "description": "InfluxEnterprise deployment platform settings"
+            }
+        }
+    },
+    "variables": {
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('networkSettings').subnet.meta.vnet, parameters('networkSettings').subnet.meta.name)]",
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": "true",
+             "ssh": {
+                "publicKeys": [
+                    {
+                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                        "keyData": "[parameters('password').sshPublicKey]"
+                    }
+                ]
+            }
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-03-01",
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[concat('avail-', parameters('namespace'))]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "platformUpdateDomainCount": 3,
+                "platformFaultDomainCount": "[parameters('networkSettings').platformFaultDomainCount]"
+            },
+            "sku": {
+                "name": "Aligned"
+            }
+        },
+        {
+            "apiVersion": "2019-04-01",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat('nic-', copyindex(), '-vm', parameters('namespace'), '-', copyindex())]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "metaNodesNicLoop",
+                "count": 3
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[concat(parameters('networkSettings').metaNodesIpPrefix, copyindex())]",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2019-07-01",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat('vm', parameters('namespace'), '-', copyindex(1))]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "provider": "[parameters('osSettings').influxTags.provider]"
+            },
+            "plan": {
+                "name": "meta",
+                "product": "influxdb-enterprise-vm",
+                "publisher": "influxdata"
+            },
+            "copy": {
+                "name": "metanodeVmLoop",
+                "count": 2
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', 'nic-', copyindex(1), '-vm', parameters('namespace'), '-', copyindex(1))]",
+                "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]"
+            ],
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', concat('avail-', parameters('namespace')))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('osSettings').vmSizeMetaNodes]"
+                },
+                "osProfile": {
+                    "computerName":  "[concat('vm', parameters('namespace'), '-', copyindex(1))]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[if(equals(parameters('password').authenticationType,'password'),parameters('password').password,json('null'))]",
+                    "linuxConfiguration": "[if(equals(parameters('password').authenticationType, 'password'), json('null'), variables('linuxConfiguration'))]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "influxdata",
+                        "offer": "influxdb-enterprise-vm",
+                        "sku": "meta",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat('vm', parameters('namespace'), '-', copyindex(1), '-osdisk')]",
+                        "createOption": "FromImage",
+                        "diskSizeGB": 32,
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "diskSizeGB": 32,
+                            "name": "[concat('vm', parameters('namespace'),'-', copyindex(1), '-datadisk')]",
+                            "caching": "None",
+                            "createOption": "Empty",
+                            "managedDisk": {
+                                "storageAccountType": "Standard_LRS"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('nic-', copyindex(1), '-vm', parameters('namespace'), '-', copyindex(1)))]"
+                        }
+                    ]
+                }
+            },
+            "resources": [
+                {
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "name": "[concat('vm', parameters('namespace'),'-', copyindex(1), '/configureMetanode',copyindex(1))]",
+                    "apiVersion": "2019-07-01",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-', copyindex(1))]"
+                    ],
+                    "properties": "[parameters('osSettings').extensionSettings.meta]"
+                }
+            ]
+        },
+        {
+            "apiVersion": "2019-07-01",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat('vm', parameters('namespace'), '-0')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "provider": "[parameters('osSettings').influxTags.provider]"
+            },
+            "plan": {
+                "name": "meta",
+                "product": "influxdb-enterprise-vm",
+                "publisher": "influxdata"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', 'nic-0-vm', parameters('namespace'), '-0')]",
+                "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]",
+                "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-1','/extensions/', 'configureMetanode1')]",
+                "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-2','/extensions/', 'configureMetanode2')]"
+            ],
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', concat('avail-', parameters('namespace')))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('osSettings').vmSizeMetaNodes]"
+                },
+                "osProfile": {
+                    "computerName":  "[concat('vm', parameters('namespace'), '-0')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[if(equals(parameters('password').authenticationType,'password'),parameters('password').password,json('null'))]",
+                    "linuxConfiguration": "[if(equals(parameters('password').authenticationType, 'password'), json('null'), variables('linuxConfiguration'))]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "influxdata",
+                        "offer": "influxdb-enterprise-vm",
+                        "sku": "meta",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat('vm', parameters('namespace'), '-0', '-osdisk')]",
+                        "createOption": "FromImage",
+                        "diskSizeGB": 32,
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "diskSizeGB": 32,
+                            "name": "[concat('vm', parameters('namespace'),'-0', '-datadisk')]",
+                            "caching": "None",
+                            "createOption": "Empty",
+                            "managedDisk": {
+                                "storageAccountType": "Standard_LRS"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('nic-0-vm', parameters('namespace'), '-0'))]"
+                        }
+                    ]
+                }
+            },
+            "resources": [
+                {
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "name": "[concat('vm', parameters('namespace'),'-0', '/configureLeader0')]",
+                    "apiVersion": "2019-07-01",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-0')]"
+                    ],
+                    "properties": "[parameters('osSettings').extensionSettings.leader]"
+                }
+            ]
+        }
+    ],
+    "outputs": {}
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/0b85a077-8ba5-4cb5-90f7-1e882afe10c3')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/0b85a077-8ba5-4cb5-90f7-1e882afe10c3')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "GitHub - Repository was destroyed",
+        "description": "'Detect activities when a repository was destroyed. This query runs every day and its severity is Medium.'\n",
+        "query": "GitHubAuditData\n| where Action == \"repo.destroy\"\n| extend AccountName = tostring(split(Actor, \"@\")[0]), AccountUPNSuffix = tostring(split(Actor, \"@\")[1])\n",
+        "status": "Available",
+        "queryFrequency": "1d",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Actor",
+                "identifier": "FullName"
+              },
+              {
+                "columnName": "AccountName",
+                "identifier": "Name"
+              },
+              {
+                "columnName": "AccountUPNSuffix",
+                "identifier": "UPNSuffix"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "InitialAccess"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "7d"
+      }
+    }
+  ]
+}

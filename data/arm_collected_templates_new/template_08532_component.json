@@ -1,0 +1,44 @@
+{
+    "contentVersion": "1.0.0.0",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "hostingPlanName": {
+            "type": "string",
+            "metadata": {
+                "description": "Hosting plan name."
+            }
+        }
+    },
+    "variables": {
+        "sku": "Free",
+        "skuCode": "F1",
+        "workerSizeId": "0",
+        "numberOfWorkers": "0"
+    },
+    "resources": [        
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2020-06-01",
+            "name": "[parameters('hostingPlanName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "Tier": "[variables('sku')]",
+                "Name": "[variables('skuCode')]"
+            },
+            "kind": "linux",
+            "properties": {
+                "name": "[parameters('hostingPlanName')]",
+                "workerSizeId": "[variables('workerSizeId')]",
+                "reserved": true,
+                "numberOfWorkers": "[variables('numberOfWorkers')]"
+            }
+        }
+    ]
+}

@@ -1,0 +1,335 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "newRelicInsertKey": {
+      "metadata": {
+        "description": "Your New Relic Insert Key"
+      },
+      "minLength": 1,
+      "type": "string"
+    },
+    "newRelicRegion": {
+      "allowedValues": ["us", "eu"],
+      "defaultValue": "us",
+      "metadata": {
+        "description": "Your New Relic region"
+      },
+      "type": "string"
+    },
+    "logsEnabled": {
+      "defaultValue": true,
+	  "metadata": {
+        "description": "Export App Insights logs"
+      },
+      "type": "bool"
+    },
+    "metricsEnabled": {
+      "defaultValue": true,
+      "metadata": {
+        "description": "Export App Insights metrics"
+      },
+      "type": "bool"
+    },
+    "packageUri": {
+      "defaultValue": "https://newrelicazureingestion.blob.core.windows.net/newrelic-azure-log-ingestion/latest.zip",
+      "metadata": {
+        "description": "Location of the deployment package"
+      },
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "name": "[variables('namespaceName')]",
+      "type": "Microsoft.EventHub/namespaces",
+      "apiVersion": "2018-01-01-preview",
+      "location": "[resourceGroup().location]",
+      "tags": {},
+      "sku": {
+        "name": "Standard",
+        "tier": "Standard",
+        "capacity": 2
+      },
+      "properties": {
+        "maximumThroughputUnits": 20,
+        "isAutoInflateEnabled": true
+      }
+    },
+    {
+      "apiVersion": "2019-06-01",
+      "type": "Microsoft.Storage/storageAccounts",
+      "dependsOn": [],
+      "kind": "StorageV2",
+      "location": "[resourceGroup().location]",
+      "name": "[variables('newrelicResource')]",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2020-06-01",
+      "kind": "functionapp",
+      "location": "[resourceGroup().location]",
+      "name": "[variables('servicePlanName')]",
+      "properties": {
+        "name": "[variables('servicePlanName')]",
+        "targetWorkerCount": 1,
+        "targetWorkerSizeId": 1,
+        "workerSize": "1",
+        "numberOfWorkers": 1,
+        "computeMode": "Dynamic"
+      },
+       "sku": {
+        "name": "Y1",
+        "tier": "Dynamic"
+      }
+    },
+    {
+      "type": "microsoft.operationalinsights/workspaces",
+      "apiVersion": "2020-10-01",
+      "name": "[variables('newrelicResource')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "sku": {
+          "name": "pergb2018"
+        },
+        "retentionInDays": 30,
+        "features": {
+          "legacy": 0,
+          "searchVersion": 1,
+          "enableLogAccessUsingOnlyResourcePermissions": true
+        },
+        "workspaceCapping": {
+          "dailyQuotaGb": -1
+        },
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      }
+    },
+    {
+      "name": "[variables('newrelicResource')]",
+      "type": "Microsoft.Insights/components",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2020-02-02-preview",
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('newrelicResource'))]"
+      ],
+      "properties": {
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('newrelicResource'))]",
+        "ApplicationId": "[variables('newrelicResource')]",
+        "Application_Type": "web"
+      }
+    },
+    {
+      "type": "microsoft.insights/components/providers/diagnosticSettings",
+      "apiVersion": "2017-05-01-preview",
+      "name": "[concat(variables('newrelicResource'), '/Microsoft.Insights/diagnosticSettings')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', variables('newrelicResource'))]",
+        "[concat('Microsoft.EventHub/namespaces/', variables('namespaceName'))]",
+        "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', variables('namespaceName'), variables('authorizationRulesSharedAccessKeyName'))]"
+      ],
+      "properties": {
+        "eventHubAuthorizationRuleId": "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', variables('namespaceName'), variables('authorizationRulesSharedAccessKeyName'))]",
+        "eventHubName": "[variables('eventHubName')]",
+        "metrics": [
+          {
+            "category": "AllMetrics",
+            "enabled": "[parameters('metricsEnabled')]"
+          }
+        ],
+        "logs": [
+          {
+            "category": "AppAvailabilityResults",
+            "enabled": "[parameters('logsEnabled')]"
+          },
+          {
+            "category": "AppBrowserTimings",
+            "enabled": "[parameters('logsEnabled')]"
+          },
+          {
+            "category": "AppEvents",
+            "enabled": "[parameters('logsEnabled')]"
+          },
+          {
+            "category": "AppMetrics",
+            "enabled": "[parameters('logsEnabled')]"
+          },
+          {
+            "category": "AppDependencies",
+            "enabled": "[parameters('logsEnabled')]"
+          },
+          {
+            "category": "AppExceptions",
+            "enabled": "[parameters('logsEnabled')]"
+          },
+          {
+            "category": "AppPageViews",
+            "enabled": "[parameters('logsEnabled')]"
+          },
+          {
+            "category": "AppPerformanceCounters",
+            "enabled": "[parameters('logsEnabled')]"
+          },
+          {
+            "category": "AppRequests",
+            "enabled": "[parameters('logsEnabled')]"
+          },
+          {
+            "category": "AppSystemEvents",
+            "enabled": "[parameters('logsEnabled')]"
+          },
+          {
+            "category": "AppTraces",
+            "enabled": "[parameters('logsEnabled')]"
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2020-09-01",
+      "type": "Microsoft.Web/sites",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('newrelicResource'))]",
+        "[resourceId('microsoft.insights/components', variables('newrelicResource'))]",
+        "[concat('Microsoft.EventHub/namespaces/', variables('namespaceName'))]"
+      ],
+      "kind": "functionapp",
+      "location": "[resourceGroup().location]",
+      "name": "[variables('functionAppName')]",
+      "properties": {
+        "enabled": true,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]",
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+              "value": "~2"
+            },
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(concat('microsoft.insights/components/',  variables('newrelicResource')), '2015-05-01').InstrumentationKey]"
+            },
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference(concat('microsoft.insights/components/',  variables('newrelicResource')), '2015-05-01').ConnectionString]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~3"
+            },
+            {
+              "name": "WEBSITE_NODE_DEFAULT_VERSION",
+              "value": "~14"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "node"
+            },
+			{
+			  "name": "FUNCTION_APP_EDIT_MODE",
+			  "value": "readwrite"
+			},
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('newrelicResource'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newrelicResource')),'2019-06-01').keys[0].value)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[toLower(variables('functionAppName'))]"
+            },
+            {
+              "name": "Project",
+              "value": "dist/"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('newrelicResource'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newrelicResource')),'2019-06-01').keys[0].value)]"
+            },
+            {
+              "name": "AzureWebJobsDashboard",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('newrelicResource'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('newrelicResource')),'2019-06-01').keys[0].value)]"
+            },
+            {
+              "name": "AzureEventHubLogsConnectionString",
+              "value": "[listkeys(resourceId('Microsoft.EventHub/namespaces/authorizationRules', variables('namespaceName'), variables('authorizationRulesSharedAccessKeyName')), '2017-04-01').primaryConnectionString]"
+            },
+            {
+              "name": "NEW_RELIC_INSERT_KEY",
+              "value": "[parameters('newRelicInsertKey')]"
+            },
+            {
+              "name": "NEW_RELIC_REGION",
+              "value": "[parameters('newRelicRegion')]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "apiVersion": "2014-06-01",
+          "name": "MSDeploy",
+          "type": "Extensions",
+          "dependsOn": [
+            "[concat('Microsoft.Web/sites/', variables('functionAppName'))]"
+          ],
+          "properties": {
+            "packageUri": "[parameters('packageUri')]"
+          }
+        }
+      ]
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces', variables('namespaceName'))]"
+      ],
+      "location": "[resourceGroup().location]",
+      "name": "[concat(variables('namespaceName'), '/', variables('authorizationRulesSharedAccessKeyName'))]",
+      "properties": {
+        "rights": [
+          "Listen",
+          "Manage",
+          "Send"
+        ]
+      },
+      "scale": null,
+      "type": "Microsoft.EventHub/namespaces/AuthorizationRules"
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces', variables('namespaceName'))]"
+      ],
+      "location": "[resourceGroup().location]",
+      "name": "[concat(variables('namespaceName'), '/', variables('eventHubName'))]",
+      "properties": {
+        "messageRetentionInDays": 7,
+        "partitionCount": 4,
+        "partitionIds": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ],
+        "status": "Active"
+      },
+      "scale": null,
+      "type": "Microsoft.EventHub/namespaces/eventhubs"
+    }
+  ],
+  "variables": {
+    "newrelicResource": "[concat('newrelic', uniqueString(resourceGroup().id))]",
+    "authorizationRulesSharedAccessKeyName": "NewRelicLogsSharedAccessKey",
+    "eventHubName": "newrelic-log-ingestion",
+    "functionAppName": "[concat('NewRelicLogsIngestion', uniqueString(resourceGroup().id))]",
+    "namespaceName": "[concat('NewRelicLogs', uniqueString(resourceGroup().id))]",
+    "servicePlanName": "[concat('newRelicLogsServicePlan', uniqueString(resourceGroup().id))]",
+    "sourceControlName": "[concat('newRelicLogsSourceControl', uniqueString(resourceGroup().id))]"
+  }
+}

@@ -1,0 +1,254 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "keyVaultName": {
+       "type": "string"
+    },
+    "webMSI":{
+      "type":"string"
+    },
+    "dataloadACIId":{
+      "type":"string"
+    },
+    "serviceMSI":{
+      "type":"string"
+    },
+    "serviceType": {
+      "type": "string"
+    },
+    "serviceAccountName": {
+      "type": "string"
+    },
+    "dataAccountName": {
+      "type": "string"
+    },
+    "dataType": {
+      "type": "string"
+    },
+    "dataAdministratorLoginPassword": {
+      "type": "string"
+    } ,
+    "dataAdministratorLogin": {
+      "type": "string"
+    },
+    "dataAccountLoginPassword": {
+      "type": "string"
+    } ,
+    "dataAccountLogin": {
+      "type": "string"
+    },
+    "serviceConnectionString": {
+      "type" : "string"
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "resourceGroupName": "[resourceGroup().name]",
+    "databaseName": "ContosoTravel"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "name": "[parameters('keyVaultName')]",
+      "apiVersion": "2015-06-01",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "KeyVault"
+      },
+      "properties": {
+        "enabledForDeployment": "false",
+        "enabledForTemplateDeployment": "false",
+        "enabledForVolumeEncryption": "false",
+        "tenantId": "[subscription().tenantId]",
+        "accessPolicies": [
+          {
+              "tenantId": "[reference(parameters('webMSI'), '2015-08-31-PREVIEW').tenantId]",
+              "objectId": "[reference(parameters('webMSI'), '2015-08-31-PREVIEW').principalId]",
+              "permissions": {
+                  "secrets": [
+                      "Get", "List"
+                  ]
+              }
+          },
+          {
+            "tenantId": "[reference(parameters('serviceMSI'), '2015-08-31-PREVIEW').tenantId]",
+            "objectId": "[reference(parameters('serviceMSI'), '2015-08-31-PREVIEW').principalId]",
+            "permissions": {
+                "secrets": [
+                    "Get", "List"
+                ]
+            }
+          },
+          {
+            "tenantId": "[reference(parameters('dataloadACIId'), '2018-10-01', 'Full').identity.tenantId]",
+            "objectId": "[reference(parameters('dataloadACIId'), '2018-10-01', 'Full').identity.principalId]",
+            "permissions": {
+                "secrets": [
+                    "Get", "List"
+                ]
+            }
+         }
+      ],
+        "sku": {
+          "name": "Standard",
+          "family": "A"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'), '/ContosoTravel--ServicesType')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[parameters('serviceType')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'), '/ContosoTravel--DataType')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[parameters('dataType')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'), '/ContosoTravel--ServicesMiddlewareAccountName')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[parameters('serviceAccountName')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'), '/ContosoTravel--DataAccountName')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[parameters('dataAccountName')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'), '/ContosoTravel--DatabaseName')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[variables('databaseName')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'), '/ContosoTravel--SubscriptionId')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[subscription().subscriptionId]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'), '/ContosoTravel--TenantId')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[subscription().tenantId]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'), '/ContosoTravel--ResourceGroupName')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[variables('resourceGroupName')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'), '/ContosoTravel--AzureRegion')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[variables('location')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'), '/ContosoTravel--DataAdministratorLogin')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[parameters('dataAdministratorLogin')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'), '/ContosoTravel--DataAdministratorLoginPassword')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[parameters('dataAdministratorLoginPassword')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'), '/ContosoTravel--DataAccountUserName')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[parameters('dataAccountLogin')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'), '/ContosoTravel--DataAccountPassword')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[parameters('dataAccountLoginPassword')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'), '/ContosoTravel--ServiceConnectionString')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[parameters('serviceConnectionString')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+      ]
+    }
+  ]
+}

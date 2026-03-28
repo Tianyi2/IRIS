@@ -1,0 +1,204 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "Virtual Network name"
+      }
+    },
+    "virtualNetworkAddressPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Address prefix of the Virtual Network"
+      }
+    },
+    "virtualNetworkDnsServers": {
+      "type": "array",
+      "metadata": {
+        "description": "DNS servers"
+      }
+    },
+    "virtualNetworkCustomDns": {
+      "type": "string",
+      "defaultValue": "custom",
+      "allowedValues": [
+        "azure",
+        "custom"
+      ],
+      "metadata": {
+        "description": "Sets the DNS server to Azure default or custom value"
+      }
+    },
+    "virtualNetworkSubnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet name"
+      }
+    },
+    "virtualNetworkGatewaySubnetName": {
+      "type": "string",
+      "defaultValue": "GatewaySubnet",
+      "allowedValues": [
+        "GatewaySubnet"
+      ],
+      "metadata": {
+        "description": "Gateway subnet name"
+      }
+    },
+    "virtualNetworkSubnetPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet prefix"
+      }
+    },
+    "virtualNetworkGatewaySubnetPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Gateway subnet prefix"
+      }
+    },
+    "allowedPorts": {
+      "type": "array",
+      "metadata": {
+        "description": "Define allowed inbound ports"
+      }
+    }
+  },
+  "variables": {
+    "apiVersion": {
+      "network": "2018-01-01"
+    },
+    "basePorts": [
+      22,
+      3389
+    ],
+    "deploymentConfiguration": {
+      "virtualNetworkCustomDns": "[parameters('virtualNetworkCustomDns')]",
+      "allowedPorts": "[concat(variables('basePorts'), parameters('allowedPorts'))]"
+    },
+    "networkConfiguration": {
+      "virtualNetworkName": "[parameters('virtualNetworkName')]",
+      "virtualNetworkAddressPrefix": "[parameters('virtualNetworkAddressPrefix')]",
+      "virtualNetworkDnsServers": "[parameters('virtualNetworkDnsServers')]",
+      "virtualNetworkSubnetName": "[parameters('virtualNetworkSubnetName')]",
+      "virtualNetworkGatewaySubnetName": "[parameters('virtualNetworkGatewaySubnetName')]",
+      "virtualNetworkSubnetPrefix": "[parameters('virtualNetworkSubnetPrefix')]",
+      "virtualNetworkGatewaySubnetPrefix": "[parameters('virtualNetworkGatewaySubnetPrefix')]",
+      "asgRemoteWindows": "remote-windows-asg",
+      "asgRemoteLinux": "remote-linux-asg"
+    },
+    "asgConfiguration": {
+      "windows": "[resourceId('Microsoft.Network/applicationSecurityGroups',variables('networkConfiguration').asgRemoteWindows)]",
+      "linux": "[resourceId('Microsoft.Network/applicationSecurityGroups',variables('networkConfiguration').asgRemoteLinux)]"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('apiVersion').network]",
+      "type": "Microsoft.Network/applicationSecurityGroups",
+      "name": "[variables('networkConfiguration').asgRemoteWindows]",
+      "location": "[resourceGroup().location]",
+      "properties": {}
+    },
+    {
+      "apiVersion": "[variables('apiVersion').network]",
+      "type": "Microsoft.Network/applicationSecurityGroups",
+      "name": "[variables('networkConfiguration').asgRemoteLinux]",
+      "location": "[resourceGroup().location]",
+      "properties": {}
+    },
+    {
+      "apiVersion": "[variables('apiVersion').network]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[concat(variables('networkConfiguration').virtualNetworkName,'-',variables('networkConfiguration').virtualNetworkSubnetName,'-nsg')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/applicationSecurityGroups/',variables('networkConfiguration').asgRemoteWindows)]",
+        "[concat('Microsoft.Network/applicationSecurityGroups/',variables('networkConfiguration').asgRemoteLinux)]"
+      ],
+      "properties": {
+        "copy": [
+          {
+            "name": "securityRules",
+            "count": "[length(variables('deploymentConfiguration').allowedPorts)]",
+            "input": {
+              "name": "[concat('enabledPort',variables('deploymentConfiguration').allowedPorts[copyIndex('securityRules')])]",
+              "properties": {
+                "description": "[concat('Enabled Port ',variables('deploymentConfiguration').allowedPorts[copyIndex('securityRules')])]",
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "destinationPortRange": "[variables('deploymentConfiguration').allowedPorts[copyIndex('securityRules')]]",
+                "sourceAddressPrefix": "Internet",
+                "destinationApplicationSecurityGroups": [
+                  {
+                    "id": "[if(equals(variables('deploymentConfiguration').allowedPorts[copyIndex('securityRules')],22), variables('asgConfiguration').linux, variables('asgConfiguration').windows)]"
+                  }
+                ],
+                "access": "Allow",
+                "priority": "[add(2000,copyIndex('securityRules'))]",
+                "direction": "Inbound"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion').network]",
+      "type": "Microsoft.Network/routeTables",
+      "name": "[concat(variables('networkConfiguration').virtualNetworkName,'-',variables('networkConfiguration').virtualNetworkSubnetName,'-udr')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "routes": []
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion').network]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('networkConfiguration').virtualNetworkName]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/',variables('networkConfiguration').virtualNetworkName,'-',variables('networkConfiguration').virtualNetworkSubnetName,'-nsg')]",
+        "[concat('Microsoft.Network/routeTables/',variables('networkConfiguration').virtualNetworkName,'-',variables('networkConfiguration').virtualNetworkSubnetName,'-udr')]"
+      ],
+      "properties": {
+        "dhcpOptions": {
+          "dnsServers": "[if(equals(variables('deploymentConfiguration').virtualNetworkCustomDns,'custom'), variables('networkConfiguration').virtualNetworkDnsServers, json('null'))]"
+        },
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('networkConfiguration').virtualNetworkAddressPrefix]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('networkConfiguration').virtualNetworkSubnetName]",
+            "properties": {
+              "addressPrefix": "[variables('networkConfiguration').virtualNetworkSubnetPrefix]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups',concat(variables('networkConfiguration').virtualNetworkName,'-',variables('networkConfiguration').virtualNetworkSubnetName,'-nsg'))]"
+              },
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables',concat(variables('networkConfiguration').virtualNetworkName,'-',variables('networkConfiguration').virtualNetworkSubnetName,'-udr'))]"
+              }
+            }
+          },
+          {
+            "name": "[variables('networkConfiguration').virtualNetworkGatewaySubnetName]",
+            "properties": {
+              "addressPrefix": "[variables('networkConfiguration').virtualNetworkGatewaySubnetPrefix]"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "enabledPorts": {
+      "type": "array",
+      "value": "[variables('deploymentConfiguration').allowedPorts]"
+    }
+  }
+}

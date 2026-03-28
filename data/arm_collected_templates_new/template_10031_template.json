@@ -1,0 +1,88 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachines_udacity_name": {
+            "defaultValue": "udacity",
+            "type": "String"
+        },
+        "disks_udacity_OsDisk_1_a3fe030b7f3044b4b7b3d78b6e9e53b2_externalid": {
+            "defaultValue": "/subscriptions/f9ad88d3-af70-4d49-996d-bd205cd45824/resourceGroups/Project-194059/providers/Microsoft.Compute/disks/udacity_OsDisk_1_a3fe030b7f3044b4b7b3d78b6e9e53b2",
+            "type": "String"
+        },
+        "networkInterfaces_udacity944_externalid": {
+            "defaultValue": "/subscriptions/f9ad88d3-af70-4d49-996d-bd205cd45824/resourceGroups/Project-194059/providers/Microsoft.Network/networkInterfaces/udacity944",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-11-01",
+            "name": "[parameters('virtualMachines_udacity_name')]",
+            "location": "southcentralus",
+            "plan": {
+                "name": "wordpress-ubuntu-20-04",
+                "product": "wordpress-ubuntu-20-04",
+                "publisher": "cloud-infrastructure-services"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v3"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "cloud-infrastructure-services",
+                        "offer": "wordpress-ubuntu-20-04",
+                        "sku": "wordpress-ubuntu-20-04",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "[concat(parameters('virtualMachines_udacity_name'), '_OsDisk_1_a3fe030b7f3044b4b7b3d78b6e9e53b2')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS",
+                            "id": "[parameters('disks_udacity_OsDisk_1_a3fe030b7f3044b4b7b3d78b6e9e53b2_externalid')]"
+                        },
+                        "deleteOption": "Delete",
+                        "diskSizeGB": 30
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_udacity_name')]",
+                    "adminUsername": "UDACITY",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false,
+                        "provisionVMAgent": true,
+                        "patchSettings": {
+                            "patchMode": "ImageDefault",
+                            "assessmentMode": "ImageDefault"
+                        }
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[parameters('networkInterfaces_udacity944_externalid')]",
+                            "properties": {
+                                "deleteOption": "Detach"
+                            }
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        }
+    ]
+}

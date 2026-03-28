@@ -1,0 +1,210 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "7234911639001170042"
+    }
+  },
+  "parameters": {
+    "name": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the name of the Key Vault resource."
+      }
+    },
+    "skuName": {
+      "type": "string",
+      "defaultValue": "standard",
+      "allowedValues": [
+        "premium",
+        "standard"
+      ],
+      "metadata": {
+        "description": "Specifies the sku name of the Key Vault resource."
+      }
+    },
+    "tenantId": {
+      "type": "string",
+      "defaultValue": "[subscription().tenantId]",
+      "metadata": {
+        "description": "Specifies the Azure Active Directory tenant ID that should be used for authenticating requests to the key vault."
+      }
+    },
+    "networkAclsDefaultAction": {
+      "type": "string",
+      "defaultValue": "Allow",
+      "allowedValues": [
+        "Allow",
+        "Deny"
+      ],
+      "metadata": {
+        "description": "The default action of allow or deny when no other rules match. Allowed values: Allow or Deny"
+      }
+    },
+    "enabledForDeployment": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Specifies whether the Azure Key Vault resource is enabled for deployments."
+      }
+    },
+    "enabledForDiskEncryption": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Specifies whether the Azure Key Vault resource is enabled for disk encryption."
+      }
+    },
+    "enabledForTemplateDeployment": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Specifies whether the Azure Key Vault resource is enabled for template deployment."
+      }
+    },
+    "enableSoftDelete": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Specifies whether the soft deelete is enabled for this Azure Key Vault resource."
+      }
+    },
+    "objectIds": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Specifies the object ID ofthe service principals to configure in Key Vault access policies."
+      }
+    },
+    "workspaceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the resource id of the Log Analytics workspace."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Specifies the location."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "metadata": {
+        "description": "Specifies the resource tags."
+      }
+    }
+  },
+  "variables": {
+    "copy": [
+      {
+        "name": "logs",
+        "count": "[length(variables('logCategories'))]",
+        "input": {
+          "category": "[variables('logCategories')[copyIndex('logs')]]",
+          "enabled": true,
+          "retentionPolicy": {
+            "enabled": true,
+            "days": 0
+          }
+        }
+      },
+      {
+        "name": "metrics",
+        "count": "[length(variables('metricCategories'))]",
+        "input": {
+          "category": "[variables('metricCategories')[copyIndex('metrics')]]",
+          "enabled": true,
+          "retentionPolicy": {
+            "enabled": true,
+            "days": 0
+          }
+        }
+      }
+    ],
+    "diagnosticSettingsName": "diagnosticSettings",
+    "logCategories": [
+      "AuditEvent",
+      "AzurePolicyEvaluationDetails"
+    ],
+    "metricCategories": [
+      "AllMetrics"
+    ]
+  },
+  "resources": [
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2021-10-01",
+      "name": "[parameters('name')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "copy": [
+          {
+            "name": "accessPolicies",
+            "count": "[length(parameters('objectIds'))]",
+            "input": {
+              "tenantId": "[subscription().tenantId]",
+              "objectId": "[parameters('objectIds')[copyIndex('accessPolicies')]]",
+              "permissions": {
+                "keys": [
+                  "get",
+                  "list"
+                ],
+                "secrets": [
+                  "get",
+                  "list"
+                ],
+                "certificates": [
+                  "get",
+                  "list"
+                ]
+              }
+            }
+          }
+        ],
+        "sku": {
+          "family": "A",
+          "name": "[parameters('skuName')]"
+        },
+        "tenantId": "[parameters('tenantId')]",
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "[parameters('networkAclsDefaultAction')]"
+        },
+        "enabledForDeployment": "[parameters('enabledForDeployment')]",
+        "enabledForDiskEncryption": "[parameters('enabledForDiskEncryption')]",
+        "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
+        "enableSoftDelete": "[parameters('enableSoftDelete')]"
+      }
+    },
+    {
+      "type": "Microsoft.Insights/diagnosticSettings",
+      "apiVersion": "2021-05-01-preview",
+      "scope": "[resourceId('Microsoft.KeyVault/vaults', parameters('name'))]",
+      "name": "[variables('diagnosticSettingsName')]",
+      "properties": {
+        "workspaceId": "[parameters('workspaceId')]",
+        "logs": "[variables('logs')]",
+        "metrics": "[variables('metrics')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('name'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "id": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('name'))]"
+    },
+    "name": {
+      "type": "string",
+      "value": "[parameters('name')]"
+    }
+  }
+}

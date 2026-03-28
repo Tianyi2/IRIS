@@ -1,0 +1,337 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.Network/azureFirewalls to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.Network/azureFirewalls to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "azfwapplicationruleEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AZFWApplicationRule",
+        "description": "Enable or disable log category AZFWApplicationRule"
+      },
+      "defaultValue": true
+    },
+    "azfwapplicationruleaggregationEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AZFWApplicationRuleAggregation",
+        "description": "Enable or disable log category AZFWApplicationRuleAggregation"
+      },
+      "defaultValue": true
+    },
+    "azfwdnsqueryEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AZFWDnsQuery",
+        "description": "Enable or disable log category AZFWDnsQuery"
+      },
+      "defaultValue": true
+    },
+    "azfwfatflowEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AZFWFatFlow",
+        "description": "Enable or disable log category AZFWFatFlow"
+      },
+      "defaultValue": true
+    },
+    "azfwflowtraceEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AZFWFlowTrace",
+        "description": "Enable or disable log category AZFWFlowTrace"
+      },
+      "defaultValue": true
+    },
+    "azfwfqdnresolvefailureEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AZFWFqdnResolveFailure",
+        "description": "Enable or disable log category AZFWFqdnResolveFailure"
+      },
+      "defaultValue": true
+    },
+    "azfwidpssignatureEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AZFWIdpsSignature",
+        "description": "Enable or disable log category AZFWIdpsSignature"
+      },
+      "defaultValue": true
+    },
+    "azfwnatruleEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AZFWNatRule",
+        "description": "Enable or disable log category AZFWNatRule"
+      },
+      "defaultValue": true
+    },
+    "azfwnatruleaggregationEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AZFWNatRuleAggregation",
+        "description": "Enable or disable log category AZFWNatRuleAggregation"
+      },
+      "defaultValue": true
+    },
+    "azfwnetworkruleEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AZFWNetworkRule",
+        "description": "Enable or disable log category AZFWNetworkRule"
+      },
+      "defaultValue": true
+    },
+    "azfwnetworkruleaggregationEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AZFWNetworkRuleAggregation",
+        "description": "Enable or disable log category AZFWNetworkRuleAggregation"
+      },
+      "defaultValue": true
+    },
+    "azfwthreatintelEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AZFWThreatIntel",
+        "description": "Enable or disable log category AZFWThreatIntel"
+      },
+      "defaultValue": true
+    },
+    "azurefirewallapplicationruleEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AzureFirewallApplicationRule",
+        "description": "Enable or disable log category AzureFirewallApplicationRule"
+      },
+      "defaultValue": true
+    },
+    "azurefirewalldnsproxyEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AzureFirewallDnsProxy",
+        "description": "Enable or disable log category AzureFirewallDnsProxy"
+      },
+      "defaultValue": true
+    },
+    "azurefirewallnetworkruleEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AzureFirewallNetworkRule",
+        "description": "Enable or disable log category AzureFirewallNetworkRule"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.Network/azureFirewalls"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.Network/azureFirewalls/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.Network/azureFirewalls, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "AZFWApplicationRule",
+                    "enabled": "[parameters('azfwapplicationruleEnabled')]"
+                  },
+                  {
+                    "category": "AZFWApplicationRuleAggregation",
+                    "enabled": "[parameters('azfwapplicationruleaggregationEnabled')]"
+                  },
+                  {
+                    "category": "AZFWDnsQuery",
+                    "enabled": "[parameters('azfwdnsqueryEnabled')]"
+                  },
+                  {
+                    "category": "AZFWFatFlow",
+                    "enabled": "[parameters('azfwfatflowEnabled')]"
+                  },
+                  {
+                    "category": "AZFWFlowTrace",
+                    "enabled": "[parameters('azfwflowtraceEnabled')]"
+                  },
+                  {
+                    "category": "AZFWFqdnResolveFailure",
+                    "enabled": "[parameters('azfwfqdnresolvefailureEnabled')]"
+                  },
+                  {
+                    "category": "AZFWIdpsSignature",
+                    "enabled": "[parameters('azfwidpssignatureEnabled')]"
+                  },
+                  {
+                    "category": "AZFWNatRule",
+                    "enabled": "[parameters('azfwnatruleEnabled')]"
+                  },
+                  {
+                    "category": "AZFWNatRuleAggregation",
+                    "enabled": "[parameters('azfwnatruleaggregationEnabled')]"
+                  },
+                  {
+                    "category": "AZFWNetworkRule",
+                    "enabled": "[parameters('azfwnetworkruleEnabled')]"
+                  },
+                  {
+                    "category": "AZFWNetworkRuleAggregation",
+                    "enabled": "[parameters('azfwnetworkruleaggregationEnabled')]"
+                  },
+                  {
+                    "category": "AZFWThreatIntel",
+                    "enabled": "[parameters('azfwthreatintelEnabled')]"
+                  },
+                  {
+                    "category": "AzureFirewallApplicationRule",
+                    "enabled": "[parameters('azurefirewallapplicationruleEnabled')]"
+                  },
+                  {
+                    "category": "AzureFirewallDnsProxy",
+                    "enabled": "[parameters('azurefirewalldnsproxyEnabled')]"
+                  },
+                  {
+                    "category": "AzureFirewallNetworkRule",
+                    "enabled": "[parameters('azurefirewallnetworkruleEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

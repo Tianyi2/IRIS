@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "1f3468fd-fcde-5ad6-b26c-ba760405ebd9",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "principalId": "e3e3d9cc-da62-4cc1-a30a-ce29cfb10801",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "/subscriptions/0095be37-07e5-48e7-b252-462ae52fefba/providers/Microsoft.Authorization/roleDefinitions/e147488a-f6f5-4113-8e2d-b22465e65bf6",
+        "scope": "/subscriptions/0095be37-07e5-48e7-b252-462ae52fefba/resourcegroups/uday-dns-resourcegroup"
+      }
+    }
+  ],
+  "outputs": {}
+}

@@ -1,0 +1,119 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/44da53c3-f3b0-4b70-afff-f79275cb9442')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/44da53c3-f3b0-4b70-afff-f79275cb9442')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Jamf Protect - Network Threats",
+        "query": "JamfProtectThreatEvents\n| where EventResult == \"Blocked\"\n    and isnotempty(EventSeverity)\n| extend Tactics = \"Initial Access\"\n| extend Techniques = \"T1566\"\n",
+        "suppressionDuration": "PT5H",
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": false,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "PT5H",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "status": "Available",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Network Threat detected on {{DvcHostname}}",
+          "alertDynamicProperties": [
+            {
+              "alertProperty": "AlertLink",
+              "value": "EventReportUrl"
+            },
+            {
+              "alertProperty": "ProviderName",
+              "value": "EventVendor"
+            },
+            {
+              "alertProperty": "ProductName",
+              "value": "EventProduct"
+            },
+            {
+              "alertProperty": "RemediationSteps",
+              "value": "EventResult"
+            },
+            {
+              "alertProperty": "Techniques",
+              "value": "Techniques"
+            }
+          ],
+          "alertTacticsColumnName": "Tactics",
+          "alertDescriptionFormat": "A Network Threat has been {{EventResult}} on {{DvcHostname}}",
+          "alertSeverityColumnName": "EventSeverity"
+        },
+        "suppressionEnabled": false,
+        "severity": "Informational",
+        "tactics": [
+          "InitialAccess"
+        ],
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Hostname",
+                "identifier": "HostName"
+              },
+              {
+                "columnName": "DvcOs",
+                "identifier": "OSFamily"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DstIpAddr",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SrcUsermail",
+                "identifier": "AadUserId"
+              },
+              {
+                "columnName": "SrcUsername",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DnsQueryName",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          }
+        ],
+        "description": "'Creates an incident based based on Jamf Protect's Network Threat Event Stream alerts.'\n",
+        "customDetails": {
+          "Category": "ThreatCategory"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,262 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentTag": {
+        "type": "string"
+    },
+    "parentBusinessTag": {
+        "type": "string"
+    },
+    "portfolioTag": {
+        "type": "string"
+    },
+    "productTag": {
+        "type": "string"
+    },
+    "serviceTag": {
+        "type": "string",
+        "defaultValue": "[parameters('productTag')]"
+    },
+    "serviceLineTag": {
+        "type": "string"
+    },
+    "serviceOfferingTag": {
+        "type": "string",
+        "defaultValue": "[parameters('productTag')]"
+    },
+    "functionAppName": {
+      "type": "string"
+    },
+    "appServicePlanName": {
+      "type": "string"
+    },
+    "appServicePlanResourceGroup": {
+      "type": "string"
+    },
+    "functionAppAppSettings": {
+      "type": "array",
+      "defaultValue": []
+    },
+    "functionAppConnectionStrings": {
+      "type": "array",
+      "defaultValue": []
+    },
+    "customHostName": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "certificateThumbprint": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "This can be passed into the template via the reference function: [reference(resourceId(parameters('certificateResourceGroup'), 'Microsoft.Web/certificates', parameters('certificateName')), '2016-03-01').Thumbprint]"
+      }
+    },
+    "subnetResourceId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Resource ID of the subnet used for vNet integration"
+      }
+    },
+    "ipSecurityRestrictions": {
+      "type": "array",
+      "defaultValue": [
+      ],
+      "metadata": {
+        "description": "Must use this format: https://docs.microsoft.com/en-us/azure/templates/microsoft.web/2016-08-01/sites#IpSecurityRestriction. 2018-02-01 API will break template using current WAFOutboundIPAddresses shared variable."
+      }
+    },
+    "use32BitWorkerProcess": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "http20Enabled": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "ftpsState": {
+      "type": "string",
+      "defaultValue": "Disabled",
+      "allowedValues": [
+        "AllAllowed",
+        "FtpsOnly",
+        "Disabled"
+      ]
+    },
+    "settingName": {
+      "type": "String",
+      "defaultvalue": "FunctionAppDiagSettings",
+      "metadata": {
+        "description": "The name of the diagnostic setting"
+      }
+    },
+    "workspaceId": {
+      "type": "String",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ResourceID of the Log Analytics workspace in which resource logs should be saved."
+      }
+    },
+    "functionAppLogsSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "Function App Logs diagnostic setting"
+      }
+    },
+    "allMetricsSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "All Metrics diagnostic setting"
+      }
+    },
+    "retentionPolicyEnabled": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "retentionPolicyDays": {
+      "type": "string",
+      "defaultValue": "30"
+    },
+    "clientCertEnabled": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "clientCertMode": {
+      "type": "string",
+      "defaultValue": "Required"
+    },
+    "netFrameworkVersion": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": ".NET version of project, e.g. v6.0, needed for runtime version ~4 onwards",
+        "link": "https://learn.microsoft.com/en-us/answers/questions/835272/azure-functions-pinned-to-unsupported-dotnet-runti.html"
+      }
+    }
+  },
+  "variables": {
+    "useCustomHostname": "[greater(length(parameters('customHostname')), 0)]",
+    "appServicePlanId": "[resourceId(parameters('appServicePlanResourceGroup'), 'Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
+    "functionAppApiVersion": "2022-03-01",
+    "baseSiteConfig": {
+      "appSettings": "[parameters('functionAppAppSettings')]",
+      "connectionStrings": "[parameters('functionAppConnectionStrings')]",
+      "ipSecurityRestrictions": "[parameters('ipSecurityRestrictions')]",
+      "use32BitWorkerProcess": "[parameters('use32BitWorkerProcess')]",
+      "http20Enabled": "[parameters('http20Enabled')]",
+      "ftpsState": "[parameters('ftpsState')]"
+    },
+    "siteConfigNetFrameworkVersion": {
+      "netFrameworkVersion": "[parameters('netFrameworkVersion')]"
+    },
+    "siteConfig": "[if(greater(length(parameters('netFrameworkVersion')), 0),  union(variables('baseSiteConfig'), variables('siteConfigNetFrameworkVersion')), variables('baseSiteConfig'))]"
+  },
+  "resources": [
+    {
+      "name": "[parameters('functionAppName')]",
+      "type": "Microsoft.Web/sites",
+      "kind": "functionapp",
+      "apiVersion": "[variables('functionAppApiVersion')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "tags": {
+          "Environment": "[parameters('environmentTag')]",
+          "Parent Business": "[parameters('parentBusinessTag')]",
+          "Portfolio": "[parameters('portfolioTag')]",
+          "Product": "[parameters('productTag')]",
+          "Service": "[parameters('serviceTag')]",
+          "Service Line": "[parameters('serviceLineTag')]",
+          "Service Offering": "[parameters('serviceOfferingTag')]"
+      },
+      "properties": {
+        "serverFarmId": "[variables('appServicePlanId')]",
+        "clientAffinityEnabled": false,
+        "clientCertEnabled": "[parameters('clientCertEnabled')]",
+        "clientCertMode": "[parameters('clientCertMode')]",
+        "siteConfig": "[union(createObject('alwaysOn', if(contains(createArray('functionapp','elastic'),reference(resourceId(parameters('appServicePlanResourceGroup'),'Microsoft.Web/serverFarms',parameters('appServicePlanName')), '2019-08-01').kind), 'false', 'true')), variables('siteConfig'))]",
+        "httpsOnly": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/hostnameBindings",
+      "condition": "[variables('UseCustomHostname')]",
+      "name": "[concat(parameters('functionAppName'), '/', if(variables('useCustomHostname'), parameters('customHostname'), 'placeholder'))]",
+      "apiVersion": "[variables('functionAppApiVersion')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "sslState": "SniEnabled",
+        "thumbprint": "[parameters('certificateThumbprint')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('functionAppName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "condition": "[greater(length(parameters('subnetResourceId')), 0)]",
+      "name": "[concat(parameters('functionAppName'), '/virtualNetwork')]",
+      "apiVersion": "[variables('functionAppApiVersion')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "subnetResourceId": "[parameters('subnetResourceId')]",
+        "swiftSupported": true
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('functionAppName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites/providers/diagnosticSettings",
+      "condition": "[greater(length(parameters('workspaceId')), 0)]",
+      "apiVersion": "2017-05-01-preview",
+      "name": "[concat(parameters('functionAppName'),'/microsoft.insights/', parameters('settingName'))]",
+      "dependsOn": [
+        "[parameters('functionAppName')]"
+      ],
+      "properties": {
+        "name": "[parameters('settingName')]",
+        "workspaceId": "[parameters('workspaceId')]",
+        "logs": [
+          {
+            "category": "FunctionAppLogs",
+            "enabled": "[parameters('FunctionAppLogsSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "category": "AllMetrics",
+            "enabled": "[parameters('allMetricsSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "managedServiceIdentityId": {
+      "type": "string",
+      "value": "[reference(parameters('functionAppName'), variables('functionAppApiVersion'), 'Full').identity.principalId]"
+    },
+    "possibleOutboundIpAddresses": {
+      "type": "array",
+      "value": "[split(reference(parameters('functionAppName')).possibleOutboundIpAddresses, ',')]"
+    },
+    "possibleOutboundIpAddressesAsString": {
+      "type": "string",
+      "value": "[reference(parameters('functionAppName')).possibleOutboundIpAddresses]"
+    }
+  }
+}

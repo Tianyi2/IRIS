@@ -1,0 +1,458 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namingPrefix": {
+      "defaultValue": "contoso",
+      "type": "string"
+    },
+    "vmAdminUserName": {
+      "defaultValue": "contosoAdmin",
+      "type": "string"
+    },
+    "vmAdminPassword": {
+      "type": "securestring"
+    },
+    "networkingResourceGroup": {
+      "type": "string",
+      "defaultValue": "contoso-network"
+    },
+    "vnetMainName": {
+      "defaultValue": "contoso-vnet-main",
+      "type": "string"
+    },
+    "subnetMgmtName": {
+      "defaultValue": "contoso-subnet-mgmt",
+      "type": "string"
+    },
+    "saVmDiagnosticsResourceGroup": {
+      "type": "string",
+      "defaultValue": "contoso-diagnostics"
+    },
+    "saVmDiagnosticsName": {
+      "type": "string",
+      "defaultValue": "contosovmdiagnostics"
+    },
+    "omsWorkspaceResourceGroup": {
+      "defaultValue": "contoso-diagnostics",
+      "type": "string"
+    },
+    "omsWorkspaceName": {
+      "defaultValue": "contoso-loganalytics",
+      "type": "string"
+    }
+  },
+  "variables": {
+    "vmJumpbox": {
+      "name": "[concat(parameters('namingPrefix'),'-vm-jumpbox')]",
+      "computerName": "[concat(parameters('namingPrefix'),'vmjbox')]",
+      "size": "Standard_DS3_v2",
+      "osDiskName": "[concat(parameters('namingPrefix'),'-vm-jumpbox-osdisk')]",
+      "osDiskSize": 128,
+      "imagePublisher": "MicrosoftWindowsServer",
+      "imageOffer": "WindowsServer",
+      "imageSku": "2012-R2-Datacenter",
+      "imageVersion": "latest",
+      "networkInterfaceName": "[concat(parameters('namingPrefix'),'-ni-jumpbox')]",
+      "ipName": "[concat(parameters('namingPrefix'),'-ip-jumpbox')]",
+      "ipAddress": "10.0.4.4",
+      "publicIpName": "[concat(parameters('namingPrefix'),'-pip-jumpbox')]"
+    },
+    "wadmetricsresourceid": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name , '/providers/', 'Microsoft.Compute/virtualMachines/')]"
+  },
+  "resources": [
+    {
+      "comments": "",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('vmJumpbox').name]",
+      "apiVersion": "2017-03-30",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "Autoshutdown": "yes"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('vmJumpbox').size]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('vmJumpbox').imagePublisher]",
+            "offer": "[variables('vmJumpbox').imageOffer]",
+            "sku": "[variables('vmJumpbox').imageSku]",
+            "version": "[variables('vmJumpbox').imageVersion]"
+          },
+          "osDisk": {
+            "osType": "Windows",
+            "name": "[variables('vmJumpbox').osDiskName]",
+            "createOption": "FromImage",
+            "caching": "ReadWrite",
+            "diskSizeGB": "[variables('vmJumpbox').osDiskSize]"
+          },
+          "dataDisks": []
+        },
+        "osProfile": {
+          "computerName": "[variables('vmJumpbox').computerName]",
+          "adminUsername": "[parameters('vmAdminUsername')]",
+          "adminPassword": "[parameters('vmAdminPassword')]",
+          "windowsConfiguration": {
+            "provisionVMAgent": true,
+            "enableAutomaticUpdates": true
+          },
+          "secrets": []
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmJumpbox').networkInterfaceName)]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[reference(resourceId(subscription().subscriptionId, parameters('saVmDiagnosticsResourceGroup'), 'Microsoft.Storage/storageAccounts/', parameters('saVmDiagnosticsName')), '2016-01-01').primaryEndpoints.blob]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('vmJumpbox').networkInterfaceName)]"
+      ]
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('vmJumpbox').networkInterfaceName]",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "scale": null,
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[variables('vmJumpbox').ipName]",
+            "properties": {
+              "privateIPAddress": "[variables('vmJumpbox').ipAddress]",
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmJumpbox').publicIpName)]"
+              },
+              "subnet": {
+                "id": "[resourceId(subscription().subscriptionId, parameters('networkingResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetMainName'), parameters('subnetMgmtName'))]"
+              },
+              "primary": true,
+              "privateIPAddressVersion": "IPv4"
+            }
+          }
+        ],
+        "dnsSettings": {},
+        "macAddress": "00-0D-3A-03-90-62",
+        "enableAcceleratedNetworking": false,
+        "enableIPForwarding": false,
+        "primary": true
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('vmJumpbox').publicIpName)]"
+      ]
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('vmJumpbox').publicIpName]",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAddressVersion": "IPv4",
+        "publicIPAllocationMethod": "Dynamic",
+        "idleTimeoutInMinutes": 4,
+        "dnsSettings": {
+          "domainNameLabel": "[variables('vmJumpbox').computerName]"
+        }
+      },
+      "dependsOn": []
+    },
+    {
+      "apiVersion": "2017-03-30",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmJumpbox').name, '/disable-ie-esc')]",
+      "location": "[resourceGroup().location]",
+      "tags": {},
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.4",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "https://raw.githubusercontent.com/gsacavdm/gov-arm-devops/master/vms-jumpbox-win/disable-ie-esc.ps1"
+          ],
+          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File disable-ie-esc.ps1')]"
+        }
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmJumpbox').name)]"
+      ]
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmJumpbox').name, '/IaaSDiagnostics')]",
+      "apiVersion": "2017-03-30",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publisher": "Microsoft.Azure.Diagnostics",
+        "type": "IaaSDiagnostics",
+        "typeHandlerVersion": "1.9",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "StorageAccount": "[parameters('saVmDiagnosticsName')]",
+          "WadCfg": {
+            "DiagnosticMonitorConfiguration": {
+              "DiagnosticInfrastructureLogs": {
+                "scheduledTransferLogLevelFilter": "Error"
+              },
+              "Metrics": {
+                "MetricAggregation": [
+                  {
+                    "scheduledTransferPeriod": "PT1H"
+                  },
+                  {
+                    "scheduledTransferPeriod": "PT1M"
+                  }
+                ],
+                "resourceId": "[concat(variables('wadmetricsresourceid'), variables('vmJumpbox').name)]"
+              },
+              "PerformanceCounters": {
+                "PerformanceCounterConfiguration": [
+                  {
+                    "counterSpecifier": "\\Processor Information(_Total)\\% Processor Time",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Processor Information(_Total)\\% Privileged Time",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Processor Information(_Total)\\% User Time",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Processor Information(_Total)\\Processor Frequency",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\System\\Processes",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Process(_Total)\\Thread Count",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Process(_Total)\\Handle Count",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\System\\System Up Time",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\System\\Context Switches/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\System\\Processor Queue Length",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\Available Bytes",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\Committed Bytes",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\Cache Bytes",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\Pool Paged Bytes",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\Pool Nonpaged Bytes",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\Pages/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\Page Faults/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Process(_Total)\\Working Set",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Process(_Total)\\Working Set - Private",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\% Disk Time",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\% Disk Read Time",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\% Disk Write Time",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\% Idle Time",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Bytes/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Read Bytes/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Write Bytes/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Transfers/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Reads/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Writes/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk sec/Transfer",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk sec/Read",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk sec/Write",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk Queue Length",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk Read Queue Length",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk Write Queue Length",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\% Free Space",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Free Megabytes",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Bytes Total/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Bytes Sent/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Bytes Received/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Packets/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Packets Sent/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Packets Received/sec",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Packets Outbound Errors",
+                    "sampleRate": "PT1M"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Packets Received Errors",
+                    "sampleRate": "PT1M"
+                  }
+                ],
+                "scheduledTransferPeriod": "PT1M"
+              },
+              "WindowsEventLog": {
+                "DataSource": [
+                  {
+                    "name": "Application!*[Application[(Level = 1 or Level = 2 or Level = 3)]]"
+                  },
+                  {
+                    "name": "Security!*[System[band(Keywords,4503599627370496)]]"
+                  },
+                  {
+                    "name": "System!*[System[(Level = 1 or Level = 2 or Level = 3)]]"
+                  }
+                ],
+                "scheduledTransferPeriod": "PT1M"
+              },
+              "overallQuotaInMB": 5120
+            }
+          }
+        },
+        "protectedSettings": {
+          "storageAccountName": "[parameters('saVmDiagnosticsName')]",
+          "storageAccountKey": "[listKeys(resourceId(subscription().subscriptionId, parameters('saVmDiagnosticsResourceGroup'), 'Microsoft.Storage/storageAccounts/', parameters('saVmDiagnosticsName')), '2016-01-01').keys[0].value]",
+          "storageAccountEndPoint": "[replace(reference(resourceId(subscription().subscriptionId, parameters('saVmDiagnosticsResourceGroup'), 'Microsoft.Storage/storageAccounts/', parameters('saVmDiagnosticsName')), '2016-01-01').primaryEndpoints.blob, concat(parameters('saVmDiagnosticsName'),'.blob.'), '')]"
+        }
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmJumpbox').name)]"
+      ]
+    },
+    {
+      "apiVersion": "2017-03-30",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmJumpbox').name, '/oms-extension')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+        "type": "MicrosoftMonitoringAgent",
+        "typeHandlerVersion": "1.0",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "workspaceId": "[reference(resourceId(subscription().subscriptionId, parameters('omsWorkspaceResourceGroup'), 'Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName')), '2015-11-01-preview').customerId]"
+        },
+        "protectedSettings": {
+          "workspaceKey": "[listKeys(resourceId(subscription().subscriptionId, parameters('omsWorkspaceResourceGroup'), 'Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName')), '2015-11-01-preview').primarySharedKey]"
+        }
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmJumpbox').name)]"
+      ]
+    }
+  ]
+}

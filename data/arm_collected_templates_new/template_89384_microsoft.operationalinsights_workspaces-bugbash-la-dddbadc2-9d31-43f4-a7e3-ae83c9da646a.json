@@ -1,0 +1,41 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "microsoft.operationalinsights/workspaces",
+      "name": "bugbash-la-dddbadc2-9d31-43f4-a7e3-ae83c9da646a",
+      "apiVersion": "2020-10-01",
+      "location": "[resourceGroup().location]",
+      "tags": null,
+      "properties": {
+        "source": "Azure",
+        "customerId": "6d415aac-cbd9-42bc-9193-f6432a6ef0d4",
+        "provisioningState": "Succeeded",
+        "sku": {
+          "name": "pergb2018",
+          "maxCapacityReservationLevel": 3000,
+          "lastSkuUpdate": "Fri, 19 Mar 2021 16:38:12 GMT"
+        },
+        "retentionInDays": 30,
+        "features": {
+          "legacy": 0,
+          "searchVersion": 1,
+          "enableLogAccessUsingOnlyResourcePermissions": true
+        },
+        "workspaceCapping": {
+          "dailyQuotaGb": -1,
+          "quotaNextResetTime": "Sun, 21 Mar 2021 09:00:00 GMT",
+          "dataIngestionStatus": "RespectQuota"
+        },
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled",
+        "createdDate": "Fri, 19 Mar 2021 16:38:12 GMT",
+        "modifiedDate": "Fri, 19 Mar 2021 17:27:54 GMT"
+      }
+    }
+  ],
+  "outputs": {}
+}

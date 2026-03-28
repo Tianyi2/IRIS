@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "aa4ff695-6730-53d8-9854-0cf667c9c981",
+      "apiVersion": "2022-01-01-preview",
+      "properties": {
+        "DisplayName": "Deploy-LX-Arc-Monitoring",
+        "ObjectType": "ServicePrincipal",
+        "PrincipalId": "53fa1fd7-58bc-460b-8fad-1f1609b2f0cb",
+        "RoleDefinitionId": "/providers/Microsoft.Authorization/RoleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+        "RoleDefinitionName": "Owner"
+      }
+    }
+  ],
+  "outputs": {}
+}

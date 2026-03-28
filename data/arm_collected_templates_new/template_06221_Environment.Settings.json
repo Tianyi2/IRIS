@@ -1,0 +1,131 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "projectName": {
+            "type": "string"
+        },
+        "environmentName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the environment. 'prod' is reserved for production environment.",
+                "restrictions": "projectName+environmentName length should be max 20. Required by Azure storage naming conventions."
+            }
+        },
+        "size": {
+            "type": "string",
+            "defaultValue": "Small",
+            "allowedValues": [
+                "ExtraSmall",
+                "Small",
+                "Medium",
+                "Large",
+                "ExtraLarge"
+            ]
+        },
+        "templateBaseUrl": {
+            "type": "string",
+            "defaultValue": "https://raw.githubusercontent.com/Lateral-Pathfinder/arm-templates/master/templates/",
+            "metadata": {
+                "description": "Location for the individual deployment templates. If it's a blob storage account, the templateSasToken must have a value."
+            }
+        },
+        "templateSasToken": {
+            "type": "string",
+            "defaultValue": " ",
+            "metadata": {
+                "description": "Sas Token for Azure storage account. Used when the individual templates are linked from blob storage"
+            }
+        },
+        "consolidate": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "If true, multiple environments will have one single serverfarm and Redis cache. Cuts down costs."
+            }
+        },        
+		"customDomain": {
+            "type": "string",
+            "metadata": {
+                "description": "Custom domain for the project."
+            }
+        },
+        "createDomains": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "decription": "Skip custom domains creation at first run, it needs the apps to exist."
+            }
+        }
+    },
+    "variables":{
+		"resourceName": "[concat(parameters('environmentName'), '-', parameters('projectName'))]",
+        "serverFarmName": "[if(parameters('consolidate'), concat('prod-', parameters('projectName')), variables('resourceName'))]",
+        "serverFarmResourceGroupName": "[if(parameters('consolidate'), concat('prod-', parameters('projectName')), variables('resourceName'))]",
+		"Names": {
+			"resource": "[variables('resourceName')]",
+			"app": "[variables('resourceName')]",
+			"sqlServer": "[variables('resourceName')]",
+			"sqlDb": "[variables('resourceName')]",
+            "sqlDbResourceId": "[concat(subscription().id,'/resourcegroups/', resourceGroup().name, '/providers/Microsoft.Sql/servers/', variables('resourceName'), '/databases/', variables('resourceName'))]",
+			"keyVault": "[variables('resourceName')]",
+			"keyVaultBaseUrl": "[concat('https://', variables('resourceName'), '.vault.azure.net/')]",
+			"actionGroup": "[variables('resourceName')]",
+			"actionGroupId": "[concat(subscription().id,'/resourcegroups/', resourceGroup().name, '/providers/microsoft.insights/actionGroups/', variables('resourceName'))]",
+			"actionGroupShortName": "[toUpper(take(parameters('environmentName'),15))]",
+			"serviceBusNamespace": "[variables('resourceName')]",
+			"workspace": "[variables('resourceName')]",
+			"workspaceId": "[concat(subscription().id,'/resourcegroups/', resourceGroup().name, '/providers/Microsoft.OperationalInsights/workspaces/', variables('resourceName'))]",
+			"automation": "[variables('resourceName')]",
+			"redisCache": "[variables('resourceName')]",
+			"tableStorage": "[concat(parameters('environmentName'), parameters('projectName'), 'tbl')]",
+			"blobStorage": "[concat(parameters('environmentName'), parameters('projectName'), 'blb')]",
+			"serverFarmName": "[variables('serverFarmName')]",
+            "serverFarmResourceGroupName": "[variables('serverFarmResourceGroupName')]",
+            "serverFarmResourceId": "[concat(subscription().id,'/resourcegroups/', variables('serverFarmResourceGroupName'), '/providers/Microsoft.Web/serverfarms/', variables('serverFarmName'))]"
+		},
+		"Environment": {
+			"projectName": "[parameters('projectName')]",
+			"environmentName": "[parameters('environmentName')]",
+			"size": "[parameters('size')]",
+			"templateBaseUrl": "[parameters('templateBaseUrl')]",
+			"templateSasToken": "[parameters('templateSasToken')]",
+			"consolidate": "[parameters('consolidate')]",
+			"customDomain": "[parameters('customDomain')]",
+			"createDomains": "[parameters('createDomains')]"
+		},
+		"Tags": {
+			"project": "[parameters('projectName')]",
+            "environment": "[parameters('environmentName')]"
+		}
+	},
+    "resources": [
+ 		{
+            "apiVersion": "2017-05-10",
+            "name": "environmentSize",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateBaseUrl'), 'utils/Environment.Size.json', parameters('templateSasToken'))]"
+                },
+                "parameters": {
+                    "size": {
+                        "value": "[parameters('size')]"
+                    }
+                }
+            }
+        }     
+	],
+	"outputs": {
+        "V": {
+            "type": "object",
+            "value": {
+                "Environment": "[variables('Environment')]",
+                "Size": "[reference('environmentSize').outputs.size.value]",
+                "Names": "[variables('Names')]",
+                "Tags": "[variables('Tags')]"
+            }
+        }
+	}
+}

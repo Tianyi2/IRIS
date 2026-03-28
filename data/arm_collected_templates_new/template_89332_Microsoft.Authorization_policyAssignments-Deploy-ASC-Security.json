@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deploy-ASC-Security",
+      "apiVersion": "2020-09-01",
+      "location": "[deployment().location]",
+      "properties": {
+        "Scope": "/providers/Microsoft.Management/managementGroups/bugbash",
+        "NotScopes": null,
+        "DisplayName": "Deploy-ASC-Defender",
+        "Description": "Deploy-ASC-Defender",
+        "EnforcementMode": 0,
+        "PolicyDefinitionId": "/providers/Microsoft.Management/managementGroups/bugbash/providers/Microsoft.Authorization/policyDefinitions/Deploy-ASC-Standard",
+        "Parameters": {
+          "pricingTierVms": {
+            "value": "Standard"
+          },
+          "pricingTierSqlServers": {
+            "value": "Standard"
+          },
+          "pricingTierAppServices": {
+            "value": "Standard"
+          },
+          "pricingTierStorageAccounts": {
+            "value": "Standard"
+          },
+          "pricingTierContainerRegistry": {
+            "value": "Standard"
+          },
+          "pricingTierKeyVaults": {
+            "value": "Standard"
+          },
+          "pricingTierKubernetesService": {
+            "value": "Standard"
+          },
+          "pricingTierDns": {
+            "value": "Standard"
+          },
+          "pricingTierArm": {
+            "value": "Standard"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

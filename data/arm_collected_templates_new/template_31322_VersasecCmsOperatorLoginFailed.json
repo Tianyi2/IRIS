@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/B1DB8B7E-9D74-48C3-9683-74483CBEFF4E')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/B1DB8B7E-9D74-48C3-9683-74483CBEFF4E')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": false,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "5m",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "severity": "High",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "name": "Versasec CMS - Multiple Failed Login Attempts",
+        "description": "Detects when Operator login failed to often.\n",
+        "query": "let threshold = 5;\nVersasecCmsSysLogs \n| where EventId == 2 \n| sort by ComputerName asc, TimeGenerated asc\n| extend TimeDiff = datetime_diff('minute', TimeGenerated, prev(TimeGenerated))\n| where TimeDiff <= threshold and ComputerName == prev(ComputerName)\n",
+        "status": "Available",
+        "queryFrequency": "5m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "ComputerName",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Host"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "CredentialAccess"
+        ],
+        "triggerThreshold": 5,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "4835a56e-6dff-59b2-abf1-6037d61f709e",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "principalId": "6fd46a55-822d-4243-9e2a-2e18839b2760",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
+        "scope": "/providers/Microsoft.Management/managementGroups/contoso-decommissioned"
+      }
+    }
+  ],
+  "outputs": {}
+}

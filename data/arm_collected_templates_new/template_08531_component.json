@@ -1,0 +1,108 @@
+{
+    "contentVersion": "1.0.0.0",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "parameters": {
+        "webAppName": {
+            "type": "string",
+            "defaultValue": "[concat('Django-', uniqueString(resourceGroup().id))]",
+            "metadata": {
+                "description": "That name is the name of our application. It has to be unique.Type a name followed by your resource group name. (<name>-<resourceGroupName>)"
+            }
+        },
+        "hostingPlanName": {
+            "type": "string",
+            "metadata": {
+                "description": "Hosting plan name"
+            }
+        },
+        "appInsights": {
+            "type": "string",
+            "metadata": {
+                "description": "App insight name"
+            }
+        },
+        "containerSpec": {
+            "type": "string",
+            "defaultValue": "DOCKER|appsvcorg/django-python:0.1",
+            "metadata": {
+                "description": "Container specification"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-06-01",
+            "name": "DeployAppInsights",
+            "properties": {
+                "mode": "Incremental",
+                "parameters": {
+                    "appInsights": {
+                        "value": "[parameters('appInsights')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    }
+                },
+                "templateLink": {                    
+                    "relativePath": "../appInsights/component.json"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-06-01",
+            "name": "DeployHostingplan",
+            "properties": {
+                "mode": "Incremental",
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "hostingPlanName": {
+                        "value": "[parameters('hostingPlanName')]"
+                    }
+                },                
+                "templateLink": {
+                    "relativePath": "../server-farm/component.json"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-06-01",
+            "name": "DeployWebApp",
+            "dependsOn": [ "DeployHostingplan" ],
+            "properties": {
+                "mode": "Incremental",
+                "parameters": {
+                    "webAppName": {
+                        "value": "[parameters('webAppName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "hostingPlanName": {
+                        "value": "[parameters('hostingPlanName')]"
+                    },
+                    "containerSpec": {
+                        "value": "[parameters('containerSpec')]"
+                    },
+                    "instrumentationKey": {
+                        "value": "[reference('DeployAppInsights').outputs.instrumentationKey.value]"
+                    }
+                },                
+                "templateLink": {
+                    "relativePath": "../web-app/component.json"
+                }
+            }
+        }
+    ]
+}

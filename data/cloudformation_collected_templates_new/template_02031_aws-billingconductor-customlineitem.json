@@ -1,0 +1,363 @@
+{
+  "typeName": "AWS::BillingConductor::CustomLineItem",
+  "description": "A custom line item is an one time charge that is applied to a specific billing group's bill.",
+  "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-billing-conductor.git",
+  "definitions": {
+    "Tag": {
+      "type": "object",
+      "properties": {
+        "Key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "markdownDescription": "\n\n---\n\nRequired: Yes  \nType: String  \nMinimum Length: 1  \nMaximum Length: 128  \nUpdate requires: No interruption\n"
+        },
+        "Value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "markdownDescription": "\n\n---\n\nRequired: Yes  \nType: String  \nMinimum Length: 1  \nMaximum Length: 256  \nUpdate requires: No interruption\n"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Key",
+        "Value"
+      ],
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "Type": {
+      "type": "string",
+      "enum": [
+        "FEE",
+        "CREDIT"
+      ],
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nAllowed Values: FEE | CREDIT  \nUpdate requires: No interruption\n"
+    },
+    "CustomLineItemPercentageChargeDetails": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ChildAssociatedResources": {
+          "type": "array",
+          "insertionOrder": false,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nPattern: (arn:aws(-cn)?:billingconductor::[0-9]{12}:(customlineitem|billinggroup)/)?[a-zA-Z0-9]{10,12}  \nUpdate requires: No interruption\n"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+        },
+        "PercentageValue": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10000,
+          "markdownDescription": "\n\n---\n\nRequired: Yes  \nType: Number  \nUpdate requires: No interruption\n"
+        }
+      },
+      "required": [
+        "PercentageValue"
+      ],
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "CustomLineItemFlatChargeDetails": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ChargeValue": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000,
+          "markdownDescription": "\n\n---\n\nRequired: Yes  \nType: Number  \nUpdate requires: No interruption\n"
+        }
+      },
+      "required": [
+        "ChargeValue"
+      ],
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "LineItemFilters": {
+      "type": "array",
+      "insertionOrder": false,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/LineItemFilter"
+      },
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+    },
+    "LineItemFilter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Attribute": {
+          "type": "string",
+          "enum": [
+            "LINE_ITEM_TYPE"
+          ],
+          "markdownDescription": "\n\n---\n\nRequired: Yes  \nType: String  \nAllowed Values: LINE_ITEM_TYPE  \nUpdate requires: No interruption\n"
+        },
+        "MatchOption": {
+          "type": "string",
+          "enum": [
+            "NOT_EQUAL"
+          ],
+          "markdownDescription": "\n\n---\n\nRequired: Yes  \nType: String  \nAllowed Values: NOT_EQUAL  \nUpdate requires: No interruption\n"
+        },
+        "Values": {
+          "type": "array",
+          "insertionOrder": false,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/definitions/LineItemFilterValue"
+          },
+          "markdownDescription": "\n\n---\n\nRequired: Yes  \nType: Array  \nUpdate requires: No interruption\n"
+        }
+      },
+      "required": [
+        "Attribute",
+        "MatchOption",
+        "Values"
+      ],
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: No interruption\n"
+    },
+    "LineItemFilterValue": {
+      "type": "string",
+      "enum": [
+        "SAVINGS_PLAN_NEGATION"
+      ],
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nAllowed Values: SAVINGS_PLAN_NEGATION  \nUpdate requires: No interruption\n"
+    },
+    "CustomLineItemChargeDetails": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Flat": {
+          "$ref": "#/definitions/CustomLineItemFlatChargeDetails"
+        },
+        "Percentage": {
+          "$ref": "#/definitions/CustomLineItemPercentageChargeDetails"
+        },
+        "Type": {
+          "$ref": "#/definitions/Type"
+        },
+        "LineItemFilters": {
+          "$ref": "#/definitions/LineItemFilters"
+        }
+      },
+      "required": [
+        "Type"
+      ],
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: Replacement\n"
+    },
+    "InclusiveStartBillingPeriod": {
+      "type": "string",
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nPattern: \\d{4}-(0?[1-9]|1[012])  \nUpdate requires: No interruption\n"
+    },
+    "ExclusiveEndBillingPeriod": {
+      "type": "string",
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nPattern: \\d{4}-(0?[1-9]|1[012])  \nUpdate requires: No interruption\n"
+    },
+    "BillingPeriodRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "InclusiveStartBillingPeriod": {
+          "$ref": "#/definitions/InclusiveStartBillingPeriod"
+        },
+        "ExclusiveEndBillingPeriod": {
+          "$ref": "#/definitions/ExclusiveEndBillingPeriod"
+        }
+      },
+      "markdownDescription": "\n\n---\n\nRequired: No  \nUpdate requires: Replacement\n"
+    }
+  },
+  "properties": {
+    "Name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "markdownDescription": "\n\n---\n\nRequired: Yes  \nType: String  \nMinimum Length: 1  \nMaximum Length: 128  \nPattern: [a-zA-Z0-9_\\+=\\.\\-@]+  \nUpdate requires: No interruption\n"
+    },
+    "Description": {
+      "type": "string",
+      "maxLength": 255,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nMaximum Length: 255  \nUpdate requires: No interruption\n"
+    },
+    "CustomLineItemChargeDetails": {
+      "$ref": "#/definitions/CustomLineItemChargeDetails"
+    },
+    "BillingGroupArn": {
+      "description": "Billing Group ARN",
+      "type": "string",
+      "markdownDescription": "Billing Group ARN\n\n---\n\nRequired: Yes  \nType: String  \nPattern: arn:aws(-cn)?:billingconductor::[0-9]{12}:billinggroup/?[0-9]{12}  \nUpdate requires: Replacement\n"
+    },
+    "BillingPeriodRange": {
+      "$ref": "#/definitions/BillingPeriodRange"
+    },
+    "Arn": {
+      "description": "ARN",
+      "type": "string",
+      "markdownDescription": "ARN\n\n---\n\nRequired: No  \nType: String  \nPattern: (arn:aws(-cn)?:billingconductor::[0-9]{12}:customlineitem/)?[a-zA-Z0-9]{10}  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "CreationTime": {
+      "description": "Creation timestamp in UNIX epoch time format",
+      "type": "integer",
+      "markdownDescription": "Creation timestamp in UNIX epoch time format\n\n---\n\nRequired: No  \nType: Integer  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "LastModifiedTime": {
+      "description": "Latest modified timestamp in UNIX epoch time format",
+      "type": "integer",
+      "markdownDescription": "Latest modified timestamp in UNIX epoch time format\n\n---\n\nRequired: No  \nType: Integer  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "AssociationSize": {
+      "description": "Number of source values associated to this custom line item",
+      "type": "integer",
+      "markdownDescription": "Number of source values associated to this custom line item\n\n---\n\nRequired: No  \nType: Integer  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "ProductCode": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 29,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nMinimum Length: 1  \nMaximum Length: 29  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "CurrencyCode": {
+      "type": "string",
+      "enum": [
+        "USD",
+        "CNY"
+      ],
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nAllowed Values: USD | CNY  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "AccountId": {
+      "type": "string",
+      "description": "The account which this custom line item will be charged to",
+      "markdownDescription": "The account which this custom line item will be charged to\n\n---\n\nRequired: No  \nType: String  \nPattern: [0-9]{12}  \nUpdate requires: Replacement\n"
+    },
+    "Tags": {
+      "type": "array",
+      "uniqueItems": true,
+      "insertionOrder": false,
+      "items": {
+        "$ref": "#/definitions/Tag"
+      },
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: Array  \nUpdate requires: No interruption\n"
+    }
+  },
+  "additionalProperties": false,
+  "tagging": {
+    "taggable": true,
+    "tagOnCreate": true,
+    "tagUpdatable": true,
+    "cloudFormationSystemTags": true,
+    "tagProperty": "/properties/Tags",
+    "permissions": [
+      "billingconductor:ListTagsForResource",
+      "billingconductor:TagResource",
+      "billingconductor:UntagResource"
+    ]
+  },
+  "required": [
+    "Name",
+    "BillingGroupArn"
+  ],
+  "readOnlyProperties": [
+    "/properties/Arn",
+    "/properties/CreationTime",
+    "/properties/LastModifiedTime",
+    "/properties/AssociationSize",
+    "/properties/CurrencyCode",
+    "/properties/ProductCode"
+  ],
+  "createOnlyProperties": [
+    "/properties/BillingGroupArn",
+    "/properties/AccountId",
+    "/properties/BillingPeriodRange/InclusiveStartBillingPeriod",
+    "/properties/BillingPeriodRange/ExclusiveEndBillingPeriod",
+    "/properties/CustomLineItemChargeDetails/Type"
+  ],
+  "primaryIdentifier": [
+    "/properties/Arn"
+  ],
+  "handlers": {
+    "create": {
+      "permissions": [
+        "billingconductor:CreateCustomLineItem",
+        "billingconductor:BatchAssociateResourcesToCustomLineItem",
+        "billingconductor:ListCustomLineItems",
+        "billingconductor:TagResource",
+        "billingconductor:ListTagsForResource"
+      ]
+    },
+    "read": {
+      "permissions": [
+        "billingconductor:ListCustomLineItems",
+        "billingconductor:ListCustomLineItemVersions",
+        "billingconductor:ListResourcesAssociatedToCustomLineItem",
+        "billingconductor:ListTagsForResource"
+      ]
+    },
+    "list": {
+      "permissions": [
+        "billingconductor:ListCustomLineItems",
+        "billingconductor:ListResourcesAssociatedToCustomLineItem",
+        "billingconductor:ListTagsForResource"
+      ]
+    },
+    "update": {
+      "permissions": [
+        "billingconductor:UpdateCustomLineItem",
+        "billingconductor:ListCustomLineItems",
+        "billingconductor:ListResourcesAssociatedToCustomLineItem",
+        "billingconductor:BatchAssociateResourcesToCustomLineItem",
+        "billingconductor:BatchDisassociateResourcesFromCustomLineItem",
+        "billingconductor:TagResource",
+        "billingconductor:UntagResource"
+      ]
+    },
+    "delete": {
+      "permissions": [
+        "billingconductor:DeleteCustomLineItem",
+        "billingconductor:ListCustomLineItems",
+        "billingconductor:BatchDisassociateResourcesFromCustomLineItem",
+        "billingconductor:ListResourcesAssociatedToCustomLineItem",
+        "billingconductor:UntagResource"
+      ]
+    }
+  },
+  "attributes": {
+    "Arn": {
+      "description": "ARN",
+      "type": "string",
+      "markdownDescription": "ARN\n\n---\n\nRequired: No  \nType: String  \nPattern: (arn:aws(-cn)?:billingconductor::[0-9]{12}:customlineitem/)?[a-zA-Z0-9]{10}  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "CreationTime": {
+      "description": "Creation timestamp in UNIX epoch time format",
+      "type": "integer",
+      "markdownDescription": "Creation timestamp in UNIX epoch time format\n\n---\n\nRequired: No  \nType: Integer  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "LastModifiedTime": {
+      "description": "Latest modified timestamp in UNIX epoch time format",
+      "type": "integer",
+      "markdownDescription": "Latest modified timestamp in UNIX epoch time format\n\n---\n\nRequired: No  \nType: Integer  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "AssociationSize": {
+      "description": "Number of source values associated to this custom line item",
+      "type": "integer",
+      "markdownDescription": "Number of source values associated to this custom line item\n\n---\n\nRequired: No  \nType: Integer  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "ProductCode": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 29,
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nMinimum Length: 1  \nMaximum Length: 29  \nUpdate requires: No interruption\nRead only property: Yes"
+    },
+    "CurrencyCode": {
+      "type": "string",
+      "enum": [
+        "USD",
+        "CNY"
+      ],
+      "markdownDescription": "\n\n---\n\nRequired: No  \nType: String  \nAllowed Values: USD | CNY  \nUpdate requires: No interruption\nRead only property: Yes"
+    }
+  }
+}

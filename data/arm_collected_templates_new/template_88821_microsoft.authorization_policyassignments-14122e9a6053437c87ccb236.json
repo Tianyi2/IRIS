@@ -1,0 +1,81 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "14122e9a6053437c87ccb236",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "westeurope",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourcegroups/saturn-policy-identity/providers/Microsoft.ManagedIdentity/userAssignedIdentities/saturn-policy-identity": {
+            "clientId": "3af92696-7908-4732-bb6b-9f96fb6432f6",
+            "principalId": "bee3d72e-1c84-46a5-a0a5-79c0cd4a9ec7"
+          }
+        }
+      },
+      "properties": {
+        "displayName": "Enforce secure-by-default Network and Networking services for Financial Services Industry",
+        "enforcementMode": "Default",
+        "metadata": {
+          "parameterScopes": {}
+        },
+        "nonComplianceMessages": [],
+        "notScopes": [],
+        "overrides": [],
+        "parameters": {
+          "bastionLogAnalyticsWorkspaceId": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-mgmt/providers/Microsoft.OperationalInsights/workspaces/saturn-law"
+          },
+          "ddosPlanResourceId": {
+            "value": "/subscriptions/539e250b-b64b-4aec-aace-271141f578e5/resourceGroups/saturn-ddos/providers/Microsoft.Network/ddosProtectionPlans/saturn-ddos-westeurope"
+          },
+          "erDiagnosticsLogAnalyticsWorkspaceId": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-mgmt/providers/Microsoft.OperationalInsights/workspaces/saturn-law"
+          },
+          "fdCdnLogAnalyticsWorkpaceId": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-mgmt/providers/Microsoft.OperationalInsights/workspaces/saturn-law"
+          },
+          "fdDiagnosticsLogAnalyticsWorkspaceId": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-mgmt/providers/Microsoft.OperationalInsights/workspaces/saturn-law"
+          },
+          "gwLogAnalyticsWorkspaceId": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-mgmt/providers/Microsoft.OperationalInsights/workspaces/saturn-law"
+          },
+          "lbDiagnosticsLogAnalyticsWorkspaceId": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-mgmt/providers/Microsoft.OperationalInsights/workspaces/saturn-law"
+          },
+          "nsgLogAnalyticsWorkspaceId": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-mgmt/providers/Microsoft.OperationalInsights/workspaces/saturn-law"
+          },
+          "p2sLogAnalyticsWorkspaceId": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-mgmt/providers/Microsoft.OperationalInsights/workspaces/saturn-law"
+          },
+          "pipLogAnalyticsWorkspaceId": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-mgmt/providers/Microsoft.OperationalInsights/workspaces/saturn-law"
+          },
+          "tmDiagnosticsLogAnalyticsWorkspaceId": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-mgmt/providers/Microsoft.OperationalInsights/workspaces/saturn-law"
+          },
+          "vnetDiagnosticsLogAnalyticsWorkspaceId": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-mgmt/providers/Microsoft.OperationalInsights/workspaces/saturn-law"
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Management/managementGroups/saturn/providers/Microsoft.Authorization/policySetDefinitions/Compliant-Network",
+        "resourceSelectors": [],
+        "scope": "/providers/Microsoft.Management/managementGroups/saturn-platform"
+      }
+    }
+  ],
+  "outputs": {}
+}

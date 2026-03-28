@@ -1,0 +1,12 @@
+﻿template_language,tool,smell_type,precision,recall,tp,fp,fn,total_templates,gt_clean_templates,pred_clean_templates
+arm,arm-ttk,no_smell,0.6060606060606061,1.0,40,26,0,80,40,66
+arm,checkov,no_smell,0.5797101449275363,1.0,40,29,0,80,40,69
+bicep,bicep-linter,no_smell,0.6129032258064516,0.95,38,24,2,75,40,62
+bicep,checkov,no_smell,0.547945205479452,1.0,40,33,0,75,40,73
+terraform,checkov,no_smell,0.5405405405405406,1.0,40,34,0,80,40,74
+terraform,terraform-validate,no_smell,0.5128205128205128,1.0,40,38,0,80,40,78
+terraform,tflint,no_smell,0.5714285714285714,1.0,40,30,0,80,40,70
+terraform,trivy,no_smell,0.5063291139240507,1.0,40,39,0,80,40,79
+cfn,cfn-lint,no_smell,0.7547169811320755,1.0,40,13,0,75,40,53
+cfn,checkov,no_smell,0.5571428571428572,0.975,39,31,1,75,40,70
+cfn,trivy,no_smell,0.5555555555555556,1.0,40,32,0,75,40,72

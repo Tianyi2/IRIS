@@ -1,0 +1,44 @@
+
+
+# # Get AWS-Vulnerable-Lambda from GitHub
+# module "git_metasploitable3" {
+#   source = "github.com/rapid7/metasploitable3"
+# }
+
+
+# # run packer (prints to stdout, but stores the output in a variable)
+# packer_out=$(packer build packer.json | tee /dev/tty)
+
+# # packer prints the id of the generated AMI in its last line
+# ami=$(echo "$packer_out" | tail -c 30 | perl -n -e'/: (ami-.+)$/ && print $1')
+
+# # create the 'ami.tf' file from the template:
+# export AMI_GENERATED_BY_PACKER="$ami" && envsubst < ami.tf.template > ami.tf
+
+
+
+
+
+//Vulnerable Instance: metasploitable3
+resource "aws_instance" "metasploitable3" {
+  count         = var.deploment-control["metasploitable3"] ? 1 :0     // control variable from variables.tf
+
+  ami           = var.metasploitable3-ami[var.aws-region] 
+  instance_type = "t2.micro"
+  key_name      = aws_key_pair.kali-key-pair.key_name   # use same key than kali instance
+  private_ip    = "10.0.1.5"
+  subnet_id                   = aws_subnet.privateSubnet.id
+  vpc_security_group_ids = [aws_security_group.SecurityGroup-VulnerableMachines.id]
+  tags = {
+    Name = "metasploitable3"
+  }
+
+  depends_on = [
+    aws_vpc.VPC,
+    aws_subnet.privateSubnet,
+    aws_route_table.PublicRouteTable,
+    aws_security_group.SecurityGroup-VulnerableMachines
+  ]
+
+}
+

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/d7ee7bb5-d712-4d44-b201-b13379924934')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/d7ee7bb5-d712-4d44-b201-b13379924934')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "lookbackDuration": "5h",
+            "groupByCustomDetails": [],
+            "matchingMethod": "AnyAlert",
+            "enabled": true,
+            "reopenClosedIncident": false,
+            "groupByEntities": [],
+            "groupByAlertDetails": []
+          },
+          "createIncident": true
+        },
+        "severity": "Low",
+        "alertDetailsOverride": {
+          "alertTactics": "Tactics",
+          "alertDynamicProperties": [
+            {
+              "alertProperty": "AlertLink",
+              "value": "URL"
+            }
+          ],
+          "alertDescriptionFormat": "New direct access policy was granted against organizational policy. This policy detects when access was granted directly (not via groups). This policy is defined by default by Authomize to track AWS only. It is possible to edit the existing policy or create more versions to track other apps.\n",
+          "alertnameFormat": "Alert from Authomize - New direct access policy was granted against organizational policy",
+          "alertSeverity": "Severity"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "name": "New direct access policy was granted against organizational policy",
+        "description": "This policy detects when access was granted directly (not via groups). This policy is defined by default by Authomize to track AWS only. It is possible to edit the existing policy or create more versions to track other apps.",
+        "suppressionDuration": "5h",
+        "query": "Authomize_v2_CL\n| where ingestion_time() >= ago(30m)\n| extend EventID = id_s, Policy = policy_name_s, Severity = severity_s,Description = description_s,Recommendation = recommendation_s,URL = url_s,Tactics = tactics_s\n| where Policy has \"New direct access policy was granted against organizational policy\"\n| project  EventID, Policy, Severity, Description, Recommendation, URL, Category, Tactics",
+        "status": "Available",
+        "queryFrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "URL",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          }
+        ],
+        "suppressionEnabled": false,
+        "queryPeriod": "30m",
+        "triggerOperator": "gt",
+        "tactics": [
+          "InitialAccess",
+          "PrivilegeEscalation"
+        ],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "AuthomizeEventID": "EventID",
+          "EventDescription": "Description",
+          "EventRecommendation": "Recommendation",
+          "EventName": "Policy",
+          "ReferencedURL": "URL"
+        }
+      }
+    }
+  ]
+}

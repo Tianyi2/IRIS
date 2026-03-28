@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deny-IP-forwarding",
+      "apiVersion": "2021-06-01",
+      "location": "westeurope",
+      "properties": {
+        "Scope": "/providers/Microsoft.Management/managementGroups/gotOps-landingzones",
+        "NotScopes": null,
+        "DisplayName": "Deny-IP-Forwarding",
+        "Description": "Deny-IP-Forwarding",
+        "EnforcementMode": "DoNotEnforce",
+        "PolicyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/88c0b9da-ce96-4b03-9635-f29a937e2900",
+        "Parameters": null,
+        "NonComplianceMessages": null
+      }
+    }
+  ],
+  "outputs": {}
+}

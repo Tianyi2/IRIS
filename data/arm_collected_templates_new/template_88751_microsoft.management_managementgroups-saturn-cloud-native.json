@@ -1,0 +1,95 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/tenantDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Management/managementGroups",
+      "name": "saturn-cloud-native",
+      "apiVersion": "2021-04-01",
+      "scope": "/",
+      "properties": {
+        "displayName": "saturn-cloud-native",
+        "details": {
+          "parent": {
+            "id": "/providers/Microsoft.Management/managementGroups/saturn-landingzones"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "AzOps-microsoft.management_managementgroups-nested",
+      "location": "[deployment().location]",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-08-01/tenantDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "type": "Microsoft.Management/managementGroups/subscriptions",
+              "apiVersion": "2021-04-01",
+              "name": "saturn-cloud-native/2b20fbc5-3fba-4d81-b2ff-594113dac038",
+              "scope": "/"
+            },
+            {
+              "type": "Microsoft.Management/managementGroups/subscriptions",
+              "apiVersion": "2021-04-01",
+              "name": "saturn-cloud-native/51657466-0972-4bec-b7cd-c11f520c26f8",
+              "scope": "/"
+            },
+            {
+              "type": "Microsoft.Management/managementGroups/subscriptions",
+              "apiVersion": "2021-04-01",
+              "name": "saturn-cloud-native/a7b4a663-6ee3-4bbb-9961-e67543923e7a",
+              "scope": "/"
+            },
+            {
+              "type": "Microsoft.Management/managementGroups/subscriptions",
+              "apiVersion": "2021-04-01",
+              "name": "saturn-cloud-native/22a8d224-e190-45c0-a936-f915ee2d8b16",
+              "scope": "/"
+            },
+            {
+              "type": "Microsoft.Management/managementGroups/subscriptions",
+              "apiVersion": "2021-04-01",
+              "name": "saturn-cloud-native/6a439cba-0e4d-46ca-9eda-e3b7a8f60a49",
+              "scope": "/"
+            },
+            {
+              "type": "Microsoft.Management/managementGroups/subscriptions",
+              "apiVersion": "2021-04-01",
+              "name": "saturn-cloud-native/c97123d8-7b72-4517-b2c7-3cf81f7569e0",
+              "scope": "/"
+            },
+            {
+              "type": "Microsoft.Management/managementGroups/subscriptions",
+              "apiVersion": "2021-04-01",
+              "name": "saturn-cloud-native/96385c6b-c525-4a8b-a339-91ee5a007193",
+              "scope": "/"
+            },
+            {
+              "type": "Microsoft.Management/managementGroups/subscriptions",
+              "apiVersion": "2021-04-01",
+              "name": "saturn-cloud-native/18f1b316-6959-443c-807e-3ede7c6cfa32",
+              "scope": "/"
+            }
+          ],
+          "outputs": {}
+        }
+      },
+      "dependsOn": [
+        "Microsoft.Management/managementGroups/saturn-cloud-native"
+      ]
+    }
+  ],
+  "outputs": {}
+}

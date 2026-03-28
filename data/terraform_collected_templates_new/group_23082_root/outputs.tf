@@ -1,0 +1,74 @@
+
+
+// more output examples: 
+// https://github.com/terraform-aws-modules/terraform-aws-ec2-instance/blob/master/outputs.tf
+
+
+
+// Save Kali Private key on local file kali.pem
+resource "local_file" "private_key" {
+    content  = tls_private_key.kali-rsa-key.private_key_pem
+    filename = "kali.pem"
+    file_permission = "400"
+}
+
+output "ssh_ec2_kali_linux_connect" {
+  #value = "ssh -i kali.pem -L 3390:127.0.0.1:3389 -o StrictHostKeyChecking=no -o IdentitiesOnly=yes kali@${aws_instance.kali.public_ip}"
+  value = "ssh -i kali.pem -L 3390:127.0.0.1:3389 -o StrictHostKeyChecking=no -o IdentitiesOnly=yes kali@${var.duckdns_domain}.duckdns.org" 
+
+  depends_on = [aws_instance.kali]
+}
+
+output "ssh_ec2_kali_linux_wireguard" {
+  value = "scp -i kali.pem -o StrictHostKeyChecking=no -o IdentitiesOnly=yes kali@${var.duckdns_domain}.duckdns.org:/home/kali/client_vpn.wg ."
+
+  depends_on = [aws_instance.kali]
+}
+
+# Output ssh for each user
+output "ssh_ec2_user_linux_connect" {
+  value = [for user in local.usernames : "ssh -i outputs/${user}/${user}.key -L 3390:127.0.0.1:3389 -o StrictHostKeyChecking=no -o IdentitiesOnly=yes ${user}@${var.duckdns_domain}.duckdns.org" ]
+
+  depends_on = [aws_instance.kali]
+}
+
+
+
+
+output "metasploitable3_output_ip" {
+   value = length(aws_instance.metasploitable3) > 0 ? "metasploit ip: @${aws_instance.metasploitable3[0].private_ip}" : null
+
+    depends_on = [aws_instance.metasploitable3]
+}
+
+output "windowsserver2012R2_output_ip" {
+   value = length(aws_instance.windowsserver2012R2) > 0 ? "windowsserver2012R2 ip: @${aws_instance.windowsserver2012R2[0].private_ip}" : null
+
+    depends_on = [aws_instance.windowsserver2012R2]
+}
+
+output "dvca_output_ip" {
+   value = length(aws_instance.dvca) > 0 ? "dvca ip: @${aws_instance.dvca[0].private_ip}" : null
+
+    depends_on = [aws_instance.dvca]
+}
+
+
+#output "serveless_goat_output" {
+#   value = length(aws_instance.serveless-goat) > 0 ? "serveless-goat outputs: @${aws_cloudformation_stack.serverless-goat.outputs}" : null
+#
+#    depends_on = [
+#      aws_instance.serveless-goat,
+#  ]
+#}
+
+
+#output "ssh_eip_kali_linux_connect" {
+#  value = "ssh -i kali.pem -o IdentitiesOnly=yes kali@${aws_eip.ElasticIP.public_ip}"
+#}
+
+
+output "kali_dyndns" {
+   value = "nslookup ${var.duckdns_domain}.duckdns.org # {aws_instance.kali.public_ip} " 
+}
+

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/12ecc3cf-a1db-4fa4-bcb2-605dd3a274e0')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/12ecc3cf-a1db-4fa4-bcb2-605dd3a274e0')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "BloodHound Attack Path Finding - Large Default Groups With Limited Ownership Privileges",
+        "description": "BloodHound Attack Path Finding - Large Default Groups With Limited Ownership Privileges",
+        "query": "BHEAttackPathsData_CL | where Finding == \"LargeDefaultGroupsOwnsLimitedRights\"",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "domain_name",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "Remediation": "ShortRemediation",
+          "Description": "ShortDescription"
+        },
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

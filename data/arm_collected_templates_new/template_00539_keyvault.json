@@ -1,0 +1,173 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentTag": {
+        "type": "string"
+    },
+    "parentBusinessTag": {
+        "type": "string"
+    },
+    "portfolioTag": {
+        "type": "string"
+    },
+    "productTag": {
+        "type": "string"
+    },
+    "serviceTag": {
+        "type": "string",
+        "defaultValue": "[parameters('productTag')]"
+    },
+    "serviceLineTag": {
+        "type": "string"
+    },
+    "serviceOfferingTag": {
+        "type": "string",
+        "defaultValue": "[parameters('productTag')]"
+    },
+    "keyVaultName": {
+      "type": "string"
+    },
+    "keyVaultAccessPolicies": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Array of objects with the following schema: https://docs.microsoft.com/en-us/azure/templates/microsoft.keyvault/2018-02-14/vaults#AccessPolicyEntry"
+      }
+    },
+    "enabledForDiskEncryption": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "enabledForTemplateDeployment": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "enableSoftDelete": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "enablePurgeProtection": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enables purge protection.  Warning: This can only be enabled when soft delete is already enabled."
+      }
+    },
+    "settingName": {
+      "type": "String",
+      "defaultvalue": "keyVaultDiagSettings",
+      "metadata": {
+        "description": "The name of the diagnostic setting"
+      }
+    },
+    "workspaceId": {
+      "type": "String",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ResourceID of the Log Analytics workspace in which resource logs should be saved."
+      }
+    },
+    "auditEventSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "Audit Event diagnostic setting"
+      }
+    },
+    "allMetricsSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "All Metrics diagnostic setting"
+      }
+    },
+    "retentionPolicyEnabled": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "retentionPolicyDays": {
+      "type": "string",
+      "defaultValue": "30"
+    }
+  },
+  "variables": {
+    "shouldIncludePurgeProperty": "[and(parameters('enableSoftDelete'), parameters('enablePurgeProtection'))]",
+    "kvBaseProperties": {
+        "enabledForDiskEncryption": "[parameters('enabledForDiskEncryption')]",
+        "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
+        "enableSoftDelete": "[parameters('enableSoftDelete')]",
+        "accessPolicies": "[parameters('keyVaultAccessPolicies')]",
+        "tenantId": "[subscription().tenantId]",
+        "sku": {
+          "name": "Standard",
+          "family": "A"
+        }
+    },
+    "purgeProtectionProperty": {
+      "enablePurgeProtection": true
+    },
+    "allProperties": "[if(variables('shouldIncludePurgeProperty'), union(variables('kvBaseProperties'), variables('purgeProtectionProperty')), variables('kvBaseProperties'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "name": "[parameters('keyVaultName')]",
+      "apiVersion": "2018-02-14",
+      "location": "[resourceGroup().location]",
+      "properties": "[variables('allProperties')]",
+      "tags": {
+          "Environment": "[parameters('environmentTag')]",
+          "Parent Business": "[parameters('parentBusinessTag')]",
+          "Portfolio": "[parameters('portfolioTag')]",
+          "Product": "[parameters('productTag')]",
+          "Service": "[parameters('serviceTag')]",
+          "Service Line": "[parameters('serviceLineTag')]",
+          "Service Offering": "[parameters('serviceOfferingTag')]"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/providers/diagnosticSettings",
+      "condition": "[greater(length(parameters('workspaceId')), 0)]",
+      "apiVersion": "2017-05-01-preview",
+      "name": "[concat(parameters('keyVaultName'),'/microsoft.insights/', parameters('settingName'))]",
+      "dependsOn": [
+        "[parameters('keyVaultName')]"
+      ],
+      "properties": {
+        "name": "[parameters('settingName')]",
+        "workspaceId": "[parameters('workspaceId')]",
+        "logs": [
+          {
+            "category": "AuditEvent",
+            "enabled": "[parameters('auditEventSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "category": "AllMetrics",
+            "enabled": "[parameters('allMetricsSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "KeyVaultUri": {
+      "type": "string",
+      "value": "[reference(parameters('keyVaultName')).vaultUri]"
+    },
+    "KeyVaultResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+    }
+  }
+}

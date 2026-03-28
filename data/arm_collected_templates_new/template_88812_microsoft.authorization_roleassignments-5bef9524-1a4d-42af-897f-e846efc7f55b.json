@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "5bef9524-1a4d-42af-897f-e846efc7f55b",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "principalId": "7f059546-1659-4933-a071-546d2473ed85",
+        "principalType": "User",
+        "roleDefinitionId": "/subscriptions/0095be37-07e5-48e7-b252-462ae52fefba/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+        "scope": "/subscriptions/0095be37-07e5-48e7-b252-462ae52fefba"
+      }
+    }
+  ],
+  "outputs": {}
+}

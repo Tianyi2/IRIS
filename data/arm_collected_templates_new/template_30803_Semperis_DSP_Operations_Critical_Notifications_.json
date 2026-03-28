@@ -1,0 +1,69 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/8f471e21-3bb2-466f-9bc2-0a0326a60788')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/8f471e21-3bb2-466f-9bc2-0a0326a60788')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Critical Notification -- Alert from Semperis Directory Services Protector",
+          "alertDescriptionFormat": "A critical notification was created in the DSP system."
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "name": "Semperis DSP Operations Critical Notifications",
+        "description": "'Alerts when there are critical notifications fired in the DSP system.'\n",
+        "query": "SecurityEvent\n| where EventSourceName == 'Semperis-DSP-Notifications' and EventID == 30001\n| extend p1Xml = parse_xml(EventData).EventData.Data\n| mv-expand bagexpansion=array p1Xml\n| evaluate bag_unpack(p1Xml)\n| extend Name=column_ifexists('@Name', ''), Value=column_ifexists('#text', '')\n| evaluate pivot(Name, any(Value), TimeGenerated, EventSourceName, Channel, Computer, Level, EventLevelName, EventID, Task, Type, _ResourceId)\n| parse column_ifexists('objectDN', '') with * \"CN=\" cnName \",\" *\n| where \"Critical\" == column_ifexists('severity', \"\")\n| extend changedBy = column_ifexists('changedBy', \"\")\n| extend NTDomain = tostring(split(changedBy, '\\\\', 0)[0]), LoginUser = tostring(split(changedBy, '\\\\', 1)[0])\n| extend HostName = tostring(split(Computer, '.', 0)[0]), DnsDomain = tostring(strcat_array(array_slice(split(Computer, '.'), 1, -1), '.'))\n",
+        "status": "Available",
+        "queryFrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "LoginUser",
+                "identifier": "Name"
+              },
+              {
+                "columnName": "NTDomain",
+                "identifier": "NTDomain"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "HostName",
+                "identifier": "HostName"
+              },
+              {
+                "columnName": "DnsDomain",
+                "identifier": "DnsDomain"
+              }
+            ],
+            "entityType": "Host"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "InitialAccess",
+          "CredentialAccess",
+          "ResourceDevelopment"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "30m"
+      }
+    }
+  ]
+}

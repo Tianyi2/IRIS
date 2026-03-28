@@ -1,0 +1,73 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/64badfab-1dd8-4491-927b-3ca206fa9a17')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/64badfab-1dd8-4491-927b-3ca206fa9a17')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "name": "Threats detected by ESET",
+        "description": "'Escalates threats detected by ESET.'\n",
+        "query": "ESETPROTECT\n| where EventType == \"Threat_Event\"\n| extend DvcHostname, SrcUserName, DvcIpAddr, FileHashSha1, FileHashAlgo = \"SHA1\"\n",
+        "queryFrequency": "5m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SrcUserName",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DvcHostname",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DvcIpAddr",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "FileHashAlgo",
+                "identifier": "Algorithm"
+              },
+              {
+                "columnName": "FileHashSha1",
+                "identifier": "Value"
+              }
+            ],
+            "entityType": "FileHash"
+          }
+        ],
+        "severity": "Low",
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "tactics": [
+          "Execution"
+        ],
+        "queryPeriod": "5m"
+      }
+    }
+  ]
+}

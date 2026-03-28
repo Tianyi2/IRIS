@@ -1,0 +1,940 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "Central US",
+      "metadata": {
+        "description": "Deployment location of where Apigee will be installed"
+      }
+    },
+    "tshirtSize": {
+      "type": "string",
+      "defaultValue": "XSmall",
+      "allowedValues": [
+        "XSmall",
+        "Medium",
+        "Large"
+      ],
+      "metadata": {
+        "description": "T-shirt size of the Apigee deployment"
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D2s_v3",
+      "allowedValues": [
+        "Standard_D2",
+        "Standard_D4",
+        "Standard_D8",
+        "Standard_D2_v3",
+        "Standard_D4_v3",
+        "Standard_DS2",
+        "Standard_DS3",
+        "Standard_DS4",
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_D2s_v3",
+        "Standard_D4s_v3",
+        "Standard_D8s_v3",
+        "Standard_A3",
+        "Standard_A4",
+        "Standard_A5"
+      ],
+      "metadata": {
+        "description": "VM Size of the Apigee deployment"
+      }
+    },
+    "ftpUserName": {
+      "type": "string",
+      "defaultValue": "apigeese"
+    },
+    "ftpPassword": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
+    "apigeeVersion": {
+      "type": "string",
+      "defaultValue": "4.19.06"
+    },
+    "apigeeDeploymentName": {
+      "type": "string",
+      "defaultValue": "apigeetrial"
+    },
+    "adminUserName": {
+      "type": "string",
+      "defaultValue": "apigeetrial"
+    },
+    "authenticationType": {
+      "type": "string",
+      "defaultValue": "sshPublicKey",
+      "allowedValues": [
+        "password",
+        "sshPublicKey"
+      ],
+      "metadata": {
+        "descritpion": "Type of authentication "
+      }
+    },
+    "password": {
+      "type": "securestring",
+      "defaultValue": "iLoveapi$",
+      "metadata": {
+        "descritpion": "Password for non SSH login (supported only for XSmall)"
+      }
+    },
+    "sshKey": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The public key for the username given. You can use SSH Agent to generate a key pair. https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/"
+      }
+    },
+    "apigeeAdminEmail": {
+      "type": "string",
+      "defaultValue": "opdk@apigee.com",
+      "metadata": {
+        "description": "email address used as super admin of Apigee deployment"
+      }
+    },
+    "apigeeAdminPassword": {
+      "type": "securestring",
+      "defaultValue": "Secret123"
+    },
+    "sshPrivateKey": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The private key for the username given. This is used to login to other instances if a multi node deployment (Medium, Large t-shirt sizes) is selected."
+      }
+    },
+    "licenseFileText": {
+      "type": "string",
+      "metadata": {
+        "description": "License file that is given to your organization by Apigee. Paste the content of the file here"
+      }
+    },
+    "org": {
+      "type": "string",
+      "defaultValue": "apigeetrial",
+      "metadata": {
+        "description": "Org Name"
+      }
+    },
+    "smtp-host": {
+      "type": "string",
+      "defaultValue": "smtp.gmail.com",
+      "metadata": {
+        "description": "SMTP host"
+      }
+    },
+    "smtp-port": {
+      "type": "string",
+      "defaultValue": "465",
+      "metadata": {
+        "description": "SMTP port"
+      }
+    },
+    "smtp-ssl": {
+      "type": "string",
+      "defaultValue": "y",
+      "metadata": {
+        "description": "SMTP SSL Enabled (y/n)"
+      }
+    },
+    "smtp-username": {
+      "type": "string",
+      "defaultValue": "apiadmin@apigee.com",
+      "metadata": {
+        "description": "SMTP username"
+      }
+    },
+    "smtp-password": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "SMTP Password"
+      }
+    },
+    "smtp-mailfrom": {
+      "type": "string",
+      "defaultValue": "noreply@apigee.com",
+      "metadata": {
+        "description": "SMTP Mail From"
+      }
+    },
+    "installDevportal": {
+      "type": "string",
+      "defaultValue": "n",
+      "allowedValues": [
+        "y",
+        "n"
+      ],
+      "metadata": {
+        "description": "Install Dev portal?"
+      }
+    },
+    "installUE": {
+      "type": "string",
+      "defaultValue": "y",
+      "allowedValues": [
+        "y",
+        "n"
+      ],
+      "metadata": {
+        "description": "Install UE?"
+      }
+    }
+  },
+  "variables": {
+    "templateBaseUrl": "https://raw.githubusercontent.com/apigee/microsoft/master/apigee-edge-arm-template/templates/",
+    "tshirtSizeXSmall": {
+      "sharedTemplateUrl": "[concat(variables('templateBaseUrl'), 'shared-resources.json')]",
+      "datastoreInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'empty-resources.json')]",
+      "qpidInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'empty-resources.json')]",
+      "analyticsInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'empty-resources.json')]",
+      "rmpInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'empty-resources.json')]",
+      "managementInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'management-instances-', parameters('authenticationType') ,'.json')]",
+      "managementInstanceSize": "[parameters('vmSize')]",
+      "devportalInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'devportal-instances-', parameters('authenticationType'),'.json')]",
+      "devportalInstanceSize": "[parameters('vmSize')]",
+      "ueInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'ue-instances-', parameters('authenticationType'),'.json')]",
+      "ueInstanceSize": "[parameters('vmSize')]"
+
+    },
+    "tshirtSizeMedium": {
+      "sharedTemplateUrl": "[concat(variables('templateBaseUrl'), 'shared-resources.json')]",
+      "datastoreInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'empty-resources.json')]",
+      "qpidInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'empty-resources.json')]",
+      "analyticsInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'analytics-instances.json')]",
+      "rmpInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'rmp-instances.json')]",
+      "managementInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'management-instances-sshPublicKey.json')]",
+      "managementInstanceSize": "[parameters('vmSize')]",
+      "devportalInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'devportal-instances-sshPublicKey.json')]",
+      "devportalInstanceSize": "[parameters('vmSize')]",
+      "ueInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'ue-instances-sshPublicKey.json')]",
+      "ueInstanceSize": "[parameters('vmSize')]"
+    },
+    "tshirtSizeLarge": {
+      "sharedTemplateUrl": "[concat(variables('templateBaseUrl'), 'shared-resources.json')]",
+      "datastoreInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'internal-instances.json')]",
+      "qpidInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'internal-instances.json')]",
+      "analyticsInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'analytics-instances.json')]",
+      "rmpInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'rmp-instances.json')]",
+      "managementInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'management-instances-sshPublicKey.json')]",
+      "managementInstanceSize": "[parameters('vmSize')]",
+      "devportalInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'devportal-instances-sshPublicKey.json')]",
+      "devportalInstanceSize": "[parameters('vmSize')]",
+      "ueInstancesTemplateUrl": "[concat(variables('templateBaseUrl'), 'ue-instances-sshPublicKey.json')]",
+      "ueInstanceSize": "[parameters('vmSize')]"
+    },
+    "tshirtSize": "[variables(concat('tshirtSize', parameters('tshirtSize')))]",
+    "nicName": "[concat('ApigeeVMNic-',parameters('apigeeDeploymentName'))]",
+    "addressPrefix": "10.0.0.0/16",
+    "subnet1Name": "Subnet-1",
+    "subnet1Prefix": "10.0.0.0/24",
+    "publicIPAddressName": "[concat('ApigeeManagementPublicIP-',parameters('apigeeDeploymentName'))]",
+    "publicIPDNSName": "[concat(parameters('apigeeDeploymentName'), '-management')]",
+    "runtimePublicIPAddressName": "[concat('ApigeeRuntimePublicIP-',parameters('apigeeDeploymentName'))]",
+    "publicIPAddressType": "Dynamic",
+    "vmStorageAccountContainerName": "vhds",
+    "vmName": "[parameters('apigeeDeploymentName')]",
+    "virtualNetworkName": "[concat('ApigeeVNET-',parameters('apigeeDeploymentName'))]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+    "storageAccountType": "Standard_LRS",
+    "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]",
+    "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
+    "runtimePublicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('runtimePublicIPAddressName'))]",
+    "storageAccountName": "[concat(uniqueString(resourceGroup().id, deployment().name), 'apigee')]",
+    "image": "Not Applicable",
+    "sku": "7.5",
+    "product": "CentOS",
+    "publisher": "OpenLogic",
+    "version": "latest",
+    "providerGuid": "[toUpper('b6dd345e-8ee1-4d3d-b276-a84bdfb88fe6')]"
+  },
+  "resources": [
+
+    {
+      "name": "shared",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('tshirtSize').sharedTemplateUrl]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "vmDnsName": {
+            "value": "[parameters('apigeeDeploymentName')]"
+          },
+          "vmtypeprefix": {
+            "value": "shared"
+          },
+          "adminUserName": {
+            "value": "[parameters('adminUserName')]"
+          },
+          "machineSettings": {
+            "value": {
+              "vmSize": "[variables('tshirtSize').managementInstanceSize]",
+              "diskSize": "250",
+              "vmCount": 1
+            }
+          },
+          "sshKey": {
+            "value": "[parameters('sshKey')]"
+          },
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          },
+          "providerGuid": {
+            "value": "[variables('providerGuid')]"
+          }
+        }
+      }
+    }, {
+      "name": "datastoreInstances",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', 'shared')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('tshirtSize').datastoreInstancesTemplateUrl]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "vmDnsName": {
+            "value": "[parameters('apigeeDeploymentName')]"
+          },
+          "vmtypeprefix": {
+            "value": "datastore"
+          },
+          "adminUserName": {
+            "value": "[parameters('adminUserName')]"
+          },
+          "machineSettings": {
+            "value": {
+              "vmSize": "[variables('tshirtSize').managementInstanceSize]",
+              "diskSize": "250",
+              "vmCount": 2
+            }
+          },
+          "sshKey": {
+            "value": "[parameters('sshKey')]"
+          },
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          },
+          "image": {
+            "value": "[variables('image')]"
+          },
+          "sku": {
+            "value": "[variables('sku')]"
+          },
+          "product": {
+            "value": "[variables('product')]"
+          },
+          "publisher": {
+            "value": "[variables('publisher')]"
+          },
+          "version": {
+            "value": "[variables('version')]"
+          },
+          "providerGuid": {
+            "value": "[variables('providerGuid')]"
+          },
+          "storageAccountBaseUrl": {
+            "value": "[reference('shared').outputs.storageBlobBaseUrl.value]"
+          }
+        }
+      }
+    }, {
+      "name": "qpidInstances",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', 'shared')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('tshirtSize').qpidInstancesTemplateUrl]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "vmDnsName": {
+            "value": "[parameters('apigeeDeploymentName')]"
+          },
+          "vmtypeprefix": {
+            "value": "qpid"
+          },
+          "adminUserName": {
+            "value": "[parameters('adminUserName')]"
+          },
+          "machineSettings": {
+            "value": {
+              "vmSize": "[variables('tshirtSize').managementInstanceSize]",
+              "diskSize": "250",
+              "vmCount": 2
+            }
+          },
+          "sshKey": {
+            "value": "[parameters('sshKey')]"
+          },
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          },
+          "image": {
+            "value": "[variables('image')]"
+          },
+          "sku": {
+            "value": "[variables('sku')]"
+          },
+          "product": {
+            "value": "[variables('product')]"
+          },
+          "publisher": {
+            "value": "[variables('publisher')]"
+          },
+          "version": {
+            "value": "[variables('version')]"
+          },
+          "providerGuid": {
+            "value": "[variables('providerGuid')]"
+          },
+          "storageAccountBaseUrl": {
+            "value": "[reference('shared').outputs.storageBlobBaseUrl.value]"
+          }
+        }
+      }
+    }, {
+      "name": "analyticsInstances",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', 'shared')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('tshirtSize').analyticsInstancesTemplateUrl]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "vmDnsName": {
+            "value": "[parameters('apigeeDeploymentName')]"
+          },
+          "vmtypeprefix": {
+            "value": "analytics"
+          },
+          "adminUserName": {
+            "value": "[parameters('adminUserName')]"
+          },
+          "machineSettings": {
+            "value": {
+              "vmSize": "[variables('tshirtSize').managementInstanceSize]",
+              "diskSize": "500",
+              "vmCount": 2
+            }
+          },
+          "sshKey": {
+            "value": "[parameters('sshKey')]"
+          },
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          },
+          "image": {
+            "value": "[variables('image')]"
+          },
+          "sku": {
+            "value": "[variables('sku')]"
+          },
+          "product": {
+            "value": "[variables('product')]"
+          },
+          "publisher": {
+            "value": "[variables('publisher')]"
+          },
+          "version": {
+            "value": "[variables('version')]"
+          },
+          "providerGuid": {
+            "value": "[variables('providerGuid')]"
+          },
+          "storageAccountBaseUrl": {
+            "value": "[reference('shared').outputs.storageBlobBaseUrl.value]"
+          }
+        }
+      }
+    }, {
+      "name": "rmpInstances",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', 'shared')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('tshirtSize').rmpInstancesTemplateUrl]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "vmDnsName": {
+            "value": "[parameters('apigeeDeploymentName')]"
+          },
+          "vmtypeprefix": {
+            "value": "rmp"
+          },
+          "adminUserName": {
+            "value": "[parameters('adminUserName')]"
+          },
+          "machineSettings": {
+            "value": {
+              "vmSize": "[variables('tshirtSize').managementInstanceSize]",
+              "diskSize": "250",
+              "vmCount": 2
+            }
+          },
+          "sshKey": {
+            "value": "[parameters('sshKey')]"
+          },
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          },
+          "image": {
+            "value": "[variables('image')]"
+          },
+          "sku": {
+            "value": "[variables('sku')]"
+          },
+          "product": {
+            "value": "[variables('product')]"
+          },
+          "publisher": {
+            "value": "[variables('publisher')]"
+          },
+          "version": {
+            "value": "[variables('version')]"
+          },
+          "providerGuid": {
+            "value": "[variables('providerGuid')]"
+          },
+          "storageAccountBaseUrl": {
+            "value": "[reference('shared').outputs.storageBlobBaseUrl.value]"
+          }
+        }
+      }
+    },
+    {
+      "name": "managementInstances",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', 'shared')]",
+        "[concat('Microsoft.Resources/deployments/', 'datastoreInstances')]",
+        "[concat('Microsoft.Resources/deployments/', 'qpidInstances')]",
+        "[concat('Microsoft.Resources/deployments/', 'analyticsInstances')]",
+        "[concat('Microsoft.Resources/deployments/', 'rmpInstances')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('tshirtSize').managementInstancesTemplateUrl]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "vmDnsName": {
+            "value": "[parameters('apigeeDeploymentName')]"
+          },
+          "vmtypeprefix": {
+            "value": "management"
+          },
+          "adminUserName": {
+            "value": "[parameters('adminUserName')]"
+          },
+          "machineSettings": {
+            "value": {
+              "vmSize": "[variables('tshirtSize').managementInstanceSize]",
+              "diskSize": "250",
+              "vmCount": 1
+            }
+          },
+          "password": {
+            "value": "[parameters('password')]"
+          },
+          "sshKey": {
+            "value": "[parameters('sshKey')]"
+          },
+          "tshirtSize": {
+            "value": "[parameters('tshirtSize')]"
+          },
+          "ftpUserName": {
+            "value": "[parameters('ftpUserName')]"
+          },
+          "ftpPassword": {
+            "value": "[parameters('ftpPassword')]"
+          },
+          "apigeeVersion": {
+            "value": "[parameters('apigeeVersion')]"
+          },
+          "apigeeAdminEmail": {
+            "value": "[parameters('apigeeAdminEmail')]"
+          },
+          "apigeeAdminPassword": {
+            "value": "[parameters('apigeeAdminPassword')]"
+          },
+          "org": {
+            "value": "[parameters('org')]"
+          },
+          "smtp-host": {
+            "value": "[parameters('smtp-host')]"
+          },
+          "smtp-port": {
+            "value": "[parameters('smtp-port')]"
+          },
+          "smtp-ssl": {
+            "value": "[parameters('smtp-ssl')]"
+          },
+          "smtp-username": {
+            "value": "[parameters('smtp-username')]"
+          },
+          "smtp-password": {
+            "value": "[parameters('smtp-password')]"
+          },
+          "smtp-mailfrom": {
+            "value": "[parameters('smtp-mailfrom')]"
+          },
+          "sshPrivateKey": {
+            "value": "[parameters('sshPrivateKey')]"
+          },
+          "licenseFileText": {
+            "value": "[parameters('licenseFileText')]"
+          },
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          },
+          "image": {
+            "value": "[variables('image')]"
+          },
+          "templateBaseUrl": {
+            "value": "[variables('templateBaseUrl')]"
+          },
+          "sku": {
+            "value": "[variables('sku')]"
+          },
+          "product": {
+            "value": "[variables('product')]"
+          },
+          "publisher": {
+            "value": "[variables('publisher')]"
+          },
+          "version": {
+            "value": "[variables('version')]"
+          },
+          "hostNames": {
+            "value": {
+              "datastore_ip1": "[reference('datastoreInstances').outputs.ip1.value]",
+              "datastore_ip2": "[reference('datastoreInstances').outputs.ip2.value]",
+              "qpid_ip1": "[reference('qpidInstances').outputs.ip1.value]",
+              "qpid_ip2": "[reference('qpidInstances').outputs.ip2.value]",
+              "analytics_ip1": "[reference('analyticsInstances').outputs.ip1.value]",
+              "analytics_ip2": "[reference('analyticsInstances').outputs.ip2.value]",
+              "rmp_ip1": "[reference('rmpInstances').outputs.ip1.value]",
+              "rmp_ip2": "[reference('rmpInstances').outputs.ip2.value]",
+              "management_public_ip": "[reference('shared').outputs.managementDNSName.value]",
+              "runtime_public_ip": "[reference('rmpInstances').outputs.runtimePublicDNSName.value]"
+            }
+          },
+          "providerGuid": {
+            "value": "[variables('providerGuid')]"
+          },
+          "storageAccountBaseUrl": {
+            "value": "[reference('shared').outputs.storageBlobBaseUrl.value]"
+          }
+        }
+      }
+    },
+    {
+      "name": "devportalInstances",
+      "condition": "[equals(parameters('installDevportal'),'y')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', 'shared')]",
+        "[concat('Microsoft.Resources/deployments/', 'datastoreInstances')]",
+        "[concat('Microsoft.Resources/deployments/', 'qpidInstances')]",
+        "[concat('Microsoft.Resources/deployments/', 'analyticsInstances')]",
+        "[concat('Microsoft.Resources/deployments/', 'rmpInstances')]",
+        "[concat('Microsoft.Resources/deployments/', 'managementInstances')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('tshirtSize').devportalInstancesTemplateUrl]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "vmDnsName": {
+            "value": "[parameters('apigeeDeploymentName')]"
+          },
+          "vmtypeprefix": {
+            "value": "devportal"
+          },
+          "ftpUserName": {
+            "value": "[parameters('ftpUserName')]"
+          },
+          "ftpPassword": {
+            "value": "[parameters('ftpPassword')]"
+          },
+          "apigeeVersion": {
+            "value": "[parameters('apigeeVersion')]"
+          },
+          "adminUserName": {
+            "value": "[parameters('adminUserName')]"
+          },
+          "machineSettings": {
+            "value": {
+              "vmSize": "[variables('tshirtSize').devportalInstanceSize]",
+              "diskSize": "250",
+              "vmCount": 1
+            }
+          },
+          "password": {
+            "value": "[parameters('password')]"
+          },
+          "sshKey": {
+            "value": "[parameters('sshKey')]"
+          },
+          "apigeeAdminEmail": {
+            "value": "[parameters('apigeeAdminEmail')]"
+          },
+          "apigeeAdminPassword": {
+            "value": "[parameters('apigeeAdminPassword')]"
+          },
+          "msip": {
+            "value": "[reference('managementInstances').outputs.ip1.value]"
+          },
+          "org": {
+            "value": "[parameters('org')]"
+          },
+          "smtp-host": {
+            "value": "[parameters('smtp-host')]"
+          },
+          "smtp-port": {
+            "value": "[parameters('smtp-port')]"
+          },
+          "smtp-ssl": {
+            "value": "[parameters('smtp-ssl')]"
+          },
+          "smtp-username": {
+            "value": "[parameters('smtp-username')]"
+          },
+          "smtp-password": {
+            "value": "[parameters('smtp-password')]"
+          },
+          "smtp-mailfrom": {
+            "value": "[parameters('smtp-mailfrom')]"
+          },
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          },
+          "image": {
+            "value": "[variables('image')]"
+          },
+          "templateBaseUrl": {
+            "value": "[variables('templateBaseUrl')]"
+          },
+          "sku": {
+            "value": "[variables('sku')]"
+          },
+          "product": {
+            "value": "[variables('product')]"
+          },
+          "publisher": {
+            "value": "[variables('publisher')]"
+          },
+          "version": {
+            "value": "[variables('version')]"
+          },
+          "providerGuid": {
+            "value": "[variables('providerGuid')]"
+          },
+          "storageAccountBaseUrl": {
+            "value": "[reference('shared').outputs.storageBlobBaseUrl.value]"
+          }
+        }
+      }
+    },
+    {
+      "name": "ueInstances",
+      "condition": "[equals(parameters('installUE'),'y')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', 'shared')]",
+        "[concat('Microsoft.Resources/deployments/', 'datastoreInstances')]",
+        "[concat('Microsoft.Resources/deployments/', 'qpidInstances')]",
+        "[concat('Microsoft.Resources/deployments/', 'analyticsInstances')]",
+        "[concat('Microsoft.Resources/deployments/', 'rmpInstances')]",
+        "[concat('Microsoft.Resources/deployments/', 'managementInstances')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('tshirtSize').ueInstancesTemplateUrl]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "vmDnsName": {
+            "value": "[parameters('apigeeDeploymentName')]"
+          },
+          "vmtypeprefix": {
+            "value": "ue"
+          },
+          "ftpUserName": {
+            "value": "[parameters('ftpUserName')]"
+          },
+          "ftpPassword": {
+            "value": "[parameters('ftpPassword')]"
+          },
+          "apigeeVersion": {
+            "value": "[parameters('apigeeVersion')]"
+          },
+          "adminUserName": {
+            "value": "[parameters('adminUserName')]"
+          },
+          "machineSettings": {
+            "value": {
+              "vmSize": "[variables('tshirtSize').ueInstanceSize]",
+              "diskSize": "250",
+              "vmCount": 1
+            }
+          },
+          "password": {
+            "value": "[parameters('password')]"
+          },
+          "sshKey": {
+            "value": "[parameters('sshKey')]"
+          },
+          "sshPrivateKey": {
+            "value": "[parameters('sshPrivateKey')]"
+          },
+          "tshirtSize": {
+            "value": "[parameters('tshirtSize')]"
+          },
+          "apigeeAdminEmail": {
+            "value": "[parameters('apigeeAdminEmail')]"
+          },
+          "apigeeAdminPassword": {
+            "value": "[parameters('apigeeAdminPassword')]"
+          },
+          "msip": {
+            "value": "[reference('managementInstances').outputs.ip1.value]"
+          },
+          "org": {
+            "value": "[parameters('org')]"
+          },
+          "smtp-host": {
+            "value": "[parameters('smtp-host')]"
+          },
+          "smtp-port": {
+            "value": "[parameters('smtp-port')]"
+          },
+          "smtp-ssl": {
+            "value": "[parameters('smtp-ssl')]"
+          },
+          "smtp-username": {
+            "value": "[parameters('smtp-username')]"
+          },
+          "smtp-password": {
+            "value": "[parameters('smtp-password')]"
+          },
+          "smtp-mailfrom": {
+            "value": "[parameters('smtp-mailfrom')]"
+          },
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          },
+          "image": {
+            "value": "[variables('image')]"
+          },
+          "templateBaseUrl": {
+            "value": "[variables('templateBaseUrl')]"
+          },
+          "sku": {
+            "value": "[variables('sku')]"
+          },
+          "product": {
+            "value": "[variables('product')]"
+          },
+          "publisher": {
+            "value": "[variables('publisher')]"
+          },
+          "version": {
+            "value": "[variables('version')]"
+          },
+          "providerGuid": {
+            "value": "[variables('providerGuid')]"
+          },
+          "storageAccountBaseUrl": {
+            "value": "[reference('shared').outputs.storageBlobBaseUrl.value]"
+          },
+          "mspublicip": {
+            "value": "[reference('shared').outputs.managementDNSName.value]"
+          },
+          "pgip": {
+            "value": "[reference('analyticsInstances').outputs.ip1.value]"
+          },
+          "uepublicip": {
+            "value": "[reference('shared').outputs.ueDNSName.value]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "managementPublicDNSName": {
+      "value": "[reference('shared').outputs.managementDNSName.value]",
+      "type": "string"
+    },
+    "runtimePublicDNSName": {
+      "value": "[reference('rmpInstances').outputs.runtimePublicDNSName.value]",
+      "type": "string"
+    },
+    "managementUI": {
+      "value": "[concat('http://', reference('shared').outputs.managementDNSName.value, ':9000')]",
+      "type": "string"
+    }
+  }
+}

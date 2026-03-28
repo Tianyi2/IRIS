@@ -1,0 +1,109 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        },
+        "owner": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": ""
+            }
+        },
+        "projectName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": ""
+            }
+        },
+        "projectCode": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": ""
+            }
+        },
+        "creationDate": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "devTestLabsName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "A DevTest Labs name"
+            }
+        },
+        "addressPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.0.0/16",
+            "metadata": {
+                "description": "A primary address scope in this Virtual Networks"
+            }
+        }
+
+    },
+    "variables": {
+        "vnetName": "[concat('vnet-', parameters('name'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('vnetName')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "ProjectOwner": "[parameters('owner')]",
+                "ProjectName": "[parameters('projectName')]",
+                "ProjectCode": "[parameters('projectCode')]",
+                "CreationDate": "[parameters('creationDate')]"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('addressPrefix')]"
+                    ]
+                },
+                "dhcpOptions": {
+                    "dnsServers": [
+                    ]
+                },
+                "virtualNetworkPeerings": [
+                ],
+                "enableDdosProtection": false,
+                "enableVmProtection": false
+            }
+        },
+        {
+            "type": "Microsoft.DevTestLab/labs/virtualnetworks",
+            "apiVersion": "2018-09-15",
+            "name": "[concat(parameters('devTestLabsName'), '/', variables('vnetName'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualnetworks', variables('vnetName'))]"
+            ],
+            "properties": {
+                "allowedSubnets": [
+                ],
+                "externalProviderResourceId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+                "subnetOverrides": [
+                ]
+            }
+        }
+
+    ],
+    "outputs": {
+        "VnetName": {
+            "value": "[variables('vnetName')]",
+            "type": "string"
+        }
+    }
+}

@@ -1,0 +1,36 @@
+Resources:
+  {% for bucket in buckets %}
+  S3TestBucket{{ bucket }}:
+    Type: AWS::S3::Bucket
+  {% endfor %}
+
+  TestRole1:
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "cloudformation.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: /test/1/
+      Policies:
+      - PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            -
+              Effect: "Allow"
+              Action: "*"
+              Resource: "*"
+        PolicyName: {{ PolicyName }}
+    Type: AWS::IAM::Role
+
+  Bucket1:
+    From: Modules
+    Properties:
+      BucketName: formica-test-bucket-name-something-here
+  Bucket2:
+    From: Modules::Submodule::Submodule

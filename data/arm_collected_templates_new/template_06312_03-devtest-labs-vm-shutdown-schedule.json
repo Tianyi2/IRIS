@@ -1,0 +1,75 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        },
+        "owner": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "A project owner's email address"
+            }
+        },
+        "devTestLabsName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "A DevTest Labs name"
+            }
+        },
+        "time": {
+            "type": "string",
+            "defaultValue": "1900",
+            "metadata": {
+                "description": "A time to shutdown VMs with 'HHmm'"
+            }
+        },
+        "timeZoneId": {
+            "type": "string",
+            "defaultValue": "Tokyo Standard Time",
+            "metadata": {
+                "description": "A timezone ID"
+            }
+        }
+
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "type": "Microsoft.DevTestLab/labs/notificationChannels",
+            "apiVersion": "2018-09-15",
+            "name": "[concat(parameters('devTestLabsName'), '/AutoShutdown')]",
+            "properties": {
+                "emailRecipient": "[parameters('owner')]",
+                "notificationLocale": "ja",
+                "events": [
+                    {
+                        "eventName": "AutoShutdown"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.DevTestLab/labs/schedules",
+            "apiVersion": "2018-09-15",
+            "name": "[concat(parameters('devTestLabsName'), '/labvmsshutdown')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "status": "Enabled",
+                "taskType": "LabVmsShutdownTask",
+                "dailyRecurrence": {
+                    "time": "[parameters('time')]"
+                },
+                "timeZoneId": "[parameters('timeZoneId')]",
+                "notificationSettings": {
+                    "status": "Enabled",
+                    "timeInMinutes": 30
+                }
+            }
+        }
+    ]
+}

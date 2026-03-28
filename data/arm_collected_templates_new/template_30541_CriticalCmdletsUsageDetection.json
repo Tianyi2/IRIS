@@ -1,0 +1,85 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/5170c3c4-b8c9-485c-910d-a21d965ee181')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/5170c3c4-b8c9-485c-910d-a21d965ee181')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "{{CmdletName}} executed on {{TargetObject}}",
+          "alertDescriptionFormat": "Alert from Microsoft Exchange Security as {{CmdletName}} with parameters {{CmdletParameters}} was executed on {{TargetObject}}",
+          "alertSeverityColumnName": "Level"
+        },
+        "name": "VIP Mailbox manipulation",
+        "description": "'Alert if a cmdlet that can be translated to data exfiltration or mailbox access is executed on a VIP Mailbox.'\n",
+        "query": "let VIPRestriction = \"on\";\nExchangeAdminAuditLogs\n| where IsVIP or VIPRestriction =~ \"off\"\n| where UserOriented =~ 'Yes' and IsSensitive and ((IsRestrictedCmdLet and IsSenstiveCmdletParameters) or IsRestrictedCmdLet == false)\n| extend Level = iif (Status == \"Failure\", \"Medium\", \"High\")\n",
+        "status": "Available",
+        "queryFrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "TargetObject",
+                "identifier": "MailboxPrimaryAddress"
+              }
+            ],
+            "entityType": "Mailbox"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Computer",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "TargetObject",
+                "identifier": "Sid"
+              },
+              {
+                "columnName": "TargetObject",
+                "identifier": "ObjectGuid"
+              },
+              {
+                "columnName": "TargetObject",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Caller",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "severity": "Medium",
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "tactics": [
+          "Exfiltration",
+          "Persistence",
+          "Collection"
+        ],
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

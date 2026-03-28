@@ -1,0 +1,85 @@
+##
+# (c) 2021-2025
+#     Cloud Ops Works LLC - https://cloudops.works/
+#     Find us on:
+#       GitHub: https://github.com/cloudopsworks
+#       WebSite: https://cloudops.works
+#     Distributed Under Apache v2.0 License
+#
+
+locals {
+  create_sg = try(var.security_groups.create, false)
+  security_group_ids = concat(
+    aws_security_group.this[*].id,
+  data.aws_security_group.this[*].id)
+  allow_security_groups_names = {
+    for sg in try(var.security_groups.allow_security_groups, []) : sg => sg
+    if local.create_sg
+  }
+  allow_security_groups_pre = {
+    for k, v in local.allow_security_groups_names : k => data.aws_security_group.allow_sg[k].id
+  }
+  allow_security_groups = merge(local.allow_security_groups_pre,
+    {
+      for grp in try(var.security_groups.group_ids, []) : grp => grp
+    }
+  )
+}
+
+resource "aws_security_group" "this" {
+  count       = local.create_sg ? 1 : 0
+  name        = try(var.security_groups.name, "${local.cluster_identifier}-sg")
+  description = "Security group for RDS instance - ${local.cluster_identifier}"
+  vpc_id      = var.vpc.vpc_id
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = merge(
+    local.all_tags, tomap({
+      Name = try(var.security_groups.name, "${local.cluster_identifier}-sg")
+    })
+  )
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes = [
+      description
+    ]
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "this_cidr" {
+  for_each = {
+    for cidr in try(var.security_groups.allow_cidrs, []) : cidr => cidr
+    if local.create_sg
+  }
+  from_port         = local.rds_port
+  to_port           = local.rds_port
+  ip_protocol       = "TCP"
+  security_group_id = aws_security_group.this[0].id
+  cidr_ipv4         = each.value
+  tags              = local.all_tags
+}
+
+
+data "aws_security_group" "allow_sg" {
+  for_each = local.allow_security_groups_names
+  name     = each.value
+}
+
+resource "aws_vpc_security_group_ingress_rule" "this_sg" {
+  for_each                     = local.allow_security_groups
+  from_port                    = local.rds_port
+  to_port                      = local.rds_port
+  ip_protocol                  = "TCP"
+  security_group_id            = aws_security_group.this[0].id
+  referenced_security_group_id = each.value
+  tags                         = local.all_tags
+}
+
+data "aws_security_group" "this" {
+  count = !local.create_sg ? 1 : 0
+  name  = var.security_groups.name
+}

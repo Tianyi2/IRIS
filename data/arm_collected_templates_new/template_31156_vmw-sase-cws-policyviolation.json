@@ -1,0 +1,83 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/b84a1f62-ad30-4ae1-8b21-3d304d8aa818')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/b84a1f62-ad30-4ae1-8b21-3d304d8aa818')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "lookbackDuration": "5h",
+            "groupByCustomDetails": [],
+            "matchingMethod": "AllEntities",
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "groupByEntities": [],
+            "groupByAlertDetails": []
+          },
+          "createIncident": true
+        },
+        "severity": "Medium",
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "VMware Cloud Web Security - Web Access Policy Violation",
+        "description": "VMware Cloud Web Security reported access events which were violating web access policy rules. Additional investigation might be required.",
+        "suppressionDuration": "5h",
+        "query": "VMware_CWS_Weblogs_CL\n| where action == \"block\"\n",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "sourceIp",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "virusList",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Malware"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "url",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "userId",
+                "identifier": "AadUserId"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "suppressionEnabled": false,
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

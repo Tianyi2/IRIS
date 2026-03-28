@@ -1,0 +1,69 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/7a0f79cc-8d28-44b5-ac1e-6176565bb7b8')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/7a0f79cc-8d28-44b5-ac1e-6176565bb7b8')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "alertDetailsOverride": null,
+          "alertDisplayNameFormat": "New Subdomain Detected {{SD_Subdomain}}",
+          "alertDescriptionFormat": "A new subdomain was discovered for monitored domain/keyword. Keyword {{SD_KeywordName}} Bucket {{SD_BucketName}} Severity {{MappedSeverity}} This may represent new attack surface exposure or infrastructure expansion.\n",
+          "groupingConfiguration": {
+            "enabled": false,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "PT5H",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "enabled": true,
+        "severity": "Low",
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Cyble Vision Alerts Discovered Subdomain",
+        "description": "'Triggers when a new subdomain is detected for a monitored keyword/domain.'\n",
+        "query": "Alerts_subdomains  \n| where Service == \"subdomains\" \n| extend MappedSeverity = Severity\n",
+        "status": "Available",
+        "queryfrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SD_Subdomain",
+                "identifier": "DomainName"
+              }
+            ],
+            "entityType": "DNS"
+          }
+        ],
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "Reconnaissance"
+        ],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "SD_EntityID": "EntityID",
+          "MappedSeverity": "Severity",
+          "SD_BucketName": "BucketName",
+          "AlertID": "AlertID",
+          "SD_KeywordName": "KeywordName",
+          "SD_Subdomain": "SD_Subdomain",
+          "Service": "Service",
+          "Status": "Status"
+        },
+        "queryPeriod": "30m"
+      }
+    }
+  ]
+}

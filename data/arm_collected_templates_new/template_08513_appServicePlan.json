@@ -1,0 +1,92 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appServicePlanName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of hosting plan"
+      }
+    },
+    "skuTier": {
+      "type": "string",
+      "allowedValues": [
+        "Free",
+        "Shared",
+        "Basic",
+        "Standard",
+        "Premium"
+      ],
+      "defaultValue": "Free",
+      "metadata": {
+        "description": "SKU tier"
+      }
+    },
+    "skuName": {
+      "type": "string",
+      "allowedValues": [
+        "F1",
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "defaultValue": "F1",
+      "metadata": {
+        "description": "SKU Name"
+      }
+    },
+    "webAppName": {
+      "type": "string",
+      "defaultValue": "somthingBogus",
+      "metadata": {
+        "description": "an example of overwritting the parameter from the parent and then passing it to the child."
+      }
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[parameters('appServicePlanName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "name": "[parameters('appServicePlanName')]"
+      },
+      "sku": {
+        "name": "[parameters('skuName')]",
+        "tier": "[parameters('skuTier')]",
+        "capacity": 1
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "name": "LinkedWebApp",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'webApp.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "siteName": {
+            "value": "[parameters('webAppName')]"
+          },
+          "serverFarmId": {
+            "value": "[parameters('appServicePlanName')]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+      ]
+    }
+  ]
+}

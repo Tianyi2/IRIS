@@ -1,0 +1,245 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "resourceName": {
+            "type": "String",
+            "metadata": {
+                "description": "The name of the Managed Cluster resource."
+            }
+        },
+        "location": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "String",
+            "metadata": {
+                "description": "The location of AKS resource."
+            }
+        },
+        "nodeSize": {
+            "type": "string",
+            "defaultValue": "Standard_DS2_v2",
+            "metadata": {
+                "description": "Cluster VM size"
+            }
+        },
+        "kubernetesVersion": {
+            "defaultValue": "1.17.11",
+            "type": "String",
+            "metadata": {
+                "description": "The version of Kubernetes."
+            }
+        },
+        "enableRBAC": {
+            "defaultValue": true,
+            "type": "Bool",
+            "metadata": {
+                "description": "Boolean flag to turn on and off of RBAC."
+            }
+        },
+        "vnetName": {
+            "defaultValue": "[concat(parameters('resourceName'), '-vnet')]",
+            "type": "string"
+        },
+        "vnetAddressPrefix": {
+            "defaultValue": "10.0.0.0/8",
+            "type": "string"
+        },
+        "vnetSubnetPrefix": {
+            "defaultValue": "10.240.0.0/16",
+            "type": "string"
+        },
+        "dnsPrefix": {
+            "defaultValue": "[concat(parameters('resourceName'), '-dns')]",
+            "type": "string"
+        },
+        "serviceCidr": {
+            "defaultValue": "10.0.0.0/16",
+            "type": "String",
+            "metadata": {
+                "description": "A CIDR notation IP range from which to assign service cluster IPs."
+            }
+        },
+        "dnsServiceIP": {
+            "defaultValue": "10.0.0.10",
+            "type": "String",
+            "metadata": {
+                "description": "Containers DNS server IP address."
+            }
+        },
+        "dockerBridgeCidr": {
+            "defaultValue": "172.17.0.1/16",
+            "type": "String",
+            "metadata": {
+                "description": "A CIDR notation IP for Docker bridge."
+            }
+        },
+        "subnetRoleAssignmentName": {
+            "defaultValue": "[concat(parameters('vnetName'), '/default/Microsoft.Authorization/', newGuid())]",
+            "type": "string",
+            "metadata": {
+                "description": "GUID for vnet role assignment"
+            }
+        }
+    },
+    "variables": {
+        "vnetSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), 'default')]",
+        "managedIdentityName": "init-container-identity"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('vnetName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "[parameters('vnetSubnetPrefix')]"
+                        }
+                    }
+                ],
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('vnetAddressPrefix')]"
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.ContainerService/managedClusters",
+            "apiVersion": "2020-03-01",
+            "name": "[parameters('resourceName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', parameters('vnetName'))]"
+            ],
+            "tags": {},
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "kubernetesVersion": "[parameters('kubernetesVersion')]",
+                "enableRBAC": "[parameters('enableRBAC')]",
+                "dnsPrefix": "[parameters('dnsPrefix')]",
+                "agentPoolProfiles": [
+                    {
+                        "name": "agentpool",
+                        "count": 1,
+                        "enableAutoScaling": true,
+                        "minCount": 1,
+                        "maxCount": 100,
+                        "vmSize": "[parameters('nodeSize')]",
+                        "osType": "Linux",
+                        "type": "VirtualMachineScaleSets",
+                        "mode": "System",
+                        "vnetSubnetID": "[variables('vnetSubnetId')]"
+                    },
+                    {
+                        "name": "winnp",
+                        "count": 0,
+                        "enableAutoScaling": true,
+                        "minCount": 0,
+                        "maxCount": 100,
+                        "vmSize": "[parameters('nodeSize')]",
+                        "osType": "Windows",
+                        "type": "VirtualMachineScaleSets",
+                        "mode": "User",
+                        "vnetSubnetID": "[variables('vnetSubnetId')]"
+                    }
+                ],
+                "networkProfile": {
+                    "loadBalancerSku": "standard",
+                    "networkPlugin": "azure",
+                    "serviceCidr": "[parameters('serviceCidr')]",
+                    "dnsServiceIP": "[parameters('dnsServiceIP')]",
+                    "dockerBridgeCidr": "[parameters('dockerBridgeCidr')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "ClusterSubnetRoleAssignmentDeployment",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', parameters('vnetName'))]"
+            ],
+            "resourceGroup": "[resourceGroup().name]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments",
+                            "apiVersion": "2020-04-01-preview",
+                            "name": "[parameters('subnetRoleAssignmentName')]",
+                            "properties": {
+                                "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '4d97b98b-1d4f-4787-a291-c67834d212e7')]",
+                                "principalId": "[reference(parameters('resourceName')).identityProfile.kubeletidentity.objectId]",
+                                "scope": "[variables('vnetSubnetId')]"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-05-01",
+            "name": "InitIdentityDeployment",
+            "dependsOn": [
+                "[concat('Microsoft.ContainerService/managedClusters/', parameters('resourceName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "parameters": {
+                    "clusterName": {
+                        "value": "[parameters('resourceName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "managedIdentityName": {
+                        "value": "[variables('managedIdentityName')]"
+                    }
+                },
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/micya/aks-arm/main/init-identity-deploy.json"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-05-01",
+            "name": "InitContainerDeployment",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'InitIdentityDeployment')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "parameters": {
+                    "clusterName": {
+                        "value": "[parameters('resourceName')]"
+                    },
+                    "clusterGroup": {
+                        "value": "[resourceGroup().name]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "managedIdentityName": {
+                        "value": "[variables('managedIdentityName')]"
+                    }
+                },
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/micya/aks-arm/main/init-container-deploy.json"
+                }
+            }
+        }
+    ]
+}

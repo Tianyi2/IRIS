@@ -1,0 +1,47 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "variables": {
+        "roleName": "WAF Policies Editor",
+        "roleDescription": "Can read and edit Web Application Firewall policies for Front Door and Application Gateway.",
+        "customRoleId": "[guid('WafPoliciesEditorCustomRole')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Authorization/roleDefinitions",
+            "apiVersion": "2022-04-01",
+            "name": "[variables('customRoleId')]",
+            "properties": {
+                "roleName": "[variables('roleName')]",
+                "description": "[variables('roleDescription')]",
+                "type": "CustomRole",
+                "assignableScopes": [        
+          			"[subscription().id]",
+          			"[resourceGroup().id]"
+                ],
+                "permissions": [
+                    {
+                        "actions": [
+                            "Microsoft.Cdn/cdnwebapplicationfirewallmanagedrulesets/read",
+                            "Microsoft.Cdn/cdnwebapplicationfirewallmanagedrulesets/write",
+                            "Microsoft.Cdn/cdnwebapplicationfirewallmanagedrulesets/delete",
+                            "Microsoft.Cdn/cdnwebapplicationfirewallpolicies/read",
+                            "Microsoft.Cdn/cdnwebapplicationfirewallpolicies/write",
+                            "Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/read",
+                            "Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/write",
+                            "Microsoft.Network/frontDoorWebApplicationFirewallManagedRuleSets/read",
+                            "Microsoft.Network/frontDoorWebApplicationFirewallPolicies/read",
+                            "Microsoft.Network/frontDoorWebApplicationFirewallPolicies/write",
+                            "Microsoft.Security/webApplicationFirewalls/read",
+                            "Microsoft.Security/webApplicationFirewalls/write",
+                            "Microsoft.Security/webApplicationFirewalls/delete"
+                        ],
+                        "dataActions": [],
+                        "notActions": [],
+                        "dataNotActions": []
+                    }
+                ]
+            }
+        }
+    ]
+}

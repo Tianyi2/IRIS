@@ -1,0 +1,69 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "2527001460767129313"
+    }
+  },
+  "parameters": {
+    "solutionLocation": {
+      "type": "string"
+    },
+    "cosmosAccountName": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "defaultValue": "GlobalDocumentDB",
+      "allowedValues": [
+        "GlobalDocumentDB",
+        "MongoDB",
+        "Parse"
+      ]
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {}
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "apiVersion": "2024-12-01-preview",
+      "name": "[parameters('cosmosAccountName')]",
+      "kind": "[parameters('kind')]",
+      "location": "[parameters('solutionLocation')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "consistencyPolicy": {
+          "defaultConsistencyLevel": "Session"
+        },
+        "locations": [
+          {
+            "locationName": "[parameters('solutionLocation')]",
+            "failoverPriority": 0,
+            "isZoneRedundant": false
+          }
+        ],
+        "databaseAccountOfferType": "Standard",
+        "enableAutomaticFailover": false,
+        "enableMultipleWriteLocations": false,
+        "apiProperties": "[if(equals(parameters('kind'), 'MongoDB'), createObject('serverVersion', '7.0'), createObject())]",
+        "capabilities": "[if(equals(parameters('kind'), 'MongoDB'), createArray(createObject('name', 'EnableMongo')), createArray(createObject('name', 'EnableServerless')))]",
+        "capacityMode": "Serverless",
+        "enableFreeTier": false,
+        "publicNetworkAccess": "Enabled",
+        "networkAclBypass": "AzureServices"
+      }
+    }
+  ],
+  "outputs": {
+    "cosmosAccountName": {
+      "type": "string",
+      "value": "[parameters('cosmosAccountName')]"
+    }
+  }
+}

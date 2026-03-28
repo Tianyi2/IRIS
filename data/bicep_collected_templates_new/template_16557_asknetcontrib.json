@@ -1,0 +1,74 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "9351992414865103004"
+    }
+  },
+  "parameters": {
+    "byoAKSSubnetId": {
+      "type": "string"
+    },
+    "byoAKSPodSubnetId": {
+      "type": "string"
+    },
+    "user_identity_principalId": {
+      "type": "string"
+    },
+    "rbacAssignmentScope": {
+      "type": "string",
+      "defaultValue": "Subnet",
+      "allowedValues": [
+        "Subnet",
+        "Vnet"
+      ]
+    }
+  },
+  "variables": {
+    "networkContributorRole": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')]",
+    "existingAksPodSubnetName": "[if(not(empty(parameters('byoAKSPodSubnetId'))), split(parameters('byoAKSPodSubnetId'), '/')[10], '')]",
+    "existingAksSubnetName": "[if(not(empty(parameters('byoAKSSubnetId'))), split(parameters('byoAKSSubnetId'), '/')[10], '')]",
+    "existingAksVnetName": "[if(not(empty(parameters('byoAKSSubnetId'))), split(parameters('byoAKSSubnetId'), '/')[8], '')]"
+  },
+  "resources": [
+    {
+      "condition": "[equals(parameters('rbacAssignmentScope'), 'Subnet')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('existingAksVnetName'), variables('existingAksSubnetName'))]",
+      "name": "[guid(parameters('user_identity_principalId'), variables('networkContributorRole'), variables('existingAksSubnetName'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('networkContributorRole')]",
+        "principalId": "[parameters('user_identity_principalId')]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "condition": "[equals(parameters('rbacAssignmentScope'), 'subnet')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('existingAksVnetName'), variables('existingAksPodSubnetName'))]",
+      "name": "[guid(parameters('user_identity_principalId'), variables('networkContributorRole'), variables('existingAksPodSubnetName'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('networkContributorRole')]",
+        "principalId": "[parameters('user_identity_principalId')]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "condition": "[not(equals(parameters('rbacAssignmentScope'), 'subnet'))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.Network/virtualNetworks', variables('existingAksVnetName'))]",
+      "name": "[guid(parameters('user_identity_principalId'), variables('networkContributorRole'), variables('existingAksVnetName'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('networkContributorRole')]",
+        "principalId": "[parameters('user_identity_principalId')]",
+        "principalType": "ServicePrincipal"
+      }
+    }
+  ]
+}

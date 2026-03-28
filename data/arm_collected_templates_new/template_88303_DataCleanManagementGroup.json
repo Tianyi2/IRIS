@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "managementGroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "The management group to be configured"
+      }
+    }
+  },
+  "functions": [],
+  "variables": {},
+  "resources": [
+  ],
+  "outputs": {}
+}

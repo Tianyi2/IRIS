@@ -1,0 +1,46 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "devTestLabsName": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "maxAllowedVmsPerUser": {
+            "type": "int",
+            "defaultValue": 10
+        },
+        "maxAllowedVmsPerLab": {
+            "type": "int",
+            "defaultValue": 31
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "type": "Microsoft.DevTestLab/labs/policysets/policies",
+            "name": "[concat(parameters('devTestLabsName'), '/', 'default/MaxVMsAllowedPerUser')]",
+            "apiVersion": "2018-09-15",
+            "properties": {
+                "description": "",
+                "factName": "UserOwnedLabVmCount",
+                "threshold": "[string(parameters('maxAllowedVmsPerUser'))]",
+                "evaluatorType": "MaxValuePolicy",
+                "status": "enabled"
+            }
+        },
+        {
+            "type": "Microsoft.DevTestLab/labs/policysets/policies",
+            "name": "[concat(parameters('devTestLabsName'), '/', 'default/MaxVMsAllowedPerLab')]",
+            "apiVersion": "2018-09-15",
+            "properties": {
+                "description": "",
+                "factName": "LabVmCount",
+                "threshold": "[string(parameters('maxAllowedVmsPerLab'))]",
+                "evaluatorType": "MaxValuePolicy",
+                "status": "enabled"
+            }
+        }
+    ]
+}

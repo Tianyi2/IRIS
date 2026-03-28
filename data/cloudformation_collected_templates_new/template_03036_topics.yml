@@ -1,0 +1,10 @@
+Description: IT - templating
+Resources:
+
+  {{#each stack.data.topics}}
+  Topic{{@index}}:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: TopicName{{@index}}
+  {{/each}}
+

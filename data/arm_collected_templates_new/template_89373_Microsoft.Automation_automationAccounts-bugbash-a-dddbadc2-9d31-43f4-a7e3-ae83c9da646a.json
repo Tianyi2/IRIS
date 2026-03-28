@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Automation/automationAccounts",
+      "name": "bugbash-a-dddbadc2-9d31-43f4-a7e3-ae83c9da646a",
+      "apiVersion": "2020-01-13-preview",
+      "location": "[resourceGroup().location]",
+      "tags": {},
+      "properties": {
+        "sku": {
+          "name": "Basic",
+          "family": null,
+          "capacity": null
+        },
+        "state": "Ok",
+        "RegistrationUrl": "https://5742ae6b-f1bd-4945-9418-41f15fd99307.agentsvc.ne.azure-automation.net/accounts/5742ae6b-f1bd-4945-9418-41f15fd99307",
+        "creationTime": "2021-03-19T16:38:10.303+00:00",
+        "lastModifiedBy": null,
+        "lastModifiedTime": "2021-03-19T16:38:10.303+00:00"
+      }
+    }
+  ],
+  "outputs": {}
+}

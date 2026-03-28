@@ -1,0 +1,61 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "webAppName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the web app to associate the custom domain with."
+            }
+        },
+        "customDomain": {
+            "type": "string",
+            "metadata": {
+                "description": "The custom domain that you wish to add."
+            }
+        },
+        "certificateName": {
+            "type": "string",
+            "metadata": {
+                "description": "The existing certificate name that has alread been uploaded to the web app, see README.md"
+            }
+        },
+        "vaultResourceGroupName": {
+            "type": "string"
+        },
+        "vaultName": {
+            "type": "string"
+        },
+        "existingKeyVaultSecretName": {
+            "type": "string"
+        },
+        "appServicePlanName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "type":"Microsoft.Web/certificates",
+            "name":"[parameters('certificateName')]",
+            "apiVersion":"2016-03-01",
+            "location":"[resourceGroup().location]",
+            "properties":{
+                "keyVaultId": "[resourceId(parameters('vaultResourceGroupName'), 'Microsoft.KeyVault/vaults', parameters('vaultName'))]",
+                "keyVaultSecretName":"[parameters('existingKeyVaultSecretName')]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverFarms',parameters('appServicePlanName'))]"
+            }
+        },
+       {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('webAppName'), '/', parameters('customDomain'))]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "siteName": "[parameters('webAppName')]",
+                "hostNameType": "Verified",
+                "sslState": "SniEnabled",
+                "thumbprint":"[reference(resourceId('Microsoft.Web/certificates', parameters('certificateName'))).Thumbprint]"
+            }
+        }
+    ]
+}

@@ -1,0 +1,192 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Admin username used when provisioning virtual machines"
+            }
+        },
+        "password": {
+            "type": "secureObject",
+            "metadata": {
+                "description": "Admin password used when provisioning virtual machines"
+            }
+        },
+        "storageSettings": {
+            "type": "object",
+            "metadata": {
+                "description": "Storage Account Settings"
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location where resources will be provisioned"
+            }
+        },
+        "osSettings": {
+            "type": "object",
+            "metadata": {
+                "description": "InfluxEnterprise deployment platform settings"
+            }
+        },
+        "networkSettings": {
+            "type": "object",
+            "metadata": {
+                "description": "Network settings"
+            }
+        },
+        "namespace": {
+            "type": "string",
+            "metadata": {
+                "description": "The namespace for resources created by this template"
+            }
+        },
+        "lbBackendPools": {
+            "type": "object",
+            "metadata": {
+                "description": "loadBalancerBackendAddressPools config object"
+            }
+        }
+    },
+    "variables": {
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('networkSettings').subnet.data.vnet, parameters('networkSettings').subnet.data.name)]",
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": "true",
+            "ssh": {
+                "publicKeys": [
+                    {
+                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                        "keyData": "[parameters('password').sshPublicKey]"
+                    }
+                ]
+            }
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-07-01",
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[concat('avail-', parameters('namespace'))]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "platformUpdateDomainCount": 10,
+                "platformFaultDomainCount": "[parameters('networkSettings').platformFaultDomainCount]"
+            },
+            "sku": {
+                "name": "Aligned"
+            }
+        },
+        {
+            "apiVersion": "2019-09-01",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat('nic-', copyindex(), '-vm', parameters('namespace'), '-', copyindex())]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "[concat('dataNodeNic','nicLoop')]",
+                "count": "[parameters('osSettings').vmDataNodeCount]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[concat(parameters('networkSettings').dataNodesIpPrefix,copyindex())]",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "loadBalancerBackendAddressPools": "[parameters('lbBackendPools').backendPools]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2019-07-01",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat('vm', parameters('namespace'), '-', copyindex())]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "provider": "[parameters('osSettings').influxTags.provider]"
+            },
+            "plan": {
+                "name": "data",
+                "product": "influxdb-enterprise-vm",
+                "publisher": "influxdata"
+            },
+            "copy": {
+                "name": "[concat(parameters('namespace'), 'virtualMachineLoop')]",
+                "count": "[parameters('osSettings').vmDataNodeCount]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', 'nic-', copyindex(), '-vm', parameters('namespace'), '-', copyindex())]",
+                "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]"
+            ],
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', concat('avail-', parameters('namespace')))]"
+                },
+                "hardwareProfile": {
+                    "vmSize":  "[parameters('osSettings').vmSizeDataNodes]"
+                },
+                "osProfile": {
+                    "computerName": "[concat('vm', parameters('namespace'), '-', copyindex())]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[if(equals(parameters('password').authenticationType,'password'),parameters('password').password,json('null'))]",
+                    "linuxConfiguration": "[if(equals(parameters('password').authenticationType, 'password'), json('null'), variables('linuxConfiguration'))]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "influxdata",
+                        "offer": "influxdb-enterprise-vm",
+                        "sku": "data",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat('vm', parameters('namespace'), '-', copyindex(), '-osdisk')]",
+                        "createOption": "FromImage",
+                        "diskSizeGB": 32,
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "diskSizeGB": "[parameters('storageSettings').diskSize]",
+                            "name": "[concat('vm', parameters('namespace'), '-', copyindex(), '-datadisk')]",
+                            "caching": "None",
+                            "createOption": "Empty",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('nic-', copyindex(), '-vm', parameters('namespace'), '-', copyindex()))]"
+                        }
+                    ]
+                }
+            },
+            "resources": [
+                {
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "name": "[concat('vm', parameters('namespace'), '-', copyindex(), '/configureDatanode', copyindex())]",
+                    "apiVersion": "2019-07-01",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'), '-', copyindex())]"
+                    ],
+                    "properties": "[parameters('osSettings').extensionSettings.data]"
+                }
+            ]
+        }
+    ],
+    "outputs": {}
+}

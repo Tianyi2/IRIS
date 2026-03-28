@@ -1,0 +1,42 @@
+terraform {
+  backend "s3" {
+  }
+  required_version = ">= 1.5.0"
+  required_providers {
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.3"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.35.1"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "2.17.0"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "4.1.0"
+    }
+    authentik = {
+      source  = "goauthentik/authentik"
+      version = "2025.10.1"
+    }
+    bcrypt = {
+      source  = "viktorradnai/bcrypt"
+      version = "0.1.2"
+    }
+  }
+}
+
+provider "kubernetes" {
+  config_path = var.kubeconfig
+}
+
+
+provider "helm" {
+  kubernetes {
+    config_path = var.kubeconfig
+  }
+}

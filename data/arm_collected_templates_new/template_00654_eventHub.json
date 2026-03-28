@@ -1,0 +1,132 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "resourceTags": {
+            "type": "object",
+            "metadata": {
+                "description": "The tags that will be assigned to the EventHub namespace"
+            }
+        },
+        "namespaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the EventHub namespace"
+            }
+        },
+        "eventHubName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the EventHub instance"
+            }
+        },
+        "skipNamespaceDeployment": {
+            "type": "string",
+            "metadata": {
+                "description": "Set to yes to only deploy EventHub instance"
+            }
+        },
+        "isAutoInflateEnabled": {
+            "type": "string",
+            "metadata": {
+                "description": "Enable or disable AutoInflate TPUs"
+            }
+        },
+        "maximumThroughputUnits": {
+            "type": "string",
+            "metadata": {
+                "description": "Configure min and max TPUs"
+            }
+        },
+        "eventHubSku": {
+            "type": "string",
+            "metadata": {
+                "description": "Specifies the messaging tier for the Event Hub namespace"
+            }
+        },
+        "messageRetentionInDays": {
+            "type": "string",
+            "metadata": {
+                "description": "How long to retain the data in Event Hub"
+            }
+        },
+        "partitionCount": {
+            "type": "string",
+            "metadata": {
+                "description": "Number of partitions chosen"
+            }
+        },
+        "accessPolicyName": {
+            "type": "string",
+            "metadata": {
+                "description": "Number of partitions chosen"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "The resource group name where the Event Hub will be deployed."
+            }
+        }
+    },
+    "variables": {
+
+    },
+    "resources": [
+        {
+            "condition": "[equals(parameters('skipNamespaceDeployment'),'yes')]",
+            "apiVersion": "2017-04-01",
+            "name": "[parameters('namespaceName')]",
+            "type": "Microsoft.EventHub/namespaces",
+            "location": "[parameters('location')]",
+            "tags": "[parameters('resourceTags')]",
+            "sku": {
+                "name": "[parameters('eventHubSku')]",
+                "tier": "[parameters('eventHubSku')]"
+            },
+            "properties": {
+                "isAutoInflateEnabled": "[parameters('isAutoInflateEnabled')]",
+                "messageRetentionInDays": "[parameters('messageRetentionInDays')]",
+                "partitionCount": "[parameters('partitionCount')]",
+                "maximumThroughputUnits": "[parameters('maximumThroughputUnits')]"
+            },
+            "resources": [
+                {
+                    "apiVersion": "2017-04-01",
+                    "name": "[parameters('eventHubName')]",
+                    "tags": "[parameters('resourceTags')]",
+                    "type": "eventhubs",
+                    "dependsOn": [
+                        "[concat('Microsoft.EventHub/namespaces/', parameters('namespaceName'))]"
+                    ],
+                    "properties": {
+                        "messageRetentionInDays": "[parameters('messageRetentionInDays')]",
+                        "partitionCount": "[parameters('partitionCount')]"
+                    },
+
+                    "resources": [
+                        {
+                            "apiVersion": "2017-04-01",
+                            "name": "[parameters('accessPolicyName')]",
+                            "type": "authorizationRules",
+                            "dependsOn": [
+                                "[concat('Microsoft.EventHub/namespaces/',parameters('namespaceName'),'/eventhubs/',parameters('eventHubName'))]"
+                            ],
+                            "location": "[parameters('location')]",
+                            "properties": {
+                                "Rights": [
+                                    "Send",
+                                    "Listen"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "outputs": {
+
+    }
+}

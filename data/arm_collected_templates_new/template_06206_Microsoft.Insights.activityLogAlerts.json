@@ -1,0 +1,69 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "Name of the alert."
+            }
+        },
+        "description": {
+            "type": "string",
+            "metadata": {
+                "description": "Description of the alert."
+            }
+        },
+        "conditions": {
+            "type": "array",
+            "metadata": {
+                "description": "List of conditions. Reference: https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/activitylogalerts#ActivityLogAlertLeafCondition"
+            }
+        },
+        "actionGroupId": {
+            "type": "string",
+            "metadata": {
+                "description": "The ID of the action group that is triggered when the alert is activated."
+            }
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue" : {}
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('name')]",
+            "type": "Microsoft.Insights/activityLogAlerts",
+            "apiVersion": "2017-04-01",
+            "location": "Global",
+            "tags": "[parameters('tags')]",
+            "properties": {
+                "scopes": [
+                    "[subscription().id]"
+                ],
+                "enabled": true,
+                "condition": {
+                    "allOf": "[parameters('conditions')]"
+                },
+                "actions": {
+                    "actionGroups": [
+                        {
+                            "actionGroupId": "[parameters('actionGroupId')]",
+                            "webhookProperties": {
+                            }
+                        }
+                    ]
+                },
+                "description": "[parameters('description')]"
+            }
+        }
+    ],
+    "outputs": {
+        "activityLogAlert": {
+            "type": "object",
+            "value": "[reference(parameters('name'), '2017-04-01', 'Full')]"
+        }
+    }
+}

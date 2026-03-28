@@ -1,0 +1,55 @@
+{
+  "$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "languageVersion":"2.0",
+  "contentVersion":"1.1.1.1",
+  "apiProfile":"",
+  "definitions":{},
+  "parameters":{
+    "environment":{
+      "defaultValue":"stg",
+      "type":"String",
+      "metadata":{
+        "description":"Environment."
+      }
+    },
+    "region_name":{
+      "defaultValue":"[resourceGroup().location]",
+      "type":"String",
+      "metadata":{
+        "description":"Region name."
+      }
+    },
+    "storage_account_prefix":{
+      "type":"String",
+      "metadata":{
+        "description":"Storage account prefix."
+      }
+    }
+  },
+  "variables":{},
+  "functions":[],
+  "resources":{
+    "crm_app_stt_st":{
+      "apiVersion":"2022-09-01",
+      "type":"Microsoft.Storage/storageAccounts",
+      "name":"[concat(parameters('storage_account_prefix'),'crmappsttst')]",
+      "location":"[parameters('region_name')]",
+      "kind":"StorageV2",
+      "sku":{
+        "name":"Standard_LRS"
+      },
+      "properties":{
+        "allowBlobPublicAccess":true,
+        "publicNetworkAccess":"Enabled"
+      },
+      "tags":{
+        "Name":"crm-app-stt-st",
+        "Environment":"[parameters('environment')]",
+        "Stack":"crm",
+        "Region":"[parameters('region_name')]",
+        "Organization":"sloopstash"
+      }
+    }
+  },
+  "outputs":{}
+}

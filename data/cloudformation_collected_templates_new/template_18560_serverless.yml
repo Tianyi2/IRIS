@@ -1,0 +1,67 @@
+service: alerta-utec-realtime
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: python3.11          # 👈 usa 3.11 para tener boto3 incluido
+  region: us-east-1
+  stage: production
+
+  iam:
+    role: arn:aws:iam::645337731455:role/LabRole
+
+custom:
+  connectionsTableName: Connections
+  incidentesTableName: Incidentes
+
+functions:
+  websocketConnect:
+    handler: websocket_connect.lambda_handler
+    environment:
+      CONNECTIONS_TABLE: ${self:custom.connectionsTableName}
+    events:
+      - websocket:
+          route: $connect
+
+  websocketDisconnect:
+    handler: websocket_disconnect.lambda_handler
+    environment:
+      CONNECTIONS_TABLE: ${self:custom.connectionsTableName}
+    events:
+      - websocket:
+          route: $disconnect
+
+  dynamoStreamBroadcast:
+    handler: dynamo_stream_broadcast.lambda_handler
+    environment:
+      CONNECTIONS_TABLE: ${self:custom.connectionsTableName}
+      WS_ENDPOINT:
+        Fn::Join:
+          - ''
+          - - 'https://'
+            - Ref: WebsocketsApi     # creado automáticamente por el evento websocket
+            - '.execute-api.'
+            - Ref: AWS::Region
+            - '.amazonaws.com/'
+            - ${sls:stage}
+    events:
+      - stream:
+          type: dynamodb
+          # 👇 pon aquí el StreamArn REAL de tu tabla Incidentes
+          arn: arn:aws:dynamodb:us-east-1:645337731455:table/Incidentes/stream/2025-11-16T21:43:18.423
+          maximumRetryAttempts: 3
+          startingPosition: LATEST
+
+resources:
+  Resources:
+    ConnectionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.connectionsTableName}
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST

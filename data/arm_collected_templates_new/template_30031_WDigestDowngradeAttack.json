@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/f6502545-ae3a-4232-a8b0-79d87e5c98d7')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/f6502545-ae3a-4232-a8b0-79d87e5c98d7')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "WDigest downgrade attack",
+        "description": "'When the WDigest Authentication protocol is enabled, plain text passwords are stored in the Local Security Authority Subsystem Service (LSASS) exposing them to theft. This setting will prevent WDigest from storing credentials in memory.\nRef: https://www.stigviewer.com/stig/windows_7/2016-12-19/finding/V-72753'\n",
+        "query": "Event\n| where EventLog =~ \"Microsoft-Windows-Sysmon/Operational\" and EventID in (13)\n| parse EventData with * 'TargetObject\">' TargetObject \"<\" * 'Details\">' Details \"<\" * \n| where TargetObject=~\"HKLM\\\\System\\\\CurrentControlSet\\\\Control\\\\SecurityProviders\\\\WDigest\\\\UseLogonCredential\" and Details !=\"DWORD (0x00000000)\"\n| summarize StartTimeUtc = min(TimeGenerated), EndTimeUtc = max(TimeGenerated) by EventID, Computer,  TargetObject, Details\n| extend HostName = iif(Computer has '.',substring(Computer,0,indexof(Computer,'.')),Computer) , DnsDomain = iif(Computer has '.',substring(Computer,indexof(Computer,'.')+1),'')\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "TargetObject",
+                "identifier": "Key"
+              }
+            ],
+            "entityType": "RegistryKey"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Computer",
+                "identifier": "FullName"
+              },
+              {
+                "columnName": "HostName",
+                "identifier": "HostName"
+              },
+              {
+                "columnName": "DnsDomain",
+                "identifier": "DnsDomain"
+              }
+            ],
+            "entityType": "Host"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "CredentialAccess"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

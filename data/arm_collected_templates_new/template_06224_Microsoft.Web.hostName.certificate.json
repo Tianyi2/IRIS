@@ -1,0 +1,60 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "app": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the website to create ssl certificate and binding for."
+            }
+        },
+        "hostingPlanName": {
+            "type": "string"
+        },
+        "hostName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Custom host name for the Website."
+            }
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue" : {}
+        }
+    },
+    "variables": {
+        "bindingName": "[concat(parameters('app'), '/', parameters('hostName'))]",
+        "certificateName": "[concat(parameters('app'), '-certificate')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/sites/hostnameBindings",
+            "apiVersion": "2019-08-01",
+            "name": "[variables('bindingName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+            }
+        },
+        {
+            "type": "Microsoft.Web/certificates",
+            "apiVersion": "2019-08-01",
+            "name": "[variables('certificateName')]",
+            "location": "[resourceGroup().location]",
+            "tags": "[parameters('tags')]",
+            "dependsOn": [
+                "[concat('Microsoft.Web/sites/',parameters('app'),'/hostnameBindings/',parameters('hostName'))]"
+            ],
+            "properties": {
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
+                "canonicalName": "[parameters('hostName')]"
+            }
+        }
+    ],
+    "outputs": {
+        "thumbprint": {
+            "type": "string",
+            "value": "[reference(variables('certificateName'), '2019-08-01').thumbprint]"
+        }
+    }
+}

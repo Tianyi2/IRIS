@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deploy-ASC-Monitoring",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "westeurope",
+      "identity": {
+        "principalId": "30f04cef-cd77-418b-9201-4c9a18fb1f79",
+        "tenantId": "5663f39e-feb1-4303-a1f9-cf20b702de61",
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "description": "The Azure Security Benchmark initiative represents the policies and controls implementing security recommendations defined in Azure Security Benchmark v3, see https://aka.ms/azsecbm. This also serves as the Microsoft Defender for Cloud default policy initiative. You can directly assign this initiative, or manage its policies and compliance results within Microsoft Defender for Cloud.",
+        "displayName": "Azure Security Benchmark",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "parameters": {
+          "autoProvisioningOfTheLogAnalyticsAgentShouldBeEnabledOnYourSubscriptionMonitoringEffect": {
+            "value": "Disabled"
+          },
+          "identityDesignateLessThanOwnersMonitoringEffect": {
+            "value": "Disabled"
+          },
+          "identityEnableMFAForOwnerPermissionsMonitoringEffect": {
+            "value": "Disabled"
+          },
+          "networkWatcherShouldBeEnabledMonitoringEffect": {
+            "value": "Disabled"
+          },
+          "useRbacRulesMonitoringEffect": {
+            "value": "Disabled"
+          },
+          "useServicePrincipalToProtectSubscriptionsMonitoringEffect": {
+            "value": "Disabled"
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8",
+        "scope": "/providers/Microsoft.Management/managementGroups/saturn"
+      }
+    }
+  ],
+  "outputs": {}
+}

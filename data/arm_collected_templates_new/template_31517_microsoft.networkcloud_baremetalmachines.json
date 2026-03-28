@@ -1,0 +1,325 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.NetworkCloud/bareMetalMachines to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.NetworkCloud/bareMetalMachines to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "defendersecurityEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DefenderSecurity",
+        "description": "Enable or disable log category DefenderSecurity"
+      },
+      "defaultValue": true
+    },
+    "nexusbreakglassauditEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "NexusBreakGlassAudit",
+        "description": "Enable or disable log category NexusBreakGlassAudit"
+      },
+      "defaultValue": true
+    },
+    "securitycriticalEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SecurityCritical",
+        "description": "Enable or disable log category SecurityCritical"
+      },
+      "defaultValue": true
+    },
+    "securitydebugEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SecurityDebug",
+        "description": "Enable or disable log category SecurityDebug"
+      },
+      "defaultValue": true
+    },
+    "securityerrorEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SecurityError",
+        "description": "Enable or disable log category SecurityError"
+      },
+      "defaultValue": true
+    },
+    "securityinfoEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SecurityInfo",
+        "description": "Enable or disable log category SecurityInfo"
+      },
+      "defaultValue": true
+    },
+    "securitynoticeEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SecurityNotice",
+        "description": "Enable or disable log category SecurityNotice"
+      },
+      "defaultValue": true
+    },
+    "securitywarningEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SecurityWarning",
+        "description": "Enable or disable log category SecurityWarning"
+      },
+      "defaultValue": true
+    },
+    "syslogcriticalEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SyslogCritical",
+        "description": "Enable or disable log category SyslogCritical"
+      },
+      "defaultValue": true
+    },
+    "syslogdebugEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SyslogDebug",
+        "description": "Enable or disable log category SyslogDebug"
+      },
+      "defaultValue": true
+    },
+    "syslogerrorEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SyslogError",
+        "description": "Enable or disable log category SyslogError"
+      },
+      "defaultValue": true
+    },
+    "sysloginfoEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SyslogInfo",
+        "description": "Enable or disable log category SyslogInfo"
+      },
+      "defaultValue": true
+    },
+    "syslognoticeEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SyslogNotice",
+        "description": "Enable or disable log category SyslogNotice"
+      },
+      "defaultValue": true
+    },
+    "syslogwarningEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "SyslogWarning",
+        "description": "Enable or disable log category SyslogWarning"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.NetworkCloud/bareMetalMachines"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.NetworkCloud/bareMetalMachines/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.NetworkCloud/bareMetalMachines, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "DefenderSecurity",
+                    "enabled": "[parameters('defendersecurityEnabled')]"
+                  },
+                  {
+                    "category": "NexusBreakGlassAudit",
+                    "enabled": "[parameters('nexusbreakglassauditEnabled')]"
+                  },
+                  {
+                    "category": "SecurityCritical",
+                    "enabled": "[parameters('securitycriticalEnabled')]"
+                  },
+                  {
+                    "category": "SecurityDebug",
+                    "enabled": "[parameters('securitydebugEnabled')]"
+                  },
+                  {
+                    "category": "SecurityError",
+                    "enabled": "[parameters('securityerrorEnabled')]"
+                  },
+                  {
+                    "category": "SecurityInfo",
+                    "enabled": "[parameters('securityinfoEnabled')]"
+                  },
+                  {
+                    "category": "SecurityNotice",
+                    "enabled": "[parameters('securitynoticeEnabled')]"
+                  },
+                  {
+                    "category": "SecurityWarning",
+                    "enabled": "[parameters('securitywarningEnabled')]"
+                  },
+                  {
+                    "category": "SyslogCritical",
+                    "enabled": "[parameters('syslogcriticalEnabled')]"
+                  },
+                  {
+                    "category": "SyslogDebug",
+                    "enabled": "[parameters('syslogdebugEnabled')]"
+                  },
+                  {
+                    "category": "SyslogError",
+                    "enabled": "[parameters('syslogerrorEnabled')]"
+                  },
+                  {
+                    "category": "SyslogInfo",
+                    "enabled": "[parameters('sysloginfoEnabled')]"
+                  },
+                  {
+                    "category": "SyslogNotice",
+                    "enabled": "[parameters('syslognoticeEnabled')]"
+                  },
+                  {
+                    "category": "SyslogWarning",
+                    "enabled": "[parameters('syslogwarningEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

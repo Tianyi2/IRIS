@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Deploy-AzActivity-Log",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "westeurope",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-policy-identity/providers/Microsoft.ManagedIdentity/userAssignedIdentities/saturn-policy-identity": {
+            "clientId": "3af92696-7908-4732-bb6b-9f96fb6432f6",
+            "principalId": "bee3d72e-1c84-46a5-a0a5-79c0cd4a9ec7"
+          }
+        }
+      },
+      "properties": {
+        "description": "Deploys the diagnostic settings for Azure Activity to stream subscriptions audit logs to a Log Analytics workspace to monitor subscription-level events",
+        "displayName": "Configure Azure Activity logs to stream to specified Log Analytics workspace",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "parameters": {
+          "logAnalytics": {
+            "value": "/subscriptions/d5a088e8-eb9b-4ddc-a76c-f9e6f2b6b4ad/resourceGroups/saturn-mgmt/providers/Microsoft.OperationalInsights/workspaces/saturn-law"
+          },
+          "logsEnabled": {
+            "value": "True"
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2465583e-4e78-4c15-b6be-a36cbc7c8b0f",
+        "scope": "/providers/Microsoft.Management/managementGroups/saturn"
+      }
+    }
+  ],
+  "outputs": {}
+}

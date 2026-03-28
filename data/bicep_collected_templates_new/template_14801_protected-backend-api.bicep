@@ -1,0 +1,87 @@
+//=============================================================================
+// Protected Backend API in API Management
+//
+// Represents a backend that is protected by OAuth.
+//=============================================================================
+
+//=============================================================================
+// Parameters
+//=============================================================================
+
+@description('The name of the API Management service')
+param apiManagementServiceName string
+
+@description('The ID of the tenant')
+param tenantId string
+
+@description('The expected OAuth audience for the JWT token')
+param oauthAudience string
+
+//=============================================================================
+// Existing resources
+//=============================================================================
+
+resource apiManagementService 'Microsoft.ApiManagement/service@2025-03-01-preview' existing = {
+  name: apiManagementServiceName
+}
+
+//=============================================================================
+// Resources
+//=============================================================================
+
+// Named Values
+
+resource tenantIdNamedValue 'Microsoft.ApiManagement/service/namedValues@2025-03-01-preview' = {
+  name: 'tenant-id'
+  parent: apiManagementService
+  properties: {
+    displayName: 'tenant-id'
+    value: tenantId
+  }
+}
+
+resource oauthAudienceNamedValue 'Microsoft.ApiManagement/service/namedValues@2025-03-01-preview' = {
+  name: 'oauth-audience'
+  parent: apiManagementService
+  properties: {
+    displayName: 'oauth-audience'
+    value: oauthAudience
+  }
+}
+
+// API
+
+resource protectedBackendApi 'Microsoft.ApiManagement/service/apis@2025-03-01-preview' = {
+  name: 'protected-backend-api'
+  parent: apiManagementService
+  properties: {
+    displayName: 'Protected Backend API'
+    path: 'protected'
+    protocols: [
+      'https'
+    ]
+    subscriptionRequired: false // API is protected with OAuth
+  }
+
+  resource policies 'policies' = {
+    name: 'policy'
+    properties: {
+      format: 'rawxml'
+      value: loadTextContent('protected-backend-api.xml')
+    }
+
+    dependsOn: [
+      tenantIdNamedValue
+      oauthAudienceNamedValue
+    ]
+  }
+
+  resource getOperation 'operations' = {
+    name: 'get'
+    properties: {
+      displayName: 'Get'
+      method: 'GET'
+      urlTemplate: '/'
+    }
+  }
+}

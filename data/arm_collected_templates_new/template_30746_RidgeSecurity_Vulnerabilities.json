@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/d096643d-6789-4c74-8893-dd3fc8a94069')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/d096643d-6789-4c74-8893-dd3fc8a94069')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "High",
+        "name": "Vulerabilities",
+        "description": "This query searches for all the vulerabilities that RidgeBot identified\n",
+        "query": "CommonSecurityLog\n| where DeviceVendor == \"RidgeSecurity\"\n| where DeviceEventClassID startswith \"40\"\n| order by LogSeverity\n",
+        "status": "Available",
+        "queryFrequency": "12h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DeviceVendor",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Computer",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "Execution",
+          "InitialAccess",
+          "PrivilegeEscalation"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "12h"
+      }
+    }
+  ]
+}

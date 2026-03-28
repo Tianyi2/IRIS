@@ -1,0 +1,849 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Front_Door_Name": {
+            "defaultValue": "sunwell-fd",
+            "type": "String",
+            "metadata": {
+                "description": "The name of the Front Door itself"
+            }
+        },
+        "Backend_Hostname": {
+            "defaultValue": "xxxx.azurewebsites.net",
+            "type": "String",
+            "metadata": {
+                "description": "The backend hostname target"
+            }
+        },
+        "Backend_Hostname_Header": {
+            "defaultValue": "xxxx.azurewebsites.net",
+            "type": "String",
+            "metadata": {
+                "description": "The Host header that will be used to forward to the backend"
+            }
+        },
+        "Origin_Group_Name": {
+            "defaultValue": "Main-Origin-Group",
+            "type": "String",
+            "metadata": {
+                "description": "The name of the Origin Group"
+            }
+        },
+        "WAF_Policy_Name": {
+            "defaultValue": "XXXWafPolicy",
+            "type": "String",
+            "metadata": {
+                "description": "The name of the WAF Policy. Cannot have spaces or special characters"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/frontdoorwebapplicationfirewallpolicies",
+            "apiVersion": "2022-05-01",
+            "name": "[parameters('WAF_Policy_Name')]",
+            "location": "Global",
+            "sku": {
+                "name": "Premium_AzureFrontDoor"
+            },
+            "properties": {
+                "policySettings": {
+                    "enabledState": "Enabled",
+                    "mode": "Detection",
+                    "customBlockResponseStatusCode": 403,
+                    "customBlockResponseBody": "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgICA8dGl0bGU+UmVxdWVzdCBCbG9ja2VkPC90aXRsZT4KICAgIDxzY3JpcHQgc3JjPSJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvZ2gvRGpvbmdvdi9jQ2xpcGJvYXJkQHYyLjEvY0NsaXBib2FyZC5taW4uanMiIGRlZmVyPjwvc2NyaXB0PgogICAgPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xLjAiPgogICAgPG1ldGEgY2hhcnNldD0idXRmLTgiLz4KICAgIDxzdHlsZT4KICAgICAgICBodG1sIHsKICAgICAgICAgICAgZm9udC1zaXplOiAxNnB4OwogICAgICAgIH0KICAgICAgICBib2R5IHsKICAgICAgICAgICAgdGV4dC1hbGlnbjogY2VudGVyOwogICAgICAgICAgICBiYWNrZ3JvdW5kOiB3aGl0ZTsKICAgICAgICB9CiAgICAgICAgcCB7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS4ycmVtOwogICAgICAgIH0KICAgICAgICAuYzBweSB7CiAgICAgICAgICAgIG1heC13aWR0aDogbWF4LWNvbnRlbnQ7CiAgICAgICAgICAgIGJhY2tncm91bmQ6IGRpbWdyYXk7CiAgICAgICAgICAgIG1hcmdpbjogMTBweCBhdXRvOwogICAgICAgICAgICBwYWRkaW5nOiAxcmVtOwogICAgICAgICAgICBjb2xvcjogd2hpdGU7CiAgICAgICAgICAgIGJvcmRlcjogMnB4IHNvbGlkICNmZmE1MDA7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS4ycmVtOwogICAgICAgICAgICBmb250LWZhbWlseTogJ0NvdXJpZXIgTmV3JywgQ291cmllciwgbW9ub3NwYWNlOwogICAgICAgICAgICBib3gtc2hhZG93OiAwIDMuMnB4IDcuMnB4IDAgcmdiKDAgMCAwIC8gNTUlKSwgMCAwLjZweCAxLjhweCAwIHJnYigwIDAgMCAvIDU1JSk7CiAgICAgICAgICAgIHdvcmQtd3JhcDogYnJlYWstd29yZDsKICAgICAgICB9CiAgICA8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5PgogICAgPGgxPllvdXIgcmVxdWVzdCBoYXMgYmVlbiBibG9ja2VkPC9oMT4KICAgIDxwPklmIHlvdSBiZWxpZXZlIHRoYXQgdGhpcyByZXF1ZXN0IHdhcyBibG9ja2VkIGluIGVycm9yLCBwbGVhc2UgY29udGFjdCB0aGUgc3VwcG9ydCB3aXRoIHRoaXMgcmVmZXJlbmNlIGluIGhhbmQ6PC9wPgogICAgPGRpdiBjbGFzcz0iYzBweSIgZGF0YS1jbGlwYm9hcmQtaWNvbi1zdHJva2U9IiNmZmE1MDAiIGRhdGEtY2xpcGJvYXJkLWljb24tc3Ryb2tlLXdpZHRoPSIxLjUiPnt7YXp1cmUtcmVmfX08L2Rpdj4KPC9ib2R5Pgo8L2h0bWw+",
+                    "requestBodyCheck": "Enabled"
+                },
+                "customRules": {
+                    "rules": [
+                        {
+                            "name": "DenyList",
+                            "enabledState": "Enabled",
+                            "priority": 1,
+                            "ruleType": "MatchRule",
+                            "rateLimitDurationInMinutes": 1,
+                            "rateLimitThreshold": 100,
+                            "matchConditions": [
+                                {
+                                    "matchVariable": "RemoteAddr",
+                                    "operator": "IPMatch",
+                                    "negateCondition": false,
+                                    "matchValue": [
+                                        "1.209.47.241"
+                                    ],
+                                    "transforms": []
+                                }
+                            ],
+                            "action": "Block"
+                        },
+                        {
+                            "name": "RateLimit",
+                            "enabledState": "Enabled",
+                            "priority": 2,
+                            "ruleType": "RateLimitRule",
+                            "rateLimitDurationInMinutes": 1,
+                            "rateLimitThreshold": 1500,
+                            "matchConditions": [
+                                {
+                                    "matchVariable": "RequestUri",
+                                    "operator": "Any",
+                                    "negateCondition": false,
+                                    "matchValue": [],
+                                    "transforms": []
+                                }
+                            ],
+                            "action": "Block"
+                        },
+                        {
+                            "name": "EmergencyRanges",
+                            "enabledState": "Disabled",
+                            "priority": 3,
+                            "ruleType": "MatchRule",
+                            "rateLimitDurationInMinutes": 1,
+                            "rateLimitThreshold": 100,
+                            "matchConditions": [
+                                {
+                                    "matchVariable": "RemoteAddr",
+                                    "operator": "IPMatch",
+                                    "negateCondition": true,
+                                    "matchValue": [
+                                        "185.138.63.1/32"
+                                    ],
+                                    "transforms": []
+                                }
+                            ],
+                            "action": "Block"
+                        },
+                        {
+                            "name": "DisallowUserAgents",
+                            "enabledState": "Enabled",
+                            "priority": 4,
+                            "ruleType": "MatchRule",
+                            "rateLimitDurationInMinutes": 1,
+                            "rateLimitThreshold": 100,
+                            "matchConditions": [
+                                {
+                                    "matchVariable": "RequestHeader",
+                                    "selector": "user-agent",
+                                    "operator": "Contains",
+                                    "negateCondition": false,
+                                    "matchValue": [
+                                        "${jndi:ldap"
+                                    ],
+                                    "transforms": []
+                                }
+                            ],
+                            "action": "Block"
+                        },
+                        {
+                            "name": "AllowList",
+                            "enabledState": "Enabled",
+                            "priority": 5,
+                            "ruleType": "MatchRule",
+                            "rateLimitDurationInMinutes": 1,
+                            "rateLimitThreshold": 100,
+                            "matchConditions": [
+                                {
+                                    "matchVariable": "RemoteAddr",
+                                    "operator": "IPMatch",
+                                    "negateCondition": false,
+                                    "matchValue": [
+                                        "20.50.161.4"
+                                    ],
+                                    "transforms": []
+                                }
+                            ],
+                            "action": "Allow"
+                        }
+                    ]
+                },
+                "managedRules": {
+                    "managedRuleSets": [
+                        {
+                            "ruleSetType": "Microsoft_DefaultRuleSet",
+                            "ruleSetVersion": "2.0",
+                            "ruleSetAction": "Block",
+                            "ruleGroupOverrides": [],
+                            "exclusions": []
+                        },
+                        {
+                            "ruleSetType": "Microsoft_BotManagerRuleSet",
+                            "ruleSetVersion": "1.0",
+                            "ruleGroupOverrides": [],
+                            "exclusions": []
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[parameters('Front_Door_Name')]",
+            "location": "Global",
+            "sku": {
+                "name": "Premium_AzureFrontDoor"
+            },
+            "kind": "frontdoor",
+            "properties": {
+                "originResponseTimeoutSeconds": 60,
+                "extendedProperties": {}
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/frontdoorwebapplicationfirewallpolicies', parameters('WAF_Policy_Name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/afdendpoints",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('Front_Door_Name'), '/', parameters('Front_Door_Name'))]",
+            "location": "Global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles', parameters('Front_Door_Name'))]"
+            ],
+            "properties": {
+                "enabledState": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/origingroups",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('Front_Door_Name'), '/', parameters('Origin_Group_Name'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles', parameters('Front_Door_Name'))]"
+            ],
+            "properties": {
+                "loadBalancingSettings": {
+                    "sampleSize": 4,
+                    "successfulSamplesRequired": 3,
+                    "additionalLatencyInMilliseconds": 50
+                },
+                "healthProbeSettings": {
+                    "probePath": "/",
+                    "probeRequestType": "HEAD",
+                    "probeProtocol": "Https",
+                    "probeIntervalInSeconds": 100
+                },
+                "sessionAffinityState": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/rulesets",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('Front_Door_Name'), '/SecuirtyHeaders')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles', parameters('Front_Door_Name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/origingroups/origins",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('Front_Door_Name'), '/', parameters('Origin_Group_Name'), '/backend')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/origingroups', parameters('Front_Door_Name'), parameters('Origin_Group_Name'))]",
+                "[resourceId('Microsoft.Cdn/profiles', parameters('Front_Door_Name'))]"
+            ],
+            "properties": {
+                "hostName": "[parameters('Backend_Hostname')]",
+                "httpPort": 80,
+                "httpsPort": 443,
+                "originHostHeader": "[parameters('Backend_Hostname_Header')]",
+                "priority": 1,
+                "weight": 1000,
+                "enabledState": "Enabled",
+                "enforceCertificateNameCheck": true
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/rulesets/rules",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('Front_Door_Name'), '/SecuirtyHeaders/ContentSecurityPolicy')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/rulesets', parameters('Front_Door_Name'), 'SecuirtyHeaders')]",
+                "[resourceId('Microsoft.Cdn/profiles', parameters('Front_Door_Name'))]"
+            ],
+            "properties": {
+                "order": 4,
+                "conditions": [
+                    {
+                        "name": "HostName",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHostNameConditionParameters",
+                            "operator": "Equal",
+                            "negateCondition": false,
+                            "matchValues": [ "[parameters('Backend_Hostname_Header')]" ],
+                            "transforms": [
+                                "Lowercase"
+                            ]
+                        }
+                    }
+                ],
+                "actions": [
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Overwrite",
+                            "headerName": "Content-Security-Policy",
+                            "value": "upgrade-insecure-requests;"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy",
+                            "value": "base-uri 'self';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy",
+                            "value": "object-src 'none';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy",
+                            "value": "frame-ancestors 'self';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy",
+                            "value": "report-uri https://uefa-secops-dashboard.azurewebsites.net/csp-reports/report;"
+                        }
+                    }
+                ],
+                "matchProcessingBehavior": "Continue"
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/rulesets/rules",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('Front_Door_Name'), '/SecuirtyHeaders/ContentSecurityPolicyReportOnly')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/rulesets', parameters('Front_Door_Name'), 'SecuirtyHeaders')]",
+                "[resourceId('Microsoft.Cdn/profiles', parameters('Front_Door_Name'))]"
+            ],
+            "properties": {
+                "order": 5,
+                "conditions": [
+                    {
+                        "name": "HostName",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHostNameConditionParameters",
+                            "operator": "Equal",
+                            "negateCondition": false,
+                            "matchValues": [ "[parameters('Backend_Hostname_Header')]" ],
+                            "transforms": [
+                                "Lowercase"
+                            ]
+                        }
+                    }
+                ],
+                "actions": [
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Overwrite",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "block-all-mixed-content;"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "default-src 'none';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "style-src 'self' 'report-sample';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "style-src-elem 'self' 'report-sample';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "style-src-attr 'self' 'report-sample';"
+                        }
+                    }
+                ],
+                "matchProcessingBehavior": "Continue"
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/rulesets/rules",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('Front_Door_Name'), '/SecuirtyHeaders/ContentSecurityPolicyReportOnly2')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/rulesets', parameters('Front_Door_Name'), 'SecuirtyHeaders')]",
+                "[resourceId('Microsoft.Cdn/profiles', parameters('Front_Door_Name'))]"
+            ],
+            "properties": {
+                "order": 6,
+                "conditions": [
+                    {
+                        "name": "HostName",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHostNameConditionParameters",
+                            "operator": "Equal",
+                            "negateCondition": false,
+                            "matchValues": [ "[parameters('Backend_Hostname_Header')]" ],
+                            "transforms": [
+                                "Lowercase"
+                            ]
+                        }
+                    }
+                ],
+                "actions": [
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "script-src 'self' 'report-sample'"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "script-src-elem 'self' 'report-sample'"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "script-src-attr 'self' 'report-sample'"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "img src 'self';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "font-src 'self';"
+                        }
+                    }
+                ],
+                "matchProcessingBehavior": "Continue"
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/rulesets/rules",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('Front_Door_Name'), '/SecuirtyHeaders/ContentSecurityPolicyReportOnly3')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/rulesets', parameters('Front_Door_Name'), 'SecuirtyHeaders')]",
+                "[resourceId('Microsoft.Cdn/profiles', parameters('Front_Door_Name'))]"
+            ],
+            "properties": {
+                "order": 7,
+                "conditions": [
+                    {
+                        "name": "HostName",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHostNameConditionParameters",
+                            "operator": "Equal",
+                            "negateCondition": false,
+                            "matchValues": [ "[parameters('Backend_Hostname_Header')]" ],
+                            "transforms": [
+                                "Lowercase"
+                            ]
+                        }
+                    }
+                ],
+                "actions": [
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "form-action 'self';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "frame-ancestors 'none';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "frame-src 'self';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "child-src 'self';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "connect-src 'self';"
+                        }
+                    }
+                ],
+                "matchProcessingBehavior": "Continue"
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/rulesets/rules",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('Front_Door_Name'), '/SecuirtyHeaders/ContentSecurityPolicyReportOnly4')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/rulesets', parameters('Front_Door_Name'), 'SecuirtyHeaders')]",
+                "[resourceId('Microsoft.Cdn/profiles', parameters('Front_Door_Name'))]"
+            ],
+            "properties": {
+                "order": 8,
+                "conditions": [
+                    {
+                        "name": "HostName",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHostNameConditionParameters",
+                            "operator": "Equal",
+                            "negateCondition": false,
+                            "matchValues": [ "[parameters('Backend_Hostname_Header')]" ],
+                            "transforms": [
+                                "Lowercase"
+                            ]
+                        }
+                    }
+                ],
+                "actions": [
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "base-uri 'self';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "object-src 'none';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "media-src 'self';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "manifest-src 'self';"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "worker-src 'self';"
+                        }
+                    }
+                ],
+                "matchProcessingBehavior": "Continue"
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/rulesets/rules",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('Front_Door_Name'), '/SecuirtyHeaders/ContentSecurityPolicyReportOnly5')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/rulesets', parameters('Front_Door_Name'), 'SecuirtyHeaders')]",
+                "[resourceId('Microsoft.Cdn/profiles', parameters('Front_Door_Name'))]"
+            ],
+            "properties": {
+                "order": 9,
+                "conditions": [
+                    {
+                        "name": "HostName",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHostNameConditionParameters",
+                            "operator": "Equal",
+                            "negateCondition": false,
+                            "matchValues": [ "[parameters('Backend_Hostname_Header')]" ],
+                            "transforms": [
+                                "Lowercase"
+                            ]
+                        }
+                    }
+                ],
+                "actions": [
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Append",
+                            "headerName": "Content-Security-Policy-Report-Only",
+                            "value": "report-uri https://uefa-secops-dashboard.azurewebsites.net/csp-reports/report;"
+                        }
+                    }
+                ],
+                "matchProcessingBehavior": "Continue"
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/rulesets/rules",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('Front_Door_Name'), '/SecuirtyHeaders/RemoveHeaders')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/rulesets', parameters('Front_Door_Name'), 'SecuirtyHeaders')]",
+                "[resourceId('Microsoft.Cdn/profiles', parameters('Front_Door_Name'))]"
+            ],
+            "properties": {
+                "order": 10,
+                "conditions": [
+                    {
+                        "name": "HostName",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHostNameConditionParameters",
+                            "operator": "Equal",
+                            "negateCondition": false,
+                            "matchValues": [ "[parameters('Backend_Hostname_Header')]" ],
+                            "transforms": [
+                                "Lowercase"
+                            ]
+                        }
+                    }
+                ],
+                "actions": [
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Delete",
+                            "headerName": "Server"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Delete",
+                            "headerName": "X-Powered-By"
+                        }
+                    }
+                ],
+                "matchProcessingBehavior": "Continue"
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/rulesets/rules",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('Front_Door_Name'), '/SecuirtyHeaders/SecurityHeaders1')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/rulesets', parameters('Front_Door_Name'), 'SecuirtyHeaders')]",
+                "[resourceId('Microsoft.Cdn/profiles', parameters('Front_Door_Name'))]"
+            ],
+            "properties": {
+                "order": 3,
+                "conditions": [
+                    {
+                        "name": "HostName",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHostNameConditionParameters",
+                            "operator": "Equal",
+                            "negateCondition": false,
+                            "matchValues": [ "[parameters('Backend_Hostname_Header')]" ],
+                            "transforms": [
+                                "Lowercase"
+                            ]
+                        }
+                    }
+                ],
+                "actions": [
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Overwrite",
+                            "headerName": "X-Content-Type-Options",
+                            "value": "nosniff"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Overwrite",
+                            "headerName": "Referrer-Policy",
+                            "value": "strict-origin-when-cross-origin"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Overwrite",
+                            "headerName": "Strict-Transport-Security",
+                            "value": "max-age=63072000;"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Overwrite",
+                            "headerName": "Permissions-Policy",
+                            "value": "accelerometer=(),autoplay=(self \"https://example.com\"),camera=(),display-capture=(),document-domain=(),encrypted-media=(),fullscreen=(),geolocation=(),gyroscope=(),magnetometer=(),microphone=(),midi=(),payment=(),picture-in-picture=(),publickey-credentials-get=(),screen-wake-lock=(),sync-xhr=(self),usb=(),web-share=(),xr-spatial-tracking=()"
+                        }
+                    },
+                    {
+                        "name": "ModifyResponseHeader",
+                        "parameters": {
+                            "typeName": "DeliveryRuleHeaderActionParameters",
+                            "headerAction": "Overwrite",
+                            "headerName": "X-Permitted-Cross-Domain-Policies",
+                            "value": "none"
+                        }
+                    }
+                ],
+                "matchProcessingBehavior": "Continue"
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/securitypolicies",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('Front_Door_Name'), '/', parameters('Front_Door_Name'), '-security-policy')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles', parameters('Front_Door_Name'))]",
+                "[resourceId('Microsoft.Cdn/profiles/afdendpoints', parameters('Front_Door_Name'), parameters('Front_Door_Name'))]"
+            ],
+            "properties": {
+                "parameters": {
+                    "wafPolicy": {
+                        "id": "[resourceId('Microsoft.Network/frontdoorwebapplicationfirewallpolicies', parameters('WAF_Policy_Name'))]"
+                    },
+                    "associations": [
+                        {
+                            "domains": [
+                                {
+                                    "id": "[resourceId('Microsoft.Cdn/profiles/afdendpoints', parameters('Front_Door_Name'), parameters('Front_Door_Name'))]"
+                                }
+                            ],
+                            "patternsToMatch": [
+                                "/*"
+                            ]
+                        }
+                    ],
+                    "type": "WebApplicationFirewall"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/afdendpoints/routes",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('Front_Door_Name'), '/', parameters('Front_Door_Name'), '/Route-To-', parameters('Origin_Group_Name'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/afdendpoints', parameters('Front_Door_Name'), parameters('Front_Door_Name'))]",
+                "[resourceId('Microsoft.Cdn/profiles', parameters('Front_Door_Name'))]",
+                "[resourceId('Microsoft.Cdn/profiles/origingroups', parameters('Front_Door_Name'), parameters('Origin_Group_Name'))]",
+                "[resourceId('Microsoft.Cdn/profiles/rulesets', parameters('Front_Door_Name'), 'SecuirtyHeaders')]"
+            ],
+            "properties": {
+                "customDomains": [],
+                "originGroup": {
+                    "id": "[resourceId('Microsoft.Cdn/profiles/origingroups', parameters('Front_Door_Name'), parameters('Origin_Group_Name'))]"
+                },
+                "ruleSets": [
+                    {
+                        "id": "[resourceId('Microsoft.Cdn/profiles/rulesets', parameters('Front_Door_Name'), 'SecuirtyHeaders')]"
+                    }
+                ],
+                "supportedProtocols": [
+                    "Http",
+                    "Https"
+                ],
+                "patternsToMatch": [
+                    "/*"
+                ],
+                "forwardingProtocol": "MatchRequest",
+                "linkToDefaultDomain": "Enabled",
+                "httpsRedirect": "Enabled",
+                "enabledState": "Enabled"
+            }
+        }
+    ]
+}

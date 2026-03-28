@@ -1,0 +1,180 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "keyVaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Key Vault."
+            }
+        },
+        "webAppMSI": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Name of the associated Web App or Function App resource MSI."
+            }
+        },
+        "adObjectId": {
+            "type": "string",
+            "metadata": {
+                "description": "Object Id of the AD user or group. Get using Get-AzureRmADUser or Get-AzureRmADServicePrincipal cmdlets"
+            }
+        },
+        "keysPermissions": {
+            "type": "array",
+            "defaultValue": [
+                "all"
+            ],
+            "metadata": {
+                "description": "Permissions to keys in the vault. \r\n(Valid permissions are: encrypt, decrypt, wrapKey, unwrapKey, sign, verify, get, list, create, update, import, delete, backup, restore, recover, purge)"
+            }
+        },
+        "secretsPermissions": {
+            "type": "array",
+            "defaultValue": [
+                "all"
+            ],
+            "metadata": {
+                "description": "Permissions to secrets in the vault. \r\n(Valid permissions are: get, list, set, delete, backup, restore, recover, purge)"
+            }
+        },
+        "certificatesPermissions": {
+            "type": "array",
+            "defaultValue": [
+                "all"
+            ],
+            "metadata": {
+                "description": "Permissions to certificates in the vault. \r\n(Valid permissions are: get, list, delete, create, import, update, managecontacts, getissuers, listissuers, setissuers, deleteissuers, manageissuers, recover, purge)"
+            }
+        },
+        "storagePermissions": {
+            "type": "array",
+            "defaultValue": [
+                "all"
+            ],
+            "metadata": {
+                "description": "Permissions to storage accounts in the vault. \r\n(Valid permissions are: get, list, delete, set, update, regeneratekey, setsas, listsas, getsas, deletesas)"
+            }
+        },
+        "skuName": {
+            "type": "string",
+            "defaultValue": "Premium",
+            "allowedValues": [
+                "Standard",
+                "Premium"
+            ],
+            "metadata": {
+                "description": "SKU for the vault"
+            }
+        },
+        "enableVaultForDeployment": {
+            "type": "bool",
+            "defaultValue": false,
+            "allowedValues": [
+                true,
+                false
+            ],
+            "metadata": {
+                "description": "Enables the Microsoft.Compute resource provider to retrieve secrets from this key vault when this key vault is referenced in resource creation, for example when creating a virtual machine."
+            }
+        },
+        "enableVaultForDiskEncryption": {
+            "type": "bool",
+            "defaultValue": false,
+            "allowedValues": [
+                true,
+                false
+            ],
+            "metadata": {
+                "description": "Enables the Azure disk encryption service to get secrets and unwrap keys from this key vault."
+            }
+        },
+        "enabledForTemplateDeployment": {
+            "type": "bool",
+            "defaultValue": true,
+            "allowedValues": [
+                true,
+                false
+            ],
+            "metadata": {
+                "description": "Enables Azure Resource Manager to get secrets from this key vault when this key vault is referenced in a template deployment."
+            }
+        },
+        "enableSoftDelete": {
+            "type": "bool",
+            "defaultValue": true,
+            "allowedValues": [
+                true,
+                false
+            ],
+            "metadata": {
+                "description": "Specifies that the soft-delete functionality is enabled for this key vault. When soft-delete is enabled, for a grace period, you can recover this key vault and its contents after it is deleted."
+            }
+        },
+        "enablePurgeProtection": {
+            "type": "bool",
+            "defaultValue": true,
+            "allowedValues": [
+                true,
+                false
+            ],
+            "metadata": {
+                "description": "Specifies whether protection against immediate deletion is enabled for this vault. Requires soft delete to be enabled as well."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        }
+    },
+    "variables": {
+        "tenantId": "[subscription().tenantId]",
+        "webAppResourceId": "[concat(resourceId('Microsoft.Web/sites', parameters('webAppMSI')),'/providers/Microsoft.ManagedIdentity/Identities/default')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "name": "[parameters('keyVaultName')]",
+            "apiVersion": "2016-10-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "enabledForDeployment": "[parameters('enableVaultForDeployment')]",
+                "enabledForDiskEncryption": "[parameters('enableVaultForDiskEncryption')]",
+                "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
+                "enableSoftDelete": "[parameters('enableSoftDelete')]",
+                "enablePurgeProtection": "[parameters('enablePurgeProtection')]",
+                "tenantId": "[variables('tenantId')]",
+                "accessPolicies": [
+                    {
+                        "tenantId": "[variables('tenantId')]",
+                        "objectId": "[parameters('adObjectId')]",
+                        "permissions": {
+                            "keys": "[parameters('keysPermissions')]",
+                            "secrets": "[parameters('secretsPermissions')]",
+                            "certificates": "[parameters('certificatesPermissions')]",
+                            "storage": "[parameters('storagePermissions')]"
+                        }
+                    },
+                    {
+                       "tenantId": "[reference(variables('webAppResourceId'), '2015-08-31-PREVIEW').tenantId]",
+                       "objectId": "[reference(variables('webAppResourceId'), '2015-08-31-PREVIEW').principalId]",
+                       "permissions": {
+                           "secrets": [
+                               "get",
+                               "list"
+                           ]
+                       }
+                    }
+                ],
+                "sku": {
+                    "name": "[parameters('skuName')]",
+                    "family": "A"
+                }
+            }
+        }
+    ]
+}

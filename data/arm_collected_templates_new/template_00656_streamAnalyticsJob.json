@@ -1,0 +1,148 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.1.0.0",
+    "parameters": {
+        "resourceTags": {
+            "type": "object",
+            "metadata": {
+                "description": "The tags that will be assigned to the Stream Analytics Job"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for the resources. Important: physical location must be the same for all resources to avoid data transfer costs."
+            }
+        },
+        "streamAnalyticsJobName": {
+            "type": "string",
+            "metadata": {
+                "description": "Stream Analytics Job Name, can contain alphanumeric characters and hypen and must be 3-63 characters long"
+            }
+        },
+        "numberOfStreamingUnits": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of SUs"
+            }
+        },
+        "inputName": {
+            "type": "string",
+            "metadata": {
+                "description": "Input Name"
+            }
+        },
+
+        "outputName": {
+            "type": "string",
+            "metadata": {
+                "description": "Output Name"
+            }
+        },
+        "accessPolicyName": {
+            "type": "string",
+            "metadata": {
+                "description": "SAS key name"
+            }
+        },
+        "namespaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Event Hub namespace name"
+            }
+        },
+        "eventHubName": {
+            "type": "string",
+            "metadata": {
+                "description": "Event Hub name"
+            }
+        }
+    },
+    "variables": {
+        "keyname": "[resourceId('Microsoft.EventHub/namespaces/eventhubs/authorizationRules', parameters('namespaceName'),parameters('eventHubName'), 'twitterStreamer')]",
+        "cosmosDbAccountId": "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbAccountName'))]",
+        "cosmosDbAccountName": "cosmosmsciss",
+        "cosmosDbName": "dbname",
+        "collectionName": "container1",
+        "documentId":"collectiondocumentId",
+        "partitionKey": "PartitionId"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.StreamAnalytics/StreamingJobs",
+            "apiVersion": "2019-06-01",
+            "name": "[parameters('streamAnalyticsJobName')]",
+            "location": "[parameters('location')]",
+            "tags": "[parameters('resourceTags')]",
+            "properties": {
+                "sku": {
+                    "name": "standard"
+                },
+                "outputErrorPolicy": "stop",
+                "eventsOutOfOrderPolicy": "adjust",
+                "eventsOutOfOrderMaxDelayInSeconds": 0,
+                "eventsLateArrivalMaxDelayInSeconds": 5,
+                "dataLocale": "en-US",
+                "inputs": [
+                    {
+                        "name": "[parameters('inputName')]",
+                        "properties": {
+                            "type": "Stream",
+                            "datasource": {
+                                "type": "Microsoft.ServiceBus/EventHub",
+                                "properties": {
+                                    "serviceBusNamespace": "[parameters('namespaceName')]",
+                                    "sharedAccessPolicyName": "[parameters('accessPolicyName')]",
+                                    "sharedAccessPolicyKey": "[listkeys(variables('keyname'), '2017-04-01').primaryKey]",
+                                    "eventHubName": "[parameters('eventHubName')]",
+                                    "consumerGroupName": "$Default"
+                                }
+                            },
+                            "serialization": {
+                                "type": "Json",
+                                "properties": {
+                                    "encoding": "UTF8",
+                                    "format": "LineSeparated"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "[parameters('outputName')]",
+                        "properties": {
+                            "type": "Stream",
+                            "datasource": {
+                                "type": "Microsoft.Storage/DocumentDB",
+                                "properties": {
+                                    "accountId": "[variables('cosmosDbAccountName')]",
+                                    "accountKey": "[listKeys(variables('cosmosDbAccountId'), '2020-04-01').primaryMasterKey]",
+                                    "database": "[variables('cosmosDbName')]",
+                                    "collectionNamePattern": "[variables('collectionName')]",
+                                    "partitionKey": "[variables('partitionKey')]",
+                                    "documentId": "[variables('documentId')]"
+                                }
+                            },
+                            "serialization": {
+                                "type": "Json",
+                                "properties": {
+                                    "encoding": "UTF8",
+                                    "format": "LineSeparated"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "transformation": {
+                    "name": "Transformation",
+                    "properties": {
+                        "streamingUnits": "[parameters('numberOfStreamingUnits')]",
+                        "query": "[concat('SELECT\r\n    *\r\nINTO\r\n    ',parameters('outputName'),'\r\nFROM\r\n    ',parameters('inputName'))]"
+                    }
+                }
+            }
+        }
+    ]
+}

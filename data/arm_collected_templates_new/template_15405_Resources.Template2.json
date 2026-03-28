@@ -1,0 +1,216 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Key Vault."
+            }
+        },
+        "role": {
+            "type": "string",
+            "defaultValue": "App secrets",
+            "metadata": {
+                "description": "The role of the service."
+            }
+        },
+        "accessPolicies": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "The access policies defined for this vault."
+            }
+        },
+        "useDeployment": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Determines if Azure can deploy certificates from this Key Vault."
+            }
+        },
+        "useTemplate": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Determines if templates can reference secrets from this Key Vault."
+            }
+        },
+        "useDiskEncryption": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Determines if this Key Vault can be used for Azure Disk Encryption."
+            }
+        },
+        "networkAcls": {
+            "type": "object",
+            "defaultValue": {
+                "defaultAction": "Allow",
+                "bypass": "AzureServices",
+                "ipRules": [],
+                "virtualNetworkRules": []
+            },
+            "metadata": {
+                "description": "The network firewall defined for this vault."
+            }
+        },
+        "diagnosticStorageAccountName": {
+            "type": "string",
+            "defaultValue": "kvstoragediag01"
+        }
+    },
+    "variables": {
+        "vault2": "vault-002"
+    },
+    "resources": [
+        {
+            "comments": "Application Key Vault",
+            "type": "Microsoft.KeyVault/vaults",
+            "name": "[parameters('vaultName')]",
+            "apiVersion": "2016-10-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "enabledForDeployment": "[parameters('useDeployment')]",
+                "enabledForTemplateDeployment": "[parameters('useTemplate')]",
+                "enabledForDiskEncryption": "[parameters('useDiskEncryption')]",
+                "enableSoftDelete": true,
+                "enablePurgeProtection": true,
+                "accessPolicies": "[parameters('accessPolicies')]",
+                "tenantId": "[subscription().tenantId]",
+                "sku": {
+                    "name": "standard",
+                    "family": "A"
+                },
+                "networkAcls": "[parameters('networkAcls')]"
+            },
+            "tags": {
+                "role": "[parameters('role')]"
+            },
+            "resources": [
+                {
+                    "comments": "",
+                    "type": "Microsoft.KeyVault/vaults/providers/diagnosticsettings",
+                    "name": "[concat(parameters('vaultName'), '/Microsoft.Insights/service')]",
+                    "apiVersion": "2016-09-01",
+                    "Location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[concat('Microsoft.KeyVault/vaults/', parameters('vaultName'))]",
+                        "[concat('Microsoft.Storage/storageAccounts/', parameters('diagnosticStorageAccountName'))]"
+                    ],
+                    "properties": {
+                        "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('diagnosticStorageAccountName'))]",
+                        "logs": [
+                            {
+                                "category": "AuditEvent",
+                                "enabled": true,
+                                "retentionPolicy": {
+                                    "enabled": true,
+                                    "days": 7
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "Microsoft.KeyVault/vaults/keys",
+                    "apiVersion": "2021-06-01-preview",
+                    "name": "[concat(parameters('vaultName'), '/', 'key1')]",
+                    "tags": {},
+                    "properties": {
+                        "keyOps": [
+                            "sign",
+                            "verify",
+                            "wrapKey",
+                            "unwrapKey",
+                            "encrypt",
+                            "decrypt"
+                        ],
+                        "keySize": 2048,
+                        "kty": "RSA",
+                        "rotationPolicy": {
+                            "lifetimeActions": [
+                                {
+                                    "action": {
+                                        "type": "Rotate"
+                                    },
+                                    "trigger": {
+                                        "timeAfterCreate": "P18D"
+                                    }
+                                },
+                                {
+                                    "action": {
+                                        "type": "Notify"
+                                    },
+                                    "trigger": {
+                                        "timeAfterCreate": "P30D"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[parameters('diagnosticStorageAccountName')]",
+            "apiVersion": "2016-12-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "Storage",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/keys",
+            "apiVersion": "2021-06-01-preview",
+            "name": "[concat(variables('vault2'), '/', 'key2')]",
+            "tags": {},
+            "properties": {
+                "keyOps": [
+                    "sign",
+                    "verify",
+                    "wrapKey",
+                    "unwrapKey",
+                    "encrypt",
+                    "decrypt"
+                ],
+                "keySize": 2048,
+                "kty": "RSA",
+                "rotationPolicy": {
+                    "lifetimeActions": [
+                        {
+                            "action": {
+                                "type": "Notify"
+                            },
+                            "trigger": {
+                                "timeAfterCreate": "P30D"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/keys",
+            "apiVersion": "2021-06-01-preview",
+            "name": "[concat(variables('vault2'), '/', 'key3')]",
+            "tags": {},
+            "properties": {
+                "keyOps": [
+                    "sign",
+                    "verify",
+                    "wrapKey",
+                    "unwrapKey",
+                    "encrypt",
+                    "decrypt"
+                ],
+                "keySize": 2048,
+                "kty": "RSA"
+            }
+        }
+    ],
+    "other": {}
+}

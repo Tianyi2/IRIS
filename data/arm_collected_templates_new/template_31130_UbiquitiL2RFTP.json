@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/fd200125-9d57-4838-85ca-6430c63e4e5d')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/fd200125-9d57-4838-85ca-6430c63e4e5d')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "Ubiquiti - Unusual FTP connection to external server",
+        "description": "'Detects local to remote (L2R) FTP connections.'\n",
+        "query": "let allowed_ftp = dynamic(['127.0.0.2']);\nUbiquitiAuditEvent\n| where EventCategory == 'firewall'\n| where ipv4_is_private(SrcIpAddr)\n| where ipv4_is_private(DstIpAddr) == 'False'\n| where DstPortNumber in ('20', '21')\n| where DstIpAddr !in (allowed_ftp)\n| extend IPCustomEntity = SrcIpAddr\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "IPCustomEntity",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "Exfiltration",
+          "CommandAndControl"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

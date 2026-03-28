@@ -1,0 +1,84 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/cb410ad5-6e9d-4278-b963-1e3af205d680')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/cb410ad5-6e9d-4278-b963-1e3af205d680')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "12h",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "alertDetailsOverride": null,
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "SpyCloud Enterprise Breach Detection",
+        "description": "'This alert creates an incident when an malware record is detected in the SpyCloud watchlist data'\n",
+        "suppressionDuration": "5h",
+        "query": "SpyCloudBreachDataWatchlist_CL\n| where Severity_s == '20'\n| project TimeGenerated, Document_Id_g, Source_Id_s, SpyCloud_Publish_Date_t, Email_s, Domain_s, Password_s, Password_Plaintext_s, Username_s, IP_Address_s\n",
+        "status": "Available",
+        "sentinelEntitiesMappings": null,
+        "queryFrequency": "12h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Email_s",
+                "identifier": "FullName"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Username_s",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "IP_Address_s",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "severity": "High",
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "tactics": [
+          "CredentialAccess"
+        ],
+        "customDetails": {
+          "Source_Id": "Source_Id_s",
+          "PublishDate": "SpyCloud_Publish_Date_t",
+          "Password": "Password_s",
+          "Document_Id": "Document_Id_g",
+          "Password_Plaintext": "Password_Plaintext_s",
+          "Domain": "Domain_s"
+        },
+        "queryPeriod": "12h"
+      }
+    }
+  ]
+}

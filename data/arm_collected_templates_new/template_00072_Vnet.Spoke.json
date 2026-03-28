@@ -1,0 +1,173 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "spokeVnetObject": {
+      "type": "object",
+      "defaultValue": {
+        "vnetName": "VNET-DMZ-02",
+        "vnetPrefix": "10.0.32.0/20",
+        "subnets": [
+          {
+            "subnetName": "DMZ-02-Subnet-01",
+            "subnetPrefix": "10.0.32.0/26"
+          },
+          {
+            "subnetName": "DMZ-02-Subnet-02",
+            "subnetPrefix": "10.0.32.64/26"
+          },
+          {
+            "subnetName": "DMZ-02-Subnet-03",
+            "subnetPrefix": "10.0.32.128/26"
+          },
+          {
+            "subnetName": "DMZ-02-Subnet-04",
+            "subnetPrefix": "10.0.32.192/26"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "JSON object representing the spoke VNet"
+      }
+    },
+    "peeredVnetName": {
+      "type": "string",
+      "defaultValue": "VNET-DMZ-01",
+      "metadata": {
+        "description": "The ResourceId of the hub vnet used for peering"
+      }
+    }
+  },
+  "variables": {
+    "apiVersions": {
+      "deployments": "2017-05-10",
+      "virtualNetworks": "2019-11-01",
+      "virtualNetworkPeerings": "2019-04-01"
+    },
+    "serviceEndpointLocations": [
+      "*"
+    ]
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('apiVersions').virtualNetworks]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[parameters('spokeVnetObject').vnetName]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('spokeVnetObject').vnetPrefix]"
+          ]
+        },
+        "copy": [
+          {
+            "name": "subnets",
+            "count": "[length(parameters('spokeVnetObject').subnets)]",
+            "input": {
+              "name": "[parameters('spokeVnetObject').subnets[copyindex('subnets')].subnetName]",
+              "properties": {
+                "addressPrefix": "[parameters('spokeVnetObject').subnets[copyindex('subnets')].subnetPrefix]",
+                "serviceEndpoints": [
+                  {
+                    "service": "Microsoft.AzureActiveDirectory",
+                    "locations": "[variables('serviceEndpointLocations')]"
+                  },
+                  {
+                    "service": "Microsoft.AzureCosmosDB",
+                    "locations": "[variables('serviceEndpointLocations')]"
+                  },
+                  {
+                    "service": "Microsoft.ContainerRegistry",
+                    "locations": "[variables('serviceEndpointLocations')]"
+                  },
+                  {
+                    "service": "Microsoft.EventHub",
+                    "locations": "[variables('serviceEndpointLocations')]"
+                  },
+                  {
+                    "service": "Microsoft.KeyVault",
+                    "locations": "[variables('serviceEndpointLocations')]"
+                  },
+                  {
+                    "service": "Microsoft.ServiceBus",
+                    "locations": "[variables('serviceEndpointLocations')]"
+                  },
+                  {
+                    "service": "Microsoft.Sql",
+                    "locations": "[variables('serviceEndpointLocations')]"
+                  },
+                  {
+                    "service": "Microsoft.Storage",
+                    "locations": "[variables('serviceEndpointLocations')]"
+                  },
+                  {
+                    "service": "Microsoft.Web",
+                    "locations": "[variables('serviceEndpointLocations')]"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersions').virtualNetworks]",
+      "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "name": "[concat(parameters('spokeVnetObject').vnetName, '/virtualNetworkPeerings')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', parameters('spokeVnetObject').vnetName)]"
+      ],
+      "properties": {
+        "allowVirtualNetworkAccess": true,
+        "allowForwardedTraffic": false,
+        "allowGatewayTransit": false,
+        "useRemoteGateways": false,
+        "remoteVirtualNetwork": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworks',  parameters('peeredVnetName'))]"
+        }
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersions').deployments]",
+      "name": "nestedTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "resourceGroup": "[resourceGroup().name]",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+          },
+          "variables": {
+          },
+          "resources": [
+            {
+              "apiVersion": "2019-04-01",
+              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+              "name": "[concat(parameters('peeredVnetName'), '/virtualNetworkPeerings')]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": false,
+                "allowGatewayTransit": false,
+                "useRemoteGateways": false,
+                "remoteVirtualNetwork": {
+                  "id": "[resourceId('Microsoft.Network/virtualNetworks',  parameters('spokeVnetObject').vnetName)]"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks/virtualNetworkPeerings', parameters('spokeVnetObject').vnetName, 'virtualNetworkPeerings')]"
+      ]
+    }
+  ]
+}

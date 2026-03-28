@@ -1,0 +1,13 @@
+﻿failure_type,count,percentage
+Invalid or missing $schema:,11205,51.72
+No 'resources' section found or it is empty,4703,21.71
+Invalid or missing $schema,3948,18.22
+JSON parse error: Expecting property name enclosed in double quotes,930,4.29
+JSON parse error: Expecting value,249,1.15
+"JSON parse error: Expecting ',' delimiter",227,1.05
+JSON parse error: Illegal trailing comma before end of object,212,0.98
+JSON parse error: Invalid control character at,138,0.64
+JSON parse error: Illegal trailing comma before end of array,34,0.16
+Template root is not a dictionary,11,0.05
+JSON parse error: Extra data,5,0.02
+JSON parse error: Invalid \escape,2,0.01

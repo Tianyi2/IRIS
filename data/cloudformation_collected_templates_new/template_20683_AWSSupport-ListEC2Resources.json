@@ -1,0 +1,460 @@
+{
+  "description": "The **AWSSupport-ListEC2Resources** runbook lists Amazon Elastic Compute Cloud (Amazon EC2) related resources including:\n- Amazon EC2 instances\n- Amazon Machine Images (AMIs)\n- Amazon Elastic Block Store (Amazon EBS) volumes\n- Amazon EBS snapshots\n- Elastic IP addresses (EIPs)\n- Elastic Network Interfaces (ENIs)\n- Amazon EC2 Auto Scaling groups (ASGs)\n- Elastic Load Balancing (ELB) load balancers\n\nThis document has four parameters:\n- (Optional) `AutomationAssumeRole`: AWS Identity and Access Management (IAM) role required for executing this runbook.\n- (Optional) `BucketName`: an Amazon Simple Storage Service (Amazon S3) bucket in your account to save the outputted list as a comma-separated values (CSV) text file. The CSV file will include separate sections for each resource type, with detailed information such as IDs, names, states, and regions.\n- (Optional) `RegionsToQuery`: AWS Regions to list the resources from. By default all active regions are queried.\n- (Optional) `DisplayResourceDeletionDocumentation`: to include relevant documentation links to delete the resources. Default is `Yes`.\n\n**Note: This document outputs sensitive data about your AWS resources. Please make sure appropriate bucket policy is in place for the bucket specified in the parameter `BucketName`. If the bucket is detected as public, the CSV file is not uploaded.**",
+  "schemaVersion": "0.3",
+  "assumeRole": "{{ AutomationAssumeRole }}",
+  "outputs": [
+    "ListEC2Instances.EC2Instances",
+    "ListImages.AMIs",
+    "ListVolumes.EBSVolumes",
+    "ListSnapshots.VolumeSnapshots",
+    "ListEIPs.EIPs",
+    "ListENIs.NetworkInterfaces",
+    "ListAutoScalingGroups.AutoScalingGroups",
+    "ListElasticLoadBalancers.ELBs"
+  ],
+  "parameters": {
+    "AutomationAssumeRole": {
+      "type": "AWS::IAM::Role::Arn",
+      "description": "(Optional) The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that allows Systems Manager Automation to perform the actions on your behalf. If no role is specified, Systems Manager Automation uses the permissions of the user that starts this runbook.",
+      "default": ""
+    },
+    "BucketName": {
+      "type": "AWS::S3::Bucket::Name",
+      "description": "(Optional) The name of the Amazon S3 bucket to save a CSV text file of the reported list of resources.",
+      "default": ""
+    },
+    "RegionsToQuery": {
+      "type": "String",
+      "default": "All",
+      "description": "(Optional) The list of AWS Regions to query for resources. By default, queries all active regions in the AWS Partition. To query specific regions, provide a comma-delimited list, for example: `us-east-1,us-west-1`.",
+      "allowedPattern": "All|[a-z]{2}(-gov)?(-iso[a-z]?)?-[a-z]{2,10}-[0-9]{1,2}(,[a-z]{2}(-gov)?(-iso[a-z]?)?-[a-z]{2,10}-[0-9]{1,2})*"
+    },
+    "DisplayResourceDeletionDocumentation": {
+      "type": "String",
+      "default": "True",
+      "description": "(Optional) If set to `True`, the automation creates links in the output to documentation related to deleting your resources.",
+      "allowedValues": [
+        "True",
+        "False"
+      ]
+    }
+  },
+  "mainSteps": [
+    {
+      "name": "GetActiveRegions",
+      "description": "Retrieves the active AWS Regions for the AWS account.",
+      "action": "aws:executeAwsApi",
+      "nextStep": "ValidateRegionsToQuery",
+      "outputs": [
+        {
+          "Name": "ActiveRegions",
+          "Selector": "$.Regions",
+          "Type": "MapList"
+        }
+      ],
+      "inputs": {
+        "Api": "DescribeRegions",
+        "Service": "ec2"
+      },
+      "onFailure": "Abort",
+      "isCritical": true
+    },
+    {
+      "name": "ValidateRegionsToQuery",
+      "description": "Validates that the AWS Regions specified in the `RegionToQuery` parameter are valid.",
+      "action": "aws:executeScript",
+      "nextStep": "BranchOnIfValidRegions",
+      "timeoutSeconds": 1800,
+      "inputs": {
+        "InputPayload": {
+          "RegionsToQuery": "{{ RegionsToQuery }}",
+          "ActiveRegions": "{{ GetActiveRegions.ActiveRegions }}"
+        },
+        "Handler": "validate_regions.script_handler",
+        "Runtime": "python3.11",
+        "Attachment": "artifact.zip"
+      },
+      "outputs": [
+        {
+          "Name": "ValidRegions",
+          "Selector": "$.Payload.valid_regions",
+          "Type": "String"
+        },
+        {
+          "Name": "InvalidRegions",
+          "Selector": "$.Payload.invalid_regions",
+          "Type": "String"
+        },
+        {
+          "Name": "InactiveRegions",
+          "Selector": "$.Payload.inactive_regions",
+          "Type": "String"
+        },
+        {
+          "Name": "KnownIssuesNotRunningIn",
+          "Selector": "$.Payload.not_running_in",
+          "Type": "String"
+        }
+      ],
+      "onFailure": "Abort"
+    },
+    {
+      "name": "BranchOnIfValidRegions",
+      "description": "Branches on if valid regions are present and continues or ends the execution.",
+      "action": "aws:branch",
+      "isEnd": true,
+      "inputs": {
+        "Choices": [
+          {
+            "Not": {
+              "Variable": "{{ ValidateRegionsToQuery.ValidRegions }}",
+              "StringEquals": "Empty"
+            },
+            "NextStep": "ListEC2Instances"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ListEC2Instances",
+      "description": "Retrieves the list of Amazon EC2 instances with their details.",
+      "action": "aws:executeScript",
+      "nextStep": "ListImages",
+      "timeoutSeconds": 1800,
+      "inputs": {
+        "InputPayload": {
+          "Regions": "{{ ValidateRegionsToQuery.ValidRegions }}",
+          "Documentation": "{{ DisplayResourceDeletionDocumentation }}"
+        },
+        "Handler": "list_instances.script_handler",
+        "Runtime": "python3.11",
+        "Attachment": "artifact.zip"
+      },
+      "outputs": [
+        {
+          "Name": "EC2Instances",
+          "Selector": "$.Payload.resource_list",
+          "Type": "String"
+        },
+        {
+          "Name": "Failures",
+          "Selector": "$.Payload.failed",
+          "Type": "String"
+        },
+        {
+          "Name": "How to terminate resource",
+          "Selector": "$.Payload.how_to",
+          "Type": "String"
+        }
+      ],
+      "onFailure": "Continue",
+      "isCritical": false
+    },
+    {
+      "name": "ListImages",
+      "description": "Retrieves the list of Amazon Machine Images (AMIs).",
+      "action": "aws:executeScript",
+      "nextStep": "ListVolumes",
+      "timeoutSeconds": 1800,
+      "inputs": {
+        "InputPayload": {
+          "Regions": "{{ ValidateRegionsToQuery.ValidRegions }}",
+          "Documentation": "{{ DisplayResourceDeletionDocumentation }}"
+        },
+        "Handler": "list_images.script_handler",
+        "Runtime": "python3.11",
+        "Attachment": "artifact.zip"
+      },
+      "outputs": [
+        {
+          "Name": "AMIs",
+          "Selector": "$.Payload.resource_list",
+          "Type": "String"
+        },
+        {
+          "Name": "Failures",
+          "Selector": "$.Payload.failed",
+          "Type": "String"
+        },
+        {
+          "Name": "How to terminate resource",
+          "Selector": "$.Payload.how_to",
+          "Type": "String"
+        }
+      ],
+      "onFailure": "Continue",
+      "isCritical": false
+    },
+    {
+      "name": "ListVolumes",
+      "description": "Retrieves the list of Amazon EBS volumes.",
+      "action": "aws:executeScript",
+      "nextStep": "ListSnapshots",
+      "timeoutSeconds": 1800,
+      "inputs": {
+        "InputPayload": {
+          "Regions": "{{ ValidateRegionsToQuery.ValidRegions }}",
+          "Documentation": "{{ DisplayResourceDeletionDocumentation }}"
+        },
+        "Handler": "list_volumes.script_handler",
+        "Runtime": "python3.11",
+        "Attachment": "artifact.zip"
+      },
+      "outputs": [
+        {
+          "Name": "EBSVolumes",
+          "Selector": "$.Payload.resource_list",
+          "Type": "String"
+        },
+        {
+          "Name": "Failures",
+          "Selector": "$.Payload.failed",
+          "Type": "String"
+        },
+        {
+          "Name": "How to terminate resource",
+          "Selector": "$.Payload.how_to",
+          "Type": "String"
+        }
+      ],
+      "onFailure": "Continue",
+      "isCritical": false
+    },
+    {
+      "name": "ListSnapshots",
+      "description": "Retrieves the list of Amazon EBS snapshots.",
+      "action": "aws:executeScript",
+      "nextStep": "ListEIPs",
+      "timeoutSeconds": 1800,
+      "inputs": {
+        "InputPayload": {
+          "Regions": "{{ ValidateRegionsToQuery.ValidRegions }}",
+          "Documentation": "{{ DisplayResourceDeletionDocumentation }}"
+        },
+        "Handler": "list_snapshots.script_handler",
+        "Runtime": "python3.11",
+        "Attachment": "artifact.zip"
+      },
+      "outputs": [
+        {
+          "Name": "VolumeSnapshots",
+          "Selector": "$.Payload.resource_list",
+          "Type": "String"
+        },
+        {
+          "Name": "Failures",
+          "Selector": "$.Payload.failed",
+          "Type": "String"
+        },
+        {
+          "Name": "How to terminate resource",
+          "Selector": "$.Payload.how_to",
+          "Type": "String"
+        }
+      ],
+      "onFailure": "Continue",
+      "isCritical": false
+    },
+    {
+      "name": "ListEIPs",
+      "description": "Retrieves the list of Elastic IP addresses.",
+      "action": "aws:executeScript",
+      "nextStep": "ListENIs",
+      "timeoutSeconds": 1800,
+      "inputs": {
+        "InputPayload": {
+          "Regions": "{{ ValidateRegionsToQuery.ValidRegions }}",
+          "Documentation": "{{ DisplayResourceDeletionDocumentation }}"
+        },
+        "Handler": "list_eips.script_handler",
+        "Runtime": "python3.11",
+        "Attachment": "artifact.zip"
+      },
+      "outputs": [
+        {
+          "Name": "EIPs",
+          "Selector": "$.Payload.resource_list",
+          "Type": "String"
+        },
+        {
+          "Name": "Failures",
+          "Selector": "$.Payload.failed",
+          "Type": "String"
+        },
+        {
+          "Name": "How to terminate resource",
+          "Selector": "$.Payload.how_to",
+          "Type": "String"
+        }
+      ],
+      "onFailure": "Continue",
+      "isCritical": false
+    },
+    {
+      "name": "ListENIs",
+      "description": "Retrieves the list of elastic network interfaces (ENIs).",
+      "action": "aws:executeScript",
+      "nextStep": "ListAutoScalingGroups",
+      "timeoutSeconds": 1800,
+      "inputs": {
+        "InputPayload": {
+          "Regions": "{{ ValidateRegionsToQuery.ValidRegions }}",
+          "Documentation": "{{ DisplayResourceDeletionDocumentation }}"
+        },
+        "Handler": "list_enis.script_handler",
+        "Runtime": "python3.11",
+        "Attachment": "artifact.zip"
+      },
+      "outputs": [
+        {
+          "Name": "NetworkInterfaces",
+          "Selector": "$.Payload.resource_list",
+          "Type": "String"
+        },
+        {
+          "Name": "Failures",
+          "Selector": "$.Payload.failed",
+          "Type": "String"
+        },
+        {
+          "Name": "How to terminate resource",
+          "Selector": "$.Payload.how_to",
+          "Type": "String"
+        }
+      ],
+      "onFailure": "Continue",
+      "isCritical": false
+    },
+    {
+      "name": "ListAutoScalingGroups",
+      "description": "Retrieves the list of Auto Scaling groups.",
+      "action": "aws:executeScript",
+      "nextStep": "ListElasticLoadBalancers",
+      "timeoutSeconds": 1800,
+      "inputs": {
+        "Handler": "list_autoscaling_groups.script_handler",
+        "InputPayload": {
+          "Regions": "{{ ValidateRegionsToQuery.ValidRegions }}",
+          "Documentation": "{{ DisplayResourceDeletionDocumentation }}"
+        },
+        "Runtime": "python3.11",
+        "Attachment": "artifact.zip"
+      },
+      "outputs": [
+        {
+          "Name": "AutoScalingGroups",
+          "Selector": "$.Payload.resource_list",
+          "Type": "String"
+        },
+        {
+          "Name": "Failures",
+          "Selector": "$.Payload.failed",
+          "Type": "String"
+        },
+        {
+          "Name": "How to terminate resource",
+          "Selector": "$.Payload.how_to",
+          "Type": "String"
+        }
+      ],
+      "onFailure": "Continue",
+      "isCritical": false
+    },
+    {
+      "name": "ListElasticLoadBalancers",
+      "description": "Retrieves the list of Elastic Load Balancers.",
+      "action": "aws:executeScript",
+      "nextStep": "BranchOnIfCSVRequested",
+      "timeoutSeconds": 1800,
+      "inputs": {
+        "InputPayload": {
+          "Regions": "{{ ValidateRegionsToQuery.ValidRegions }}",
+          "Documentation": "{{ DisplayResourceDeletionDocumentation }}"
+        },
+        "Handler": "list_elbs.script_handler",
+        "Runtime": "python3.11",
+        "Attachment": "artifact.zip"
+      },
+      "outputs": [
+        {
+          "Name": "ELBs",
+          "Selector": "$.Payload.resource_list",
+          "Type": "String"
+        },
+        {
+          "Name": "Failures",
+          "Selector": "$.Payload.failed",
+          "Type": "String"
+        },
+        {
+          "Name": "How to terminate resource",
+          "Selector": "$.Payload.how_to",
+          "Type": "String"
+        }
+      ],
+      "onFailure": "Continue",
+      "isCritical": false
+    },
+    {
+      "name": "BranchOnIfCSVRequested",
+      "description": "Branches on if the CSV output was requested.",
+      "action": "aws:branch",
+      "isEnd": true,
+      "inputs": {
+        "Choices": [
+          {
+            "Not": {
+              "Variable": "{{ BucketName }}",
+              "StringEquals": ""
+            },
+            "NextStep": "UploadCSVToS3"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UploadCSVToS3",
+      "description": "Creates and uploads CSV file with resource details to the specified Amazon S3 bucket.",
+      "action": "aws:executeScript",
+      "isEnd": true,
+      "timeoutSeconds": 1800,
+      "inputs": {
+        "InputPayload": {
+          "Bucket": "{{ BucketName }}",
+          "Automation ID": "{{ automation:EXECUTION_ID }}",
+          "Instances": "{{ ListEC2Instances.EC2Instances }}",
+          "AMIs": "{{ ListImages.AMIs }}",
+          "EBS Volumes": "{{ ListVolumes.EBSVolumes }}",
+          "Snapshots": "{{ ListSnapshots.VolumeSnapshots }}",
+          "Elastic IPs": "{{ ListEIPs.EIPs }}",
+          "Elastic Network Interfaces": "{{ ListENIs.NetworkInterfaces }}",
+          "Auto Scaling Groups": "{{ ListAutoScalingGroups.AutoScalingGroups }}",
+          "Elastic Load balancers": "{{ ListElasticLoadBalancers.ELBs }}"
+        },
+        "Handler": "upload_csv_to_s3.script_handler",
+        "Runtime": "python3.11",
+        "Attachment": "artifact.zip"
+      },
+      "outputs": [
+        {
+          "Name": "Download From Here",
+          "Selector": "$.Payload.download_from_here",
+          "Type": "String"
+        },
+        {
+          "Name": "Message",
+          "Selector": "$.Payload.message",
+          "Type": "String"
+        }
+      ],
+      "onFailure": "Abort"
+    }
+  ],
+  "files": {
+    "artifact.zip": {
+      "checksums": {
+        "SHA256": "820f75adc1a60c062562402a7a9e2664193c82b4f12e504fee4ba172f0463ed9"
+      }
+    }
+  }
+}

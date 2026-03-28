@@ -1,0 +1,94 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/b9df1ec4-a572-4448-8da1-1bc4b7e1687f')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/b9df1ec4-a572-4448-8da1-1bc4b7e1687f')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": false,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "PT5H",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "enabled": true,
+        "severity": "Low",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "CybleVision Tor Link Alert ({{KeywordName}})",
+          "alertDescriptionFormat": "Source {{TL_SearchEngine}}. Tor URL {{TL_TorUrl}}. Description {{Description}}\"\n",
+          "alertDynamicProperties": []
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Cyble Vision Alerts TOR Links",
+        "description": "'Detects Tor marketplace, darkweb link, and onion domain alerts from CybleVision. Uses the Alerts_TorLinks parser to extract onion URLs, search engines, search keywords, content, and identifiers. Incidents are grouped by service.'\n",
+        "suppressionDuration": "PT5H",
+        "query": "Alerts_tor_links \n| where Service == \"tor_links\" \n| extend MappedSeverity = Severity\n",
+        "status": "Available",
+        "queryFrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "TL_TorUrl",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Domain",
+                "identifier": "DomainName"
+              }
+            ],
+            "entityType": "DNS"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "IP",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "ResourceDevelopment",
+          "Reconnaissance"
+        ],
+        "triggerThreshold": 0,
+        "subTechniques": [],
+        "customDetails": {
+          "MappedSeverity": "Severity",
+          "AlertID": "AlertID",
+          "Tags": "Tags",
+          "SearchKeyword": "TL_SearchKeyword",
+          "DocId": "TL_Doc_Id",
+          "UpdatedOn": "TL_UpdatedOn",
+          "SearchEngine": "Search_Engine",
+          "Service": "Service",
+          "TOR_Doc": "TL_Doc_Data",
+          "Status": "Status"
+        },
+        "queryPeriod": "30m"
+      }
+    }
+  ]
+}

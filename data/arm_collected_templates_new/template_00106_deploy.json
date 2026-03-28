@@ -1,0 +1,189 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 12,
+            "metadata": {
+                "description": "The name of the app service, hosting plan."
+            }
+        },
+        "kind": {
+            "type": "string",
+            "defaultValue": "linux",
+            "allowedValues": [
+                "linux",
+                "app",
+                "functionapp",
+                "functionapp,linux"
+            ],
+            "metadata": {
+                "description": "App Service kind (windows/linux)"
+            }
+        },
+        "sku": {
+            "type": "string",
+            "defaultValue": "D1",
+            "allowedValues": [
+                "Y1",
+                "B1",
+                "D1",
+                "S1",
+                "S2",
+                "S3",
+                "P1v2",
+                "P1v3",
+                "P2v2",
+                "P2v3",
+                "P3v2",
+                "P3v3"
+            ],
+            "metadata": {
+                "description": "App Service Tier (SKU)."
+            }
+        },
+        "size": {
+            "type": "int",
+            "defaultValue": 1,
+            "minValue": 1,
+            "maxValue": 4,
+            "metadata": {
+                "description": "App Service VM Size."
+            }
+        },
+        "capacity": {
+            "type": "int",
+            "defaultValue": 1,
+            "minValue": 1,
+            "maxValue": 20,
+            "metadata": {
+                "description": "App Service capacity."
+            }
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Tags for service"
+            }
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "ossVersion": { "ossversion": "0.0.1" },
+        "tags": "[union(parameters('tags'), variables('ossVersion'))]",
+        "name": "[parameters('name')]",
+        "sku": "[parameters('sku')]",
+        "workerSize": "[parameters('size')]",
+        "isWindows": "[equals(parameters('kind'), 'app')]",
+        "kind": "[parameters('kind')]",
+        "reserved": "[not(variables('isWindows'))]",
+        "maxCapacity": "[variables('capacityMap')[parameters('sku')]]",
+        "capacityMap":{
+                "Y1": 0,
+                "B1": 3,
+                "D1": 3,
+                "S1": 10,
+                "S2": 10,
+                "S3": 10,
+                "P1v2": 20,
+                "P1v3": 20,
+                "P2v2": 20,
+                "P2v3": 20,
+                "P3v2": 20,
+                "P3v3": 20
+        },
+        "autoscaleEnable": "[and(not(equals(parameters('sku'), 'F1')), not(equals(parameters('sku'), 'Y1')))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2020-06-01",
+            "name": "[variables('name')]",
+            "kind": "[variables('kind')]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "[variables('sku')]",
+                "capacity": "[parameters('capacity')]"
+            },
+            "properties": {
+                "name": "[variables('name')]",
+                "workerSize": "[variables('workerSize')]",
+                "reserved": "[variables('reserved')]"
+            },
+            "tags": "[variables('tags')]"
+        },
+        {
+            "condition": "[variables('autoscaleEnable')]",
+            "type": "microsoft.insights/autoscalesettings",
+            "apiVersion": "2014-04-01",
+            "name": "scale-out",
+            "location": "[variables('location')]",
+            "properties": {
+                "profiles": [
+                    {
+                        "name": "CPU Scale out",
+                        "capacity": {
+                            "minimum": "[parameters('capacity')]",
+                            "maximum": "[variables('maxCapacity')]",
+                            "default": "[parameters('capacity')]"
+                        },
+                        "rules": [
+                            {
+                                "metricTrigger": {
+                                    "metricName": "CpuPercentage",
+                                    "metricNamespace": "microsoft.web/serverfarms",
+                                    "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('name'))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT5M",
+                                    "timeAggregation": "Average",
+                                    "operator": "GreaterThan",
+                                    "threshold": 80,
+                                    "dimensions": [],
+                                    "dividePerInstance": false
+                                },
+                                "scaleAction": {
+                                    "direction": "Increase",
+                                    "type": "ChangeCount",
+                                    "value": 1,
+                                    "cooldown": "PT5M"
+                                }
+                            },
+                            {
+                                "metricTrigger": {
+                                    "metricName": "CpuPercentage",
+                                    "metricNamespace": "microsoft.web/serverfarms",
+                                    "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('name'))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT5M",
+                                    "timeAggregation": "Average",
+                                    "operator": "LessThan",
+                                    "threshold": 65,
+                                    "dimensions": [],
+                                    "dividePerInstance": false
+                                },
+                                "scaleAction": {
+                                    "direction": "Decrease",
+                                    "type": "ChangeCount",
+                                    "value": 1,
+                                    "cooldown": "PT15M"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "enabled": true,
+                "name": "scale-out",
+                "targetResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('name'))]"
+            },
+            "tags": "[variables('tags')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('name'))]"
+            ]
+        }
+    ]
+}

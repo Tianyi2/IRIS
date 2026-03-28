@@ -1,0 +1,124 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+
+	},
+	"variables": {
+        "tagPrefix": "policy"
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Authorization/policyDefinitions",
+			"apiVersion": "2018-05-01",
+			"name": "crodriguezde_policy1",
+			"properties": {
+				"policyType": "Custom",
+				"mode": "All",
+				"parameters": {
+				},
+				"policyRule": {
+					"if": {
+						"allOf": [
+							{
+								"field": "type",
+								"equals": "Microsoft.Resources/subscriptions/resourceGroups"
+							},
+							{
+								"field": "tags['policy1']",
+								"exists": "false"
+							}
+						]
+					},
+					"then": {
+						"effect": "deny"
+					}
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Authorization/policyDefinitions",
+			"apiVersion": "2018-05-01",
+			"name": "crodriguezde_policy2",
+			"properties": {
+				"policyType": "Custom",
+				"mode": "All",
+				"parameters": {
+				},
+				"policyRule": {
+					"if": {
+						"allOf": [
+							{
+								"field": "type",
+								"equals": "Microsoft.Resources/subscriptions/resourceGroups"
+							},
+							{
+								"field": "tags['policy2']",
+								"exists": "true"
+							}
+						]
+					},
+					"then": {
+						"effect": "deny"
+					}
+				}
+			}
+		},
+        {
+			"type": "Microsoft.Authorization/policyDefinitions",
+			"apiVersion": "2018-05-01",
+			"name": "crodriguezde_policy3",
+			"properties": {
+				"policyType": "Custom",
+				"mode": "Indexed",
+				"parameters": {
+				},
+				"policyRule": {
+					"if": {
+						"allOf": [
+							{
+								"field": "type",
+								"equals": "Microsoft.Resources/subscriptions/resourceGroups"
+							},
+							{
+								"field": "tags['policy3']",
+								"exists": "false"
+							}
+						]
+					},
+					"then": {
+						"effect": "deny"
+					}
+				}
+			}
+		},
+        {
+			"type": "Microsoft.Authorization/policyDefinitions",
+			"apiVersion": "2018-05-01",
+			"name": "crodriguezde_policy4",
+			"properties": {
+				"policyType": "Custom",
+				"mode": "Indexed",
+				"parameters": {
+				},
+				"policyRule": {
+					"if": {
+						"allOf": [
+							{
+								"field": "type",
+								"equals": "Microsoft.Resources/subscriptions/resourceGroups"
+							},
+							{
+								"field": "tags['policy4']",
+								"exists": "true"
+							}
+						]
+					},
+					"then": {
+						"effect": "deny"
+					}
+				}
+			}
+		}
+	]
+}

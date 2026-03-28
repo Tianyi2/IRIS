@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Kubernetes default master node pool
+Metadata:
+  Tags:
+    InfrastructureComponent: "true"
+    application: "kubernetes"
+    component: "control-plane"
+
+Mappings:
+  Images:
+    {{.Cluster.Region}}:
+      # Use the node pool's architecture to construct the config item name that we're using to get the AMI name.
+      MachineImage: '{{ index .NodePool.ConfigItems (print "kuberuntu_image_v1_34_" .NodePool.ConfigItems.kuberuntu_ami_version "_" .Values.InstanceInfo.Architecture) }}'
+
+Resources:
+  AutoScalingGroup:
+    CreationPolicy:
+      ResourceSignal:
+        Count: '0'
+        Timeout: PT15M
+    Properties:
+      HealthCheckGracePeriod: 480
+      HealthCheckType: EC2
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      MinSize: '{{ .NodePool.MinSize }}'
+      MaxSize: '{{ .NodePool.MaxSize }}'
+      Tags:
+      - Key: Name
+        PropagateAtLaunch: true
+        Value: "{{ .NodePool.Name }} ({{ .Cluster.ID }})"
+      - Key: node.kubernetes.io/role
+        PropagateAtLaunch: true
+        Value: master
+      - Key: zalando.org/pod-max-pids
+        PropagateAtLaunch: true
+        Value: "{{ .NodePool.ConfigItems.pod_max_pids }}"
+      VPCZoneIdentifier:
+{{ with $data := . }}
+{{ range $az := $data.Values.availability_zones }}
+        # {{ if eq $data.NodePool.ConfigItems.internal_node_subnets_enabled "true" }}
+        - "{{ index $data.Values.internal_node_subnets $az }}"
+        # {{ else }}
+        - "{{ index $data.Values.subnets $az }}"
+        # {{ end }}
+{{ end }}
+{{ end }}
+      TargetGroupARNs:
+      - !ImportValue '{{ .Cluster.ID }}:master-load-balancer-nlb-target-group'
+{{- if or (eq .Cluster.ConfigItems.control_plane_load_balancer_internal "serving") (eq .Cluster.ConfigItems.control_plane_load_balancer_internal "active") }}
+      - !ImportValue '{{ .Cluster.ID }}:control-plane-internal-lb-target-group'
+{{- end}}
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+  LaunchTemplate:
+    Properties:
+      LaunchTemplateName: '{{.Cluster.LocalID}}-{{ .NodePool.Name }}'
+      LaunchTemplateData:
+        MetadataOptions:
+          HttpTokens: required
+        TagSpecifications:
+        - ResourceType: "volume"
+          Tags:
+          - Key: application
+            Value: kubernetes
+          - Key: component
+            Value: control-plane
+        - ResourceType: "network-interface"
+          Tags:
+          - Key: application
+            Value: kubernetes
+          - Key: component
+            Value: control-plane
+          - Key: Name
+            Value: "{{ .NodePool.Name }} ({{ .Cluster.ID }})"
+{{ if .Values.supports_t2_unlimited }}
+        CreditSpecification:
+          CpuCredits: unlimited
+{{ end }}
+        BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            DeleteOnTermination: {{.NodePool.ConfigItems.ebs_root_volume_delete_on_termination}}
+            VolumeSize: {{.NodePool.ConfigItems.ebs_master_root_volume_size}}
+            VolumeType: gp3
+        NetworkInterfaces:
+        - DeviceIndex: 0
+          # {{ if and (eq .NodePool.ConfigItems.associate_public_ip_on_launch "true") (ne .NodePool.ConfigItems.internal_node_subnets_enabled "true") }}
+          AssociatePublicIpAddress: true
+          # {{ end }}
+          Groups:
+          - !ImportValue '{{ .Cluster.ID }}:master-security-group'
+        EbsOptimized: false
+        IamInstanceProfile:
+          Name: !Ref AutoScalingInstanceProfile
+        InstanceInitiatedShutdownBehavior: terminate
+        ImageId: !FindInMap
+        - Images
+        - !Ref 'AWS::Region'
+        - MachineImage
+        InstanceType: "{{ index .NodePool.InstanceTypes 0 }}"
+        UserData: "{{ .Values.UserData }}"
+    Type: 'AWS::EC2::LaunchTemplate'
+  AutoScalingInstanceProfile:
+    Properties:
+      Path: /
+      Roles:
+      - !ImportValue '{{ .Cluster.ID }}:master-iam-role'
+    Type: 'AWS::IAM::InstanceProfile'

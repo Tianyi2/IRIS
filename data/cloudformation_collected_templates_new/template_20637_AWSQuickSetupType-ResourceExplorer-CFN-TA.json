@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "1.0",
+  "templateBody": {
+    "Parameters": {
+      "QSType": {
+        "Type": "String",
+        "AllowedValues": [
+          "TA"
+        ],
+        "Description": "(Required) Specifies whether the Quick Setup applies to the local account or an AWS Organization."
+      },
+      "QSConfigurationId": {
+        "Type": "String",
+        "Description": "(Required) Unique identifier of the deployed configuration."
+      },
+      "QSForceUpdateParam": {
+        "Type": "String",
+        "Default": "0",
+        "Description": "This parameter can be used to force a stack update to repair resources."
+      },
+      "SelectedAggregatorRegion": {
+        "Type": "String",
+        "Description": "(Required) The Region selected to contain the Aggregator Index."
+      },
+      "ReplaceExistingAggregator": {
+        "Type": "String",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Description": "(Required) Whether or not to demote the Aggregator Index in an account if it exists outside the Selected Aggregator Region."
+      }
+    },
+    "Resources": {
+      "AWSQuickSetupAutomationRole": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "RoleName": {
+            "Fn::Sub": "AWS-QuickSetup-ResourceExplorerRole-${QSConfigurationId}-${AWS::Region}"
+          },
+          "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "ssm.amazonaws.com"
+                  ]
+                },
+                "Action": [
+                  "sts:AssumeRole"
+                ],
+                "Condition": {
+                  "StringEquals": {
+                    "aws:SourceAccount": {
+                      "Fn::Sub": "${AWS::AccountId}"
+                    }
+                  },
+                  "ArnLike": {
+                    "aws:SourceArn": {
+                      "Fn::Sub": "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:automation-execution/*"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "ManagedPolicyArns": [
+            {
+              "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AWSQuickSetupEnableAREXExecutionPolicy"
+            },
+            {
+              "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AWSSystemsManagerEnableExplorerExecutionPolicy"
+            }
+          ]
+        }
+      },
+      "AWSQuickSetupEnableAREXAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "Name": "AWSQuickSetupType-EnableAREX",
+          "AssociationName": {
+            "Fn::Sub": "AWS-QuickSetup-ResourceExplorer-EnableAREX-${QSConfigurationId}"
+          },
+          "ScheduleExpression": "rate(14 days)",
+          "Parameters": {
+            "AutomationAssumeRole": [
+              {
+                "Fn::GetAtt": [
+                  "AWSQuickSetupAutomationRole",
+                  "Arn"
+                ]
+              }
+            ],
+            "AggregatorIndexRegion": [
+              {
+                "Ref": "SelectedAggregatorRegion"
+              }
+            ],
+            "DemoteExistingAggregatorIndex": [
+              {
+                "Ref": "ReplaceExistingAggregator"
+              }
+            ],
+            "EnsureAggregatorIndex": [
+              "true"
+            ],
+            "EnsureDefaultView": [
+              "true"
+            ]
+          }
+        }
+      },
+      "AWSQuickSetupEnablingExplorerSystemAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "Name": "AWS-EnableExplorer",
+          "AssociationName": {
+            "Fn::Sub": "AWS-QuickSetup-ResourceExplorer-EnableExplorer-${QSConfigurationId}"
+          },
+          "Parameters": {
+            "AutomationAssumeRole": [
+              {
+                "Fn::GetAtt": [
+                  "AWSQuickSetupAutomationRole",
+                  "Arn"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

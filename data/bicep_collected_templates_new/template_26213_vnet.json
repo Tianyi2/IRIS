@@ -1,0 +1,88 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "14125370503093081909"
+    },
+    "description": "Creates a virtual network with 3 subnets (for AI, Azure Bastion, App Service)."
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "The location for the VNet"
+      }
+    },
+    "name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the VNet"
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "The tags for the VNet"
+      }
+    },
+    "subnets": {
+      "type": "array"
+    }
+  },
+  "variables": {
+    "addressPrefix": "10.0.0.0/16"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2021-02-01",
+      "name": "[parameters('name')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": "[parameters('subnets')]"
+      }
+    }
+  ],
+  "outputs": {
+    "subnets": {
+      "type": "array",
+      "copy": {
+        "count": "[length(parameters('subnets'))]",
+        "input": {
+          "subnets": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('name')), '2021-02-01').subnets[copyIndex()]]"
+        }
+      }
+    },
+    "subnetids": {
+      "type": "array",
+      "copy": {
+        "count": "[length(parameters('subnets'))]",
+        "input": {
+          "subnets": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('name')), '2021-02-01').subnets[copyIndex()].id]"
+        }
+      }
+    },
+    "id": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('name'))]"
+    },
+    "name": {
+      "type": "string",
+      "value": "[parameters('name')]"
+    },
+    "vnetSubnets": {
+      "type": "array",
+      "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('name')), '2021-02-01').subnets]"
+    }
+  }
+}

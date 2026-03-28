@@ -1,0 +1,86 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/1b0b2065-8bac-5a00-83c4-1b58f69ac212')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/1b0b2065-8bac-5a00-83c4-1b58f69ac212')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "P7D",
+            "reopenClosedIncident": true
+          },
+          "createIncident": true
+        },
+        "severity": "High",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Dynatrace Attack {{State}} - {{DisplayId}} : {{DisplayName}}",
+          "alertDescriptionFormat": "Dynatrace has detected an ongoing attack in your environment which was {{State}}.\n"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Dynatrace Application Security - Attack detection",
+        "description": "'Dynatrace has detected an ongoing attack in your environment.'\n",
+        "query": "DynatraceAttacks\n| where State != 'ALLOWLISTED'\n| summarize  arg_max(TimeStamp, *) by AttackId\n",
+        "status": "Available",
+        "queryFrequency": "1d",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "host",
+                "identifier": "HostName"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "url",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "sourceIp",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "Execution",
+          "Impact",
+          "InitialAccess",
+          "PrivilegeEscalation"
+        ],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "DisplayIdentifier": "DisplayId",
+          "AttackIdentifier": "AttackId",
+          "AttackState": "State",
+          "AttackType": "AttackType"
+        },
+        "queryPeriod": "1d"
+      }
+    }
+  ]
+}

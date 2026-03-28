@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/7ad4b9ff-8089-4b70-b98e-a2ca995611e9')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/7ad4b9ff-8089-4b70-b98e-a2ca995611e9')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Veeam ONE Backup Server Security and Compliance State",
+        "description": "Detects backup server security and compliance state issues.",
+        "query": "VeeamOneTriggeredAlarms_CL | where PredefinedAlarmId == 395",
+        "status": "Available",
+        "queryFrequency": "3h",
+        "triggerOperator": "gt",
+        "tactics": [],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "Comment": "Comment",
+          "TriggeredTime": "TriggeredTime",
+          "ObjectType": "ObjectType",
+          "Description": "Description",
+          "ObjectName": "ObjectName",
+          "Name": "Name",
+          "VoneHostName": "VoneHostName",
+          "TriggeredAlarmId": "TriggeredAlarmId",
+          "PredefinedAlarmId": "PredefinedAlarmId",
+          "ObjectId": "ObjectId",
+          "Status": "Status"
+        },
+        "queryPeriod": "3h"
+      }
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "9554f12a746c4728aa512875",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "westeurope",
+      "identity": {
+        "principalId": "39719e97-af1e-40f9-b9de-80798e2560dd",
+        "tenantId": "dbbc60b0-7054-4f16-a0af-724750c58153",
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "displayName": "Configure backup on virtual machines with a given tag to an existing recovery services vault in the same location",
+        "enforcementMode": "Default",
+        "metadata": {
+          "parameterScopes": {
+            "backupPolicyId": "/subscriptions/30aca850-a275-4d1a-a24b-68f7605f12d2/resourcegroups/contoso-vnethub-westeurope/providers/microsoft.recoveryservices/vaults/recovery-vault-01",
+            "vaultLocation": "/providers/Microsoft.Management/managementGroups/contoso"
+          }
+        },
+        "nonComplianceMessages": [
+          {
+            "message": "you tried to create VM with no backup enabled"
+          }
+        ],
+        "notScopes": [],
+        "overrides": [],
+        "parameters": {
+          "backupPolicyId": {
+            "value": "/subscriptions/30aca850-a275-4d1a-a24b-68f7605f12d2/resourcegroups/contoso-vnethub-westeurope/providers/microsoft.recoveryservices/vaults/recovery-vault-01/backuppolicies/policy1"
+          },
+          "inclusionTagName": {
+            "value": "VM_BACKUP"
+          },
+          "inclusionTagValue": {
+            "value": [
+              "Yes"
+            ]
+          },
+          "vaultLocation": {
+            "value": "westeurope"
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/345fa903-145c-4fe1-8bcd-93ec2adccde8",
+        "resourceSelectors": [],
+        "scope": "/providers/Microsoft.Management/managementGroups/contoso"
+      }
+    }
+  ],
+  "outputs": {}
+}

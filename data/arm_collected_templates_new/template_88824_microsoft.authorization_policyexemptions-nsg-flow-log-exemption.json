@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyExemptions",
+      "name": "NSG-Flow-Log-Exemption",
+      "apiVersion": "2022-07-01-preview",
+      "properties": {
+        "Description": "Exempted from Security Benchmark as the storage account must be on a public endpoint to enable NSG FLow Log from Network Security Groups. The storage account is configured with firewall allowing only trusted Azure Services as the exception.",
+        "DisplayName": "saturn-Management- Storage Accounts for NSG Flow Logs",
+        "ExemptionCategory": "Waiver",
+        "ExpiresOn": null,
+        "Metadata": null,
+        "PolicyAssignmentId": "/providers/Microsoft.Management/managementGroups/saturn/providers/Microsoft.Authorization/policyAssignments/Deploy-ASC-Monitoring",
+        "PolicyDefinitionReferenceIds": [
+          "StorageDisallowPublicAccess",
+          "storageAccountsShouldUseCustomerManagedKeyForEncryptionMonitoringEffect",
+          "storageAccountShouldUseAPrivateLinkConnectionMonitoringEffect"
+        ]
+      }
+    }
+  ],
+  "outputs": {}
+}

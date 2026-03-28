@@ -1,0 +1,83 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachines_saiteja_name": {
+            "defaultValue": "saiteja",
+            "type": "String"
+        },
+        "disks_saiteja_OsDisk_1_8a5671b62ee4420784ac93ec71cbff42_externalid": {
+            "defaultValue": "/subscriptions/c706b4e6-5d0a-46ba-8682-34600e0d2b5b/resourceGroups/game_group/providers/Microsoft.Compute/disks/saiteja_OsDisk_1_8a5671b62ee4420784ac93ec71cbff42",
+            "type": "String"
+        },
+        "networkInterfaces_saiteja945_externalid": {
+            "defaultValue": "/subscriptions/c706b4e6-5d0a-46ba-8682-34600e0d2b5b/resourceGroups/game_group/providers/Microsoft.Network/networkInterfaces/saiteja945",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-11-01",
+            "name": "[parameters('virtualMachines_saiteja_name')]",
+            "location": "southindia",
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_B2s"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "RedHat",
+                        "offer": "RHEL",
+                        "sku": "82gen2",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "[concat(parameters('virtualMachines_saiteja_name'), '_OsDisk_1_8a5671b62ee4420784ac93ec71cbff42')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS",
+                            "id": "[parameters('disks_saiteja_OsDisk_1_8a5671b62ee4420784ac93ec71cbff42_externalid')]"
+                        },
+                        "deleteOption": "Delete",
+                        "diskSizeGB": 64
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_saiteja_name')]",
+                    "adminUsername": "KANIKE",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false,
+                        "provisionVMAgent": true,
+                        "patchSettings": {
+                            "patchMode": "ImageDefault",
+                            "assessmentMode": "ImageDefault"
+                        }
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[parameters('networkInterfaces_saiteja945_externalid')]",
+                            "properties": {
+                                "deleteOption": "Detach"
+                            }
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        }
+    ]
+}

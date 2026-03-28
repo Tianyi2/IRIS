@@ -1,0 +1,184 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "scriptURL": {
+            "type": "string"
+        },  
+        "adminUsername": {
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "string"
+        },
+        "hostname": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 11
+        }  
+    },
+    "variables": {
+         "uniqueStorageName": "[concat('storage', uniqueString(parameters('hostname')))]",
+         "uniqueNetworkName": "[concat('network', uniqueString(parameters('hostname')))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('uniqueStorageName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "[concat('StorageAccount-',variables('uniqueStorageName'))]"
+            },
+            "properties": {
+                "accountType": "Standard_LRS"
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[concat('PublicIP-',variables('uniqueNetworkName'))]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "[concat('PublicIP-',variables('uniqueNetworkName'))]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('hostname')]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[concat('VirtualNetwork-',variables('uniqueNetworkName'))]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "[concat('VirtualNetwork-',variables('uniqueNetworkName'))]"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[concat('VirtualNetworkSubnet-',variables('uniqueNetworkName'))]",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat('NetworkInterface-',variables('uniqueNetworkName'))]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/PublicIP-', variables('uniqueNetworkName'))]",
+                "[concat('Microsoft.Network/virtualNetworks/VirtualNetwork-', variables('uniqueNetworkName'))]"
+            ],
+            "tags": {
+                "displayName": "[concat('NetworkInterface-',variables('uniqueNetworkName'))]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat('PublicIP-',variables('uniqueNetworkName')))]"
+                            },
+                            "subnet": {
+                             "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', concat('VirtualNetwork-', variables('uniqueNetworkName'))), concat('/subnets/VirtualNetworkSubnet-', variables('uniqueNetworkName')))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2017-03-30",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('hostname')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStorageName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', 'NetworkInterface-', variables('uniqueNetworkName'))]"
+            ],
+            "tags": {
+                "displayName": "[parameters('hostname')]"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2_v2"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('hostname')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsDesktop",
+                        "offer": "Windows-10",
+                        "sku": "20h1-pro",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat(parameters('hostname'), 'OSDisk')]",
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('NetworkInterface-', variables('uniqueNetworkName')))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('http://', variables('uniqueStorageName'), '.blob.core.windows.net')]"
+                    }
+                }
+            },
+            "resources": [
+                {
+                    "apiVersion": "2015-06-15",
+                    "type": "extensions",
+                    "name": "config-app",
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Compute/virtualMachines/', parameters('hostname'))]"
+                    ],
+                    "tags": {
+                        "displayName": "config-app"
+                    },
+                    "properties": {
+                        "publisher": "Microsoft.Compute",
+                        "type": "CustomScriptExtension",
+                        "typeHandlerVersion": "1.9",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "fileUris": [
+                                "[parameters('scriptURL')]"
+                            ]
+                        },
+                        "protectedSettings": {
+                            "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', './post-deploy.ps1')]"
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "outputs": {}
+}

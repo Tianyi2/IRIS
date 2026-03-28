@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "cosmosDbAccountName": {
+      "type": "string"
+    },
+    "cosmosDatabase": {
+      "type": "string"
+    },
+    "containerName": {
+      "type": "string"
+    },
+    "throughput": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "maxThroughput": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "cosmosDBType": {
+      "type": "string",
+      "allowedValues": [
+        "GlobalDocumentDB",
+        "MongoDB"
+      ]
+    }
+  },
+  "variables": {
+    "useAutoscaleSettings": "[greater(length(parameters('maxThroughput')),0)]",
+    "throughputSettings": {
+      "WithAutoscaling": {
+        "resource": {
+          "autoscaleSettings": {
+            "maxThroughput": "[parameters('maxThroughput')]"
+          }
+        }
+      },
+      "WithoutAutoscaling": {
+        "resource": {
+          "throughput": "[parameters('throughput')]"
+        }
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/throughputSettings",
+      "name": "[concat(parameters('cosmosDbAccountName'), '/', parameters('cosmosDatabase'), '/', parameters('containerName'), '/default')]",
+      "condition": "[equals(parameters('cosmosDBType'), 'GlobalDocumentDB')]",
+      "apiVersion": "2021-05-15",
+      "properties": "[if(variables('useAutoscaleSettings'), variables('throughputSettings').WithAutoscaling, variables('throughputSettings').WithoutAutoscaling)]"
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections/throughputSettings",
+      "condition": "[equals(parameters('cosmosDBType'), 'MongoDB')]",
+      "name": "[concat(parameters('cosmosDbAccountName'), '/', parameters('cosmosDatabase'), '/', parameters('containerName'), '/default')]",
+      "apiVersion": "2021-05-15",
+      "properties": "[if(variables('useAutoscaleSettings'), variables('throughputSettings').WithAutoscaling, variables('throughputSettings').WithoutAutoscaling)]"
+    }
+  ]
+}

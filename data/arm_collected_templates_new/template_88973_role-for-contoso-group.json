@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "principalId": {
+            "type": "string",
+            "defaultValue": "170adbdf-5a71-472b-8c5b-b35eaa2a2325",
+            "metadata": {
+                "description": "Provide the objectId of the principal (user, group, SPN, managed identity etc.) that will be granted RBAC at scope."
+            }
+        },
+        "roleDefinitionId": {
+            "type": "string",
+            "defaultValue": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+            "metadata": {
+                "description": "Provide the id of the built-in roleDefinition. Default is 'Contributor'."
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2017-09-01",
+            "name": "[guid(parameters('principalId'))]",
+            "properties": {
+                "principalId": "[parameters('principalId')]",
+                "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', parameters('roleDefinitionId'))]",
+                "scope": "/providers/Microsoft.Management/managementGroups/contoso-sandboxes"
+
+            }
+        }
+    ]
+} 

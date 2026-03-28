@@ -1,0 +1,376 @@
+{
+  "schemaVersion": "1.0",
+  "templateBody": {
+    "Parameters": {
+      "QSType": {
+        "Type": "String",
+        "AllowedValues": [
+          "TA",
+          "MA",
+          "LA"
+        ],
+        "Description": "(Required) Specifies whether the Quick Setup applies to the local account or an AWS organization."
+      },
+      "QSConfigurationId": {
+        "Type": "String",
+        "Description": "(Required) Unique identifier of the deployed configuration."
+      },
+      "QSGlobalResourcesRegion": {
+        "Type": "String",
+        "Description": "(Required) Name of the AWS Region to deploy global resources such as SNS topics."
+      },
+      "QSPrincipalOrgId": {
+        "Type": "String",
+        "Default": "",
+        "Description": "(Optional) The ID of the principal organization your management account operates in."
+      },
+      "QSAttachConfigurationPolicy": {
+        "Type": "String",
+        "Default": "false",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Description": "(Optional) Whether to attach Configuration permissions policy which sets boundaries of what configuration can do."
+      },
+      "AnalyseAllResources": {
+        "Type": "String",
+        "Default": "false",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Description": "(Optional) Identifies whether DevOps Guru should analyse all CloudFormation stacks of the account."
+      },
+      "EnableSnsNotifications": {
+        "Type": "String",
+        "Default": "true",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Description": "(Optional) Identifies whether DevOps Guru should send notifications when an insight is generated."
+      },
+      "EnableSsmOpsItems": {
+        "Type": "String",
+        "Default": "true",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Description": "(Optional) Determines whether DevOps Guru should create AWS Systems Manager OpsItems for each generated insight."
+      },
+      "RemediationSchedule": {
+        "Type": "String",
+        "Default": "none",
+        "AllowedValues": [
+          "rate(1 day)",
+          "rate(7 days)",
+          "rate(14 days)",
+          "rate(30 days)",
+          "none"
+        ],
+        "Description": "(Optional) Defines the custom drift remediation schedule for DevOps Guru."
+      }
+    },
+    "Conditions": {
+      "ShouldAttachConfigurationPolicy": {
+        "Fn::Equals": [
+          {
+            "Ref": "QSAttachConfigurationPolicy"
+          },
+          "true"
+        ]
+      },
+      "IsRecurrenceDisabled": {
+        "Fn::Equals": [
+          {
+            "Ref": "RemediationSchedule"
+          },
+          "none"
+        ]
+      },
+      "AnalyseAllResources": {
+        "Fn::Equals": [
+          {
+            "Ref": "AnalyseAllResources"
+          },
+          "true"
+        ]
+      },
+      "EnableSnsNotifications": {
+        "Fn::Equals": [
+          {
+            "Ref": "EnableSnsNotifications"
+          },
+          "true"
+        ]
+      },
+      "EnableSsmOpsItems": {
+        "Fn::Equals": [
+          {
+            "Ref": "EnableSsmOpsItems"
+          },
+          "true"
+        ]
+      }
+    },
+    "Resources": {
+      "CfgDevOpsGuruRoleV2": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "ssm.amazonaws.com"
+                  ]
+                },
+                "Action": [
+                  "sts:AssumeRole"
+                ],
+                "Condition": {
+                  "StringEquals": {
+                    "aws:SourceAccount": {
+                      "Fn::Sub": "${AWS::AccountId}"
+                    }
+                  },
+                  "ArnLike": {
+                    "aws:SourceArn": {
+                      "Fn::Sub": "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:automation-execution/*"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "Policies": [
+            {
+              "PolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Action": [
+                      "cloudformation:ListStacks",
+                      "cloudformation:DescribeStacks",
+                      "devops-guru:AddNotificationChannel",
+                      "devops-guru:UpdateResourceCollection",
+                      "devops-guru:UpdateServiceIntegration",
+                      "kms:CreateAlias",
+                      "kms:CreateKey",
+                      "kms:Encrypt",
+                      "kms:Decrypt",
+                      "kms:DescribeKey",
+                      "kms:GenerateDataKey*",
+                      "kms:ReEncrypt*",
+                      "sns:ListTopics"
+                    ],
+                    "Resource": "*"
+                  },
+                  {
+                    "Effect": "Allow",
+                    "Action": "iam:CreateServiceLinkedRole",
+                    "Resource": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:",
+                          {
+                            "Ref": "AWS::Partition"
+                          },
+                          ":iam::*:role/aws-service-role/devops-guru.amazonaws.com/AWSServiceRoleForDevOpsGuru"
+                        ]
+                      ]
+                    },
+                    "Condition": {
+                      "StringLike": {
+                        "iam:AWSServiceName": "devops-guru.amazonaws.com"
+                      }
+                    }
+                  },
+                  {
+                    "Effect": "Allow",
+                    "Action": [
+                      "sns:AddPermission",
+                      "sns:CreateTopic",
+                      "sns:GetTopicAttributes",
+                      "sns:Publish",
+                      "sns:SetTopicAttributes",
+                      "sns:RemovePermission"
+                    ],
+                    "Resource": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:",
+                          {
+                            "Ref": "AWS::Partition"
+                          },
+                          ":sns:",
+                          {
+                            "Ref": "AWS::Region"
+                          },
+                          ":",
+                          {
+                            "Ref": "AWS::AccountId"
+                          },
+                          ":DevOpsGuru-Default-Topic"
+                        ]
+                      ]
+                    }
+                  }
+                ]
+              },
+              "PolicyName": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "AWS-QuickSetup-Policy-",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "-",
+                    {
+                      "Ref": "QSConfigurationId"
+                    }
+                  ]
+                ]
+              }
+            }
+          ],
+          "ManagedPolicyArns": [
+            {
+              "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AWSSystemsManagerEnableExplorerExecutionPolicy"
+            }
+          ],
+          "PermissionsBoundary": {
+            "Fn::If": [
+              "ShouldAttachConfigurationPolicy",
+              {
+                "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AWSQuickSetupDevOpsGuruPermissionsBoundary"
+              },
+              {
+                "Ref": "AWS::NoValue"
+              }
+            ]
+          },
+          "RoleName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-CfgDevOpsGuru-V2-",
+                {
+                  "Ref": "QSType"
+                },
+                "_",
+                {
+                  "Ref": "AWS::Region"
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "ConfigureDevOpsGuruAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "Name": "AWSQuickSetupType-ConfigureDevOpsGuru",
+          "AssociationName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-ConfigureDevOpsGuruAssociation-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "Parameters": {
+            "AutomationAssumeRole": [
+              {
+                "Fn::GetAtt": [
+                  "CfgDevOpsGuruRoleV2",
+                  "Arn"
+                ]
+              }
+            ],
+            "AnalyzeAllResources": [
+              {
+                "Fn::If": [
+                  "AnalyseAllResources",
+                  true,
+                  false
+                ]
+              }
+            ],
+            "EnableSnsNotifications": [
+              {
+                "Fn::If": [
+                  "EnableSnsNotifications",
+                  true,
+                  false
+                ]
+              }
+            ],
+            "EnableSsmOpsItems": [
+              {
+                "Fn::If": [
+                  "EnableSsmOpsItems",
+                  true,
+                  false
+                ]
+              }
+            ]
+          },
+          "ScheduleExpression": {
+            "Fn::If": [
+              "IsRecurrenceDisabled",
+              {
+                "Ref": "AWS::NoValue"
+              },
+              {
+                "Ref": "RemediationSchedule"
+              }
+            ]
+          }
+        }
+      },
+      "EnableExplorerAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "Name": "AWS-EnableExplorer",
+          "AssociationName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-EnableExplorerAssociation-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "Parameters": {
+            "AutomationAssumeRole": [
+              {
+                "Fn::GetAtt": [
+                  "CfgDevOpsGuruRoleV2",
+                  "Arn"
+                ]
+              }
+            ],
+            "OpsDataSources": [
+              "Association"
+            ]
+          },
+          "ScheduleExpression": "rate(1 day)"
+        }
+      }
+    }
+  }
+}

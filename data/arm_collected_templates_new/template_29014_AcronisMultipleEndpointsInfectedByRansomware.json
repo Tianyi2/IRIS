@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/a783ade7-bf43-416d-b809-8f5b06d87790')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/a783ade7-bf43-416d-b809-8f5b06d87790')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "High",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "name": "Acronis - Multiple Endpoints Infected by Ransomware",
+        "description": "Detects when three or more distinct endpoints report ransomware detections within a single day.",
+        "query": "CommonSecurityLog\n| where DeviceVendor == \"Acronis\"\n| where DeviceEventClassID == \"ActiveProtectionBlocksSuspiciousActivity\"\n| summarize ActiveProtectionBlocksSuspiciousActivity = count() by DeviceName\n",
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "AnyAlert",
+            "lookbackDuration": "P1D",
+            "reopenClosedIncident": true
+          },
+          "createIncident": true
+        },
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DeviceName",
+                "identifier": "HostName"
+              }
+            ],
+            "entityType": "Host"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "Impact"
+        ],
+        "triggerThreshold": 2,
+        "customDetails": {
+          "DeviceName": "DeviceName"
+        },
+        "queryPeriod": "1d"
+      }
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "functionName": { "type": "string" },
+        "functionCount": { "type": "int" }
+    },
+    "variables": {
+        "serverFarmName": "[replace(concat('serverfarm', guid(resourceGroup().id, deployment().name)), '-', '')]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "serverfarm",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri":"[concat('https://raw.githubusercontent.com/polatengin/armtemplate-nestedtemplate-test/master/serverfarm.json?v', guid(resourceGroup().id, deployment().name))]",
+                    "contentVersion":"1.0.0.0"
+                },
+                "parameters": {
+                    "serverFarmName": { "value": "[variables('serverFarmName')]" }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "functions",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                "uri":"[concat('https://raw.githubusercontent.com/polatengin/armtemplate-nestedtemplate-test/master/function.json?v', guid(resourceGroup().id, deployment().name))]",
+                "contentVersion":"1.0.0.0"
+                },
+                "parameters": {
+                    "functionName": { "value": "[parameters('functionName')]" },
+                    "functionCount": { "value": "[parameters('functionCount')]" },
+                    "serverFarmName": { "value": "[variables('serverFarmName')]" }
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'serverfarm')]"
+            ]
+        }
+    ]
+}

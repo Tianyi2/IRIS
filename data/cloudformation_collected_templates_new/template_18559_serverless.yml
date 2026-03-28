@@ -1,0 +1,58 @@
+service: alerta-utec-incidentes-api
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: python3.11          # 👈 igual, usa 3.11
+  region: us-east-1
+  stage: production
+
+  iam:
+    role: arn:aws:iam::645337731455:role/LabRole
+
+custom:
+  incidentesTableName: Incidentes
+  historialTableName: t_historial
+
+functions:
+  # 1) Lambda HTTP para cambiar estado de un incidente
+  actualizarEstadoIncidente:
+    handler: update_incidente.lambda_handler
+    environment:
+      INCIDENTES_TABLE: ${self:custom.incidentesTableName}
+    events:
+      - httpApi:
+          path: /incidentes/{id}/estado
+          method: put
+
+  # 2) Lambda que escucha el stream de Incidentes y escribe en t_historial
+  historialStream:
+    handler: historial_stream.lambda_handler
+    environment:
+      INCIDENTES_TABLE: ${self:custom.incidentesTableName}
+      HISTORIAL_TABLE: ${self:custom.historialTableName}
+    events:
+      - stream:
+          type: dynamodb
+          # 👇 StreamArn de la MISMA tabla Incidentes
+          arn: arn:aws:dynamodb:us-east-1:645337731455:table/Incidentes/stream/2025-11-16T21:43:18.423
+          startingPosition: LATEST
+          maximumRetryAttempts: 3
+
+resources:
+  Resources:
+    HistorialTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.historialTableName}
+        AttributeDefinitions:
+          - AttributeName: incidenteId
+            AttributeType: S
+          - AttributeName: changedAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: incidenteId
+            KeyType: HASH
+          - AttributeName: changedAt
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST

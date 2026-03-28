@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+  },
+  "variables": {
+    "role_contributor": "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+    "seed": "AzureAutomanage"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(subscription().id, variables('seed'), variables('role_contributor'))]",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "roleDefinitionId": "[variables('role_contributor')]",
+        "principalId": "[reference(subscriptionResourceId('Microsoft.Automanage/servicePrincipals', 'default'), '2022-05-04', 'Full').properties.servicePrincipalId]"
+      }
+    }
+  ]
+}

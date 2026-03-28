@@ -1,0 +1,114 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/cd65aebc-7e85-4cbb-9f91-ff0376c5d37d')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/cd65aebc-7e85-4cbb-9f91-ff0376c5d37d')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "createIncident": false
+        },
+        "severity": "Medium",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Alert from {{EventVendor}} for Detection {{Title}}",
+          "alertDynamicProperties": [
+            {
+              "alertProperty": "AlertLink",
+              "value": "Url"
+            },
+            {
+              "alertProperty": "Techniques",
+              "value": "TechniqueIds"
+            },
+            {
+              "alertProperty": "ProductName",
+              "value": "EventVendor"
+            }
+          ],
+          "alertTacticsColumnName": "TacticNames",
+          "alertDescriptionFormat": "Alert from {{EventVendor}} for Detection {{Title}} for Id {{Id}}",
+          "alertSeverityColumnName": "Severity"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Generate alerts based on ExtraHop detections recommended for triage",
+        "description": "'This analytics rule will generate alerts in Microsoft Sentinel for detections from ExtraHop that are recommended for triage.'\n",
+        "query": "ExtraHopDetections\n| where IsRecommended == true\n",
+        "status": "Available",
+        "queryFrequency": "15m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SourceHostname",
+                "identifier": "HostName"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DestinationHostname",
+                "identifier": "HostName"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SourceIpAddress",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DestinationIpAddress",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SourceUsername",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "DestinationUsername",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "Persistence"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "15m"
+      }
+    }
+  ]
+}

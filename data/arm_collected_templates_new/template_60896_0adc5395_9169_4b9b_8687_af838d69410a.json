@@ -1,0 +1,117 @@
+{
+  "Name": "0adc5395-9169-4b9b-8687-af838d69410a",
+  "ResourceId": "/providers/Microsoft.Authorization/policyDefinitions/0adc5395-9169-4b9b-8687-af838d69410a",
+  "ResourceName": "0adc5395-9169-4b9b-8687-af838d69410a",
+  "ResourceType": "Microsoft.Authorization/policyDefinitions",
+  "SubscriptionId": null,
+  "Properties": {
+    "Description": "Deploy Azure Policy's extension for Azure Arc to provide at-scale enforcements and safeguard your Arc enabled Kubernetes clusters in a centralized, consistent manner. Learn more at https://aka.ms/akspolicydoc.",
+    "DisplayName": "Configure Azure Arc enabled Kubernetes clusters to install the Azure Policy extension",
+    "Metadata": {
+      "version": "1.1.0",
+      "category": "Kubernetes"
+    },
+    "Mode": "Indexed",
+    "Parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "PolicyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Kubernetes/connectedClusters"
+          },
+          {
+            "field": "Microsoft.Kubernetes/connectedClusters/distribution",
+            "notEquals": "aks"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.KubernetesConfiguration/extensions",
+          "evaluationDelay": "AfterProvisioning",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.KubernetesConfiguration/extensions/extensionType",
+                "equals": "microsoft.policyinsights"
+              },
+              {
+                "field": "Microsoft.KubernetesConfiguration/extensions/provisioningState",
+                "equals": "Succeeded"
+              }
+            ]
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/85cb6faf-e071-4c9b-8136-154b5a04f717"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "clusterRegion": {
+                  "value": "[field('location')]"
+                },
+                "clusterResourceId": {
+                  "value": "[field('id')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "clusterRegion": {
+                    "type": "string"
+                  },
+                  "clusterResourceId": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.KubernetesConfiguration/extensions",
+                    "apiVersion": "2021-09-01",
+                    "name": "azurepolicy",
+                    "location": "[parameters('clusterRegion')]",
+                    "identity": {
+                      "type": "SystemAssigned"
+                    },
+                    "properties": {
+                      "extensionType": "microsoft.policyinsights",
+                      "configurationSettings": {},
+                      "configurationProtectedSettings": {},
+                      "autoUpgradeMinorVersion": true,
+                      "releaseTrain": "Stable",
+                      "scope": {
+                        "Cluster": {
+                          "releaseNamespace": "kube-system"
+                        }
+                      }
+                    },
+                    "scope": "[concat('Microsoft.Kubernetes/connectedClusters/', split(parameters('clusterResourceId'),'/')[8])]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "PolicyType": 2
+  },
+  "PolicyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0adc5395-9169-4b9b-8687-af838d69410a"
+}

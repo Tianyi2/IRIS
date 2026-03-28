@@ -1,0 +1,335 @@
+terraform {
+  backend "s3" {
+    bucket         = "cloud-platform-terraform-state"
+    region         = "eu-west-1"
+    key            = "aws-accounts/cloud-platform-aws/account/terraform.tfstate"
+    profile        = "moj-cp"
+    dynamodb_table = "cloud-platform-terraform-state"
+  }
+}
+
+provider "github" {
+  token = var.github_token
+  owner = var.github_owner
+}
+
+provider "aws" {
+  region  = "eu-west-2"
+  profile = "moj-cp"
+
+  default_tags {
+    tags = {
+      business-unit = "Platforms"
+      application   = "cloud-platform-aws/account"
+      is-production = "true"
+      owner         = "Cloud Platform: platforms@digital.justice.gov.uk"
+      source-code   = "github.com/ministryofjustice/cloud-platform-infrastructure"
+    }
+  }
+}
+
+# Because we are managining kops state in Ireland
+provider "aws" {
+  alias   = "ireland"
+  region  = "eu-west-1"
+  profile = "moj-cp"
+
+  default_tags {
+    tags = {
+      business-unit = "Platforms"
+      application   = "cloud-platform-aws/account"
+      is-production = "true"
+      owner         = "Cloud Platform: platforms@digital.justice.gov.uk"
+      source-code   = "github.com/ministryofjustice/cloud-platform-infrastructure"
+    }
+  }
+}
+
+# get access to live-1 VPC state
+# Necessary to get flowlogs bucket id/arn for SQS
+data "terraform_remote_state" "live-1" {
+  backend = "s3"
+  config = {
+    bucket  = "cloud-platform-terraform-state"
+    region  = "eu-west-1"
+    key     = "aws-accounts/cloud-platform-aws/vpc/live-1/terraform.tfstate"
+    profile = "moj-cp"
+  }
+}
+
+# get access to live EKS Cluster state
+# Necessary to get CloudWatch Log Group name for Firehose
+data "terraform_remote_state" "eks_live" {
+  backend = "s3"
+  config = {
+    bucket  = "cloud-platform-terraform-state"
+    region  = "eu-west-1"
+    key     = "aws-accounts/cloud-platform-aws/vpc/eks/live/terraform.tfstate"
+    profile = "moj-cp"
+  }
+}
+
+# get access to components state in manager workspace
+# Necessary to fluent-bit irsa role
+data "terraform_remote_state" "components_manager" {
+  backend = "s3"
+  config = {
+    bucket  = "cloud-platform-terraform-state"
+    region  = "eu-west-1"
+    key     = "aws-accounts/cloud-platform-aws/vpc/eks/core/components/manager/terraform.tfstate"
+    profile = "moj-cp"
+  }
+}
+
+# get access to components state in live workspace
+# Necessary to fluent-bit irsa role
+data "terraform_remote_state" "components_live" {
+  backend = "s3"
+  config = {
+    bucket  = "cloud-platform-terraform-state"
+    region  = "eu-west-1"
+    key     = "aws-accounts/cloud-platform-aws/vpc/eks/core/components/live/terraform.tfstate"
+    profile = "moj-cp"
+  }
+}
+
+# used for cloudfront/waf
+provider "aws" {
+  alias  = "northvirginia"
+  region = "us-east-1"
+
+  default_tags {
+    tags = {
+      business-unit = "Platforms"
+      application   = "cloud-platform-aws/account"
+      is-production = "true"
+      owner         = "Cloud Platform: platforms@digital.justice.gov.uk"
+      source-code   = "github.com/ministryofjustice/cloud-platform-infrastructure"
+    }
+  }
+}
+
+data "aws_caller_identity" "current" {}
+data "aws_iam_account_alias" "current" {}
+data "aws_region" "current" {}
+
+# IAM configuration for cloud-platform. Users, groups, OIDC providers etc
+module "iam" {
+  source = "github.com/ministryofjustice/cloud-platform-terraform-awsaccounts-iam?ref=0.3.2"
+
+  aws_account_name         = "cloud-platform-aws"
+  circleci_organisation_id = jsondecode(data.aws_secretsmanager_secret_version.circleci.secret_string)["organisation_id"]
+}
+
+module "sso" {
+  source = "github.com/ministryofjustice/cloud-platform-terraform-aws-sso?ref=1.12.1"
+
+  auth0_tenant_domain = "justice-cloud-platform.eu.auth0.com"
+}
+
+# Baselines: cloudtrail, cloudwatch, lambda. Everything that our accounts should have
+module "baselines" {
+  source = "github.com/ministryofjustice/cloud-platform-terraform-awsaccounts-baselines?ref=0.3.0"
+
+  enable_logging           = true
+  enable_slack_integration = true
+
+  region        = var.aws_region
+  slack_webhook = var.slack_config_cloudwatch_lp
+  slack_channel = "lower-priority-alarms"
+
+  s3_bucket_block_publicaccess_exceptions = [
+    "cloud-platform-9025c5a1a81bca7eaefd78a38df7d7de",
+    "cloud-platform-fdc5e4b70a599d8ea84b4ffd31a832b3",
+    "cloud-platform-6cf3132ef8fce52bb371b1d02f40c36d",
+    "cloud-platform-dfc64bcd6ed89a72777fc7924f9da01e",
+    "cloud-platform-6c22a751aa9a80bab3ee3706008e9d54",
+  ]
+}
+
+# Route53 hostzone
+resource "aws_route53_zone" "cloud_platform_justice_gov_uk" {
+  name = "cloud-platform.service.justice.gov.uk."
+}
+
+resource "aws_route53_record" "cloud_platform_justice_gov_uk_TXT" {
+  zone_id = aws_route53_zone.cloud_platform_justice_gov_uk.zone_id
+  name    = aws_route53_zone.cloud_platform_justice_gov_uk.name
+  type    = "TXT"
+  ttl     = "300"
+  records = ["google-site-verification=IorKX8xdhHmAEnI4O1LtGPgQwQiFtRJpPFABmzyCN1E"]
+}
+
+# PagerDuty Status page verification records
+locals {
+  pagerduty_records = {
+    "mail_cname"   = { name = "em7871.status.cloud-platform.service.justice.gov.uk", type = "CNAME", ttl = 300, records = ["u31181182.wl183.sendgrid.net"] }
+    "dkim1"        = { name = "pdt._domainkey.status.cloud-platform.service.justice.gov.uk", type = "CNAME", ttl = 300, records = ["pdt.domainkey.u31181182.wl183.sendgrid.net"] }
+    "dkim2"        = { name = "pdt2._domainkey.status.cloud-platform.service.justice.gov.uk", type = "CNAME", ttl = 300, records = ["pdt2.domainkey.u31181182.wl183.sendgrid.net"] }
+    "http-traffic" = { name = "status.cloud-platform.service.justice.gov.uk", type = "CNAME", ttl = 300, records = ["cd-6702f1611f3608e5724393c37ba1ff3c.hosted-status.pagerduty.com"] }
+  }
+}
+
+resource "aws_route53_record" "pagerduty_records" {
+  for_each = local.pagerduty_records
+  zone_id  = aws_route53_zone.cloud_platform_justice_gov_uk.zone_id
+  name     = each.value.name
+  type     = each.value.type
+  ttl      = each.value.ttl
+  records  = each.value.records
+}
+
+##############
+# S3 buckets #
+##############
+
+module "s3_bucket_thanos" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "4.3.0"
+
+  bucket = "cloud-platform-prometheus-thanos"
+  acl    = "private"
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+
+  versioning = {
+    enabled = false
+  }
+
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+
+}
+
+module "s3_bucket_velero" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "4.3.0"
+
+  bucket = "cloud-platform-velero-backups"
+  acl    = "private"
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+
+  versioning = {
+    enabled = true
+  }
+
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+
+}
+
+module "s3_bucket_kubeconfigs" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "4.3.0"
+
+  bucket = "cloud-platform-concourse-kubeconfig"
+  acl    = "private"
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+
+  versioning = {
+    enabled = true
+  }
+
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
+
+module "s3_bucket_environments_live_reports" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "4.3.0"
+
+  bucket = "cloud-platform-concourse-environments-live-reports"
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+
+  versioning = {
+    enabled = false
+  }
+
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
+# Create a DynamoDB table so we can lock the terraform state of each
+# namespace in the cloud-platform-environments repository, as we
+# `terraform apply` it.
+#
+# This table name is referenced from the environments repo, so that
+# terraform can use it to lock the state of each namespace.
+resource "aws_dynamodb_table" "cloud_platform_environments_terraform_lock" {
+  name           = "cloud-platform-environments-terraform-lock"
+  hash_key       = "LockID"
+  read_capacity  = 20
+  write_capacity = 20
+
+  provider = aws.ireland
+
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+
+  tags = {
+    Name = "Terraform Lock Table for namespaces in the cloud-platform-environments repository"
+  }
+}
+
+# Writing kubeconfig within kubeconfig bucket
+resource "aws_s3_bucket_object" "kubeconfig" {
+  key    = "kubeconfig"
+  bucket = module.s3_bucket_kubeconfigs.s3_bucket_id
+
+  content                = templatefile("${path.module}/templates/kubeconfig.tpl", { clusters = var.kubeconfig_clusters })
+  server_side_encryption = "AES256"
+}
+
+# Schedule Amazon RDS stop and start using AWS Systems Manager
+
+module "aws_scheduler" {
+  source = "github.com/ministryofjustice/cloud-platform-terraform-aws-scheduler?ref=0.2.0"
+
+  rds_schedule_expression_stop  = "cron(0 22 ? * * *)"
+  rds_schedule_expression_start = "cron(0 06 ? * * *)"
+  rds_target_tag_key            = "cloud-platform-rds-auto-shutdown-disabled"
+  rds_target_tag_value          = "Schedule RDS Stop/Start during non-business hours for cost saving disabled"
+}
+
+resource "null_resource" "test_pr" {
+  provisioner "local-exec" {
+    command = "echo 'Hello, Cloud Platform!'"
+  }
+}
+

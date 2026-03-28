@@ -1,0 +1,203 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "CosmosDbDatabaseAccountName": {
+      "type": "string",
+      "minLength": 3,
+      "metadata": {
+        "description": "The Azure Cosmos DB database account name."
+      }
+    },
+    "sqlServerAdminLogin": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The SQL server admin username."
+      }
+    },
+    "sqlServerAdminLoginPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The SQL server admin password"
+      }
+    },
+    "webAppName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The name of the Web App"
+      }
+    }
+  },
+  "variables": {
+    "sqlServerName": "[concat(uniquestring(resourceGroup().id), 'sqlserver')]",
+    "keyvaultName": "[concat(uniqueString(resourceGroup().id), 'keyvault')]",
+    "signalRName": "[concat(uniqueString(resourceGroup().id), 'signalr')]",
+    "sqlDatabaseName": "AzureChallengeDb",
+    "appInsightsName": "[concat(uniqueString(resourceGroup().id), 'appinsight')]",
+    "cosmosDbKey_secret_name": "AzChallengeCosmosKey",
+    "sqlDbConnectionString_secret_name": "AzChallengeDbConn",
+    "signalR_secret_name": "AzSignalRKey",
+    "documentDBOfferType": "Standard",
+    "location": "[resourceGroup().location]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2019-10-01",
+      "name": "linkedTemplate-cosmosdb",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'azchallenge-cosmosdb.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "databaseAccountName": {
+            "value": "[parameters('CosmosDbDatabaseAccountName')]"
+          },
+          "documentDBOfferType": {
+            "value": "[variables('documentDBOfferType')]"
+          },
+          "location": {
+            "value": "[variables('location')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-10-01",
+      "name": "linkedTemplate-sqldb",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'azchallenge-sqldb.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "sqlServerAdminLogin": {
+            "value": "[parameters('sqlServerAdminLogin')]"
+          },
+          "sqlServerAdminLoginPassword": {
+            "value": "[parameters('sqlServerAdminLoginPassword')]"
+          },
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "sqlServerName": {
+            "value": "[variables('sqlServerName')]"
+          },
+          "sqlDatabaseName": {
+            "value": "[variables('sqlDatabaseName')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-10-01",
+      "name": "linkedTemplate-signalr",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'azchallenge-signalr.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "signalRName": {
+            "value": "[variables('signalRName')]"
+          },
+          "location": {
+            "value": "[variables('location')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-10-01",
+      "name": "linkedTemplate-webapp-appinsights",
+      "type": "Microsoft.Resources/deployments",
+      "dependsOn": [
+        "linkedTemplate-sqldb",
+        "linkedTemplate-cosmosdb",
+        "linkedTemplate-signalr"
+      ],
+      "properties": {
+        "mode": "incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'azchallenge-webapp-appinsights.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "CosmosDbDatabaseAccountName": {
+            "value": "[parameters('CosmosDbDatabaseAccountName')]"
+          },
+          "webAppName": {
+            "value": "[parameters('webAppName')]"
+          },
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "keyvaultName": {
+            "value": "[variables('keyvaultName')]"
+          },
+          "appInsightsName": {
+            "value": "[variables('appInsightsName')]"
+          },
+          "cosmosDbKey_secret_name": {
+            "value": "[variables('cosmosDbKey_secret_name')]"
+          },
+          "sqlDbConnectionString_secret_name": {
+            "value": "[variables('sqlDbConnectionString_secret_name')]"
+          },
+          "signalR_secret_name": {
+            "value": "[variables('signalR_secret_name')]"
+          },
+          "sqlDatabaseName": {
+            "value": "[variables('sqlDatabaseName')]"
+          },
+          "sqlServerAdminLogin": {
+            "value": "[parameters('sqlServerAdminLogin')]"
+          },
+          "sqlServerAdminLoginPassword": {
+            "value": "[parameters('sqlServerAdminLoginPassword')]"
+          },
+          "databaseFQDN": {
+            "value": "[reference('linkedTemplate-sqldb').outputs.databaseFQDN.value]"
+          },
+          "cosmosDbMasterKey": {
+            "value": "[reference('linkedTemplate-cosmosdb').outputs.cosmosDbMasterKey.value]"
+          },
+          "signalRConnString": {
+            "value": "[reference('linkedTemplate-signalr').outputs.signalRConnString.value]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-10-01",
+      "name": "linkedTemplate-keyvault-accesspolicy",
+      "type": "Microsoft.Resources/deployments",
+      "dependsOn": [
+        "linkedTemplate-webapp-appinsights"
+      ],
+      "properties": {
+        "mode": "incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'azchallenge-keyvault-accesspolicy.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "webAppPrincipalId": {
+            "value": "[reference('linkedTemplate-webapp-appinsights').outputs.webAppPrincipalId.value]"
+          },
+          "keyvaultName": {
+            "value": "[variables('keyvaultName')]"
+          }
+        }
+      }
+    }
+  ]
+}

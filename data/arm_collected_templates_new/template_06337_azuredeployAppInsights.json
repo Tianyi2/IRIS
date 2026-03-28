@@ -1,0 +1,47 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "appInsightsName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the App Insights resource."
+            }
+        },
+        "webAppName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Web App resource."
+            }
+        },
+        "webAppResourceGroup": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Name of the Web App resource group."
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('appInsightsName')]",
+            "type": "Microsoft.Insights/components",
+            "location": "East US",
+            "apiVersion": "2014-04-01",
+            "dependsOn": [],
+            "tags": {
+                "displayName": "Component appInsights"
+            },
+            "properties": {
+                "applicationId": "[resourceId(parameters('webAppResourceGroup'), 'Microsoft.Web/sites', parameters('webAppName'))]"
+            }
+        }
+    ],
+    "outputs": {
+        "appInsightsKey": {
+            "type": "string",
+            "value": "[reference(parameters('appInsightsName'), '2014-04-01').InstrumentationKey]"
+        }
+    }
+}

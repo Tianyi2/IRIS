@@ -1,0 +1,203 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "maxLength": 16,
+      "type": "string"
+    }
+  },
+  "variables": {
+    "vnetName": "[concat(parameters('namePrefix'),'VNet1')]",
+    "subnet1Name": "Subnet1",
+    "subnet2Name": "Subnet2",
+    "location": "[resourceGroup().location]",
+    "apiVersion": "2018-07-01",
+    "siteName": "[concat('contosotravel-', parameters('namePrefix'), '-web')]",
+    "serviceName": "[concat('contosotravel-', parameters('namePrefix'), '-service')]",
+    "baseURI": "https://raw.githubusercontent.com/andywahr/arkhitekton-modules/master/ContosoTravel",
+    "LogAnalyticsLink": "[concat(variables('baseURI'),'/base/loganalytics/azuredeploy-loganalytics.json')]",
+    "StorageLink": "[concat(variables('baseURI'),'/base/storage/azuredeploy-storage.json')]",
+    "VNETLink": "[concat(variables('baseURI'),'/base/vnet/azuredeploy-vnet.json')]",
+    "AppInsightsLink": "[concat(variables('baseURI'),'/base/appinsights/azuredeploy-appinsights.json')]",
+    "DataLoadLink" : "[concat(variables('baseURI'),'/base/dataload/azuredeploy-dataload.json')]",
+    "KeyVaultLink": "[concat(variables('baseURI'),'/base/keyvault/azuredeploy-keyvault.json')]",
+    "keyVaultName": "[concat('kv', parameters('namePrefix'))]",
+    "keyVaultUrl":"[concat('https://', variables('keyVaultName'), '.vault.azure.net/')]",
+    "dataAdministratorLogin":"[concat('U', uniqueString(resourceGroup().id, 'a72a1444-c799-4b70-9d69-f4985d15d372'), '#', '@')]",
+    "dataAdministratorLoginPassword":"[concat('P', uniqueString(resourceGroup().id, '29cd7b98-f860-47e5-b284-206eb7de4505'), 'x', '!')]",
+    "dataAccountLogin":"[concat('U', uniqueString(resourceGroup().id, '8e7c1649-2121-4f91-a307-d7bf8615c2cd'), '#', '@')]",
+    "dataAccountLoginPassword":"[concat('P', uniqueString(resourceGroup().id, '5af24dfc-e00e-45cf-8ae4-639041e34d07'), 'x', '!')]"
+  },
+  "resources": [    
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "LogAnalytics-Template",
+      "apiVersion": "[variables('apiVersion')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('LogAnalyticsLink')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "namePrefix": {
+            "value": "[parameters('namePrefix')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "VNET-Template",
+      "apiVersion": "[variables('apiVersion')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('VNETLink')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "vnetName": {
+            "value": "[variables('vnetName')]"
+          },
+          "subnet1Name": {
+            "value": "[variables('subnet1Name')]"
+          },
+          "subnet2Name": {
+            "value": "[variables('subnet2Name')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "Storage-Template",
+      "dependsOn": [
+        "VNET-Template"
+      ],
+      "apiVersion": "[variables('apiVersion')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('StorageLink')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "namePrefix": {
+            "value": "[parameters('namePrefix')]"
+          },
+          "vnetName": {
+            "value": "[variables('vnetName')]"
+          },
+          "subnet1Name": {
+            "value": "[variables('subnet1Name')]"
+          },
+          "subnet2Name": {
+            "value": "[variables('subnet2Name')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "AppInsights-Template",
+      "apiVersion": "[variables('apiVersion')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('AppInsightsLink')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "namePrefix": {
+            "value": "[parameters('namePrefix')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "Dataload-Template",
+      "dependsOn": [
+        "Data-Template"
+      ],
+      "apiVersion": "[variables('apiVersion')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('DataLoadLink')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "namePrefix": {
+            "value": "[parameters('namePrefix')]"
+          },  
+          "keyVaultUrl": {
+            "value": "[variables('keyVaultUrl')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "KeyVault-Template",
+      "dependsOn": [
+        "WebSite-Template",
+        "Service-Template",
+        "Eventing-Template",
+        "Data-Template",
+        "Dataload-Template"
+      ],
+      "apiVersion": "[variables('apiVersion')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('KeyVaultLink')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "keyVaultName": {
+            "value": "[variables('keyVaultName')]"
+          },
+          "webMSI": {
+            "value": "[reference('WebSite-Template').outputs.webMSI.value]"
+          },
+          "dataloadACIId": {
+            "value": "[reference('Dataload-Template').outputs.aciMSIId.value]"
+          },
+          "serviceMSI":{
+            "value": "[reference('Service-Template').outputs.serviceMSI.value]"
+          },
+          "serviceType": {
+            "value": "[reference('Eventing-Template').outputs.serviceType.value]"
+          },
+          "serviceAccountName": {
+            "value": "[reference('Eventing-Template').outputs.serviceAccountName.value]"
+          },
+          "dataAccountName": {
+            "value": "[reference('Data-Template').outputs.dataAccountName.value]"
+          },
+          "dataType": {
+            "value": "[reference('Data-Template').outputs.dataType.value]"
+          },
+          "dataAdministratorLoginPassword": {
+            "value": "[variables('dataAdministratorLoginPassword')]"
+          } ,
+          "dataAdministratorLogin": {
+            "value": "[variables('dataAdministratorLogin')]"
+          }  ,
+          "dataAccountLoginPassword": {
+            "value": "[variables('dataAccountLoginPassword')]"
+          } ,
+          "dataAccountLogin": {
+            "value": "[variables('dataAccountLogin')]"
+          },
+          "serviceConnectionString" : {
+            "value": "[reference('Eventing-Template').outputs.eventingConnectionString.value]"
+          }
+        }
+      }
+    }
+  ]
+}

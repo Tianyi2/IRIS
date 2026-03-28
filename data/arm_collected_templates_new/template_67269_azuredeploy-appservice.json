@@ -1,0 +1,162 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "namePrefix": {
+            "type": "string",
+            "maxLength": 16
+        },
+        "appInsightInstrumentationKey": {
+            "type": "string"
+        },
+        "siteName": {
+            "type": "string"
+        },
+        "keyVaultUrl" : {
+            "type": "string"
+        },
+        "keyVaultAccountName" : {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "serverfarm": "[concat('asp-', parameters('siteName'))]",
+        "location": "[resourceGroup().location]",
+        "webSiteFQDN": "[concat(parameters('siteName'), '.azurewebsites.net')]"
+    },
+    "resources": [
+        {
+            "comments": "Generalized from resource: App Service Environment.",
+            "type": "Microsoft.Web/serverfarms",
+            "sku": {
+                "name": "S1",
+                "tier": "Standard",
+                "size": "S1",
+                "family": "S",
+                "capacity": 1
+            },
+            "kind": "app",
+            "name": "[variables('serverfarm')]",
+            "apiVersion": "2016-09-01",
+            "location": "[variables('location')]",
+            "scale": null,
+            "properties": {
+                "name": "[variables('serverfarm')]",
+                "workerTierName": null,
+                "adminSiteName": null,
+                "hostingEnvironmentProfile": null,
+                "perSiteScaling": false,
+                "reserved": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: App Service.",
+            "type": "Microsoft.Web/sites",
+            "kind": "app",
+            "name": "[parameters('siteName')]",
+            "apiVersion": "2016-08-01",
+            "location": "[variables('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "scale": null,
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('siteName'),'.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "virtualIP": null,
+                        "thumbprint": null,
+                        "toUpdate": null,
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('siteName'),'.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "virtualIP": null,
+                        "thumbprint": null,
+                        "toUpdate": null,
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('serverfarm'))]",
+                "reserved": false,
+                "siteConfig": null,
+                "scmSiteAlsoStopped": false,
+                "hostingEnvironmentProfile": null,
+                "clientAffinityEnabled": false,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "cloningInfo": null
+            },
+            "resources": [
+                {
+                    "type": "config",
+                    "name": "appsettings",
+                    "apiVersion": "2016-08-01",
+                    "properties": {
+                        "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('appInsightInstrumentationKey')]",
+                        "KeyVaultUrl": "[parameters('keyVaultUrl')]",
+                        "KeyVaultAccountName": "[parameters('keyVaultAccountName')]",
+                        "WEBSITE_NODE_DEFAULT_VERSION" : "10.6.0"
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites', parameters('siteName'))]"
+                    ]
+                }
+            ],
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('serverfarm'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: hostNameBindings",
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "name": "[concat(parameters('siteName'), '/', variables('webSiteFQDN'))]",
+            "apiVersion": "2016-08-01",
+            "location": "[variables('location')]",
+            "scale": null,
+            "properties": {
+                "siteName": "[parameters('siteName')]",
+                "domainId": null,
+                "hostNameType": "Verified"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('siteName'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: 'App Insight Extension'",
+            "type": "microsoft.insights/components",
+            "kind": "web",
+            "name": "[parameters('siteName')]",
+            "apiVersion": "2015-05-01",
+            "location": "[variables('location')]",
+            "scale": null,
+            "properties": {
+                "Application_Type": "web",
+                "Flow_Type": null,
+                "Request_Source": "IbizaWebAppExtensionCreate",
+                "HockeyAppId": null,
+                "SamplingPercentage": null
+            },
+            "dependsOn": []
+        }
+    ],
+    "outputs": {
+        "webSiteFQDN": {
+            "type": "string",
+            "value": "[string(variables('webSiteFQDN'))]"
+        },
+        "webMSI" : {
+            "type": "string",
+            "value": "[concat('Microsoft.Web/sites/', parameters('siteName'),'/providers/Microsoft.ManagedIdentity/Identities/default')]"
+        }
+    }
+}

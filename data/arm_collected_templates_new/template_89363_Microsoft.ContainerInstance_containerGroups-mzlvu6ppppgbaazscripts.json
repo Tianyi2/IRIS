@@ -1,0 +1,170 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.ContainerInstance/containerGroups",
+      "name": "mzlvu6ppppgbaazscripts",
+      "apiVersion": "2020-11-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "AZ_SCRIPTS_STATUS": "runCLI:Running"
+      },
+      "properties": {
+        "sku": "Standard",
+        "provisioningState": "Succeeded",
+        "containers": [
+          {
+            "name": "az-scripts-k6kwnhoouujpyazscripts",
+            "properties": {
+              "image": "mcr.microsoft.com/azure-cli:2.9.1",
+              "command": [
+                "bash",
+                "/mnt/azscripts/azscriptinput/DeploymentScript.sh",
+                "kubectl",
+                "create",
+                "-f",
+                "https://raw.githubusercontent.com/mspnp/aks-secure-baseline/main/cluster-manifests/cluster-baseline-settings/flux.yaml"
+              ],
+              "ports": [],
+              "environmentVariables": [
+                {
+                  "name": "AKS_CLUSTER_NAME",
+                  "value": "uday"
+                },
+                {
+                  "name": "AKS_CLUSTER_RESOURCE_GROUP_NAME",
+                  "value": "aks"
+                },
+                {
+                  "name": "AZ_SCRIPTS_PATH_INPUT_DIRECTORY",
+                  "value": "/mnt/azscripts/azscriptinput"
+                },
+                {
+                  "name": "AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY",
+                  "value": "/mnt/azscripts/azscriptoutput"
+                },
+                {
+                  "name": "AZ_SCRIPTS_PATH_USER_SCRIPT_FILE_NAME",
+                  "value": "userscript.sh"
+                },
+                {
+                  "name": "AZ_SCRIPTS_PATH_PRIMARY_SCRIPT_URI_FILE_NAME",
+                  "value": "primaryscripturi.config"
+                },
+                {
+                  "name": "AZ_SCRIPTS_PATH_SUPPORTING_SCRIPT_URI_FILE_NAME",
+                  "value": "supportingscripturi.config"
+                },
+                {
+                  "name": "AZ_SCRIPTS_PATH_SCRIPT_OUTPUT_FILE_NAME",
+                  "value": "scriptoutputs.json"
+                },
+                {
+                  "name": "AZ_SCRIPTS_PATH_EXECUTION_RESULTS_FILE_NAME",
+                  "value": "executionresult.json"
+                },
+                {
+                  "name": "AZ_SCRIPTS_AZURE_ENVIRONMENT",
+                  "value": "AzureCloud"
+                },
+                {
+                  "name": "AZ_SCRIPTS_CLEANUP_PREFERENCE",
+                  "value": "OnExpiration"
+                },
+                {
+                  "name": "AZ_SCRIPTS_USER_ASSIGNED_IDENTITY",
+                  "value": "/subscriptions/dddbadc2-9d31-43f4-a7e3-ae83c9da646a/resourceGroups/aks/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aks-uai"
+                }
+              ],
+              "instanceView": {
+                "restartCount": 0,
+                "currentState": {
+                  "state": "Terminated",
+                  "startTime": "2021-01-28T20:41:12Z",
+                  "exitCode": 0,
+                  "finishTime": "2021-01-28T21:41:23Z",
+                  "detailStatus": "Completed"
+                },
+                "events": [
+                  {
+                    "count": 1,
+                    "firstTimestamp": "2021-01-28T20:40:32Z",
+                    "lastTimestamp": "2021-01-28T20:40:32Z",
+                    "name": "Pulling",
+                    "message": "pulling image \"mcr.microsoft.com/azure-cli:2.9.1\"",
+                    "type": "Normal"
+                  },
+                  {
+                    "count": 1,
+                    "firstTimestamp": "2021-01-28T20:41:08Z",
+                    "lastTimestamp": "2021-01-28T20:41:08Z",
+                    "name": "Pulled",
+                    "message": "Successfully pulled image \"mcr.microsoft.com/azure-cli:2.9.1\"",
+                    "type": "Normal"
+                  },
+                  {
+                    "count": 1,
+                    "firstTimestamp": "2021-01-28T20:41:12Z",
+                    "lastTimestamp": "2021-01-28T20:41:12Z",
+                    "name": "Created",
+                    "message": "Created container",
+                    "type": "Normal"
+                  },
+                  {
+                    "count": 1,
+                    "firstTimestamp": "2021-01-28T20:41:12Z",
+                    "lastTimestamp": "2021-01-28T20:41:12Z",
+                    "name": "Started",
+                    "message": "Started container",
+                    "type": "Normal"
+                  }
+                ]
+              },
+              "resources": {
+                "requests": {
+                  "memoryInGB": 1,
+                  "cpu": 1
+                }
+              },
+              "volumeMounts": [
+                {
+                  "name": "azscripts",
+                  "mountPath": "/mnt/azscripts/"
+                }
+              ]
+            }
+          }
+        ],
+        "initContainers": [],
+        "restartPolicy": "Never",
+        "osType": "Linux",
+        "volumes": [
+          {
+            "name": "azscripts",
+            "azureFile": {
+              "shareName": "tzvxzm6yak6siazscripts",
+              "storageAccountName": "mzlvu6ppppgbaazscripts"
+            }
+          }
+        ],
+        "instanceView": {
+          "events": [
+            {
+              "count": 1,
+              "firstTimestamp": "2021-01-28T20:40:31Z",
+              "lastTimestamp": "2021-01-28T20:40:31Z",
+              "name": "SuccessfulMountAzureFileVolume",
+              "message": "Successfully mounted Azure File Volume.",
+              "type": "Normal"
+            }
+          ],
+          "state": "Succeeded"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

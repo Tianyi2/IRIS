@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleDefinitions",
+      "name": "349198de-8dce-5f68-84e4-fbd88e4365aa",
+      "apiVersion": "2022-05-01-preview",
+      "properties": {
+        "assignableScopes": [
+          "/providers/Microsoft.Management/managementGroups/saturn"
+        ],
+        "description": "Platform-wide global connectivity management",
+        "permissions": [
+          {
+            "actions": [
+              "*/read",
+              "Microsoft.Authorization/*/read",
+              "Microsoft.Insights/alertRules/*",
+              "Microsoft.Network/*",
+              "Microsoft.ResourceHealth/availabilityStatuses/read",
+              "Microsoft.Resources/deployments/*",
+              "Microsoft.Resources/subscriptions/resourceGroups/read",
+              "Microsoft.Support/*"
+            ],
+            "dataActions": [],
+            "notActions": [],
+            "notDataActions": []
+          }
+        ],
+        "roleName": "saturn-NetOps",
+        "type": "CustomRole"
+      }
+    }
+  ],
+  "outputs": {}
+}

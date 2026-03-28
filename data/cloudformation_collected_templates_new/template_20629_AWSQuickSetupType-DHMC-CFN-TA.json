@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "1.0",
+  "templateBody": {
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+      "QSType": {
+        "Type": "String",
+        "AllowedValues": [
+          "TA"
+        ],
+        "Default": "TA",
+        "Description": "(Required) Specifies the type of target for the Quick Setup configuration."
+      },
+      "QSConfigurationId": {
+        "Type": "String",
+        "Default": "",
+        "Description": "(Required) The unique identifier of the deployed configuration."
+      },
+      "UpdateSSMAgent": {
+        "Type": "String",
+        "Default": "true",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Description": "(Required) Specifies whether to enable automatic updates of the SSM Agent every two weeks"
+      }
+    },
+    "Conditions": {
+      "UpdateSSMAgent": {
+        "Fn::Equals": [
+          {
+            "Ref": "UpdateSSMAgent"
+          },
+          "true"
+        ]
+      }
+    },
+    "Resources": {
+      "EnableDHMCAutomationAssumeRole": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "RoleName": {
+            "Fn::Sub": "AWS-QuickSetup-DHMCRole-${QSConfigurationId}-${AWS::Region}"
+          },
+          "Description": "Do Not Modify or Delete. This resource has been created to support the deployment of DHMC Quick Setup configuration, and modification or deletion of this resource may hinder the functionality of that Quick Setup configuration.",
+          "Path": "/",
+          "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "ssm.amazonaws.com"
+                },
+                "Action": "sts:AssumeRole",
+                "Condition": {
+                  "StringEquals": {
+                    "aws:SourceAccount": {
+                      "Fn::Sub": "${AWS::AccountId}"
+                    }
+                  },
+                  "ArnLike": {
+                    "aws:SourceArn": {
+                      "Fn::Sub": "arn:${AWS::Partition}:ssm:*:${AWS::AccountId}:automation-execution/*"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "ManagedPolicyArns": [
+            {
+              "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AWSQuickSetupEnableDHMCExecutionPolicy"
+            },
+            {
+              "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AWSSystemsManagerEnableExplorerExecutionPolicy"
+            }
+          ],
+          "Tags": [
+            {
+              "Key": "QSConfigId",
+              "Value": {
+                "Ref": "QSConfigurationId"
+              }
+            }
+          ]
+        }
+      },
+      "EnableDHMCAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "AssociationName": {
+            "Fn::Sub": "AWS-QuickSetup-DHMC-EnableDHMC-${QSConfigurationId}"
+          },
+          "Name": "AWSQuickSetupType-EnableDHMC",
+          "ScheduleExpression": "rate(1 day)",
+          "Parameters": {
+            "AutomationAssumeRole": [
+              {
+                "Fn::GetAtt": [
+                  "EnableDHMCAutomationAssumeRole",
+                  "Arn"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "SSMAgentUpdateAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "AssociationName": {
+            "Fn::Sub": "AWS-QuickSetup-DHMC-UpdateSSMAgent-${QSConfigurationId}"
+          },
+          "Name": "AWS-UpdateSSMAgent",
+          "ScheduleExpression": "rate(14 days)",
+          "Targets": [
+            {
+              "Key": "InstanceIds",
+              "Values": [
+                "*"
+              ]
+            }
+          ]
+        },
+        "Condition": "UpdateSSMAgent"
+      },
+      "SystemAssociationForEnablingExplorer": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "AssociationName": {
+            "Fn::Sub": "AWS-QuickSetup-DHMC-EnableExplorer-${QSConfigurationId}"
+          },
+          "Name": "AWS-EnableExplorer",
+          "Parameters": {
+            "AutomationAssumeRole": [
+              {
+                "Fn::GetAtt": [
+                  "EnableDHMCAutomationAssumeRole",
+                  "Arn"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

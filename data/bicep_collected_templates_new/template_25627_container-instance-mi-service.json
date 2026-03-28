@@ -1,0 +1,168 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "2498933879880049582"
+    }
+  },
+  "parameters": {
+    "containerInstanceName": {
+      "type": "string"
+    },
+    "containerInstanceIdentityName": {
+      "type": "string"
+    },
+    "appClientId": {
+      "type": "string"
+    },
+    "containerAppName": {
+      "type": "string"
+    },
+    "containerImage": {
+      "type": "string"
+    },
+    "appInsightsConnectionString": {
+      "type": "string"
+    },
+    "appInsightsInstrumentationKey": {
+      "type": "string"
+    },
+    "springDatasourceUrl": {
+      "type": "string"
+    },
+    "springDatasourceUserName": {
+      "type": "string"
+    },
+    "springDatasourceShowSql": {
+      "type": "string",
+      "defaultValue": "true"
+    },
+    "containerAppPort": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "tagsArray": {
+      "type": "object",
+      "defaultValue": "[resourceGroup().tags]"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ContainerInstance/containerGroups",
+      "apiVersion": "2021-10-01",
+      "name": "[parameters('containerInstanceName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tagsArray')]",
+      "identity": {
+        "type": "SystemAssigned, UserAssigned",
+        "userAssignedIdentities": {
+          "[format('/subscriptions/{0}/resourcegroups/{1}/providers/microsoft.managedidentity/userassignedidentities/{2}', subscription().subscriptionId, resourceGroup().name, parameters('containerInstanceIdentityName'))]": {}
+        }
+      },
+      "properties": {
+        "osType": "Linux",
+        "restartPolicy": "OnFailure",
+        "sku": "Standard",
+        "ipAddress": {
+          "type": "Public",
+          "ports": [
+            {
+              "port": "[int(parameters('containerAppPort'))]"
+            }
+          ],
+          "dnsNameLabel": "[replace(replace(parameters('containerInstanceName'), '-', ''), '_', '')]"
+        },
+        "containers": [
+          {
+            "name": "[parameters('containerAppName')]",
+            "properties": {
+              "image": "[parameters('containerImage')]",
+              "livenessProbe": {
+                "httpGet": {
+                  "port": 80,
+                  "path": "[if(contains(parameters('containerImage'), 'aci-helloworld'), '/', '/actuator/health/liveness')]"
+                },
+                "initialDelaySeconds": 50,
+                "periodSeconds": 3,
+                "failureThreshold": 3,
+                "successThreshold": 2,
+                "timeoutSeconds": 3
+              },
+              "readinessProbe": {
+                "httpGet": {
+                  "port": 80,
+                  "path": "[if(contains(parameters('containerImage'), 'aci-helloworld'), '/', '/actuator/health/readiness')]"
+                },
+                "initialDelaySeconds": 50,
+                "periodSeconds": 3,
+                "failureThreshold": 3,
+                "successThreshold": 2,
+                "timeoutSeconds": 3
+              },
+              "environmentVariables": [
+                {
+                  "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                  "value": "[parameters('appInsightsInstrumentationKey')]"
+                },
+                {
+                  "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                  "value": "[parameters('appInsightsConnectionString')]"
+                },
+                {
+                  "name": "SPRING_DATASOURCE_URL",
+                  "value": "[parameters('springDatasourceUrl')]"
+                },
+                {
+                  "name": "SPRING_DATASOURCE_APP_CLIENT_ID",
+                  "value": "[parameters('appClientId')]"
+                },
+                {
+                  "name": "SPRING_DATASOURCE_USERNAME",
+                  "value": "[parameters('springDatasourceUserName')]"
+                },
+                {
+                  "name": "SPRING_PROFILES_ACTIVE",
+                  "value": "test-mi"
+                },
+                {
+                  "name": "PORT",
+                  "value": "[string(parameters('containerAppPort'))]"
+                },
+                {
+                  "name": "SPRING_DATASOURCE_SHOW_SQL",
+                  "value": "[parameters('springDatasourceShowSql')]"
+                },
+                {
+                  "name": "DEBUG_AUTH_TOKEN",
+                  "value": "true"
+                },
+                {
+                  "name": "TEST_KEYVAULT_REFERENCE",
+                  "value": "[parameters('springDatasourceUserName')]"
+                }
+              ],
+              "ports": [
+                {
+                  "port": "[int(parameters('containerAppPort'))]",
+                  "protocol": "TCP"
+                }
+              ],
+              "resources": {
+                "requests": {
+                  "cpu": 1,
+                  "memoryInGB": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

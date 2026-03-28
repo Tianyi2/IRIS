@@ -1,0 +1,1230 @@
+{
+  "schemaVersion": "1.0",
+  "templateBody": {
+    "Parameters": {
+      "QSType": {
+        "Type": "String",
+        "AllowedValues": [
+          "TA",
+          "MA",
+          "LA"
+        ],
+        "Description": "(Required) Specifies whether the Quick Setup applies to the local account or an AWS organization."
+      },
+      "QSConfigurationId": {
+        "Type": "String",
+        "Description": "(Required) Unique identifier of the deployed configuration."
+      },
+      "QSAttachConfigurationPolicy": {
+        "Type": "String",
+        "Default": "false",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Description": "(Optional) Whether to attach Configuration permissions policy which sets boundaries of what configuration can do."
+      },
+      "PackagesToInstall": {
+        "Type": "CommaDelimitedList",
+        "Description": "(Required) List of packages to be installed",
+        "AllowedValues": [
+          "AWSEFSTools",
+          "AWSCWAgent",
+          "AWSEC2LaunchAgent",
+          "novalue"
+        ]
+      },
+      "RemediationSchedule": {
+        "Type": "String",
+        "Default": "rate(30 days)",
+        "AllowedValues": [
+          "rate(30 days)",
+          "rate(14 days)",
+          "rate(2 days)",
+          "none"
+        ],
+        "Description": "(Optional) The interval at which the configuration's drift remediation runs."
+      },
+      "TargetType": {
+        "Type": "String",
+        "Default": "*",
+        "AllowedValues": [
+          "Tags",
+          "InstanceIds",
+          "*",
+          "ResourceGroups"
+        ],
+        "Description": "(Optional) Specifies the way instances are targeted. This parameter is only used for the local Quick Setup type."
+      },
+      "TargetInstances": {
+        "Type": "String",
+        "Default": "*",
+        "Description": "(Optional) Specifies the target instances. This parameter is only used for the local Quick Setup type when InstanceIds are the TargetType."
+      },
+      "TargetTagKey": {
+        "Type": "String",
+        "Default": "",
+        "Description": "(Optional) Specifies the tag key used to target instances. This parameter is only used for the local Quick Setup type when Tags are the TargetType."
+      },
+      "TargetTagValue": {
+        "Type": "String",
+        "Default": "",
+        "Description": "(Optional) Specifies the tag value used to target instances. This parameter is only used for the local Quick Setup type when Tags are the TargetType."
+      },
+      "ResourceGroupName": {
+        "Type": "String",
+        "Default": "",
+        "Description": "(Optional) Specifies the tag value for the resource group used to target instances. This parameter is only used for the local Quick Setup type when ResourceGroups are the TargetType."
+      },
+      "IsPolicyAttachAllowed": {
+        "Type": "String",
+        "Default": "false",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Description": "(Optional) Whether you want to allow Quick Setup to attach IAM policies to existing instance profiles."
+      }
+    },
+    "Conditions": {
+      "ShouldAttachConfigurationPolicy": {
+        "Fn::Equals": [
+          {
+            "Ref": "QSAttachConfigurationPolicy"
+          },
+          "true"
+        ]
+      },
+      "ShouldInstallEFSUtilsCondition": {
+        "Fn::Or": [
+          {
+            "Fn::Equals": [
+              "AWSEFSTools",
+              {
+                "Fn::Select": [
+                  0,
+                  {
+                    "Ref": "PackagesToInstall"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Fn::Equals": [
+              "AWSEFSTools",
+              {
+                "Fn::Select": [
+                  1,
+                  {
+                    "Ref": "PackagesToInstall"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Fn::Equals": [
+              "AWSEFSTools",
+              {
+                "Fn::Select": [
+                  2,
+                  {
+                    "Ref": "PackagesToInstall"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ShouldInstallCWAgentCondition": {
+        "Fn::Or": [
+          {
+            "Fn::Equals": [
+              "AWSCWAgent",
+              {
+                "Fn::Select": [
+                  0,
+                  {
+                    "Ref": "PackagesToInstall"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Fn::Equals": [
+              "AWSCWAgent",
+              {
+                "Fn::Select": [
+                  1,
+                  {
+                    "Ref": "PackagesToInstall"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Fn::Equals": [
+              "AWSCWAgent",
+              {
+                "Fn::Select": [
+                  2,
+                  {
+                    "Ref": "PackagesToInstall"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ShouldInstallEC2LaunchAgentCondition": {
+        "Fn::Or": [
+          {
+            "Fn::Equals": [
+              "AWSEC2LaunchAgent",
+              {
+                "Fn::Select": [
+                  0,
+                  {
+                    "Ref": "PackagesToInstall"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Fn::Equals": [
+              "AWSEC2LaunchAgent",
+              {
+                "Fn::Select": [
+                  1,
+                  {
+                    "Ref": "PackagesToInstall"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Fn::Equals": [
+              "AWSEC2LaunchAgent",
+              {
+                "Fn::Select": [
+                  2,
+                  {
+                    "Ref": "PackagesToInstall"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ShouldUpdatePackagesCondition": {
+        "Fn::Not": [
+          {
+            "Fn::Equals": [
+              {
+                "Ref": "RemediationSchedule"
+              },
+              "none"
+            ]
+          }
+        ]
+      },
+      "ShouldUpdateCWAgentCondition": {
+        "Fn::And": [
+          {
+            "Condition": "ShouldInstallCWAgentCondition"
+          },
+          {
+            "Condition": "ShouldUpdatePackagesCondition"
+          }
+        ]
+      },
+      "IsTagOnlyTargetedCondition": {
+        "Fn::And": [
+          {
+            "Fn::Equals": [
+              {
+                "Ref": "QSType"
+              },
+              "LA"
+            ]
+          },
+          {
+            "Fn::Equals": [
+              {
+                "Ref": "TargetType"
+              },
+              "Tags"
+            ]
+          },
+          {
+            "Fn::Equals": [
+              {
+                "Ref": "TargetTagValue"
+              },
+              ""
+            ]
+          }
+        ]
+      },
+      "IsTagKeyAndValueTargetedCondition": {
+        "Fn::And": [
+          {
+            "Fn::Equals": [
+              {
+                "Ref": "QSType"
+              },
+              "LA"
+            ]
+          },
+          {
+            "Fn::Equals": [
+              {
+                "Ref": "TargetType"
+              },
+              "Tags"
+            ]
+          },
+          {
+            "Fn::Not": [
+              {
+                "Fn::Equals": [
+                  {
+                    "Ref": "TargetTagValue"
+                  },
+                  ""
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "IsResourceGroupTargetedCondition": {
+        "Fn::And": [
+          {
+            "Fn::Equals": [
+              {
+                "Ref": "QSType"
+              },
+              "LA"
+            ]
+          },
+          {
+            "Fn::Equals": [
+              {
+                "Ref": "TargetType"
+              },
+              "ResourceGroups"
+            ]
+          }
+        ]
+      },
+      "IsOrgQuickSetup": {
+        "Fn::Equals": [
+          {
+            "Ref": "QSType"
+          },
+          "TA"
+        ]
+      },
+      "TargetAll": {
+        "Fn::Equals": [
+          {
+            "Ref": "TargetInstances"
+          },
+          "*"
+        ]
+      }
+    },
+    "Resources": {
+      "RoleForDistributorV3": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "ssm.amazonaws.com"
+                  ]
+                },
+                "Action": [
+                  "sts:AssumeRole"
+                ],
+                "Condition": {
+                  "StringEquals": {
+                    "aws:SourceAccount": {
+                      "Fn::Sub": "${AWS::AccountId}"
+                    }
+                  },
+                  "ArnLike": {
+                    "aws:SourceArn": {
+                      "Fn::Sub": "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:automation-execution/*"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "ManagedPolicyArns": [
+            {
+              "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AWSSystemsManagerEnableExplorerExecutionPolicy"
+            },
+            {
+              "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AWSQuickSetupManagedInstanceProfileExecutionPolicy"
+            }
+          ],
+          "RoleName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-RoleForDistributor-V3-",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "-",
+                {
+                  "Ref": "QSType"
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "QuickSetupInstallAndUpdateEFSUtilsAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "Name": "AWS-ConfigureAWSPackage",
+          "AssociationName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-Distributor-EFS-Utils-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "AutomationTargetParameterName": {
+            "Fn::If": [
+              "IsOrgQuickSetup",
+              "InstanceId",
+              {
+                "Fn::If": [
+                  "IsTagKeyAndValueTargetedCondition",
+                  "Tag",
+                  "InstanceId"
+                ]
+              }
+            ]
+          },
+          "Parameters": {
+            "name": [
+              "AmazonEFSUtils"
+            ],
+            "action": [
+              "Install"
+            ]
+          },
+          "ScheduleExpression": {
+            "Fn::If": [
+              "ShouldUpdatePackagesCondition",
+              {
+                "Ref": "RemediationSchedule"
+              },
+              {
+                "Ref": "AWS::NoValue"
+              }
+            ]
+          },
+          "Targets": {
+            "Fn::If": [
+              "IsOrgQuickSetup",
+              [
+                {
+                  "Key": "InstanceIds",
+                  "Values": [
+                    "*"
+                  ]
+                }
+              ],
+              {
+                "Fn::If": [
+                  "IsTagOnlyTargetedCondition",
+                  [
+                    {
+                      "Key": "tag-key",
+                      "Values": [
+                        {
+                          "Ref": "TargetTagKey"
+                        }
+                      ]
+                    }
+                  ],
+                  {
+                    "Fn::If": [
+                      "IsTagKeyAndValueTargetedCondition",
+                      [
+                        {
+                          "Key": {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "tag:",
+                                {
+                                  "Ref": "TargetTagKey"
+                                }
+                              ]
+                            ]
+                          },
+                          "Values": [
+                            {
+                              "Ref": "TargetTagValue"
+                            }
+                          ]
+                        }
+                      ],
+                      {
+                        "Fn::If": [
+                          "IsResourceGroupTargetedCondition",
+                          [
+                            {
+                              "Key": "resource-groups:Name",
+                              "Values": [
+                                {
+                                  "Ref": "ResourceGroupName"
+                                }
+                              ]
+                            }
+                          ],
+                          {
+                            "Fn::If": [
+                              "TargetAll",
+                              [
+                                {
+                                  "Key": "InstanceIds",
+                                  "Values": [
+                                    "*"
+                                  ]
+                                }
+                              ],
+                              [
+                                {
+                                  "Key": "InstanceIds",
+                                  "Values": {
+                                    "Fn::Split": [
+                                      ",",
+                                      {
+                                        "Ref": "TargetInstances"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "Condition": "ShouldInstallEFSUtilsCondition",
+        "DependsOn": "QuickSetupCreateAndAttachIAMToInstanceForDistributorUtilsAssociation"
+      },
+      "InstallAndManageCloudWatchDocument": {
+        "Type": "AWS::SSM::Document",
+        "Properties": {
+          "Content": {
+            "schemaVersion": "2.2",
+            "description": "The AWS-InstallAndManageCloudWatch command document installs the Amazon CloudWatch agent and manages the configuration of the agent for Amazon EC2 instances.",
+            "mainSteps": [
+              {
+                "action": "aws:runDocument",
+                "name": "installCWAgent",
+                "inputs": {
+                  "documentType": "SSMDocument",
+                  "documentPath": "AWS-ConfigureAWSPackage",
+                  "documentParameters": {
+                    "action": "Install",
+                    "name": "AmazonCloudWatchAgent"
+                  }
+                }
+              },
+              {
+                "action": "aws:runDocument",
+                "name": "manageCWAgent",
+                "inputs": {
+                  "documentType": "SSMDocument",
+                  "documentPath": "AmazonCloudWatch-ManageAgent",
+                  "documentParameters": {
+                    "action": "configure",
+                    "mode": "ec2",
+                    "optionalConfigurationSource": "default",
+                    "optionalRestart": "yes"
+                  }
+                }
+              }
+            ]
+          },
+          "UpdateMethod": "NewVersion",
+          "DocumentType": "Command",
+          "Name": {
+            "Fn::Join": [
+              "",
+              [
+                "AWSQuickSetup-Distributor-InstallAndManageCloudWatchDocument-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          }
+        },
+        "Condition": "ShouldInstallCWAgentCondition",
+        "DependsOn": "QuickSetupCreateAndAttachIAMToInstanceForDistributorUtilsAssociation"
+      },
+      "QuickSetupInstallAndManageCWAgentAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "Name": {
+            "Ref": "InstallAndManageCloudWatchDocument"
+          },
+          "AssociationName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-Distributor-CloudWatch-Agent-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "ScheduleExpression": {
+            "Ref": "AWS::NoValue"
+          },
+          "Targets": {
+            "Fn::If": [
+              "IsOrgQuickSetup",
+              [
+                {
+                  "Key": "InstanceIds",
+                  "Values": [
+                    "*"
+                  ]
+                }
+              ],
+              {
+                "Fn::If": [
+                  "IsTagOnlyTargetedCondition",
+                  [
+                    {
+                      "Key": "tag-key",
+                      "Values": [
+                        {
+                          "Ref": "TargetTagKey"
+                        }
+                      ]
+                    }
+                  ],
+                  {
+                    "Fn::If": [
+                      "IsTagKeyAndValueTargetedCondition",
+                      [
+                        {
+                          "Key": {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "tag:",
+                                {
+                                  "Ref": "TargetTagKey"
+                                }
+                              ]
+                            ]
+                          },
+                          "Values": [
+                            {
+                              "Ref": "TargetTagValue"
+                            }
+                          ]
+                        }
+                      ],
+                      {
+                        "Fn::If": [
+                          "IsResourceGroupTargetedCondition",
+                          [
+                            {
+                              "Key": "resource-groups:Name",
+                              "Values": [
+                                {
+                                  "Ref": "ResourceGroupName"
+                                }
+                              ]
+                            }
+                          ],
+                          {
+                            "Fn::If": [
+                              "TargetAll",
+                              [
+                                {
+                                  "Key": "InstanceIds",
+                                  "Values": [
+                                    "*"
+                                  ]
+                                }
+                              ],
+                              [
+                                {
+                                  "Key": "InstanceIds",
+                                  "Values": {
+                                    "Fn::Split": [
+                                      ",",
+                                      {
+                                        "Ref": "TargetInstances"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "Condition": "ShouldInstallCWAgentCondition",
+        "DependsOn": "QuickSetupCreateAndAttachIAMToInstanceForDistributorUtilsAssociation"
+      },
+      "UpdateCloudWatchAgentDocument": {
+        "Type": "AWS::SSM::Document",
+        "Properties": {
+          "Content": {
+            "schemaVersion": "2.2",
+            "description": "A composite document for updating CloudWatch agent.",
+            "mainSteps": [
+              {
+                "precondition": {
+                  "StringEquals": [
+                    "platformType",
+                    "Linux"
+                  ]
+                },
+                "action": "aws:runShellScript",
+                "name": "first",
+                "inputs": {
+                  "runCommand": [
+                    "sleep 1800"
+                  ]
+                }
+              },
+              {
+                "precondition": {
+                  "StringEquals": [
+                    "platformType",
+                    "Windows"
+                  ]
+                },
+                "action": "aws:runPowerShellScript",
+                "name": "second",
+                "inputs": {
+                  "runCommand": [
+                    "Start-Sleep -Seconds 1800"
+                  ]
+                }
+              },
+              {
+                "action": "aws:runDocument",
+                "name": "installCWAgent",
+                "inputs": {
+                  "documentType": "SSMDocument",
+                  "documentPath": "AWS-ConfigureAWSPackage",
+                  "documentParameters": {
+                    "action": "Install",
+                    "name": "AmazonCloudWatchAgent"
+                  }
+                }
+              }
+            ]
+          },
+          "DocumentType": "Command",
+          "UpdateMethod": "NewVersion",
+          "Name": {
+            "Fn::Join": [
+              "",
+              [
+                "AWSQuickSetup-Distributor-UpdateCloudWatchDocument-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          }
+        },
+        "Condition": "ShouldUpdateCWAgentCondition",
+        "DependsOn": "QuickSetupCreateAndAttachIAMToInstanceForDistributorUtilsAssociation"
+      },
+      "UpdateCloudWatchDocumentAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "Name": {
+            "Ref": "UpdateCloudWatchAgentDocument"
+          },
+          "AssociationName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-Distributor-UpdateCloudWatchAgent-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "ScheduleExpression": {
+            "Ref": "RemediationSchedule"
+          },
+          "Targets": {
+            "Fn::If": [
+              "IsOrgQuickSetup",
+              [
+                {
+                  "Key": "InstanceIds",
+                  "Values": [
+                    "*"
+                  ]
+                }
+              ],
+              {
+                "Fn::If": [
+                  "IsTagOnlyTargetedCondition",
+                  [
+                    {
+                      "Key": "tag-key",
+                      "Values": [
+                        {
+                          "Ref": "TargetTagKey"
+                        }
+                      ]
+                    }
+                  ],
+                  {
+                    "Fn::If": [
+                      "IsTagKeyAndValueTargetedCondition",
+                      [
+                        {
+                          "Key": {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "tag:",
+                                {
+                                  "Ref": "TargetTagKey"
+                                }
+                              ]
+                            ]
+                          },
+                          "Values": [
+                            {
+                              "Ref": "TargetTagValue"
+                            }
+                          ]
+                        }
+                      ],
+                      {
+                        "Fn::If": [
+                          "IsResourceGroupTargetedCondition",
+                          [
+                            {
+                              "Key": "resource-groups:Name",
+                              "Values": [
+                                {
+                                  "Ref": "ResourceGroupName"
+                                }
+                              ]
+                            }
+                          ],
+                          {
+                            "Fn::If": [
+                              "TargetAll",
+                              [
+                                {
+                                  "Key": "InstanceIds",
+                                  "Values": [
+                                    "*"
+                                  ]
+                                }
+                              ],
+                              [
+                                {
+                                  "Key": "InstanceIds",
+                                  "Values": {
+                                    "Fn::Split": [
+                                      ",",
+                                      {
+                                        "Ref": "TargetInstances"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "Condition": "ShouldUpdateCWAgentCondition",
+        "DependsOn": "QuickSetupCreateAndAttachIAMToInstanceForDistributorUtilsAssociation"
+      },
+      "QuickSetupInstallAndUpdateEC2LaunchAgentAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "Name": "AWS-ConfigureAWSPackage",
+          "AssociationName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-Distributor-EC2Launch-Agent-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "AutomationTargetParameterName": {
+            "Fn::If": [
+              "IsOrgQuickSetup",
+              "InstanceId",
+              {
+                "Fn::If": [
+                  "IsTagKeyAndValueTargetedCondition",
+                  "Tag",
+                  "InstanceId"
+                ]
+              }
+            ]
+          },
+          "Parameters": {
+            "name": [
+              "AWSEC2Launch-Agent"
+            ],
+            "action": [
+              "Install"
+            ],
+            "additionalArguments": [
+              "{\"SSM_upgrade_legacy_agent\": \"false\"}"
+            ]
+          },
+          "ScheduleExpression": {
+            "Fn::If": [
+              "ShouldUpdatePackagesCondition",
+              {
+                "Ref": "RemediationSchedule"
+              },
+              {
+                "Ref": "AWS::NoValue"
+              }
+            ]
+          },
+          "Targets": {
+            "Fn::If": [
+              "IsOrgQuickSetup",
+              [
+                {
+                  "key": "InstanceIds",
+                  "values": [
+                    "*"
+                  ]
+                }
+              ],
+              {
+                "Fn::If": [
+                  "IsTagOnlyTargetedCondition",
+                  [
+                    {
+                      "key": "tag-key",
+                      "values": [
+                        {
+                          "Ref": "TargetTagKey"
+                        }
+                      ]
+                    }
+                  ],
+                  {
+                    "Fn::If": [
+                      "IsTagKeyAndValueTargetedCondition",
+                      [
+                        {
+                          "key": {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "tag:",
+                                {
+                                  "Ref": "TargetTagKey"
+                                }
+                              ]
+                            ]
+                          },
+                          "values": [
+                            {
+                              "Ref": "TargetTagValue"
+                            }
+                          ]
+                        }
+                      ],
+                      {
+                        "Fn::If": [
+                          "IsResourceGroupTargetedCondition",
+                          [
+                            {
+                              "key": "resource-groups:Name",
+                              "values": [
+                                {
+                                  "Ref": "ResourceGroupName"
+                                }
+                              ]
+                            }
+                          ],
+                          {
+                            "Fn::If": [
+                              "TargetAll",
+                              [
+                                {
+                                  "Key": "InstanceIds",
+                                  "values": [
+                                    "*"
+                                  ]
+                                }
+                              ],
+                              [
+                                {
+                                  "key": "InstanceIds",
+                                  "values": {
+                                    "Fn::Split": [
+                                      ",",
+                                      {
+                                        "Ref": "TargetInstances"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "Condition": "ShouldInstallEC2LaunchAgentCondition",
+        "DependsOn": "QuickSetupCreateAndAttachIAMToInstanceForDistributorUtilsAssociation"
+      },
+      "QuickSetupCreateAndAttachIAMToInstanceForDistributorUtilsAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "Name": "AWSQuickSetupType-ManageInstanceProfile",
+          "AssociationName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-AttachIAMToInstanceForEFSUtils-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "AutomationTargetParameterName": "InstanceId",
+          "Parameters": {
+            "AutomationAssumeRole": [
+              {
+                "Fn::GetAtt": [
+                  "RoleForDistributorV3",
+                  "Arn"
+                ]
+              }
+            ],
+            "UpdateExistingProfiles": [
+              {
+                "Ref": "IsPolicyAttachAllowed"
+              }
+            ],
+            "ManagedPoliciesToAttach": {
+              "Fn::If": [
+                "ShouldInstallEFSUtilsCondition",
+                [
+                  {
+                    "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
+                  },
+                  {
+                    "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AmazonElasticFileSystemsUtils"
+                  }
+                ],
+                [
+                  {
+                    "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
+                  }
+                ]
+              ]
+            }
+          },
+          "ScheduleExpression": "rate(1 day)",
+          "Targets": {
+            "Fn::If": [
+              "IsOrgQuickSetup",
+              [
+                {
+                  "Key": "InstanceIds",
+                  "Values": [
+                    "*"
+                  ]
+                }
+              ],
+              {
+                "Fn::If": [
+                  "IsTagOnlyTargetedCondition",
+                  [
+                    {
+                      "Key": "tag-key",
+                      "Values": [
+                        {
+                          "Ref": "TargetTagKey"
+                        }
+                      ]
+                    }
+                  ],
+                  {
+                    "Fn::If": [
+                      "IsTagKeyAndValueTargetedCondition",
+                      [
+                        {
+                          "Key": {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "tag:",
+                                {
+                                  "Ref": "TargetTagKey"
+                                }
+                              ]
+                            ]
+                          },
+                          "Values": [
+                            {
+                              "Ref": "TargetTagValue"
+                            }
+                          ]
+                        }
+                      ],
+                      {
+                        "Fn::If": [
+                          "IsResourceGroupTargetedCondition",
+                          [
+                            {
+                              "Key": "ResourceGroup",
+                              "Values": [
+                                {
+                                  "Ref": "ResourceGroupName"
+                                }
+                              ]
+                            }
+                          ],
+                          {
+                            "Fn::If": [
+                              "TargetAll",
+                              [
+                                {
+                                  "Key": "InstanceIds",
+                                  "Values": [
+                                    "*"
+                                  ]
+                                }
+                              ],
+                              [
+                                {
+                                  "Key": "ParameterValues",
+                                  "Values": {
+                                    "Fn::Split": [
+                                      ",",
+                                      {
+                                        "Ref": "TargetInstances"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "QuickSetupEnableExplorerAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "Name": "AWS-EnableExplorer",
+          "AssociationName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-Distributor-EnableExplorer-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "Parameters": {
+            "AutomationAssumeRole": [
+              {
+                "Fn::GetAtt": [
+                  "RoleForDistributorV3",
+                  "Arn"
+                ]
+              }
+            ],
+            "OpsDataSources": [
+              "Association,EC2"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

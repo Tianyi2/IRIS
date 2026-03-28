@@ -1,0 +1,217 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Microsoft.DevCenter/devcenters to Azure Native Dynatrace Service",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "version": "1.0.0",
+    "description": "This policy enables diagnostic settings for Microsoft.DevCenter/devcenters to send all available logs to a Dynatrace environment.",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "The name of the diagnostic setting to create."
+        },
+        "defaultValue": "setByPolicy-Dynatrace"
+      },
+      "resourceLocationList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "List of resource locations to which this policy is applied."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "dynatraceResource": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Native Dynatrace Service",
+          "description": "Azure Native Dynatrace Service resource id",
+          "strongType": "Dynatrace.Observability/monitors",
+          "assignPermissions": true
+        }
+      }
+    },
+    "agenthealthstatusEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "AgentHealthStatus",
+        "description": "Enable or disable log category AgentHealthStatus"
+      },
+      "defaultValue": true
+    },
+    "connectioneventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "ConnectionEvent",
+        "description": "Enable or disable log category ConnectionEvent"
+      },
+      "defaultValue": true
+    },
+    "dataplaneauditeventEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "DataplaneAuditEvent",
+        "description": "Enable or disable log category DataplaneAuditEvent"
+      },
+      "defaultValue": true
+    },
+    "resourceoperationEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "ResourceOperation",
+        "description": "Enable or disable log category ResourceOperation"
+      },
+      "defaultValue": true
+    },
+    "usageEnabled": {
+      "type": "bool",
+      "metadata": {
+        "displayName": "Usage",
+        "description": "Enable or disable log category Usage"
+      },
+      "defaultValue": true
+    }
+  },
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.DevCenter/devcenters"
+        },
+        {
+          "anyOf": [
+            {
+              "value": "[first(parameters('resourceLocationList'))]",
+              "equals": "*"
+            },
+            {
+              "field": "location",
+              "in": "[parameters('resourceLocationList')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "count": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                "where": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                      "equals": true
+                    }
+                  ]
+                }
+              },
+              "greaterOrEquals": 1
+            },
+            {
+              "field": "Microsoft.Insights/diagnosticSettings/marketplacePartnerId",
+              "equals": "[parameters('dynatraceResource')]"
+            }
+          ]
+        },
+        "deployment": {
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceName": {
+                  "type": "string"
+                },
+                "diagnosticSettingName": {
+                  "type": "string"
+                },
+                "dynatraceResource": {
+                  "type": "string"
+                },
+                "logs": {
+                  "type": "array"
+                }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.DevCenter/devcenters/providers/diagnosticSettings",
+                  "apiVersion": "2021-05-01-preview",
+                  "name": "[concat(parameters('resourceName'), '/', parameters('diagnosticSettingName'))]",
+                  "properties": {
+                    "workspaceId": "[parameters('dynatraceResource')]",
+                    "logs": "[parameters('logs')]"
+                  }
+                }
+              ],
+              "outputs": {
+                "policy": {
+                  "type": "string",
+                  "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type Microsoft.DevCenter/devcenters, resourceName ', parameters('resourceName'), ' to Azure Native Dynatrace Service ', parameters('dynatraceResource'), ' configured')]"
+                }
+              }
+            },
+            "parameters": {
+              "resourceName": {
+                "value": "[field('name')]"
+              },
+              "diagnosticSettingName": {
+                "value": "[parameters('diagnosticSettingName')]"
+              },
+              "dynatraceResource": {
+                "value": "[parameters('dynatraceResource')]"
+              },
+              "logs": {
+                "value": [
+                  {
+                    "category": "AgentHealthStatus",
+                    "enabled": "[parameters('agenthealthstatusEnabled')]"
+                  },
+                  {
+                    "category": "ConnectionEvent",
+                    "enabled": "[parameters('connectioneventEnabled')]"
+                  },
+                  {
+                    "category": "DataplaneAuditEvent",
+                    "enabled": "[parameters('dataplaneauditeventEnabled')]"
+                  },
+                  {
+                    "category": "ResourceOperation",
+                    "enabled": "[parameters('resourceoperationEnabled')]"
+                  },
+                  {
+                    "category": "Usage",
+                    "enabled": "[parameters('usageEnabled')]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

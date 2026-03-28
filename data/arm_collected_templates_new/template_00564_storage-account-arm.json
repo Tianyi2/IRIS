@@ -1,0 +1,380 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentTag": {
+        "type": "string"
+    },
+    "parentBusinessTag": {
+        "type": "string"
+    },
+    "portfolioTag": {
+        "type": "string"
+    },
+    "productTag": {
+        "type": "string"
+    },
+    "serviceTag": {
+        "type": "string",
+        "defaultValue": "[parameters('productTag')]"
+    },
+    "serviceLineTag": {
+        "type": "string"
+    },
+    "serviceOfferingTag": {
+        "type": "string",
+        "defaultValue": "[parameters('productTag')]"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the storage account"
+      }
+    },
+    "storageAccountLocation": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Recommendation: If using to store backup data, choose the paired region for resilience"
+      }
+    },
+    "accountType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    "accessTier": {
+      "type": "string",
+      "defaultValue": "",
+      "allowedValues": [
+        "Hot",
+        "Cool",
+        ""
+      ],
+      "metadata": {
+        "description": "This setting is required if using BlobStorage as the storageKind, otherwise can be left blank"
+      }
+    },
+    "storageKind": {
+      "type": "string",
+      "defaultValue": "Storage",
+      "allowedValues": [
+        "Storage",
+        "StorageV2",
+        "BlobStorage"
+      ]
+    },
+    "subnetResourceIdList": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "A list of subnet resource ids."
+      }
+    },
+    "allowedIpAddressesList": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "A list of allowed IPs"
+      }
+    },
+    "enableCors": {
+      "type": "string",
+      "defaultValue": "False",
+      "allowedValues": [
+        "False",
+        "True"
+      ]
+    },
+    "allowedHeaders": {
+      "type": "array",
+      "defaultValue": [
+        "*"
+      ]
+    },
+    "allowedOrigins": {
+      "type": "array",
+      "defaultValue": [
+        "*"
+      ]
+    },
+    "maxAgeInSeconds": {
+      "type": "string",
+      "defaultValue": "3600"
+    },
+    "allowedMethods": {
+      "type": "array",
+        "defaultValue": [
+        "GET"
+      ]
+    },
+    "exposedHeaders": {
+      "type": "array",
+      "defaultValue": [
+        "*"
+      ]
+    },
+    "minimumTlsVersion": {
+      "type": "string",
+      "defaultValue": "TLS1_0",
+      "allowedValues": [
+        "TLS1_0",
+        "TLS1_0",
+        "TLS1_2",
+        "TLS1_3"
+      ]
+    },
+    "allowBlobPublicAccess": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Allow or disable public access to all blobs and containers in the storage account. Individual containers access levels must also be set to Blob/Contaienr to be accessible anonymously. Defaults to true for backwards compatibility with existing projects."
+      }
+    },
+    "settingName": {
+     "type": "String",
+    "defaultvalue": "StorageAccDiagSettings",
+    "metadata": {
+        "description": "The name of the diagnostic setting"
+      }
+    },    
+    "workspaceId": {
+      "type": "String",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ResourceID of the Log Analytics workspace in which resource logs should be saved."
+      }
+    },
+    "TransactionSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+         "description": "All Metrics diagnostic setting"
+       }
+    },
+    "BlobTransactionSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "All Metrics diagnostic setting"
+      }
+    },
+    "BlobStorageReadSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "Blob Storage Read diagnostic setting"
+      }
+    },
+    "BlobStorageWriteSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "Blob Storage Write diagnostic setting"
+      }
+    },
+    "BlobStorageDeleteSetting": {
+      "type": "bool",
+      "defaultvalue": false,
+      "metadata": {
+        "description": "Blob Storage Delete diagnostic setting"
+      }
+    },
+    "retentionPolicyEnabled": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "retentionPolicyDays": {
+      "type": "string",
+      "defaultValue": "30"
+    }
+  },
+  "variables": {
+     "virtualNetworkRules": {
+      "copy": [
+        {
+          "name": "virtualNetworkRules",
+          "count": "[if(greater(length(parameters('subnetResourceIdList')), 0), length(parameters('subnetResourceIdList')), 1)]",
+          "input": {
+            "id": "[if(greater(length(parameters('subnetResourceIdList')), 0), parameters('subnetResourceIdList')[copyIndex('virtualNetworkRules')], json('null'))]",
+            "action": "Allow"
+          }
+        }
+      ]
+    },
+    "ipRules": {
+      "copy": [
+        {
+          "name": "ipRules",
+          "count": "[if(greater(length(parameters('allowedIpAddressesList')), 0), length(parameters('allowedIpAddressesList')), 1)]",
+          "input": {
+            "value": "[if(greater(length(parameters('allowedIpAddressesList')), 0), parameters('allowedIpAddressesList')[copyIndex('ipRules')], json('null'))]",
+            "action": "Allow"
+          }
+        }
+      ]
+    },
+    "networkAclObject": {
+      "bypass": "Logging, Metrics",
+      "virtualNetworkRules": "[if(greater(length(parameters('subnetResourceIdList')), 0), variables('virtualNetworkRules').virtualNetworkRules, json('null'))]",
+      "ipRules": "[if(greater(length(parameters('allowedIpAddressesList')), 0), variables('ipRules').ipRules, json('null'))]",
+      "defaultAction": "Deny"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2019-04-01",
+      "name": "[parameters('storageAccountName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[parameters('storageAccountLocation')]",
+      "sku": {
+        "name": "[parameters('accountType')]"
+      },
+      "kind": "[parameters('storageKind')]",
+      "tags": {
+          "Environment": "[parameters('environmentTag')]",
+          "Parent Business": "[parameters('parentBusinessTag')]",
+          "Portfolio": "[parameters('portfolioTag')]",
+          "Product": "[parameters('productTag')]",
+          "Service": "[parameters('serviceTag')]",
+          "Service Line": "[parameters('serviceLineTag')]",
+          "Service Offering": "[parameters('serviceOfferingTag')]"
+      },
+      "properties": {
+        "encryption": {
+          "services": {
+            "blob": {
+              "enabled": true
+            },
+            "file": {
+              "enabled": true
+            }
+          },
+          "keySource": "Microsoft.Storage"
+        },
+        "accessTier": "[if(empty(parameters('accessTier')), json('null'), parameters('accessTier'))]",
+        "allowBlobPublicAccess": "[parameters('allowBlobPublicAccess')]",
+        "supportsHttpsTrafficOnly": true,
+        "minimumTlsVersion": "[parameters('minimumTlsVersion')]",
+        "networkAcls": "[if(greater(length(parameters('subnetResourceIdList')), 0), variables('networkAclObject'), json('null'))]"
+      },
+      "resources": [
+          {
+            "name": "default",
+            "type": "blobServices",
+            "condition": "[equals(parameters('enableCors'), 'True')]",
+            "apiVersion": "2018-11-01",
+            "dependsOn": [
+              "[parameters('storageAccountName')]"
+            ],
+            
+            "properties": {
+              "cors": {
+                "corsRules": [
+                  {
+                    "allowedOrigins": "[parameters('allowedOrigins')]",
+                    "allowedMethods": "[parameters('allowedMethods')]",
+                    "maxAgeInSeconds": "[parameters('maxAgeInSeconds')]",
+                    "exposedHeaders": "[parameters('exposedHeaders')]",
+                    "allowedHeaders": "[parameters('allowedHeaders')]"
+                  }
+                ]
+              }
+            },
+            "resources": []
+          }
+        ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/providers/diagnosticSettings",
+      "condition": "[greater(length(parameters('workspaceId')), 0)]",
+      "apiVersion": "2021-05-01-preview",
+      "name": "[concat(parameters('storageAccountName'),'/microsoft.insights/', parameters('settingName'))]",
+      "dependsOn": [
+          "[parameters('storageAccountName')]"
+      ],
+      "properties": {
+      "name": "[parameters('settingName')]",
+      "workspaceId": "[parameters('workspaceId')]",
+      "metrics": [
+            {
+              "category": "Transaction",
+              "enabled": "[parameters('TransactionSetting')]",
+              "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/providers/diagnosticSettings",
+      "condition": "[greater(length(parameters('workspaceId')), 0)]",
+      "apiVersion": "2021-05-01-preview",
+      "name": "[concat(parameters('storageAccountName'),'/default/microsoft.insights/', parameters('settingName'))]",
+      "dependsOn": [
+          "[parameters('storageAccountName')]"
+      ],
+      "properties": {
+      "name": "[parameters('settingName')]",
+      "workspaceId": "[parameters('workspaceId')]",
+        "logs": [
+          {
+            "category": "StorageRead",
+            "enabled": "[parameters('BlobStorageReadSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          },
+          {
+            "category": "StorageWrite",
+            "enabled": "[parameters('BlobStorageWriteSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          },
+          {
+            "category": "StorageDelete",
+            "enabled": "[parameters('BlobStorageDeleteSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          }
+        ],
+        "metrics": [
+          {
+            "category": "Transaction",
+            "enabled": "[parameters('BlobTransactionSetting')]",
+            "retentionPolicy": {
+              "enabled": "[parameters('retentionPolicyEnabled')]",
+              "days": "[parameters('retentionPolicyDays')]"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "storageKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]"
+    },
+    "storageConnectionString": {
+      "type": "string",
+      "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts',parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=core.windows.net')]"
+    },
+    "storagePrimaryEndpointsBlob": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Storage/storageAccounts',parameters('storageAccountName')), '2019-04-01').primaryEndpoints.blob]"
+    }
+  }
+}

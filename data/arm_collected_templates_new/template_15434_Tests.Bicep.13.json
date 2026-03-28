@@ -1,0 +1,255 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.28.1.47646",
+      "templateHash": "15571924133724598642"
+    }
+  },
+  "parameters": {
+    "arrayToTest": {
+      "type": "array",
+      "defaultValue": [
+        [
+          "one",
+          "two"
+        ],
+        [
+          "three"
+        ],
+        [
+          "four",
+          "five"
+        ]
+      ]
+    },
+    "environment": {
+      "type": "string",
+      "defaultValue": "subnet1"
+    },
+    "numbers": {
+      "type": "array",
+      "defaultValue": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  "variables": {
+    "dogs": [
+      {
+        "name": "Evie",
+        "age": 5,
+        "interests": [
+          "Ball",
+          "Frisbee"
+        ]
+      },
+      {
+        "name": "Casper",
+        "age": 3,
+        "interests": [
+          "Other dogs"
+        ]
+      },
+      {
+        "name": "Indy",
+        "age": 2,
+        "interests": [
+          "Butter"
+        ]
+      },
+      {
+        "name": "Kira",
+        "age": 8,
+        "interests": [
+          "Rubs"
+        ]
+      }
+    ],
+    "ages": "[map(variables('dogs'), lambda('dog', lambdaVariables('dog').age))]",
+    "mapNested": [
+      {
+        "item": [
+          "item1",
+          "item2"
+        ],
+        "value": "value1"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "vnet",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.28.1.47646",
+              "templateHash": "5110598302669187937"
+            }
+          },
+          "variables": {
+            "base": "10.0.0.0/8",
+            "subnets": [
+              {
+                "name": "subnet1",
+                "addressPrefix": "[cidrSubnet(variables('base'), 24, 0)]"
+              },
+              {
+                "name": "subnet2",
+                "addressPrefix": "[cidrSubnet(variables('base'), 24, 1)]"
+              },
+              {
+                "name": "subnet3",
+                "addressPrefix": "[cidrSubnet(variables('base'), 24, 2)]"
+              }
+            ]
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks",
+              "apiVersion": "2022-09-01",
+              "name": "vnet1",
+              "properties": {
+                "copy": [
+                  {
+                    "name": "subnets",
+                    "count": "[length(variables('subnets'))]",
+                    "input": {
+                      "name": "[variables('subnets')[copyIndex('subnets')].name]",
+                      "properties": {
+                        "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "outputs": {
+            "subnets": {
+              "type": "array",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', 'vnet1'), '2022-09-01').subnets]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "child2",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "subnetId": {
+            "value": "[filter(reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.subnets.value, lambda('s', equals(lambdaVariables('s').name, 'subnet1')))[0].id]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.28.1.47646",
+              "templateHash": "12131810097188199000"
+            }
+          },
+          "parameters": {
+            "subnetId": {
+              "type": "string"
+            }
+          },
+          "resources": []
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'vnet')]"
+      ]
+    }
+  ],
+  "outputs": {
+    "arrayOutput": {
+      "type": "array",
+      "value": "[flatten(parameters('arrayToTest'))]"
+    },
+    "oldDogs": {
+      "type": "array",
+      "value": "[filter(variables('dogs'), lambda('dog', greaterOrEquals(lambdaVariables('dog').age, 5)))]"
+    },
+    "firstOldDogs": {
+      "type": "object",
+      "value": "[first(filter(variables('dogs'), lambda('dog', greaterOrEquals(lambdaVariables('dog').age, 5))))]"
+    },
+    "firstOldDogsEmpty": {
+      "type": "object",
+      "value": "[first(filter(variables('dogs'), lambda('dog', greaterOrEquals(lambdaVariables('dog').age, 10))))]"
+    },
+    "vnetId": {
+      "type": "string",
+      "value": "[filter(reference(resourceId('Microsoft.Resources/deployments', 'vnet'), '2022-09-01').outputs.subnets.value, lambda('s', equals(lambdaVariables('s').name, parameters('environment'))))[0].id]"
+    },
+    "mockFilter": {
+      "type": "array",
+      "value": "[filter(reference(format('{0}/providers/microsoft.azurestackhci/edgeDevices/default', resourceId('Microsoft.HybridCompute/machines', 'node1')), '2024-01-01', 'Full').properties.deviceConfiguration.nicDetails, lambda('nic', not(equals(tryGet(lambdaVariables('nic'), 'defaultGateway'), null()))))[0].ip4Address]"
+    },
+    "dogNames": {
+      "type": "array",
+      "value": "[map(variables('dogs'), lambda('dog', lambdaVariables('dog').name))]"
+    },
+    "sayHi": {
+      "type": "array",
+      "value": "[map(variables('dogs'), lambda('dog', format('Hello {0}!', lambdaVariables('dog').name)))]"
+    },
+    "mapObject": {
+      "type": "array",
+      "value": "[map(range(0, length(variables('dogs'))), lambda('i', createObject('i', lambdaVariables('i'), 'dog', variables('dogs')[lambdaVariables('i')].name, 'greeting', format('Ahoy, {0}!', variables('dogs')[lambdaVariables('i')].name))))]"
+    },
+    "totalAge": {
+      "type": "int",
+      "value": "[reduce(variables('ages'), 0, lambda('cur', 'next', add(lambdaVariables('cur'), lambdaVariables('next'))))]"
+    },
+    "totalAgeAdd1": {
+      "type": "int",
+      "value": "[reduce(variables('ages'), 1, lambda('cur', 'next', add(lambdaVariables('cur'), lambdaVariables('next'))))]"
+    },
+    "dogsByAge": {
+      "type": "array",
+      "value": "[sort(variables('dogs'), lambda('a', 'b', less(lambdaVariables('a').age, lambdaVariables('b').age)))]"
+    },
+    "objectMap": {
+      "type": "object",
+      "value": "[toObject(createArray(123, 456, 789), lambda('i', format('{0}', div(lambdaVariables('i'), 100))))]"
+    },
+    "objectMap2": {
+      "type": "object",
+      "value": "[toObject(parameters('numbers'), lambda('i', format('{0}', lambdaVariables('i'))), lambda('i', createObject('isEven', equals(mod(lambdaVariables('i'), 2), 0), 'isGreaterThan2', greater(lambdaVariables('i'), 2))))]"
+    },
+    "objectMapNull": {
+      "type": "object",
+      "value": "[toObject(createArray(123, 456, 789, null()), lambda('i', format('{0}', lambdaVariables('i'))))]"
+    },
+    "mapInMap": {
+      "type": "array",
+      "value": "[flatten(map(variables('mapNested'), lambda('a', map(lambdaVariables('a').item, lambda('b', lambdaVariables('a').value)))))]"
+    }
+  }
+}

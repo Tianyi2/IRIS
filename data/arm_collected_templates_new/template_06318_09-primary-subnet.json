@@ -1,0 +1,47 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "vnetName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "A virtual networks name"
+            }
+        },
+        "subnetCidr": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "A subnet scope in this Virtual Networks"
+            }
+        }
+    },
+    "variables": {
+        "snetName": "[concat('snet-', parameters('name'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2019-11-01",
+            "name": "[concat(parameters('vnetName'), '/', variables('snetName'))]",
+            "properties": {
+                "addressPrefix": "[parameters('subnetCidr')]",
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        }
+    ],
+    "outputs": {
+        "primarySubnetName": {
+            "type": "string",
+            "value": "[variables('snetName')]"
+        }
+    }
+}

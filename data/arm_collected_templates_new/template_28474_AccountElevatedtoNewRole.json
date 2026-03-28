@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/600db9e0-1c11-4295-a88a-071c79434926')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/600db9e0-1c11-4295-a88a-071c79434926')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "name": "Account Elevated to New Role",
+        "description": "'As part of content migration, this file is moved to a new location. You can find it here https://github.com/Azure/Azure-Sentinel/blob/master/Solutions/Business%20Email%20Compromise%20-%20Financial%20 Fraud/Analytic%20Rules/AccountElevatedtoNewRole.yaml'\n"
+      }
+    }
+  ]
+}

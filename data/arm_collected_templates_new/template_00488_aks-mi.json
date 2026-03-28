@@ -1,0 +1,246 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environmentTag": {
+            "type": "string"
+        },
+        "parentBusinessTag": {
+            "type": "string"
+        },
+        "portfolioTag": {
+            "type": "string"
+        },
+        "productTag": {
+            "type": "string"
+        },
+        "serviceTag": {
+            "type": "string",
+            "defaultValue": "[parameters('productTag')]"
+        },
+        "serviceLineTag": {
+            "type": "string"
+        },
+        "serviceOfferingTag": {
+            "type": "string",
+            "defaultValue": "[parameters('productTag')]"
+        },
+        "clusterName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Managed Cluster resource."
+            }
+        },
+        "kubernetesVersion": {
+            "type": "string",
+            "metadata": {
+                "description": "The version of Kubernetes."
+            }
+        },
+        "serviceCidr": {
+            "type": "string",
+            "defaultValue": "10.0.0.0/16"
+        },
+        "dnsServiceIp": {
+            "type": "string",
+            "defaultValue": "10.0.0.10"
+        },
+        "podCidr": {
+            "type": "string",
+            "defaultValue": "10.244.0.0/16"
+        },
+        "dockerBridgeCidr": {
+            "type": "string",
+            "defaultValue": "172.17.0.1/16"
+        },
+        "autoscaleProfile": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Auto-scale configuration, as documented here: https://docs.microsoft.com/en-us/azure/templates/microsoft.containerservice/2021-05-01/managedclusters?tabs=json#ManagedClusterPropertiesAutoScalerProfile"
+            }
+        },
+        "logAnalyticsResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "The name of the resource group for log analytics"
+            }
+        },
+        "logAnalyticsWorkspaceName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The name of the log analytics workspace that will be used for monitoring"
+            }
+        },
+        "nodeResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the resource group used for nodes"
+            }
+        },
+        "nodeCount": {
+            "type": "int",
+            "defaultValue": 3,
+            "metadata": {
+                "description": "The initial number of nodes in the default node pool"
+            }
+        },
+        "VmSize": {
+            "type": "string",
+            "defaultValue": "Standard_DS2_v2",
+            "metadata": {
+                "description": "The size of Azure VM to use in the default node pool"
+            }
+        },
+        "osDiskSizeInGb": {
+            "type": "int",
+            "defaultValue": 128,
+            "metadata": {
+                "description": "The size of the manage disk created for the nodes in the default pool (defaults to 128GB)"
+            }
+        },
+        "enableAutoScaling": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Enable autoscaling on the default node pool. defaults to true"
+            }
+        },
+        "nodeMinCount": {
+            "type": "int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "The minimum number of nodes in the default node pool. Only used if auto-scale is enabled"
+            }
+        },
+        "nodeMaxCount": {
+            "type": "int",
+            "defaultValue": 5,
+            "metadata": {
+                "description": "The maximum number of nodes in the default node pool. Only used if auto-scale is enabled"
+            }
+        },
+        "apiServerWhitelistedAddresses": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "IP addresses that are authorised to use the api server"
+            }
+        },
+        "enablePrivateCluster": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Enable the AKS 'private cluster' feature to protect API calls from the public internet. Defaults to false." 
+            }
+        },
+        "privateClusterDnsZone": {
+            "type": "string",
+            "defaultValue": "[parameters('clusterName')]",
+            "metadata": {
+                "description": "The name of the private dns zone. defaults to the cluster name."
+            }
+        },
+        "enablePublicDnsZoneOnPrivateCluster": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Optionally, enable a publicly accessible fqdn for the cluster. Defaults to false."
+            }
+        }
+    },
+    "variables": {
+        "logAnalyticsId": "[resourceId(parameters('logAnalyticsResourceGroupName'), 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]",
+        "addOnObject": {
+            "noAddons": "[json('null')]",
+            "omsAddon": {
+                "omsagent": {
+                    "enabled": true,
+                    "config": {
+                        "logAnalyticsWorkspaceResourceID": "[variables('logAnalyticsId')]"
+                    }
+                }
+            }
+        },
+        "whitelistedAddresses": "[if(parameters('enablePrivateCluster'), variables('emptyArray'), parameters('apiServerWhitelistedAddresses'))]",
+        "emptyArray": [],
+        "allApiServerAccessProfiles": {
+            "privateCluster": {
+                "enablePrivateCluster": "[parameters('enablePrivateCluster')]",
+                "privateDNSZone": "[parameters('privateClusterDnsZone')]",
+                "enablePrivateClusterPublicFQDN": "[parameters('enablePublicDnsZoneOnPrivateCluster')]"
+            },
+            "publicCluster": {
+                "authorizedIPRanges": "[variables('whitelistedAddresses')]"
+            }
+        },
+        "apiServerAccessProfile": "[if(parameters('enablePrivateCluster'), variables('allApiServerAccessProfiles').privateCluster, variables('allApiServerAccessProfiles').publicCluster)]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2021-05-01",
+            "type": "Microsoft.ContainerService/managedClusters",
+            "location": "[resourceGroup().location]",
+            "name": "[parameters('clusterName')]",
+            "tags": {
+                "Environment": "[parameters('environmentTag')]",
+                "Parent Business": "[parameters('parentBusinessTag')]",
+                "Portfolio": "[parameters('portfolioTag')]",
+                "Product": "[parameters('productTag')]",
+                "Service": "[parameters('serviceTag')]",
+                "Service Line": "[parameters('serviceLineTag')]",
+                "Service Offering": "[parameters('serviceOfferingTag')]"
+            },
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "kubernetesVersion": "[parameters('kubernetesVersion')]",
+                "dnsPrefix": "[concat(parameters('clusterName'), '-dns')]",
+                "agentPoolProfiles": [
+                    {
+                        "name": "agentpool",
+                        "count": "[parameters('nodeCount')]",
+                        "vmSize": "[parameters('VmSize')]",
+                        "osDiskSizeGB": "[parameters('osDiskSizeInGb')]",
+                        "osDiskType": "Managed",
+                        "kubeletDiskType": "OS",
+                        "maxPods": 110,
+                        "type": "VirtualMachineScaleSets",
+                        "availabilityZones": [
+                            "1",
+                            "2",
+                            "3"
+                        ],
+                        "maxCount": "[parameters('nodeMaxCount')]",
+                        "minCount": "[parameters('nodeMinCount')]",
+                        "enableAutoScaling": "[parameters('enableAutoScaling')]",
+                        "orchestratorVersion": "[parameters('kubernetesVersion')]",
+                        "nodeLabels": {},
+                        "mode": "System",
+                        "osType": "Linux",
+                        "osSKU": "Ubuntu",
+                        "enableFIPS": false
+                    }
+                ],
+                "addonProfiles": "[if(equals(parameters('logAnalyticsWorkspaceName'), ''), variables('addOnObject').noAddons, variables('addOnObject').omsAddon)]",
+                "nodeResourceGroup": "[parameters('nodeResourceGroup')]",
+                "enableRBAC": true,
+                "networkProfile": {
+                    "networkPlugin": "kubenet",
+                    "loadBalancerSku": "Standard",
+                    "serviceCidr": "[parameters('serviceCidr')]",
+                    "dnsServiceIP": "[parameters('dnsServiceIp')]",
+                    "podCidr": "[parameters('podCidr')]",
+                    "dockerBridgeCidr": "[parameters('dockerBridgeCidr')]"
+                },
+                "autoScalerProfile": "[parameters('autoscaleProfile')]",
+                "apiServerAccessProfile": "[variables('apiServerAccessProfile')]"
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

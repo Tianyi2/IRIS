@@ -1,0 +1,2321 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.11.1.770",
+      "templateHash": "1100317251524991231"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the location for all resources."
+      }
+    },
+    "environment": {
+      "type": "string",
+      "defaultValue": "dev",
+      "metadata": {
+        "description": "Specifies the environment of the deployment."
+      },
+      "allowedValues": [
+        "dev",
+        "tst",
+        "prd"
+      ]
+    },
+    "prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the prefix for all resources created in this deployment."
+      },
+      "maxLength": 10,
+      "minLength": 2
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Specifies the tags that you want to apply to all resources."
+      }
+    },
+    "repositoryUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the repository URL in which the function app is checked in."
+      }
+    },
+    "purviewId": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the resource ID of the central purview instance."
+      }
+    },
+    "purviewManagedStorageId": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the resource ID of the managed storage of the central purview instance."
+      }
+    },
+    "purviewManagedEventHubId": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the resource ID of the managed event hub of the central purview instance."
+      }
+    },
+    "purviewRootCollectionMetadataPolicyId": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the id of the purview root collection metadata policy."
+      }
+    },
+    "eventGridTopicSourceSubscriptions": {
+      "type": "array",
+      "metadata": {
+        "description": "Specifies the subscription ids for which event grid topics should be created."
+      }
+    },
+    "createEventSubscription": {
+      "type": "bool",
+      "metadata": {
+        "description": "Specifies whether the event subscription from the event grid topic to the function should be created."
+      }
+    },
+    "subnetId": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the resource ID of the subnet to which all services will connect."
+      }
+    },
+    "functionSubnetId": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the resource ID of the subnet which will be used for the app service plan."
+      }
+    },
+    "privateDnsZoneIdBlob": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Specifies the resource ID of the private DNS zone for Blob Storage."
+      }
+    },
+    "privateDnsZoneIdFile": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Specifies the resource ID of the private DNS zone for File Storage."
+      }
+    },
+    "privateDnsZoneIdKeyVault": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Specifies the resource ID of the private DNS zone for KeyVault."
+      }
+    }
+  },
+  "variables": {
+    "name": "[toLower(format('{0}-{1}', parameters('prefix'), parameters('environment')))]",
+    "tagsDefault": {
+      "Owner": "Purview Automation",
+      "Project": "Purview Automation",
+      "Environment": "[parameters('environment')]",
+      "Toolkit": "bicep",
+      "Name": "[variables('name')]"
+    },
+    "tagsJoined": "[union(variables('tagsDefault'), parameters('tags'))]",
+    "purviewRootCollectionName": "[last(split(parameters('purviewId'), '/'))]",
+    "eventGridTopicDeadLetterStorageAccountContainerName": "deadletters",
+    "functionResourceGroupName": "[format('{0}-function', variables('name'))]",
+    "eventsResourceGroupName": "[format('{0}-events', variables('name'))]",
+    "automationResourceGroupName": "[format('{0}-automation', variables('name'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2021-04-01",
+      "name": "[variables('functionResourceGroupName')]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tagsJoined')]",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2021-04-01",
+      "name": "[variables('automationResourceGroupName')]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tagsJoined')]",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "functionResources",
+      "resourceGroup": "[variables('functionResourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "prefix": {
+            "value": "[variables('name')]"
+          },
+          "tags": {
+            "value": "[variables('tagsJoined')]"
+          },
+          "eventGridTopicDeadLetterStorageAccountContainerName": {
+            "value": "[variables('eventGridTopicDeadLetterStorageAccountContainerName')]"
+          },
+          "subnetId": {
+            "value": "[parameters('subnetId')]"
+          },
+          "functionSubnetId": {
+            "value": "[parameters('functionSubnetId')]"
+          },
+          "repositoryUrl": {
+            "value": "[parameters('repositoryUrl')]"
+          },
+          "purviewId": {
+            "value": "[parameters('purviewId')]"
+          },
+          "purviewManagedStorageId": {
+            "value": "[parameters('purviewManagedStorageId')]"
+          },
+          "purviewManagedEventHubId": {
+            "value": "[parameters('purviewManagedEventHubId')]"
+          },
+          "purviewRootCollectionName": {
+            "value": "[variables('purviewRootCollectionName')]"
+          },
+          "purviewRootCollectionMetadataPolicyId": {
+            "value": "[parameters('purviewRootCollectionMetadataPolicyId')]"
+          },
+          "privateDnsZoneIdKeyVault": {
+            "value": "[parameters('privateDnsZoneIdKeyVault')]"
+          },
+          "privateDnsZoneIdFile": {
+            "value": "[parameters('privateDnsZoneIdFile')]"
+          },
+          "privateDnsZoneIdBlob": {
+            "value": "[parameters('privateDnsZoneIdBlob')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.11.1.770",
+              "templateHash": "8989863284796264269"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "prefix": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "eventGridTopicDeadLetterStorageAccountContainerName": {
+              "type": "string"
+            },
+            "subnetId": {
+              "type": "string"
+            },
+            "functionSubnetId": {
+              "type": "string"
+            },
+            "repositoryUrl": {
+              "type": "string"
+            },
+            "purviewId": {
+              "type": "string"
+            },
+            "purviewManagedEventHubId": {
+              "type": "string"
+            },
+            "purviewManagedStorageId": {
+              "type": "string"
+            },
+            "purviewRootCollectionName": {
+              "type": "string"
+            },
+            "purviewRootCollectionMetadataPolicyId": {
+              "type": "string"
+            },
+            "privateDnsZoneIdBlob": {
+              "type": "string"
+            },
+            "privateDnsZoneIdFile": {
+              "type": "string"
+            },
+            "privateDnsZoneIdKeyVault": {
+              "type": "string"
+            }
+          },
+          "variables": {
+            "storage001Name": "[format('{0}-storage001', parameters('prefix'))]",
+            "applicationInsights001Name": "[format('{0}-insights001', parameters('prefix'))]",
+            "keyvault001Name": "[format('{0}-vault001', parameters('prefix'))]",
+            "function001Name": "[format('{0}-function001', parameters('prefix'))]",
+            "function001FileShareName": "[variables('function001Name')]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "storage001",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "tags": {
+                    "value": "[parameters('tags')]"
+                  },
+                  "subnetId": {
+                    "value": "[parameters('subnetId')]"
+                  },
+                  "storageName": {
+                    "value": "[variables('storage001Name')]"
+                  },
+                  "storageContainerNames": {
+                    "value": [
+                      "[parameters('eventGridTopicDeadLetterStorageAccountContainerName')]"
+                    ]
+                  },
+                  "storageFileShareNames": {
+                    "value": [
+                      "[variables('function001FileShareName')]"
+                    ]
+                  },
+                  "storageSkuName": {
+                    "value": "Standard_LRS"
+                  },
+                  "privateDnsZoneIdBlob": {
+                    "value": "[parameters('privateDnsZoneIdBlob')]"
+                  },
+                  "privateDnsZoneIdFile": {
+                    "value": "[parameters('privateDnsZoneIdFile')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "17029181876969708842"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object"
+                    },
+                    "subnetId": {
+                      "type": "string"
+                    },
+                    "storageName": {
+                      "type": "string"
+                    },
+                    "storageSkuName": {
+                      "type": "string",
+                      "defaultValue": "Standard_LRS",
+                      "allowedValues": [
+                        "Standard_LRS",
+                        "Standard_ZRS",
+                        "Standard_GRS",
+                        "Standard_GZRS",
+                        "Standard_RAGRS",
+                        "Standard_RAGZRS",
+                        "Premium_LRS",
+                        "Premium_ZRS"
+                      ]
+                    },
+                    "storageContainerNames": {
+                      "type": "array",
+                      "defaultValue": []
+                    },
+                    "storageFileShareNames": {
+                      "type": "array",
+                      "defaultValue": []
+                    },
+                    "privateDnsZoneIdBlob": {
+                      "type": "string",
+                      "defaultValue": ""
+                    },
+                    "privateDnsZoneIdFile": {
+                      "type": "string",
+                      "defaultValue": ""
+                    },
+                    "privateDnsZoneIdTable": {
+                      "type": "string",
+                      "defaultValue": ""
+                    }
+                  },
+                  "variables": {
+                    "storageNameCleaned": "[replace(parameters('storageName'), '-', '')]",
+                    "storagePrivateEndpointNameBlob": "[format('{0}-blob-private-endpoint', variables('storageNameCleaned'))]",
+                    "storagePrivateEndpointNameFile": "[format('{0}-file-private-endpoint', variables('storageNameCleaned'))]",
+                    "storagePrivateEndpointNameTable": "[format('{0}-table-private-endpoint', variables('storageNameCleaned'))]"
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Storage/storageAccounts",
+                      "apiVersion": "2021-09-01",
+                      "name": "[variables('storageNameCleaned')]",
+                      "location": "[parameters('location')]",
+                      "tags": "[parameters('tags')]",
+                      "identity": {
+                        "type": "SystemAssigned"
+                      },
+                      "sku": {
+                        "name": "[parameters('storageSkuName')]"
+                      },
+                      "kind": "StorageV2",
+                      "properties": {
+                        "accessTier": "Hot",
+                        "allowBlobPublicAccess": false,
+                        "allowCrossTenantReplication": false,
+                        "allowSharedKeyAccess": true,
+                        "encryption": {
+                          "keySource": "Microsoft.Storage",
+                          "requireInfrastructureEncryption": false,
+                          "services": {
+                            "blob": {
+                              "enabled": true,
+                              "keyType": "Account"
+                            },
+                            "file": {
+                              "enabled": true,
+                              "keyType": "Account"
+                            },
+                            "queue": {
+                              "enabled": true,
+                              "keyType": "Service"
+                            },
+                            "table": {
+                              "enabled": true,
+                              "keyType": "Service"
+                            }
+                          }
+                        },
+                        "isHnsEnabled": false,
+                        "isNfsV3Enabled": false,
+                        "keyPolicy": {
+                          "keyExpirationPeriodInDays": 7
+                        },
+                        "largeFileSharesState": "Disabled",
+                        "minimumTlsVersion": "TLS1_2",
+                        "networkAcls": {
+                          "bypass": "Metrics",
+                          "defaultAction": "Deny",
+                          "ipRules": [],
+                          "virtualNetworkRules": []
+                        },
+                        "routingPreference": {
+                          "routingChoice": "MicrosoftRouting",
+                          "publishInternetEndpoints": false,
+                          "publishMicrosoftEndpoints": false
+                        },
+                        "supportsHttpsTrafficOnly": true
+                      }
+                    },
+                    {
+                      "type": "Microsoft.Storage/storageAccounts/managementPolicies",
+                      "apiVersion": "2021-09-01",
+                      "name": "[format('{0}/{1}', variables('storageNameCleaned'), 'default')]",
+                      "properties": {
+                        "policy": {
+                          "rules": [
+                            {
+                              "enabled": true,
+                              "name": "default",
+                              "type": "Lifecycle",
+                              "definition": {
+                                "actions": {
+                                  "baseBlob": {
+                                    "tierToCool": {
+                                      "daysAfterModificationGreaterThan": 90
+                                    }
+                                  },
+                                  "snapshot": {
+                                    "tierToCool": {
+                                      "daysAfterCreationGreaterThan": 90
+                                    }
+                                  },
+                                  "version": {
+                                    "tierToCool": {
+                                      "daysAfterCreationGreaterThan": 90
+                                    }
+                                  }
+                                },
+                                "filters": {
+                                  "blobTypes": [
+                                    "blockBlob"
+                                  ],
+                                  "prefixMatch": []
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageNameCleaned'))]"
+                      ]
+                    },
+                    {
+                      "type": "Microsoft.Storage/storageAccounts/blobServices",
+                      "apiVersion": "2021-09-01",
+                      "name": "[format('{0}/{1}', variables('storageNameCleaned'), 'default')]",
+                      "properties": {
+                        "containerDeleteRetentionPolicy": {
+                          "enabled": true,
+                          "days": 7
+                        },
+                        "cors": {
+                          "corsRules": []
+                        }
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageNameCleaned'))]"
+                      ]
+                    },
+                    {
+                      "copy": {
+                        "name": "storageContainers",
+                        "count": "[length(parameters('storageContainerNames'))]"
+                      },
+                      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+                      "apiVersion": "2021-09-01",
+                      "name": "[format('{0}/{1}/{2}', variables('storageNameCleaned'), 'default', parameters('storageContainerNames')[copyIndex()])]",
+                      "properties": {
+                        "publicAccess": "None",
+                        "metadata": {}
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageNameCleaned'), 'default')]"
+                      ]
+                    },
+                    {
+                      "type": "Microsoft.Storage/storageAccounts/fileServices",
+                      "apiVersion": "2021-09-01",
+                      "name": "[format('{0}/{1}', variables('storageNameCleaned'), 'default')]",
+                      "properties": {
+                        "cors": {
+                          "corsRules": []
+                        },
+                        "shareDeleteRetentionPolicy": {
+                          "enabled": true,
+                          "days": 7
+                        }
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageNameCleaned'))]"
+                      ]
+                    },
+                    {
+                      "copy": {
+                        "name": "storageFileShares",
+                        "count": "[length(parameters('storageFileShareNames'))]"
+                      },
+                      "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+                      "apiVersion": "2021-09-01",
+                      "name": "[format('{0}/{1}/{2}', variables('storageNameCleaned'), 'default', parameters('storageFileShareNames')[copyIndex()])]",
+                      "properties": {
+                        "accessTier": "Hot",
+                        "enabledProtocols": "SMB",
+                        "metadata": {},
+                        "shareQuota": 5120
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('storageNameCleaned'), 'default')]"
+                      ]
+                    },
+                    {
+                      "type": "Microsoft.Network/privateEndpoints",
+                      "apiVersion": "2022-01-01",
+                      "name": "[variables('storagePrivateEndpointNameBlob')]",
+                      "location": "[parameters('location')]",
+                      "tags": "[parameters('tags')]",
+                      "properties": {
+                        "manualPrivateLinkServiceConnections": [],
+                        "privateLinkServiceConnections": [
+                          {
+                            "name": "[variables('storagePrivateEndpointNameBlob')]",
+                            "properties": {
+                              "groupIds": [
+                                "blob"
+                              ],
+                              "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageNameCleaned'))]",
+                              "requestMessage": ""
+                            }
+                          }
+                        ],
+                        "subnet": {
+                          "id": "[parameters('subnetId')]"
+                        }
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageNameCleaned'))]"
+                      ]
+                    },
+                    {
+                      "condition": "[not(empty(parameters('privateDnsZoneIdBlob')))]",
+                      "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+                      "apiVersion": "2022-01-01",
+                      "name": "[format('{0}/{1}', variables('storagePrivateEndpointNameBlob'), 'default')]",
+                      "properties": {
+                        "privateDnsZoneConfigs": [
+                          {
+                            "name": "[format('{0}-arecord', variables('storagePrivateEndpointNameBlob'))]",
+                            "properties": {
+                              "privateDnsZoneId": "[parameters('privateDnsZoneIdBlob')]"
+                            }
+                          }
+                        ]
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/privateEndpoints', variables('storagePrivateEndpointNameBlob'))]"
+                      ]
+                    },
+                    {
+                      "type": "Microsoft.Network/privateEndpoints",
+                      "apiVersion": "2022-01-01",
+                      "name": "[variables('storagePrivateEndpointNameFile')]",
+                      "location": "[parameters('location')]",
+                      "tags": "[parameters('tags')]",
+                      "properties": {
+                        "manualPrivateLinkServiceConnections": [],
+                        "privateLinkServiceConnections": [
+                          {
+                            "name": "[variables('storagePrivateEndpointNameFile')]",
+                            "properties": {
+                              "groupIds": [
+                                "file"
+                              ],
+                              "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageNameCleaned'))]",
+                              "requestMessage": ""
+                            }
+                          }
+                        ],
+                        "subnet": {
+                          "id": "[parameters('subnetId')]"
+                        }
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageNameCleaned'))]"
+                      ]
+                    },
+                    {
+                      "condition": "[not(empty(parameters('privateDnsZoneIdFile')))]",
+                      "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+                      "apiVersion": "2022-01-01",
+                      "name": "[format('{0}/{1}', variables('storagePrivateEndpointNameFile'), 'default')]",
+                      "properties": {
+                        "privateDnsZoneConfigs": [
+                          {
+                            "name": "[format('{0}-arecord', variables('storagePrivateEndpointNameFile'))]",
+                            "properties": {
+                              "privateDnsZoneId": "[parameters('privateDnsZoneIdFile')]"
+                            }
+                          }
+                        ]
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/privateEndpoints', variables('storagePrivateEndpointNameFile'))]"
+                      ]
+                    },
+                    {
+                      "type": "Microsoft.Network/privateEndpoints",
+                      "apiVersion": "2022-01-01",
+                      "name": "[variables('storagePrivateEndpointNameTable')]",
+                      "location": "[parameters('location')]",
+                      "tags": "[parameters('tags')]",
+                      "properties": {
+                        "manualPrivateLinkServiceConnections": [],
+                        "privateLinkServiceConnections": [
+                          {
+                            "name": "[variables('storagePrivateEndpointNameTable')]",
+                            "properties": {
+                              "groupIds": [
+                                "table"
+                              ],
+                              "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageNameCleaned'))]",
+                              "requestMessage": ""
+                            }
+                          }
+                        ],
+                        "subnet": {
+                          "id": "[parameters('subnetId')]"
+                        }
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageNameCleaned'))]"
+                      ]
+                    },
+                    {
+                      "condition": "[not(empty(parameters('privateDnsZoneIdTable')))]",
+                      "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+                      "apiVersion": "2022-01-01",
+                      "name": "[format('{0}/{1}', variables('storagePrivateEndpointNameTable'), 'default')]",
+                      "properties": {
+                        "privateDnsZoneConfigs": [
+                          {
+                            "name": "[format('{0}-arecord', variables('storagePrivateEndpointNameTable'))]",
+                            "properties": {
+                              "privateDnsZoneId": "[parameters('privateDnsZoneIdTable')]"
+                            }
+                          }
+                        ]
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/privateEndpoints', variables('storagePrivateEndpointNameTable'))]"
+                      ]
+                    }
+                  ],
+                  "outputs": {
+                    "storageId": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageNameCleaned'))]"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "applicationInsights001",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "tags": {
+                    "value": "[parameters('tags')]"
+                  },
+                  "applicationInsightsName": {
+                    "value": "[variables('applicationInsights001Name')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "8594779481048614074"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object"
+                    },
+                    "applicationInsightsName": {
+                      "type": "string"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Insights/components",
+                      "apiVersion": "2020-02-02",
+                      "name": "[parameters('applicationInsightsName')]",
+                      "location": "[parameters('location')]",
+                      "tags": "[parameters('tags')]",
+                      "kind": "web",
+                      "properties": {
+                        "Application_Type": "web",
+                        "DisableIpMasking": false,
+                        "DisableLocalAuth": false,
+                        "Flow_Type": "Redfield",
+                        "ForceCustomerStorageForProfiler": false,
+                        "ImmediatePurgeDataOn30Days": true,
+                        "IngestionMode": "ApplicationInsights",
+                        "publicNetworkAccessForIngestion": "Enabled",
+                        "publicNetworkAccessForQuery": "Enabled",
+                        "Request_Source": "IbizaWebAppExtensionCreate"
+                      }
+                    }
+                  ],
+                  "outputs": {
+                    "applicationInsightsId": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Insights/components', parameters('applicationInsightsName'))]"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "keyVault001",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "tags": {
+                    "value": "[parameters('tags')]"
+                  },
+                  "subnetId": {
+                    "value": "[parameters('subnetId')]"
+                  },
+                  "keyvaultName": {
+                    "value": "[variables('keyvault001Name')]"
+                  },
+                  "privateDnsZoneIdKeyVault": {
+                    "value": "[parameters('privateDnsZoneIdKeyVault')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "17000920059548920111"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object"
+                    },
+                    "subnetId": {
+                      "type": "string"
+                    },
+                    "keyvaultName": {
+                      "type": "string"
+                    },
+                    "privateDnsZoneIdKeyVault": {
+                      "type": "string",
+                      "defaultValue": ""
+                    }
+                  },
+                  "variables": {
+                    "keyVaultPrivateEndpointName": "[format('{0}-private-endpoint', parameters('keyvaultName'))]"
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.KeyVault/vaults",
+                      "apiVersion": "2021-11-01-preview",
+                      "name": "[parameters('keyvaultName')]",
+                      "location": "[parameters('location')]",
+                      "tags": "[parameters('tags')]",
+                      "properties": {
+                        "accessPolicies": [],
+                        "createMode": "default",
+                        "enabledForDeployment": false,
+                        "enabledForDiskEncryption": false,
+                        "enabledForTemplateDeployment": false,
+                        "enablePurgeProtection": true,
+                        "enableRbacAuthorization": true,
+                        "enableSoftDelete": true,
+                        "networkAcls": {
+                          "bypass": "AzureServices",
+                          "defaultAction": "Deny",
+                          "ipRules": [],
+                          "virtualNetworkRules": []
+                        },
+                        "sku": {
+                          "family": "A",
+                          "name": "standard"
+                        },
+                        "softDeleteRetentionInDays": 7,
+                        "tenantId": "[subscription().tenantId]"
+                      }
+                    },
+                    {
+                      "type": "Microsoft.Network/privateEndpoints",
+                      "apiVersion": "2022-01-01",
+                      "name": "[variables('keyVaultPrivateEndpointName')]",
+                      "location": "[parameters('location')]",
+                      "tags": "[parameters('tags')]",
+                      "properties": {
+                        "manualPrivateLinkServiceConnections": [],
+                        "privateLinkServiceConnections": [
+                          {
+                            "name": "[variables('keyVaultPrivateEndpointName')]",
+                            "properties": {
+                              "groupIds": [
+                                "vault"
+                              ],
+                              "privateLinkServiceId": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]",
+                              "requestMessage": ""
+                            }
+                          }
+                        ],
+                        "subnet": {
+                          "id": "[parameters('subnetId')]"
+                        }
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+                      ]
+                    },
+                    {
+                      "condition": "[not(empty(parameters('privateDnsZoneIdKeyVault')))]",
+                      "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+                      "apiVersion": "2022-01-01",
+                      "name": "[format('{0}/{1}', variables('keyVaultPrivateEndpointName'), 'default')]",
+                      "properties": {
+                        "privateDnsZoneConfigs": [
+                          {
+                            "name": "[format('{0}-arecord', variables('keyVaultPrivateEndpointName'))]",
+                            "properties": {
+                              "privateDnsZoneId": "[parameters('privateDnsZoneIdKeyVault')]"
+                            }
+                          }
+                        ]
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/privateEndpoints', variables('keyVaultPrivateEndpointName'))]"
+                      ]
+                    }
+                  ],
+                  "outputs": {
+                    "keyvaultId": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "keyvault001Secrets",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "keyVaultId": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', 'keyVault001')).outputs.keyvaultId.value]"
+                  },
+                  "applicationInsightsId": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', 'applicationInsights001')).outputs.applicationInsightsId.value]"
+                  },
+                  "storageId": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', 'storage001')).outputs.storageId.value]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "1054368285330968337"
+                    }
+                  },
+                  "parameters": {
+                    "keyVaultId": {
+                      "type": "string"
+                    },
+                    "applicationInsightsId": {
+                      "type": "string"
+                    },
+                    "storageId": {
+                      "type": "string"
+                    }
+                  },
+                  "variables": {
+                    "keyVaultName": "[if(equals(length(split(parameters('keyVaultId'), '/')), 9), last(split(parameters('keyVaultId'), '/')), 'incorrectSegmentLength')]",
+                    "applicationInsightsSubscriptionId": "[if(greaterOrEquals(length(split(parameters('applicationInsightsId'), '/')), 9), split(parameters('applicationInsightsId'), '/')[2], subscription().subscriptionId)]",
+                    "applicationInsightsResourceGroupName": "[if(greaterOrEquals(length(split(parameters('applicationInsightsId'), '/')), 9), split(parameters('applicationInsightsId'), '/')[4], resourceGroup().name)]",
+                    "applicationInsightsName": "[if(greaterOrEquals(length(split(parameters('applicationInsightsId'), '/')), 9), last(split(parameters('applicationInsightsId'), '/')), 'incorrectSegmentLength')]",
+                    "storageSubscriptionId": "[if(greaterOrEquals(length(split(parameters('storageId'), '/')), 9), split(parameters('storageId'), '/')[2], subscription().subscriptionId)]",
+                    "storageResourceGroupName": "[if(greaterOrEquals(length(split(parameters('storageId'), '/')), 9), split(parameters('storageId'), '/')[4], resourceGroup().name)]",
+                    "storageName": "[if(greaterOrEquals(length(split(parameters('storageId'), '/')), 9), last(split(parameters('storageId'), '/')), 'incorrectSegmentLength')]",
+                    "applicationInsightsConnectionStringSecretName": "applicationInsightsConnectionString",
+                    "applicationInsightsInstrumentationKeySecretName": "applicationInsightsInstrumentationKey",
+                    "storageConnectionStringSecretName": "storageConnectionString"
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.KeyVault/vaults/secrets",
+                      "apiVersion": "2021-11-01-preview",
+                      "name": "[format('{0}/{1}', variables('keyVaultName'), variables('applicationInsightsConnectionStringSecretName'))]",
+                      "properties": {
+                        "contentType": "text/plain",
+                        "value": "[reference(parameters('applicationInsightsId'), '2020-02-02').ConnectionString]",
+                        "attributes": {
+                          "enabled": true
+                        }
+                      }
+                    },
+                    {
+                      "type": "Microsoft.KeyVault/vaults/secrets",
+                      "apiVersion": "2021-11-01-preview",
+                      "name": "[format('{0}/{1}', variables('keyVaultName'), variables('applicationInsightsInstrumentationKeySecretName'))]",
+                      "properties": {
+                        "contentType": "text/plain",
+                        "value": "[reference(parameters('applicationInsightsId'), '2020-02-02').InstrumentationKey]",
+                        "attributes": {
+                          "enabled": true
+                        }
+                      }
+                    },
+                    {
+                      "type": "Microsoft.KeyVault/vaults/secrets",
+                      "apiVersion": "2021-11-01-preview",
+                      "name": "[format('{0}/{1}', variables('keyVaultName'), variables('storageConnectionStringSecretName'))]",
+                      "properties": {
+                        "contentType": "text/plain",
+                        "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net', variables('storageName'), listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('storageSubscriptionId'), variables('storageResourceGroupName')), 'Microsoft.Storage/storageAccounts', variables('storageName')), '2021-06-01').keys[0].value)]",
+                        "attributes": {
+                          "enabled": true
+                        }
+                      }
+                    }
+                  ],
+                  "outputs": {
+                    "applicationInsightsConnectionStringSecretUri": {
+                      "type": "string",
+                      "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('applicationInsightsConnectionStringSecretName'))).secretUri]"
+                    },
+                    "applicationInsightsInstrumentationKeySecretUri": {
+                      "type": "string",
+                      "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('applicationInsightsInstrumentationKeySecretName'))).secretUri]"
+                    },
+                    "storageConnectionStringSecretUri": {
+                      "type": "string",
+                      "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('storageConnectionStringSecretName'))).secretUri]"
+                    }
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'applicationInsights001')]",
+                "[resourceId('Microsoft.Resources/deployments', 'keyVault001')]",
+                "[resourceId('Microsoft.Resources/deployments', 'storage001')]"
+              ]
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "function001",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "tags": {
+                    "value": "[parameters('tags')]"
+                  },
+                  "functionName": {
+                    "value": "[variables('function001Name')]"
+                  },
+                  "functionSubnetId": {
+                    "value": "[parameters('functionSubnetId')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "7845283894232434598"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object"
+                    },
+                    "functionName": {
+                      "type": "string"
+                    },
+                    "functionSubnetId": {
+                      "type": "string"
+                    }
+                  },
+                  "variables": {
+                    "appServicePlanName": "[format('{0}-asp001', parameters('functionName'))]"
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Web/serverfarms",
+                      "apiVersion": "2022-03-01",
+                      "name": "[variables('appServicePlanName')]",
+                      "location": "[parameters('location')]",
+                      "tags": "[parameters('tags')]",
+                      "kind": "app",
+                      "sku": {
+                        "tier": "PremiumV2",
+                        "name": "P1v2"
+                      },
+                      "properties": {
+                        "elasticScaleEnabled": false,
+                        "hyperV": false,
+                        "isSpot": false,
+                        "reserved": false,
+                        "isXenon": false,
+                        "maximumElasticWorkerCount": 1,
+                        "perSiteScaling": false,
+                        "targetWorkerCount": 0,
+                        "targetWorkerSizeId": 0,
+                        "zoneRedundant": false
+                      }
+                    },
+                    {
+                      "type": "Microsoft.Web/sites",
+                      "apiVersion": "2022-03-01",
+                      "name": "[parameters('functionName')]",
+                      "location": "[parameters('location')]",
+                      "tags": "[parameters('tags')]",
+                      "identity": {
+                        "type": "SystemAssigned"
+                      },
+                      "kind": "functionapp",
+                      "properties": {
+                        "clientAffinityEnabled": false,
+                        "clientCertEnabled": false,
+                        "clientCertMode": "Required",
+                        "enabled": true,
+                        "hostNamesDisabled": false,
+                        "httpsOnly": true,
+                        "hyperV": false,
+                        "isXenon": false,
+                        "keyVaultReferenceIdentity": "SystemAssigned",
+                        "reserved": false,
+                        "redundancyMode": "None",
+                        "scmSiteAlsoStopped": false,
+                        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+                        "storageAccountRequired": false,
+                        "virtualNetworkSubnetId": "[parameters('functionSubnetId')]",
+                        "siteConfig": {
+                          "cors": {
+                            "allowedOrigins": [
+                              "https://portal.azure.com"
+                            ]
+                          },
+                          "acrUseManagedIdentityCreds": false,
+                          "alwaysOn": true,
+                          "functionAppScaleLimit": 200,
+                          "http20Enabled": false,
+                          "minTlsVersion": "1.2",
+                          "minimumElasticInstanceCount": 1,
+                          "netFrameworkVersion": "v6.0",
+                          "numberOfWorkers": 1,
+                          "use32BitWorkerProcess": true,
+                          "vnetRouteAllEnabled": true
+                        }
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+                      ]
+                    }
+                  ],
+                  "outputs": {
+                    "functionName": {
+                      "type": "string",
+                      "value": "[parameters('functionName')]"
+                    },
+                    "functionPrincipalId": {
+                      "type": "string",
+                      "value": "[reference(resourceId('Microsoft.Web/sites', parameters('functionName')), '2022-03-01', 'full').identity.principalId]"
+                    },
+                    "functionId": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Web/sites', parameters('functionName'))]"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "function001AppSettings",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "functionId": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', 'function001')).outputs.functionId.value]"
+                  },
+                  "purviewId": {
+                    "value": "[parameters('purviewId')]"
+                  },
+                  "purviewManagedEventHubId": {
+                    "value": "[parameters('purviewManagedEventHubId')]"
+                  },
+                  "purviewManagedStorageId": {
+                    "value": "[parameters('purviewManagedStorageId')]"
+                  },
+                  "purviewRootCollectionName": {
+                    "value": "[parameters('purviewRootCollectionName')]"
+                  },
+                  "purviewRootCollectionMetadataPolicyId": {
+                    "value": "[parameters('purviewRootCollectionMetadataPolicyId')]"
+                  },
+                  "functionFileShareName": {
+                    "value": "[variables('function001FileShareName')]"
+                  },
+                  "storageConnectionStringSecretUri": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', 'keyvault001Secrets')).outputs.storageConnectionStringSecretUri.value]"
+                  },
+                  "applicationInsightsInstrumentationKeySecretUri": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', 'keyvault001Secrets')).outputs.applicationInsightsInstrumentationKeySecretUri.value]"
+                  },
+                  "applicationInsightsConnectionStringSecretUri": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', 'keyvault001Secrets')).outputs.applicationInsightsConnectionStringSecretUri.value]"
+                  },
+                  "repositoryUrl": {
+                    "value": "[parameters('repositoryUrl')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "10269399696083244020"
+                    }
+                  },
+                  "parameters": {
+                    "functionId": {
+                      "type": "string"
+                    },
+                    "functionFileShareName": {
+                      "type": "string"
+                    },
+                    "applicationInsightsInstrumentationKeySecretUri": {
+                      "type": "string"
+                    },
+                    "applicationInsightsConnectionStringSecretUri": {
+                      "type": "string"
+                    },
+                    "storageConnectionStringSecretUri": {
+                      "type": "string"
+                    },
+                    "purviewId": {
+                      "type": "string"
+                    },
+                    "purviewManagedStorageId": {
+                      "type": "string"
+                    },
+                    "purviewManagedEventHubId": {
+                      "type": "string"
+                    },
+                    "purviewRootCollectionName": {
+                      "type": "string"
+                    },
+                    "purviewRootCollectionMetadataPolicyId": {
+                      "type": "string"
+                    },
+                    "repositoryUrl": {
+                      "type": "string",
+                      "defaultValue": ""
+                    }
+                  },
+                  "variables": {
+                    "functionName": "[if(equals(length(split(parameters('functionId'), '/')), 9), last(split(parameters('functionId'), '/')), 'incorrectSegmentLength')]",
+                    "purviewName": "[if(equals(length(split(parameters('purviewId'), '/')), 9), last(split(parameters('purviewId'), '/')), 'incorrectSegmentLength')]"
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Web/sites/config",
+                      "apiVersion": "2022-03-01",
+                      "name": "[format('{0}/{1}', variables('functionName'), 'appsettings')]",
+                      "properties": {
+                        "FUNCTIONS_EXTENSION_VERSION": "~4",
+                        "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+                        "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[format('@Microsoft.KeyVault(SecretUri={0})', parameters('storageConnectionStringSecretUri'))]",
+                        "WEBSITE_CONTENTSHARE": "[parameters('functionFileShareName')]",
+                        "WEBSITE_RUN_FROM_PACKAGE": "[if(empty(parameters('repositoryUrl')), '1', '0')]",
+                        "APPINSIGHTS_INSTRUMENTATIONKEY": "[format('@Microsoft.KeyVault(SecretUri={0})', parameters('applicationInsightsInstrumentationKeySecretUri'))]",
+                        "APPLICATIONINSIGHTS_CONNECTION_STRING": "[format('@Microsoft.KeyVault(SecretUri={0})', parameters('applicationInsightsConnectionStringSecretUri'))]",
+                        "APPINSIGHTS_PROFILERFEATURE_VERSION": "1.0.0",
+                        "ApplicationInsightsAgent_EXTENSION_VERSION": "~2",
+                        "DiagnosticServices_EXTENSION_VERSION": "~3",
+                        "AzureWebJobsStorage": "[format('@Microsoft.KeyVault(SecretUri={0})', parameters('storageConnectionStringSecretUri'))]",
+                        "WEBSITE_CONTENTOVERVNET": "1",
+                        "WEBSITE_VNET_ROUTE_ALL": "1",
+                        "PROJECT": "[if(empty(parameters('repositoryUrl')), '', 'code/PurviewAutomation/PurviewAutomation.csproj')]",
+                        "SCM_COMMAND_IDLE_TIMEOUT": "120",
+                        "FunctionPrincipalId": "[reference(resourceId('Microsoft.Web/sites', variables('functionName')), '2022-03-01', 'full').identity.principalId]",
+                        "PurviewResourceId": "[parameters('purviewId')]",
+                        "PurviewManagedStorageId": "[parameters('purviewManagedStorageId')]",
+                        "PurviewManagedEventHubId": "[parameters('purviewManagedEventHubId')]",
+                        "PurviewRootCollectionName": "[variables('purviewName')]",
+                        "PurviewRootCollectionMetadataPolicyId": "[parameters('purviewRootCollectionMetadataPolicyId')]",
+                        "ManagedIntegrationRuntimeName": "defaultIntegrationRuntime",
+                        "UseManagedPrivateEndpoints": "True",
+                        "SetupScan": "True",
+                        "TriggerScan": "True",
+                        "SetupLineage": "True",
+                        "RemoveDataSources": "True"
+                      }
+                    },
+                    {
+                      "condition": "[not(empty(parameters('repositoryUrl')))]",
+                      "type": "Microsoft.Web/sites/sourcecontrols",
+                      "apiVersion": "2022-03-01",
+                      "name": "[format('{0}/{1}', variables('functionName'), 'web')]",
+                      "properties": {
+                        "repoUrl": "[parameters('repositoryUrl')]",
+                        "branch": "main",
+                        "isManualIntegration": true
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites/config', variables('functionName'), 'appsettings')]"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'function001')]",
+                "[resourceId('Microsoft.Resources/deployments', 'keyvault001Secrets')]",
+                "[resourceId('Microsoft.Resources/deployments', 'roleAssignmentFunctionKeyVault')]"
+              ]
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "roleAssignmentFunctionKeyVault",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "keyVaultId": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', 'keyVault001')).outputs.keyvaultId.value]"
+                  },
+                  "functionId": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', 'function001')).outputs.functionId.value]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "1083806973195423850"
+                    }
+                  },
+                  "parameters": {
+                    "keyVaultId": {
+                      "type": "string"
+                    },
+                    "functionId": {
+                      "type": "string"
+                    }
+                  },
+                  "variables": {
+                    "keyVaultName": "[if(equals(length(split(parameters('keyVaultId'), '/')), 9), last(split(parameters('keyVaultId'), '/')), 'incorrectSegmentLength')]",
+                    "functionName": "[if(equals(length(split(parameters('functionId'), '/')), 9), last(split(parameters('functionId'), '/')), 'incorrectSegmentLength')]"
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Authorization/roleAssignments",
+                      "apiVersion": "2020-10-01-preview",
+                      "scope": "[format('Microsoft.KeyVault/vaults/{0}', variables('keyVaultName'))]",
+                      "name": "[guid(uniqueString(resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName')), resourceId('Microsoft.Web/sites', variables('functionName'))))]",
+                      "properties": {
+                        "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]",
+                        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('functionName')), '2021-02-01', 'full').identity.principalId]",
+                        "principalType": "ServicePrincipal"
+                      }
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'function001')]",
+                "[resourceId('Microsoft.Resources/deployments', 'keyVault001')]"
+              ]
+            }
+          ],
+          "outputs": {
+            "storage001Id": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', 'storage001')).outputs.storageId.value]"
+            },
+            "function001Id": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', 'function001')).outputs.functionId.value]"
+            },
+            "function001Name": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', 'function001')).outputs.functionName.value]"
+            },
+            "function001PrincipalId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', 'function001')).outputs.functionPrincipalId.value]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('functionResourceGroupName'))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "eventsResourceGroups",
+        "count": "[length(parameters('eventGridTopicSourceSubscriptions'))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('eventsResourceGroup{0}', padLeft(add(copyIndex(), 1), 3, '0'))]",
+      "subscriptionId": "[parameters('eventGridTopicSourceSubscriptions')[copyIndex()].subscriptionId]",
+      "location": "[deployment().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('eventGridTopicSourceSubscriptions')[copyIndex()].location]"
+          },
+          "tags": {
+            "value": "[variables('tagsJoined')]"
+          },
+          "resourceGroupName": {
+            "value": "[variables('eventsResourceGroupName')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.11.1.770",
+              "templateHash": "6479576377645729893"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "resourceGroupName": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/resourceGroups",
+              "apiVersion": "2021-04-01",
+              "name": "[parameters('resourceGroupName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {}
+            }
+          ],
+          "outputs": {
+            "subscriptionId": {
+              "type": "string",
+              "value": "[subscription().subscriptionId]"
+            },
+            "resourceGroupName": {
+              "type": "string",
+              "value": "[parameters('resourceGroupName')]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "copy": {
+        "name": "eventsResources",
+        "count": "[length(parameters('eventGridTopicSourceSubscriptions'))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('eventsResources{0}', padLeft(add(copyIndex(), 1), 3, '0'))]",
+      "subscriptionId": "[parameters('eventGridTopicSourceSubscriptions')[copyIndex()].subscriptionId]",
+      "resourceGroup": "[variables('eventsResourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "prefix": {
+            "value": "[variables('name')]"
+          },
+          "tags": {
+            "value": "[variables('tagsJoined')]"
+          },
+          "eventGridTopicSourceSubscriptionId": {
+            "value": "[parameters('eventGridTopicSourceSubscriptions')[copyIndex()].subscriptionId]"
+          },
+          "createEventSubscription": {
+            "value": "[parameters('createEventSubscription')]"
+          },
+          "eventGridTopicDeadLetterStorageAccountContainerName": {
+            "value": "[variables('eventGridTopicDeadLetterStorageAccountContainerName')]"
+          },
+          "functionId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('functionResourceGroupName')), 'Microsoft.Resources/deployments', 'functionResources')).outputs.function001Id.value]"
+          },
+          "storageId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('functionResourceGroupName')), 'Microsoft.Resources/deployments', 'functionResources')).outputs.storage001Id.value]"
+          },
+          "purviewId": {
+            "value": "[parameters('purviewId')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.11.1.770",
+              "templateHash": "5803050557875839834"
+            }
+          },
+          "parameters": {
+            "prefix": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "eventGridTopicSourceSubscriptionId": {
+              "type": "string"
+            },
+            "eventGridTopicDeadLetterStorageAccountContainerName": {
+              "type": "string"
+            },
+            "createEventSubscription": {
+              "type": "bool"
+            },
+            "storageId": {
+              "type": "string"
+            },
+            "functionId": {
+              "type": "string"
+            },
+            "purviewId": {
+              "type": "string"
+            }
+          },
+          "variables": {
+            "eventGridTopicName": "[format('{0}-eventGrid001', parameters('prefix'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "eventGridTopic",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "tags": {
+                    "value": "[parameters('tags')]"
+                  },
+                  "eventGridTopicName": {
+                    "value": "[variables('eventGridTopicName')]"
+                  },
+                  "eventGridTopicSourceSubscriptionId": {
+                    "value": "[parameters('eventGridTopicSourceSubscriptionId')]"
+                  },
+                  "eventGridTopicDeadLetterStorageAccountId": {
+                    "value": "[parameters('storageId')]"
+                  },
+                  "eventGridTopicDeadLetterStorageAccountContainerName": {
+                    "value": "[parameters('eventGridTopicDeadLetterStorageAccountContainerName')]"
+                  },
+                  "functionId": {
+                    "value": "[parameters('functionId')]"
+                  },
+                  "createEventSubscription": {
+                    "value": "[parameters('createEventSubscription')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "2705612083141799413"
+                    }
+                  },
+                  "parameters": {
+                    "tags": {
+                      "type": "object"
+                    },
+                    "eventGridTopicName": {
+                      "type": "string"
+                    },
+                    "eventGridTopicSourceSubscriptionId": {
+                      "type": "string"
+                    },
+                    "eventGridTopicDeadLetterStorageAccountId": {
+                      "type": "string"
+                    },
+                    "eventGridTopicDeadLetterStorageAccountContainerName": {
+                      "type": "string"
+                    },
+                    "functionId": {
+                      "type": "string"
+                    },
+                    "createEventSubscription": {
+                      "type": "bool"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.EventGrid/systemTopics",
+                      "apiVersion": "2022-06-15",
+                      "name": "[parameters('eventGridTopicName')]",
+                      "location": "global",
+                      "tags": "[parameters('tags')]",
+                      "identity": {
+                        "type": "SystemAssigned"
+                      },
+                      "properties": {
+                        "source": "[format('/subscriptions/{0}', parameters('eventGridTopicSourceSubscriptionId'))]",
+                        "topicType": "Microsoft.Resources.Subscriptions"
+                      }
+                    },
+                    {
+                      "condition": "[parameters('createEventSubscription')]",
+                      "type": "Microsoft.EventGrid/systemTopics/eventSubscriptions",
+                      "apiVersion": "2022-06-15",
+                      "name": "[format('{0}/{1}', parameters('eventGridTopicName'), 'service-creation')]",
+                      "properties": {
+                        "destination": {
+                          "endpointType": "AzureFunction",
+                          "properties": {
+                            "resourceId": "[format('{0}/functions/PurviewAutomation', parameters('functionId'))]",
+                            "maxEventsPerBatch": 1,
+                            "preferredBatchSizeInKilobytes": 64
+                          }
+                        },
+                        "eventDeliverySchema": "EventGridSchema",
+                        "filter": {
+                          "includedEventTypes": [
+                            "Microsoft.Resources.ResourceWriteSuccess",
+                            "Microsoft.Resources.ResourceDeleteSuccess"
+                          ],
+                          "enableAdvancedFilteringOnArrays": true
+                        },
+                        "labels": [],
+                        "retryPolicy": {
+                          "eventTimeToLiveInMinutes": 60,
+                          "maxDeliveryAttempts": 5
+                        }
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.EventGrid/systemTopics', parameters('eventGridTopicName'))]"
+                      ]
+                    }
+                  ],
+                  "outputs": {
+                    "eventGridTopicId": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.EventGrid/systemTopics', parameters('eventGridTopicName'))]"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "functionSubscriptionRoleAssignmentReader",
+              "subscriptionId": "[subscription().subscriptionId]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "role": {
+                    "value": "Reader"
+                  },
+                  "functionId": {
+                    "value": "[parameters('functionId')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "10013061247857959113"
+                    }
+                  },
+                  "parameters": {
+                    "functionId": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string",
+                      "allowedValues": [
+                        "Reader",
+                        "Contributor",
+                        "UserAccessAdministrator"
+                      ]
+                    }
+                  },
+                  "variables": {
+                    "functionSubscriptionId": "[if(equals(length(split(parameters('functionId'), '/')), 9), split(parameters('functionId'), '/')[2], subscription().subscriptionId)]",
+                    "functionGroupName": "[if(equals(length(split(parameters('functionId'), '/')), 9), split(parameters('functionId'), '/')[4], 'incorrectSegmentLength')]",
+                    "functionName": "[if(equals(length(split(parameters('functionId'), '/')), 9), last(split(parameters('functionId'), '/')), 'incorrectSegmentLength')]",
+                    "roles": {
+                      "Reader": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+                      "Contributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+                      "UserAccessAdministrator": "18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Authorization/roleAssignments",
+                      "apiVersion": "2020-10-01-preview",
+                      "name": "[guid(uniqueString(subscription().subscriptionId, extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('functionSubscriptionId'), variables('functionGroupName')), 'Microsoft.Web/sites', variables('functionName')), variables('roles')[parameters('role')]))]",
+                      "properties": {
+                        "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roles')[parameters('role')])]",
+                        "principalId": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('functionSubscriptionId'), variables('functionGroupName')), 'Microsoft.Web/sites', variables('functionName')), '2021-02-01', 'full').identity.principalId]",
+                        "principalType": "ServicePrincipal"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "functionSubscriptionRoleAssignmentContributor",
+              "subscriptionId": "[subscription().subscriptionId]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "role": {
+                    "value": "Contributor"
+                  },
+                  "functionId": {
+                    "value": "[parameters('functionId')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "10013061247857959113"
+                    }
+                  },
+                  "parameters": {
+                    "functionId": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string",
+                      "allowedValues": [
+                        "Reader",
+                        "Contributor",
+                        "UserAccessAdministrator"
+                      ]
+                    }
+                  },
+                  "variables": {
+                    "functionSubscriptionId": "[if(equals(length(split(parameters('functionId'), '/')), 9), split(parameters('functionId'), '/')[2], subscription().subscriptionId)]",
+                    "functionGroupName": "[if(equals(length(split(parameters('functionId'), '/')), 9), split(parameters('functionId'), '/')[4], 'incorrectSegmentLength')]",
+                    "functionName": "[if(equals(length(split(parameters('functionId'), '/')), 9), last(split(parameters('functionId'), '/')), 'incorrectSegmentLength')]",
+                    "roles": {
+                      "Reader": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+                      "Contributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+                      "UserAccessAdministrator": "18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Authorization/roleAssignments",
+                      "apiVersion": "2020-10-01-preview",
+                      "name": "[guid(uniqueString(subscription().subscriptionId, extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('functionSubscriptionId'), variables('functionGroupName')), 'Microsoft.Web/sites', variables('functionName')), variables('roles')[parameters('role')]))]",
+                      "properties": {
+                        "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roles')[parameters('role')])]",
+                        "principalId": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('functionSubscriptionId'), variables('functionGroupName')), 'Microsoft.Web/sites', variables('functionName')), '2021-02-01', 'full').identity.principalId]",
+                        "principalType": "ServicePrincipal"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "functionSubscriptionRoleAssignmentUserAccessAdministrator",
+              "subscriptionId": "[subscription().subscriptionId]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "role": {
+                    "value": "UserAccessAdministrator"
+                  },
+                  "functionId": {
+                    "value": "[parameters('functionId')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "10013061247857959113"
+                    }
+                  },
+                  "parameters": {
+                    "functionId": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string",
+                      "allowedValues": [
+                        "Reader",
+                        "Contributor",
+                        "UserAccessAdministrator"
+                      ]
+                    }
+                  },
+                  "variables": {
+                    "functionSubscriptionId": "[if(equals(length(split(parameters('functionId'), '/')), 9), split(parameters('functionId'), '/')[2], subscription().subscriptionId)]",
+                    "functionGroupName": "[if(equals(length(split(parameters('functionId'), '/')), 9), split(parameters('functionId'), '/')[4], 'incorrectSegmentLength')]",
+                    "functionName": "[if(equals(length(split(parameters('functionId'), '/')), 9), last(split(parameters('functionId'), '/')), 'incorrectSegmentLength')]",
+                    "roles": {
+                      "Reader": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+                      "Contributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+                      "UserAccessAdministrator": "18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Authorization/roleAssignments",
+                      "apiVersion": "2020-10-01-preview",
+                      "name": "[guid(uniqueString(subscription().subscriptionId, extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('functionSubscriptionId'), variables('functionGroupName')), 'Microsoft.Web/sites', variables('functionName')), variables('roles')[parameters('role')]))]",
+                      "properties": {
+                        "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roles')[parameters('role')])]",
+                        "principalId": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('functionSubscriptionId'), variables('functionGroupName')), 'Microsoft.Web/sites', variables('functionName')), '2021-02-01', 'full').identity.principalId]",
+                        "principalType": "ServicePrincipal"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "purviewSubscriptionRoleAssignmentReader",
+              "subscriptionId": "[subscription().subscriptionId]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "purviewId": {
+                    "value": "[parameters('purviewId')]"
+                  },
+                  "role": {
+                    "value": "Reader"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "6716362017176312298"
+                    }
+                  },
+                  "parameters": {
+                    "purviewId": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string",
+                      "allowedValues": [
+                        "Reader",
+                        "StorageBlobDataReader"
+                      ]
+                    }
+                  },
+                  "variables": {
+                    "purviewSubscriptionId": "[if(greaterOrEquals(length(split(parameters('purviewId'), '/')), 9), split(parameters('purviewId'), '/')[2], subscription().subscriptionId)]",
+                    "purviewResourceGroupName": "[if(greaterOrEquals(length(split(parameters('purviewId'), '/')), 9), split(parameters('purviewId'), '/')[4], 'incorrectSegmentLength')]",
+                    "purviewName": "[if(greaterOrEquals(length(split(parameters('purviewId'), '/')), 9), last(split(parameters('purviewId'), '/')), 'incorrectSegmentLength')]",
+                    "roles": {
+                      "Reader": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+                      "StorageBlobDataReader": "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Authorization/roleAssignments",
+                      "apiVersion": "2020-10-01-preview",
+                      "name": "[guid(uniqueString(subscription().subscriptionId, extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('purviewSubscriptionId'), variables('purviewResourceGroupName')), 'Microsoft.Purview/accounts', variables('purviewName')), variables('roles')[parameters('role')]))]",
+                      "properties": {
+                        "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roles')[parameters('role')])]",
+                        "principalId": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('purviewSubscriptionId'), variables('purviewResourceGroupName')), 'Microsoft.Purview/accounts', variables('purviewName')), '2021-07-01', 'full').identity.principalId]",
+                        "principalType": "ServicePrincipal"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "purviewSubscriptionRoleAssignmentStorageBlobReader",
+              "subscriptionId": "[subscription().subscriptionId]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "purviewId": {
+                    "value": "[parameters('purviewId')]"
+                  },
+                  "role": {
+                    "value": "StorageBlobDataReader"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "6716362017176312298"
+                    }
+                  },
+                  "parameters": {
+                    "purviewId": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string",
+                      "allowedValues": [
+                        "Reader",
+                        "StorageBlobDataReader"
+                      ]
+                    }
+                  },
+                  "variables": {
+                    "purviewSubscriptionId": "[if(greaterOrEquals(length(split(parameters('purviewId'), '/')), 9), split(parameters('purviewId'), '/')[2], subscription().subscriptionId)]",
+                    "purviewResourceGroupName": "[if(greaterOrEquals(length(split(parameters('purviewId'), '/')), 9), split(parameters('purviewId'), '/')[4], 'incorrectSegmentLength')]",
+                    "purviewName": "[if(greaterOrEquals(length(split(parameters('purviewId'), '/')), 9), last(split(parameters('purviewId'), '/')), 'incorrectSegmentLength')]",
+                    "roles": {
+                      "Reader": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+                      "StorageBlobDataReader": "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Authorization/roleAssignments",
+                      "apiVersion": "2020-10-01-preview",
+                      "name": "[guid(uniqueString(subscription().subscriptionId, extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('purviewSubscriptionId'), variables('purviewResourceGroupName')), 'Microsoft.Purview/accounts', variables('purviewName')), variables('roles')[parameters('role')]))]",
+                      "properties": {
+                        "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roles')[parameters('role')])]",
+                        "principalId": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('purviewSubscriptionId'), variables('purviewResourceGroupName')), 'Microsoft.Purview/accounts', variables('purviewName')), '2021-07-01', 'full').identity.principalId]",
+                        "principalType": "ServicePrincipal"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "eventsResourceGroups",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('functionResourceGroupName')), 'Microsoft.Resources/deployments', 'functionResources')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "automationResources",
+      "resourceGroup": "[variables('automationResourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[variables('tagsJoined')]"
+          },
+          "prefix": {
+            "value": "[variables('name')]"
+          },
+          "purviewId": {
+            "value": "[parameters('purviewId')]"
+          },
+          "purviewRootCollectionAdminObjectIds": {
+            "value": [
+              "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('functionResourceGroupName')), 'Microsoft.Resources/deployments', 'functionResources')).outputs.function001PrincipalId.value]"
+            ]
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.11.1.770",
+              "templateHash": "13836848903953131458"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "prefix": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "purviewId": {
+              "type": "string"
+            },
+            "purviewRootCollectionAdminObjectIds": {
+              "type": "array",
+              "defaultValue": []
+            }
+          },
+          "variables": {
+            "userAssignedIdentity001Name": "[format('{0}-uai001', parameters('prefix'))]",
+            "purviewSubscriptionId": "[if(greaterOrEquals(length(split(parameters('purviewId'), '/')), 9), split(parameters('purviewId'), '/')[2], subscription().subscriptionId)]",
+            "purviewResourceGroupName": "[if(greaterOrEquals(length(split(parameters('purviewId'), '/')), 9), split(parameters('purviewId'), '/')[4], resourceGroup().name)]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "userAssignedIdentity001",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "tags": {
+                    "value": "[parameters('tags')]"
+                  },
+                  "userAssignedIdentityName": {
+                    "value": "[variables('userAssignedIdentity001Name')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "17732490308701504505"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object"
+                    },
+                    "userAssignedIdentityName": {
+                      "type": "string"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+                      "apiVersion": "2022-01-31-preview",
+                      "name": "[parameters('userAssignedIdentityName')]",
+                      "location": "[parameters('location')]",
+                      "tags": "[parameters('tags')]"
+                    }
+                  ],
+                  "outputs": {
+                    "userAssignedIdentityId": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName'))]"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "userAssignedIdentity001RoleAssignmentPurview",
+              "subscriptionId": "[variables('purviewSubscriptionId')]",
+              "resourceGroup": "[variables('purviewResourceGroupName')]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "userAssignedIdentityId": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', 'userAssignedIdentity001')).outputs.userAssignedIdentityId.value]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "1420565149061626429"
+                    }
+                  },
+                  "parameters": {
+                    "userAssignedIdentityId": {
+                      "type": "string"
+                    }
+                  },
+                  "variables": {
+                    "userAssignedIdentitySubscriptionId": "[if(greaterOrEquals(length(split(parameters('userAssignedIdentityId'), '/')), 9), split(parameters('userAssignedIdentityId'), '/')[2], subscription().subscriptionId)]",
+                    "userAssignedIdentityResourceGroupName": "[if(greaterOrEquals(length(split(parameters('userAssignedIdentityId'), '/')), 9), split(parameters('userAssignedIdentityId'), '/')[4], resourceGroup().name)]",
+                    "userAssignedIdentityName": "[if(greaterOrEquals(length(split(parameters('userAssignedIdentityId'), '/')), 9), last(split(parameters('userAssignedIdentityId'), '/')), 'incorrectSegmentLength')]"
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Authorization/roleAssignments",
+                      "apiVersion": "2020-10-01-preview",
+                      "name": "[guid(uniqueString(resourceGroup().id, extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('userAssignedIdentitySubscriptionId'), variables('userAssignedIdentityResourceGroupName')), 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))))]",
+                      "properties": {
+                        "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]",
+                        "principalId": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('userAssignedIdentitySubscriptionId'), variables('userAssignedIdentityResourceGroupName')), 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2022-01-31-preview').principalId]",
+                        "principalType": "ServicePrincipal"
+                      }
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'userAssignedIdentity001')]"
+              ]
+            },
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "purviewSetup",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "tags": {
+                    "value": "[parameters('tags')]"
+                  },
+                  "userAssignedIdentityId": {
+                    "value": "[reference(resourceId('Microsoft.Resources/deployments', 'userAssignedIdentity001')).outputs.userAssignedIdentityId.value]"
+                  },
+                  "purviewId": {
+                    "value": "[parameters('purviewId')]"
+                  },
+                  "purviewRootCollectionAdminObjectIds": {
+                    "value": "[parameters('purviewRootCollectionAdminObjectIds')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.11.1.770",
+                      "templateHash": "17803646937144462883"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object"
+                    },
+                    "userAssignedIdentityId": {
+                      "type": "string"
+                    },
+                    "purviewId": {
+                      "type": "string"
+                    },
+                    "purviewRootCollectionAdminObjectIds": {
+                      "type": "array"
+                    },
+                    "forceUpdateTag": {
+                      "type": "string",
+                      "defaultValue": "[utcNow()]"
+                    }
+                  },
+                  "variables": {
+                    "$fxv#0": "# Licensed under the MIT license.\r\n\r\n# Define script arguments\r\n[CmdletBinding()]\r\nparam (\r\n    [Parameter(Mandatory = $true)]\r\n    [ValidateNotNullOrEmpty()]\r\n    [string]\r\n    $PurviewId,\r\n\r\n    [Parameter(Mandatory = $false)]\r\n    [string[]]\r\n    $PurviewRootCollectionAdmins = @(),\r\n\r\n    [Parameter(Mandatory=$false)]\r\n    [Switch]\r\n    $SetPurviewAccountAsDefault\r\n)\r\n\r\n# Install Required Module\r\nWrite-Output \"Installing Required Module\"\r\nSet-PSRepository `\r\n    -Name PSGallery `\r\n    -InstallationPolicy Trusted\r\nInstall-Module `\r\n    -Name Az.Purview `\r\n    -Repository PSGallery `\r\n    -Force\r\n\r\n# Define Parameters\r\nWrite-Output \"Defining Parameters\"\r\n$tenantId = (Get-AzContext).Tenant.Id\r\n$purviewSubscriptionId = $PurviewId.Split(\"/\")[2]\r\n$purviewResourceGroupName = $PurviewId.Split(\"/\")[4]\r\n$purviewAccountName = $PurviewId.Split(\"/\")[8]\r\n\r\nif ($SetPurviewAccountAsDefault) {\r\n    # Set Purview Account as Default in Tenant\r\n    Write-Output \"Setting Purview Account as Default in Tenant\"\r\n    Set-AzPurviewDefaultAccount `\r\n        -ScopeTenantId $tenantId `\r\n        -ScopeType \"Tenant\" `\r\n        -Scope $tenantId `\r\n        -SubscriptionId $purviewSubscriptionId `\r\n        -ResourceGroupName $purviewResourceGroupName `\r\n        -AccountName $purviewAccountName\r\n} else {\r\n    # NOT Set Purview Account as Default in Tenant\r\n    Write-Output \"NOT Setting Purview Account as Default in Tenant\"\r\n}\r\n\r\nforeach ($purviewRootCollectionAdmin in $PurviewRootCollectionAdmins) {\r\n    # Set Purview Root Collection Admin\r\n    Write-Output \"Setting Purview Root Collection Admin '${purviewRootCollectionAdmin}'\"\r\n    Add-AzPurviewAccountRootCollectionAdmin `\r\n        -SubscriptionId $purviewSubscriptionId `\r\n        -ResourceGroupName $purviewResourceGroupName `\r\n        -AccountName $purviewAccountName `\r\n        -ObjectId $purviewRootCollectionAdmin\r\n}\r\n",
+                    "purviewName": "[if(greaterOrEquals(length(split(parameters('purviewId'), '/')), 9), last(split(parameters('purviewId'), '/')), 'incorrectSegmentLength')]",
+                    "purviewSetupName": "[format('{0}-setup', variables('purviewName'))]",
+                    "purviewRootCollectionAdminsInput": "[replace(replace(string(parameters('purviewRootCollectionAdminObjectIds')), '[', ''), ']', '')]"
+                  },
+                  "resources": [
+                    {
+                      "condition": "[greater(length(parameters('purviewRootCollectionAdminObjectIds')), 0)]",
+                      "type": "Microsoft.Resources/deploymentScripts",
+                      "apiVersion": "2020-10-01",
+                      "name": "[variables('purviewSetupName')]",
+                      "location": "[parameters('location')]",
+                      "tags": "[parameters('tags')]",
+                      "kind": "AzurePowerShell",
+                      "identity": {
+                        "type": "UserAssigned",
+                        "userAssignedIdentities": {
+                          "[format('{0}', parameters('userAssignedIdentityId'))]": {}
+                        }
+                      },
+                      "properties": {
+                        "azPowerShellVersion": "6.3",
+                        "arguments": "[format('-PurviewId \\\"{0}\\\" -PurviewRootCollectionAdmins {1}', parameters('purviewId'), variables('purviewRootCollectionAdminsInput'))]",
+                        "cleanupPreference": "OnSuccess",
+                        "containerSettings": {
+                          "containerGroupName": "[variables('purviewSetupName')]"
+                        },
+                        "environmentVariables": [],
+                        "forceUpdateTag": "[parameters('forceUpdateTag')]",
+                        "scriptContent": "[variables('$fxv#0')]",
+                        "retentionInterval": "P1D",
+                        "supportingScriptUris": [],
+                        "timeout": "PT30M"
+                      }
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'userAssignedIdentity001')]",
+                "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('purviewSubscriptionId'), variables('purviewResourceGroupName')), 'Microsoft.Resources/deployments', 'userAssignedIdentity001RoleAssignmentPurview')]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('automationResourceGroupName'))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('functionResourceGroupName')), 'Microsoft.Resources/deployments', 'functionResources')]"
+      ]
+    }
+  ],
+  "outputs": {
+    "function001Name": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('functionResourceGroupName')), 'Microsoft.Resources/deployments', 'functionResources')).outputs.function001Name.value]"
+    },
+    "function001PrincipalId": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('functionResourceGroupName')), 'Microsoft.Resources/deployments', 'functionResources')).outputs.function001PrincipalId.value]"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "Audit-AppGW-WAF",
+      "kind": "policyassignments",
+      "apiVersion": "2022-06-01",
+      "location": "global",
+      "properties": {
+        "description": "Assign the WAF should be enabled for Application Gateway audit policy.",
+        "displayName": "Web Application Firewall (WAF) should be enabled for Application Gateway",
+        "enforcementMode": "Default",
+        "metadata": {},
+        "nonComplianceMessages": [
+          {
+            "message": "Web Application Firewall (WAF) must be enabled for Application Gateway."
+          }
+        ],
+        "parameters": {
+          "effect": {
+            "value": "Audit"
+          }
+        },
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/564feb30-bf6a-4854-b4bb-0d2d2d1e6c66",
+        "scope": "/providers/Microsoft.Management/managementGroups/contoso-landingzones"
+      }
+    }
+  ],
+  "outputs": {}
+}

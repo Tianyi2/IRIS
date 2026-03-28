@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "staticSites_name": {
+      "type": "string"
+    },
+    "staticSites_location": {
+      "type": "string"
+    },
+    "staticSites_sku": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/staticSites",
+      "apiVersion": "2023-01-01",
+      "name": "[parameters('staticSites_name')]",
+      "location": "[parameters('staticSites_location')]",
+      "sku": {
+        "name": "[parameters('staticSites_sku')]"
+      },
+      "properties": {}
+    }
+  ]
+}

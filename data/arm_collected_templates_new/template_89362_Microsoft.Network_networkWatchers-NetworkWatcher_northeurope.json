@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkWatchers",
+      "name": "NetworkWatcher_northeurope",
+      "apiVersion": "2020-11-01",
+      "location": "[resourceGroup().location]",
+      "tags": null,
+      "properties": {
+        "provisioningState": "Succeeded",
+        "runningOperationIds": []
+      }
+    }
+  ],
+  "outputs": {}
+}

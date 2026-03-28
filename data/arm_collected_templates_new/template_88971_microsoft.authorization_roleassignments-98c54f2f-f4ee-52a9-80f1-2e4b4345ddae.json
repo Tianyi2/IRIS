@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "98c54f2f-f4ee-52a9-80f1-2e4b4345ddae",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "principalId": "170adbdf-5a71-472b-8c5b-b35eaa2a2325",
+        "principalType": "Group",
+        "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+        "scope": "/providers/Microsoft.Management/managementGroups/contoso-sandboxes"
+      }
+    }
+  ],
+  "outputs": {}
+}

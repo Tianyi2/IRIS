@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "name": "git-azOpsRg-umi",
+      "apiVersion": "2018-11-30",
+      "location": "[resourceGroup().location]",
+      "tags": {},
+      "properties": {
+        "tenantId": "360d509d-82f2-42d5-9446-fbf417d9139c",
+        "principalId": "bfa0d3ff-58af-42af-a799-b3d4f38af3be",
+        "clientId": "df606eed-12a9-436b-9947-1400e80677db"
+      }
+    }
+  ],
+  "outputs": {}
+}

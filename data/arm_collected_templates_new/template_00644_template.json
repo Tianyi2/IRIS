@@ -1,0 +1,177 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namingPrefix": {
+      "defaultValue": "contoso",
+      "type": "string"
+    },
+    "vmAdminUserName": {
+      "defaultValue": "contosoAdmin",
+      "type": "string"
+    },
+    "vmAdminPassword": {
+      "type": "securestring"
+    },
+    "vnetMainName": {
+      "defaultValue": "contoso-vnet-main",
+      "type": "string"
+    },
+    "subnetAlmName": {
+      "defaultValue": "contoso-subnet-alm",
+      "type": "string"
+    }
+  },
+  "variables": {
+    "vnetMainName": "[parameters('vnetMainName')]",
+    "subnetAlmName": "[parameters('subnetAlmName')]",
+    "vmJenkinsName": "[concat(parameters('namingPrefix'),'-vm-jenkins')]",
+    "vmJenkinsComputerName": "[concat(parameters('namingPrefix'),'vmjkns')]",
+    "vmJenkinsSize": "Standard_DS3_v2",
+    "vmJenkinsOsDiskName": "[concat(variables('vmJenkinsName'),'-osdisk')]",
+    "vmJenkinsOsDiskSize": 128,
+    "vmJenkinsImagePublisher": "MicrosoftWindowsServer",
+    "vmJenkinsImageOffer": "WindowsServer",
+    "vmJenkinsImageSku": "2012-R2-Datacenter",
+    "vmJenkinsImageVersion": "latest",
+    "vmJenkinsDataDiskName": "[concat(variables('vmJenkinsName'),'-datadisk')]",
+    "vmJenkinsDataDiskSize": 80,
+    "niJenkinsName": "[concat(parameters('namingPrefix'),'-ni-jenkins')]",
+    "ipJenkinsName": "[concat(parameters('namingPrefix'),'-ip-jenkins')]",
+    "ipJenkinsAddress": "10.0.3.5",
+    "asJenkinsName": "[concat(parameters('namingPrefix'),'-as-jenkins')]",
+    "saVmDiagnosticsName": "[concat(parameters('namingPrefix'), 'vmdiagnostics')]"
+  },
+  "resources": [
+    {
+      "comments": "",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('vmJenkinsName')]",
+      "apiVersion": "2017-03-30",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('vmJenkinsSize')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('vmJenkinsImagePublisher')]",
+            "offer": "[variables('vmJenkinsImageOffer')]",
+            "sku": "[variables('vmJenkinsImageSku')]",
+            "version": "[variables('vmJenkinsImageVersion')]"
+          },
+          "osDisk": {
+            "osType": "Windows",
+            "name": "[variables('vmJenkinsOsDiskName')]",
+            "createOption": "FromImage",
+            "caching": "ReadWrite",
+            "diskSizeGB": "[variables('vmJenkinsOsDiskSize')]"
+          },
+          "dataDisks": [
+            {
+              "lun": 0,
+              "name": "[variables('vmJenkinsDataDiskName')]",
+              "createOption": "Empty",
+              "caching": "ReadOnly",
+              "diskSizeGB": "[variables('vmJenkinsDataDiskSize')]"
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[variables('vmJenkinsComputerName')]",
+          "adminUsername": "[parameters('vmAdminUsername')]",
+          "adminPassword": "[parameters('vmAdminPassword')]",
+          "windowsConfiguration": {
+            "provisionVMAgent": true,
+            "enableAutomaticUpdates": true
+          },
+          "secrets": []
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('niJenkinsName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('saVmDiagnosticsName')), '2016-01-01').primaryEndpoints.blob]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('niJenkinsName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('saVmDiagnosticsName'))]"
+      ]
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('niJenkinsName')]",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "scale": null,
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[variables('ipJenkinsName')]",
+            "properties": {
+              "privateIPAddress": "[variables('ipJenkinsAddress')]",
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetMainName'), variables('subnetAlmName'))]"
+              },
+              "primary": true,
+              "privateIPAddressVersion": "IPv4"
+            }
+          }
+        ],
+        "dnsSettings": {},
+        "macAddress": "00-0D-3A-03-05-76",
+        "enableAcceleratedNetworking": false,
+        "enableIPForwarding": false,
+        "primary": true
+      },
+      "dependsOn": []
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Storage/storageAccounts",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "kind": "Storage",
+      "name": "[variables('saVmDiagnosticsName')]",
+      "apiVersion": "2016-01-01",
+      "location": "[resourceGroup().location]",
+      "tags": {},
+      "properties": {},
+      "dependsOn": []
+    },
+    {
+      "comments": "",
+      "type": "Microsoft.Compute/availabilitySets",
+      "sku": {
+        "name": "Aligned"
+      },
+      "name": "[variables('asJenkinsName')]",
+      "apiVersion": "2017-03-30",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "platformUpdateDomainCount": 5,
+        "platformFaultDomainCount": 2,
+        "virtualMachines": [
+          {
+            "id": "[resourceId('Microsoft.Compute/virtualMachines', variables('vmJenkinsName'))]"
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines', variables('vmJenkinsName'))]"
+      ]
+    }
+  ]
+}

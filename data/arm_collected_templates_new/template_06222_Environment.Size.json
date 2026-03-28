@@ -1,0 +1,203 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "size": {
+            "type": "string",
+            "defaultValue": "Small",
+            "allowedValues": [
+                "ExtraSmall",
+                "Small",
+                "Medium",
+                "Large",
+                "ExtraLarge"
+            ]
+        }
+    },
+    "variables": {
+        "environmentSize": "[variables(concat('size', parameters('size')))]",
+        "sizeExtraSmall": {
+            "serverFarm": {
+                "sku": "Shared",
+                "skuCode": "D1",
+                "autoscale": {
+                    "enabled": false,
+                    "capacity": {
+                        "default": 1,
+                        "minimum": 1,
+                        "maximum": 1
+                    }
+                }
+            },
+            "storage": {
+                "accountType": "Standard_LRS",
+                "kind": "Storage"
+            },
+            "sqlDatabase": {
+                "tier": "Basic",
+                "sku": "Basic",
+                "maxSizeBytes": "2147483648"
+            },
+            "redis": {
+                "sku": "Basic",
+                "capacity": 0
+            },
+            "keyVaultSku": "Standard",
+            "serviceBus": {
+                "sku": "Basic",
+                "capacity": 1,
+                "zoneRedundant": false
+            },
+            "automationSku": "Free",
+            "logAnalyticsSku": "Free"
+        },
+        "sizeSmall": {
+            "serverFarm": {
+                "sku": "Basic",
+                "skuCode": "B1",
+                "autoscale": {
+                    "enabled": false,
+                    "capacity": {
+                        "default": 1,
+                        "minimum": 1,
+                        "maximum": 1
+                    }
+                }
+            },
+            "storage": {
+                "accountType": "Standard_LRS",
+                "kind": "Storage"
+            },
+            "sqlDatabase": {
+                "tier": "Basic",
+                "sku": "Basic",
+                "maxSizeBytes": "2147483648"
+            },
+            "redis": {
+                "sku": "Basic",
+                "capacity": 0
+            },
+            "keyVaultSku": "Standard",
+            "serviceBus": {
+                "sku": "Basic",
+                "capacity": 1,
+                "zoneRedundant": false
+            },
+            "automationSku": "Free",
+            "logAnalyticsSku": "Free"
+        },
+        "sizeMedium": {
+            "serverFarm": {
+                "sku": "Basic",
+                "skuCode": "B2",
+                "autoscale": {
+                    "enabled": false,
+                    "capacity": {
+                        "default": 2,
+                        "minimum": 2,
+                        "maximum": 2
+                    }
+                }
+            },
+            "storage": {
+                "accountType": "Standard_LRS",
+                "kind": "Storage"
+            },
+            "sqlDatabase": {
+                "tier": "Standard",
+                "sku": "S0",
+                "maxSizeBytes": "268435456000"
+            },
+            "redis": {
+                "sku": "Basic",
+                "capacity": 1
+            },
+            "keyVaultSku": "Standard",
+            "serviceBus": {
+                "sku": "Standard",
+                "capacity": 1,
+                "zoneRedundant": false
+            },
+            "automationSku": "Basic",
+            "logAnalyticsSku": "PerGB2018"
+        },
+        "sizeLarge": {
+            "serverFarm": {
+                "sku": "Standard",
+                "skuCode": "S2",
+                "autoscale": {
+                    "enabled": true,
+                    "capacity": {
+                        "default": 2,
+                        "minimum": 2,
+                        "maximum": 8
+                    }
+                }
+            },
+            "storage": {
+                "accountType": "Standard_GRS",
+                "kind": "Storage"
+            },
+            "sqlDatabase": {
+                "tier": "Standard",
+                "sku": "S3",
+                "maxSizeBytes": "1099511627776"
+            },
+            "redis": {
+                "sku": "Standard",
+                "capacity": 1
+            },
+            "keyVaultSku": "Premium",
+            "serviceBus": {
+                "sku": "Standard",
+                "capacity": 1,
+                "zoneRedundant": false
+            },
+            "automationSku": "Basic",
+            "logAnalyticsSku": "Standard"
+        },
+        "sizeExtraLarge": {
+            "serverFarm": {
+                "sku": "Standard",
+                "skuCode": "S3",
+                "autoscale": {
+                    "enabled": true,
+                    "capacity": {
+                        "default": 4,
+                        "minimum": 2,
+                        "maximum": 10
+                    }
+                }
+            },
+            "storage": {
+                "accountType": "Standard_GRS",
+                "kind": "Storage"
+            },
+            "sqlDatabase": {
+                "tier": "Premium",
+                "sku": "P6",
+                "maxSizeBytes": "1099511627776"
+            },
+            "redis": {
+                "sku": "Standard",
+                "capacity": 3
+            },
+            "keyVaultSku": "Premium",
+            "serviceBus": {
+                "sku": "Premium",
+                "capacity": 1,
+                "zoneRedundant": true
+            },
+            "automationSku": "Basic",
+            "logAnalyticsSku": "Premium"
+        }
+    },
+    "resources": [
+    ],
+    "outputs": {
+        "size": {
+            "type": "object",
+            "value": "[variables('environmentSize')]"
+        }
+    }
+}

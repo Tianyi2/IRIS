@@ -1,0 +1,117 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "13035374451941097139"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Optional. The location to deploy to."
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. The name of the Virtual Network to create."
+      }
+    },
+    "managedIdentityName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. The name of the Managed Identity to create."
+      }
+    }
+  },
+  "variables": {
+    "addressPrefix": "10.0.0.0/16"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2024-06-01",
+      "name": "[format('{0}/{1}', format('{0}.postgres.database.azure.com', split(parameters('virtualNetworkName'), '-')[1]), format('{0}-vnetlink', parameters('virtualNetworkName')))]",
+      "location": "global",
+      "properties": {
+        "virtualNetwork": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
+        },
+        "registrationEnabled": false
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', format('{0}.postgres.database.azure.com', split(parameters('virtualNetworkName'), '-')[1]))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2024-10-01",
+      "name": "[parameters('virtualNetworkName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "defaultSubnet",
+            "properties": {
+              "addressPrefix": "[cidrSubnet(variables('addressPrefix'), 16, 0)]",
+              "delegations": [
+                {
+                  "name": "Microsoft.DBforPostgreSQL.flexibleServers",
+                  "properties": {
+                    "serviceName": "Microsoft.DBforPostgreSQL/flexibleServers"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones",
+      "apiVersion": "2024-06-01",
+      "name": "[format('{0}.postgres.database.azure.com', split(parameters('virtualNetworkName'), '-')[1])]",
+      "location": "global"
+    },
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2023-01-31",
+      "name": "[parameters('managedIdentityName')]",
+      "location": "[parameters('location')]"
+    }
+  ],
+  "outputs": {
+    "subnetResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The resource ID of the created Virtual Network Subnet."
+      },
+      "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '2024-10-01').subnets[0].id]"
+    },
+    "privateDNSZoneResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The resource ID of the created Private DNS Zone."
+      },
+      "value": "[resourceId('Microsoft.Network/privateDnsZones', format('{0}.postgres.database.azure.com', split(parameters('virtualNetworkName'), '-')[1]))]"
+    },
+    "managedIdentityPrincipalId": {
+      "type": "string",
+      "metadata": {
+        "description": "The principal ID of the created Managed Identity."
+      },
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), '2023-01-31').principalId]"
+    }
+  }
+}

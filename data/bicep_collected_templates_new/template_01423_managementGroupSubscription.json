@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "18437447825018326055"
+    }
+  },
+  "parameters": {
+    "subscriptionManagementGroupId": {
+      "type": "string",
+      "metadata": {
+        "description": "The destination management group ID for the new subscription. Note: Do not supply the display name. The management group ID forms part of the Azure resource ID e.g., `/providers/Microsoft.Management/managementGroups/{managementGroupId}`."
+      }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "metadata": {
+        "description": "The ID of the Subscription to move to the target Management Group"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Management/managementGroups/subscriptions",
+      "apiVersion": "2023-04-01",
+      "scope": "/",
+      "name": "[format('{0}/{1}', parameters('subscriptionManagementGroupId'), parameters('subscriptionId'))]"
+    }
+  ]
+}

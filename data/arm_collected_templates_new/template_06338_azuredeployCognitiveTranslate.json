@@ -1,0 +1,39 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "cognitiveTranslateName": {
+            "metadata": {
+                "description": "Name of Text Translation API account"
+            },
+            "type": "string"
+        },
+        "cognitiveTranslateSKU": {
+            "type": "string",
+            "metadata": {
+                "description": "SKU for Text Translation API"
+            },
+            "defaultValue": "F0",
+            "allowedValues": [
+                "F0",
+                "S1",
+                "S2",
+                "S3",
+                "S4"
+            ]
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.CognitiveServices/accounts",
+            "sku": {
+                "name": "[parameters('cognitiveTranslateSKU')]"
+            },
+            "kind": "TextTranslation",
+            "name": "[parameters('cognitiveTranslateName')]",
+            "apiVersion": "2016-02-01-preview",
+            "location": "global",
+            "properties": {}
+        }
+    ]
+}

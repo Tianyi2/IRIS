@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyExemptions",
+      "name": "a975625a1b4c4e0cbda05595",
+      "apiVersion": "2022-07-01-preview",
+      "properties": {
+        "Description": null,
+        "DisplayName": "victor-test - Enforce secure-by-default Compute for Financial Services Industry",
+        "ExemptionCategory": "Waiver",
+        "ExpiresOn": null,
+        "Metadata": {},
+        "PolicyAssignmentId": "/providers/Microsoft.Management/managementGroups/saturn-landingzones/providers/Microsoft.Authorization/policyAssignments/Compliant-Compute",
+        "PolicyDefinitionReferenceIds": [
+          "Deny-ManagedDisk-Public-Network-Access"
+        ]
+      }
+    }
+  ],
+  "outputs": {}
+}

@@ -1,0 +1,176 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "sku": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Free",
+                "Shared",
+                "Basic",
+                "Standard",
+                "Premium",
+                "PremiumV2",
+                "Isolated",
+                "Dynamic"
+            ]
+        },
+        "skuCode": {
+            "type": "string",
+            "defaultValue": "B1",
+            "allowedValues": [
+                "F1",
+                "D1",
+                "B1",
+                "B2",
+                "B3",
+                "S1",
+                "S2",
+                "S3",
+                "P1",
+                "P2",
+                "P3",
+                "P1V2",
+                "P2V2",
+                "P3V2",
+                "I1",
+                "I2",
+                "I3",
+                "Y1"
+            ]
+        },
+        "minimumCapacity": {
+            "type": "int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "The minimum capacity.  Autoscale engine will ensure the instance count is at least this value."
+            }
+        },
+        "maximumCapacity": {
+            "type": "int",
+            "defaultValue": 4,
+            "metadata": {
+                "description": "The maximum capacity.  Autoscale engine will ensure the instance count is not greater than this value."
+            }
+        },
+        "defaultCapacity": {
+            "type": "int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "The default capacity.  Autoscale engine will preventively set the instance count to be this value if it can not find any metric data."
+            }
+        },
+        "autoscaleEnabled": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Indicate whether the autoscale policy is enabled or disabled."
+            }
+        },
+        "tags": {
+          "type": "object",
+          "defaultValue" : {}
+        }
+    },
+    "variables": {
+        "scalableSkus": [
+            "Standard",
+            "Premium",
+            "PremiumV2",
+            "Isolated",
+            "Dynamic"
+        ],
+        "targetResourceId": "[resourceId('Microsoft.Web/serverFarms/', parameters('name'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "sku": {
+                "Tier": "[parameters('sku')]",
+                "Name": "[parameters('skuCode')]",
+                "capacity": "[parameters('defaultCapacity')]"
+            },
+            "name": "[parameters('name')]",
+            "tags": "[parameters('tags')]",
+            "apiVersion": "2016-09-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "name": "[parameters('name')]"
+            }
+        },
+        {
+            "condition": "[contains(variables('scalableSkus'), parameters('sku'))]",
+            "type": "Microsoft.Insights/autoscalesettings",
+            "name": "[concat(parameters('name'), '-autoscale')]",
+            "apiVersion": "2014-04-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('name'))]"
+            ],
+            "properties": {
+                "profiles": [
+                    {
+                        "name": "DefaultAutoscaleProfile",
+                        "capacity": {
+                            "minimum": "[parameters('minimumCapacity')]",
+                            "maximum": "[parameters('maximumCapacity')]",
+                            "default": "[parameters('defaultCapacity')]"
+                        },
+                        "rules": [
+                            {
+                                "metricTrigger": {
+                                    "metricName": "CpuPercentage",
+                                    "metricNamespace": "",
+                                    "metricResourceUri": "[variables('targetResourceId')]",
+                                    "timeGrain": "PT5M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT10M",
+                                    "timeAggregation": "Average",
+                                    "operator": "GreaterThan",
+                                    "threshold": 60
+                                },
+                                "scaleAction": {
+                                    "direction": "Increase",
+                                    "type": "PercentChangeCount",
+                                    "value": 20,
+                                    "cooldown": "PT10M"
+                                }
+                            },
+                            {
+                                "metricTrigger": {
+                                    "metricName": "CpuPercentage",
+                                    "metricNamespace": "",
+                                    "metricResourceUri": "[variables('targetResourceId')]",
+                                    "timeGrain": "PT5M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT10M",
+                                    "timeAggregation": "Average",
+                                    "operator": "LessThan",
+                                    "threshold": 20
+                                },
+                                "scaleAction": {
+                                    "direction": "Decrease",
+                                    "type": "PercentChangeCount",
+                                    "value": 10,
+                                    "cooldown": "PT10M"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "enabled": "[parameters('autoscaleEnabled')]",
+                "targetResourceUri": "[variables('targetResourceId')]"
+            }
+        }
+    ],
+    "outputs": {
+        "serverfarm": {
+            "type": "object",
+            "value": "[reference(parameters('name'), '2016-09-01', 'Full')]"
+        }
+    }
+}

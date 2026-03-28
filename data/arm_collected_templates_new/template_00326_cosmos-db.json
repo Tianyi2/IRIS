@@ -1,0 +1,178 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "cosmosDbName": {
+      "type": "string"
+    },
+    "cosmosDbType": {
+      "type": "string",
+      "allowedValues": [
+        "GlobalDocumentDB",
+        "MongoDB"
+      ]
+    },
+    "defaultConsistencyLevel": {
+      "type": "string",
+      "allowedValues": [
+        "Eventual",
+        "Session",
+        "BoundedStaleness",
+        "Strong",
+        "ConsistentPrefix"
+      ]
+    },
+    "serverVersion": {
+      "type": "string",
+      "allowedValues": [
+        "3.2",
+        "3.6",
+        "4.0"
+      ],
+      "defaultValue": "3.6"
+    },
+    "subnetResourceIdList": {
+      "type": "array",
+      "defaultValue": []
+    },
+    "ipRangeFilter": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "A comma separated list of single IP addresses and/or CIDR ranges"
+      }
+    },
+    "logAnalyticsWorkspaceName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Log analytics workspace to send logs to (leave blank to disable)"
+      }
+    },
+    "logAnalyticsWorkspaceResourceGroupName": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "minimalTlsVersion": {
+      "type": "string",
+      "metadata": {
+        "displayName": "Minimal TLS Version",
+        "description": "Minimal version of TLS required to access cosmos db"
+      },
+      "allowedValues": [
+        "Tls",
+        "Tls11",
+        "Tls12"
+      ],
+      "defaultValue": "Tls12"
+    }
+  },
+  "variables": {
+    "apiProperties": {
+      "apiProperties": {
+        "serverVersion": "[parameters('serverVersion')]"
+      }
+    },
+    "baseCosmosProperties": {
+      "backupPolicy": {
+        "type": "Continuous"
+      },
+      "consistencyPolicy": {
+        "defaultConsistencyLevel": "[parameters('defaultConsistencyLevel')]"
+      },
+      "databaseAccountOfferType": "Standard",
+      "ipRules": "[variables('ipRulesCopy')]",
+      "isVirtualNetworkFilterEnabled": "[if(greater(length(variables('virtualNetworkRules')), 0), bool('true'), bool('false'))]",
+      "locations": [
+        {
+          "locationName": "[resourceGroup().location]"
+        }
+      ],
+      "virtualNetworkRules": "[variables('virtualNetworkRules')]",
+      "minimalTlsVersion": "[parameters('minimalTlsVersion')]"
+    },
+    "ipRangeFilterArray": "[split(parameters('ipRangeFilter'),',')]",
+    "mongoCosmosProperties": "[union(variables('baseCosmosProperties'), variables('apiProperties'))]",
+    "virtualNetworkRulesEmpty": [],
+    "virtualNetworkRules": "[if(greater(length(parameters('subnetResourceIdList')), 0), variables('virtualNetworkRulesCopy'), variables('virtualNetworkRulesEmpty'))]",
+    "copy": [
+      {
+        "name": "virtualNetworkRulesCopy",
+        "count": "[if(greater(length(parameters('subnetResourceIdList')), 0), length(parameters('subnetResourceIdList')), 1)]",
+        "input": {
+          "id": "[if(greater(length(parameters('subnetResourceIdList')), 0), parameters('subnetResourceIdList')[copyIndex('virtualNetworkRulesCopy')], json('null'))]"
+        }
+      },
+      {
+        "name": "ipRulesCopy",
+        "count": "[length(variables('ipRangeFilterArray'))]",
+        "input": {
+          "ipAddressOrRange": "[variables('ipRangeFilterArray')[copyIndex('ipRulesCopy')]]"
+        }
+      }
+    ],
+    "diagnosticSettingsEnabled": "[not(empty(parameters('logAnalyticsWorkspaceName')))]",
+    "logAnalyticsWorkspaceResourceId": "[resourceId(parameters('logAnalyticsWorkspaceResourceGroupName'), 'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]",
+    "commonDiagnosticSettings": [
+      {
+        "category": "ControlPlaneRequests",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": 90
+        }
+      }
+    ],
+    "mongoSpecificDiagnosticSettings": [
+      {
+        "category": "MongoRequests",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": 90
+        }
+      }
+    ],
+    "nonMongoSpecificDiagnosticSettings": [
+      {
+        "category": "DataPlaneRequests",
+        "enabled": true,
+        "retentionPolicy": {
+          "enabled": true,
+          "days": 90
+        }
+      }
+    ],
+    "mongoDiagnosticSettings": "[concat(variables('commonDiagnosticSettings'), variables('mongoSpecificDiagnosticSettings'))]",
+    "nonMongoDiagnosticSettings": "[concat(variables('commonDiagnosticSettings'), variables('nonMongoSpecificDiagnosticSettings'))]",
+    "diagnosticSettings": "[if(equals(parameters('cosmosDbType'), 'MongoDB'), variables('mongoDiagnosticSettings'), variables('nonMongoDiagnosticSettings'))]"
+  },
+  "resources": [
+    {
+      "name": "[parameters('cosmosDbName')]",
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "apiVersion": "2023-11-15",
+      "location": "[resourceGroup().location]",
+      "kind": "[parameters('cosmosDbType')]",
+      "properties": "[if(equals(parameters('cosmosDbType'), 'MongoDB'), variables('mongoCosmosProperties'), variables('baseCosmosProperties'))]",
+      "resources": [
+        {
+          "apiVersion": "2021-05-01-preview",
+          "type": "providers/diagnosticSettings",
+          "name": "Microsoft.Insights/service",
+          "condition": "[variables('diagnosticSettingsEnabled')]",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbName'))]"
+          ],
+          "properties": {
+            "logAnalyticsDestinationType": "Dedicated",
+            "workspaceId": "[variables('logAnalyticsWorkspaceResourceId')]",
+            "logs": "[variables('diagnosticSettings')]"
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {}
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/c4bedb3c-4fb8-4b1c-af5b-8229bd25f521')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/c4bedb3c-4fb8-4b1c-af5b-8229bd25f521')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "High",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "AIShield - Image Classification AI Model Evasion low suspicious vulnerability detected.",
+          "alertTacticsColumnName": null,
+          "alertDescriptionFormat": "This query detects Image Classification AI Model Evasion low suspicious, medium severity alert from AIShield generated at {{TimeGenerated}}.\\n\\nPlease check the source for more information and investigate further.\n",
+          "alertSeverityColumnName": "Severity"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "name": "AIShield - Image classification AI Model Evasion low suspicious vulnerability detection",
+        "description": "'This alert creates an incident when Image classification AI Model Evasion low suspicious, high severity vulnerability detected from the AIShield.'\n",
+        "query": "AIShield\n| where Message has 'Image Classification AI Model Evasion Attack Identified'\n| where Severity =~ 'Medium'\n| where SuspiciousLevel =~ 'low suspicious attack'\n| extend NTDomain = tostring(split(Computer, '\\\\')[0]), HostName = tostring(split(Computer, '.')[0])\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "HostName",
+                "identifier": "HostName"
+              },
+              {
+                "columnName": "NTDomain",
+                "identifier": "NTDomain"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SourceName",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

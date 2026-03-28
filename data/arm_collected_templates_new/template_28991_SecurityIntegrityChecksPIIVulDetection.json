@@ -1,0 +1,62 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/d6b3372a-0fc4-40ec-9630-b96efb527fba')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/d6b3372a-0fc4-40ec-9630-b96efb527fba')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "High",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Guardian- Security Integrity Checks Prompt Injection Policy Violation detection",
+          "alertDescriptionFormat": "This query detects Security Integrity Checks Prompt Injection Policy Violation detected from the Guardian generated at {{TimeGenerated}}.\\n\\nPlease check the source for more information and investigate further\n",
+          "alertSeverityColumnName": "Severity"
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "name": "Guardian- Security Integrity Checks Prompt Injection Policy Violation Detection",
+        "description": "'This alert creates an incident when Security Integrity Checks Prompt Injection Policy Violation detected from the Guardian.'\n",
+        "query": "Guardian\n| where PolicyViolatedControlFeature =~ 'Prompt Injection / Jailbreaks'\n| where Severity =~ 'High'\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "HostName",
+                "identifier": "HostName"
+              },
+              {
+                "columnName": "NTDomain",
+                "identifier": "NTDomain"
+              }
+            ],
+            "entityType": "Host"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SourceIP",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

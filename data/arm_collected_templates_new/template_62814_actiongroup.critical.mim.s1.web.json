@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "resources": [
+    {
+      "type": "Microsoft.Insights/actionGroups",
+      "apiVersion": "2018-03-01",
+      "name": "PLATFORM-alert-critmim-s1web",
+      "location": "Global",
+      "properties": {
+        "groupShortName": "PLATFORMCMIMS1W",
+        "enabled": true,
+        "logicAppReceivers": [],
+        "emailReceivers": [
+          {
+            "name": "PLATFORM Support Alert Shadow",
+            "emailAddress": "alerts@example.com",
+            "useCommonAlertSchema": true
+          }
+        ]
+      }
+    }
+  ],
+  "outputs":{}
+}

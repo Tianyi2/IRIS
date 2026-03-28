@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {
+      "storageAcctName": "[concat('blobstg', uniqueString(resourceGroup().id))]"
+    },
+    "resources": [],
+    "outputs": {
+        "StorageAcctName": {
+            "type": "string",
+            "value": "[variables('storageAcctName')]"
+        },
+        "StorageResId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAcctName'))]"
+        },
+        "StorageAcctKeys": {
+            "type": "object",
+            "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAcctName')), '2017-06-01')]"
+        }
+    }
+}
+  

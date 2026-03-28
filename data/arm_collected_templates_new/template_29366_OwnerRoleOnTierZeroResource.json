@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/cc168d7f-59d1-4472-be98-854869e62907')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/cc168d7f-59d1-4472-be98-854869e62907')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "BloodHound Attack Path Finding - Owner Role on Tier Zero Resource",
+        "description": "BloodHound Attack Path Finding - Owner Role on Tier Zero Resource",
+        "query": "BHEAttackPathsData_CL | where Finding == \"AzureT0Owner\"",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "domain_name",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "Remediation": "ShortRemediation",
+          "Description": "ShortDescription"
+        },
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "2017.09.01.0",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the name of the virtual machine. This name should be unique within the resource group."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "metadata": {
+        "description": "Specifies the tags that are assigned to the virtual machine."
+      }
+    },
+    "plan": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Specifies information about the marketplace image used to create the virtual machine. This element is only used for marketplace images."
+      }
+    },
+    "properties": {
+      "type": "object",
+      "metadata": {
+        "description": "Specifies the properties of the virtual machine."
+      }
+    },
+    "DependsOn": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Pass dependencies"
+      }
+    }
+  },
+  "variables": {
+    "comment": {
+      "definition": "https://docs.microsoft.com/en-us/rest/api/compute/virtualmachines/virtualmachines-create-or-update"
+    },
+    "virtualMachineArray": [
+      {
+        "apiVersion": "2017-03-30",
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[parameters('name')]",
+        "location": "[resourceGroup().location]",
+        "dependsOn": "[if(empty(parameters('DependsOn')),json('null'),parameters('DependsOn'))]",
+        "properties": "[parameters('properties')]",
+        "resources": []
+      },
+      {
+        "apiVersion": "2017-03-30",
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[parameters('name')]",
+        "location": "[resourceGroup().location]",
+        "dependsOn": "[if(empty(parameters('DependsOn')),json('null'),parameters('DependsOn'))]",
+        "plan": "[parameters('plan')]",
+        "properties": "[parameters('properties')]",
+        "resources": []
+      }
+    ],
+    "virtualMachine": "[if(empty(parameters('plan')),variables('virtualMachineArray')[0],variables('virtualMachineArray')[1])]"
+  },
+  "resources": [
+    {
+      "name": "CreateVirtualMachine",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": "[createarray(variables('virtualMachine'))]"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "virtualMachine": {
+      "type": "object",
+      "value": "[variables('virtualMachine')]"
+    }
+  }
+}

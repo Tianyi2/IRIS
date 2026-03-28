@@ -1,0 +1,115 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "hostPoolName": {
+      "type": "string",
+      "metadata": {
+        "description": "Der Name des vorhandenen Hostpools."
+      }
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Der Name des vorhandenen AVD Workspaces."
+      }
+    },
+    "applicationGroupName": {
+      "type": "string",
+      "defaultValue": "RemoteAppGroup",
+      "metadata": {
+        "description": "Der Name der zu erstellenden RemoteApp Application Group."
+      }
+    },
+    "applicationName": {
+      "type": "string",
+      "defaultValue": "MyApp",
+      "metadata": {
+        "description": "Der Name der RemoteApp (der Anzeigename der Anwendung)."
+      }
+    },
+    "applicationFriendlyName": {
+      "type": "string",
+      "defaultValue": "Example Application",
+      "metadata": {
+        "description": "Der benutzerfreundliche Name der RemoteApp."
+      }
+    },
+    "commandLineArguments": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optionale Kommandozeilenargumente für die Anwendung."
+      }
+    },
+    "commandLineSetting": {
+      "type": "string",
+      "defaultValue": "DoNotAllow",
+      "allowedValues": [
+        "DoNotAllow",
+        "Allow"
+      ],
+      "metadata": {
+        "description": "Legt fest, ob der Benutzer Kommandozeilenargumente übergeben darf."
+      }
+    },
+    "filePath": {
+      "type": "string",
+      "defaultValue": "C:\\Program Files\\YourApplication.exe",
+      "metadata": {
+        "description": "Der vollständige Pfad zur ausführbaren Datei der Anwendung auf den Session-Hosts."
+      }
+    },
+    "iconIndex": {
+      "type": "int",
+      "defaultValue": 0,
+      "metadata": {
+        "description": "Der Index des Icons in der Ressourcendatei (falls zutreffend)."
+      }
+    },
+    "iconPath": {
+      "type": "string",
+      "defaultValue": "C:\\Program Files\\YourApplication.ico",
+      "metadata": {
+        "description": "Der Pfad zur Icon-Datei (optional, wenn nicht im Ausführungspfad enthalten)."
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DesktopVirtualization/applicationGroups",
+      "apiVersion": "2021-07-12",
+      "name": "[parameters('applicationGroupName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "applicationGroupType": "RemoteApp",
+        "hostPoolArmPath": "[resourceId('Microsoft.DesktopVirtualization/hostPools', parameters('hostPoolName'))]",
+        "description": "RemoteApp Application Group für [parameters('applicationFriendlyName')]",
+        "friendlyName": "[parameters('applicationGroupName')]",
+        "workspaceArmPath": "[resourceId('Microsoft.DesktopVirtualization/workspaces', parameters('workspaceName'))]"
+      },
+      "resources": [
+        {
+          "type": "applications",
+          "apiVersion": "2021-07-12",
+          "name": "[parameters('applicationName')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.DesktopVirtualization/applicationGroups', parameters('applicationGroupName'))]"
+          ],
+          "properties": {
+            "filePath": "[parameters('filePath')]",
+            "friendlyName": "[parameters('applicationFriendlyName')]",
+            "commandLineArguments": "[parameters('commandLineArguments')]",
+            "commandLineSetting": "[parameters('commandLineSetting')]",
+            "iconIndex": "[parameters('iconIndex')]",
+            "iconPath": "[parameters('iconPath')]",
+            "showInPortal": true
+          }
+        }
+      ]
+    }
+  ]
+}

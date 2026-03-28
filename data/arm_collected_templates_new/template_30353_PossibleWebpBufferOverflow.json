@@ -1,0 +1,102 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/26e81021-2de6-4442-a74a-a77885e96911')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/26e81021-2de6-4442-a74a-a77885e96911')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "tactics": [
+          "Execution"
+        ],
+        "query": "//CVE-2023-4863 Process activity with .webp files on devices where CVE-2023-4863 is unpatched\n//This query shows all process activity with .webp files on vulnerable machines and is not an indicator of malicious activity\nlet VulnDevices = DeviceTvmSoftwareVulnerabilities\n    | where CveId == \"CVE-2023-4863\"\n    | distinct DeviceId;\nunion DeviceProcessEvents, DeviceNetworkEvents, DeviceEvents\n| where DeviceId in (VulnDevices) and InitiatingProcessCommandLine has(\".webp\") or ProcessCommandLine has(\".webp\")",
+        "severity": "Informational",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Possible exploitation of CVE-2023-4863",
+          "alertDynamicProperties": []
+        },
+        "suppressionEnabled": false,
+        "triggerThreshold": 0,
+        "incidentConfiguration": {
+          "createIncident": false,
+          "groupingConfiguration": {
+            "groupByEntities": [
+              "Account"
+            ],
+            "reopenClosedIncident": false,
+            "groupByAlertDetails": [],
+            "matchingMethod": "Selected",
+            "lookbackDuration": "5h",
+            "enabled": false,
+            "groupByCustomDetails": []
+          }
+        },
+        "entityMappings": [
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "DeviceName"
+              }
+            ]
+          },
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "AccountName"
+              }
+            ]
+          },
+          {
+            "entityType": "Process",
+            "fieldMappings": [
+              {
+                "identifier": "ProcessId",
+                "columnName": "ProcessId"
+              }
+            ]
+          },
+          {
+            "entityType": "Process",
+            "fieldMappings": [
+              {
+                "identifier": "ProcessId",
+                "columnName": "InitiatingProcessId"
+              }
+            ]
+          },
+          {
+            "entityType": "Process",
+            "fieldMappings": [
+              {
+                "identifier": "CommandLine",
+                "columnName": "ProcessCommandLine"
+              }
+            ]
+          }
+        ],
+        "name": "Execution of software vulnerable to webp buffer overflow of CVE-2023-4863",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "queryPeriod": "1h",
+        "triggerOperator": "gt",
+        "suppressionDuration": "5h",
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "description": "'This query looks at device, process, and network events from Defender for Endpoint that may be vulnerable to buffer overflow defined in CVE-2023-4863. Results are not an indicator of malicious activity.'\n"
+      }
+    }
+  ]
+}

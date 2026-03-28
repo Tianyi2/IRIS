@@ -1,0 +1,3285 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "connections_azureautomation_name": {
+            "defaultValue": "azureautomation",
+            "type": "String"
+        },
+        "connections_azuremonitorlogs_name": {
+            "defaultValue": "azuremonitorlogs",
+            "type": "String"
+        },
+        "workflows_LA_ElevatedAccess_we_name": {
+            "defaultValue": "LA-ElevatedAccess-we",
+            "type": "String"
+        },
+        "privateEndpoints_pep_aa_ElevatedAccess_we_name": {
+            "defaultValue": "pep-aa-ElevatedAccess-we",
+            "type": "String"
+        },
+        "virtualNetworks_vnet_logic_automation_we_hub_name": {
+            "defaultValue": "vnet-logic-automation-we-hub",
+            "type": "String"
+        },
+        "privateDnsZones_privatelink_azure_automation_net_name": {
+            "defaultValue": "privatelink.azure-automation.net",
+            "type": "String"
+        },
+        "automationAccounts_logic_ElevatedAccess_JIT_we_name": {
+            "defaultValue": "logic-ElevatedAccess-JIT-we",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Automation/automationAccounts",
+            "apiVersion": "2023-11-01",
+            "name": "[parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name')]",
+            "location": "westeurope",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "publicNetworkAccess": false,
+                "disableLocalAuth": false,
+                "sku": {
+                    "name": "Basic"
+                },
+                "encryption": {
+                    "keySource": "Microsoft.Automation",
+                    "identity": {}
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones",
+            "apiVersion": "2024-06-01",
+            "name": "[parameters('privateDnsZones_privatelink_azure_automation_net_name')]",
+            "location": "global",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2024-03-01",
+            "name": "[parameters('virtualNetworks_vnet_logic_automation_we_hub_name')]",
+            "location": "westeurope",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.1.0.0/26"
+                    ]
+                },
+                "encryption": {
+                    "enabled": false,
+                    "enforcement": "AllowUnencrypted"
+                },
+                "privateEndpointVNetPolicies": "Disabled",
+                "subnets": [
+                    {
+                        "name": "default",
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_logic_automation_we_hub_name'), 'default')]",
+                        "properties": {
+                            "addressPrefixes": [
+                                "10.1.0.0/27"
+                            ],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "NetworkSecurityGroupEnabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        },
+                        "type": "Microsoft.Network/virtualNetworks/subnets"
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "[parameters('connections_azureautomation_name')]",
+            "location": "westeurope",
+            "kind": "V1",
+            "properties": {
+                "displayName": "Elevated Access Logic",
+                "statuses": [
+                    {
+                        "status": "Ready"
+                    }
+                ],
+                "customParameterValues": {},
+                "createdTime": "2025-02-19T22:50:05.9372452Z",
+                "changedTime": "2025-02-19T22:50:05.9372452Z",
+                "api": {
+                    "name": "[parameters('connections_azureautomation_name')]",
+                    "displayName": "Azure Automation",
+                    "description": "Azure Automation provides tools to manage your cloud and on-premises infrastructure seamlessly.",
+                    "iconUri": "[concat('https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/releases/v1.0.1685/1.0.1685.3700/', parameters('connections_azureautomation_name'), '/icon.png')]",
+                    "brandColor": "#56A0D7",
+                    "id": "[concat('/subscriptions/20a35571-a564-407d-ab28-a1e68c6cba9c/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('connections_azureautomation_name'))]",
+                    "type": "Microsoft.Web/locations/managedApis"
+                },
+                "testLinks": []
+            }
+        },
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "[parameters('connections_azuremonitorlogs_name')]",
+            "location": "westeurope",
+            "kind": "V1",
+            "properties": {
+                "displayName": "Elevated Access Logic app",
+                "statuses": [
+                    {
+                        "status": "Ready"
+                    }
+                ],
+                "customParameterValues": {},
+                "createdTime": "2025-02-19T22:41:56.9226196Z",
+                "changedTime": "2025-02-19T22:41:56.9226196Z",
+                "api": {
+                    "name": "[parameters('connections_azuremonitorlogs_name')]",
+                    "displayName": "Azure Monitor Logs",
+                    "description": "Use this connector to query your Azure Monitor Logs across Log Analytics workspace and Application Insights component, to list or visualize results.",
+                    "iconUri": "[concat('https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/releases/v1.0.1694/1.0.1694.3755/', parameters('connections_azuremonitorlogs_name'), '/icon.png')]",
+                    "brandColor": "#0072C6",
+                    "id": "[concat('/subscriptions/20a35571-a564-407d-ab28-a1e68c6cba9c/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('connections_azuremonitorlogs_name'))]",
+                    "type": "Microsoft.Web/locations/managedApis"
+                },
+                "testLinks": []
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/connectionTypes",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Azure')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "isGlobal": true,
+                "fieldDefinitions": {
+                    "AutomationCertificateName": {
+                        "isEncrypted": false,
+                        "isOptional": false,
+                        "type": "System.String"
+                    },
+                    "SubscriptionID": {
+                        "isEncrypted": false,
+                        "isOptional": false,
+                        "type": "System.String"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/connectionTypes",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/AzureClassicCertificate')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "isGlobal": true,
+                "fieldDefinitions": {
+                    "SubscriptionName": {
+                        "isEncrypted": false,
+                        "isOptional": false,
+                        "type": "System.String"
+                    },
+                    "SubscriptionId": {
+                        "isEncrypted": false,
+                        "isOptional": false,
+                        "type": "System.String"
+                    },
+                    "CertificateAssetName": {
+                        "isEncrypted": false,
+                        "isOptional": false,
+                        "type": "System.String"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/connectionTypes",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/AzureServicePrincipal')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "isGlobal": true,
+                "fieldDefinitions": {
+                    "ApplicationId": {
+                        "isEncrypted": false,
+                        "isOptional": false,
+                        "type": "System.String"
+                    },
+                    "TenantId": {
+                        "isEncrypted": false,
+                        "isOptional": false,
+                        "type": "System.String"
+                    },
+                    "CertificateThumbprint": {
+                        "isEncrypted": false,
+                        "isOptional": false,
+                        "type": "System.String"
+                    },
+                    "SubscriptionId": {
+                        "isEncrypted": false,
+                        "isOptional": false,
+                        "type": "System.String"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/jobs",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/abd697a1-4a72-484c-bd89-d205080990e2')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "runbook": {
+                    "name": "Remove-ElevatedAccess"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/jobs",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/e23913a7-c70b-4251-8b0d-3615b8f595f5')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "runbook": {
+                    "name": "Remove-ElevatedAccess"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/jobs",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/f38d5e70-f350-4180-8925-aded00f44ed0')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "runbook": {
+                    "name": "Remove-ElevatedAccess"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/AuditPolicyDsc')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Accounts')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Advisor')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Aks')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.AnalysisServices')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ApiManagement')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.App')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.AppConfiguration')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ApplicationInsights')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ArcResourceBridge')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Attestation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Automanage')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Automation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Batch')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Billing')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Cdn')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.CloudService')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.CognitiveServices')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Compute')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ConfidentialLedger')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ContainerInstance')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ContainerRegistry')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.CosmosDB')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DataBoxEdge')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Databricks')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DataFactory')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DataLakeAnalytics')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DataLakeStore')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DataProtection')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DataShare')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DeploymentManager')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DesktopVirtualization')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DevCenter')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DevTestLabs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Dns')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.EventGrid')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.EventHub')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.FrontDoor')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Functions')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.HDInsight')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.HealthcareApis')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.IotHub')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.KeyVault')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Kusto')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.LoadTesting')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.LogicApp')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.MachineLearning')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.MachineLearningServices')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Maintenance')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ManagedServiceIdentity')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ManagedServices')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.MarketplaceOrdering')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Media')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Migrate')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Monitor')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.MySql')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Network')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.NetworkCloud')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.NotificationHubs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.OperationalInsights')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.PolicyInsights')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.PostgreSql')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.PowerBIEmbedded')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.PrivateDns')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.RecoveryServices')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.RedisCache')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.RedisEnterpriseCache')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Relay')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ResourceMover')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Resources')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Security')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.SecurityInsights')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ServiceBus')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ServiceFabric')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.SignalR')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Sql')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.SqlVirtualMachine')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.StackHCI')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Storage')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.StorageMover')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.StorageSync')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.StreamAnalytics')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Support')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Synapse')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.TrafficManager')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Websites')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Azure')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Azure.Storage')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/AzureRM.Automation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/AzureRM.Compute')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/AzureRM.Profile')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/AzureRM.Resources')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/AzureRM.Sql')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/AzureRM.Storage')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/ComputerManagementDsc')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/GPRegistryPolicyParser')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Microsoft.PowerShell.Core')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Microsoft.PowerShell.Diagnostics')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Microsoft.PowerShell.Management')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Microsoft.PowerShell.Security')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Microsoft.PowerShell.Utility')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Microsoft.WSMan.Management')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Orchestrator.AssetManagement.Cmdlets')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PSDscResources')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/SecurityPolicyDsc')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/StateConfigCompositeResources')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/xDSCDomainjoin')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/xPowerShellExecutionPolicy')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/xRemoteDesktopAdmin')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Accounts')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Advisor')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Aks')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.AnalysisServices')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ApiManagement')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.App')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.AppConfiguration')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ApplicationInsights')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ArcResourceBridge')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Attestation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Automanage')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Automation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Batch')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Billing')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Cdn')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.CloudService')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.CognitiveServices')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Compute')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ConfidentialLedger')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ContainerInstance')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ContainerRegistry')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.CosmosDB')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DataBoxEdge')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Databricks')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DataFactory')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DataLakeAnalytics')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DataLakeStore')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DataProtection')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DataShare')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DeploymentManager')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DesktopVirtualization')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DevCenter')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.DevTestLabs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Dns')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.EventGrid')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.EventHub')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.FrontDoor')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Functions')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.HDInsight')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.HealthcareApis')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.IotHub')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.KeyVault')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Kusto')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.LoadTesting')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.LogicApp')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.MachineLearning')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.MachineLearningServices')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Maintenance')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ManagedServiceIdentity')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ManagedServices')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.MarketplaceOrdering')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Media')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Migrate')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Monitor')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.MySql')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Network')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.NetworkCloud')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.NotificationHubs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.OperationalInsights')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.PolicyInsights')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.PostgreSql')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.PowerBIEmbedded')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.PrivateDns')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.RecoveryServices')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.RedisCache')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.RedisEnterpriseCache')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Relay')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ResourceMover')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Resources')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Security')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.SecurityInsights')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ServiceBus')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.ServiceFabric')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.SignalR')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Sql')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.SqlVirtualMachine')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.StackHCI')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Storage')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.StorageMover')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.StorageSync')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.StreamAnalytics')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Support')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Synapse')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.TrafficManager')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/powerShell72Modules",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Az.Websites')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runbooks",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/AzureAutomationTutorialWithIdentity')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "runbookType": "PowerShell",
+                "logVerbose": false,
+                "logProgress": false,
+                "logActivityTrace": 0
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runbooks",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/AzureAutomationTutorialWithIdentityGraphical')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "runbookType": "GraphPowerShell",
+                "logVerbose": false,
+                "logProgress": false,
+                "logActivityTrace": 0
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runbooks",
+            "apiVersion": "2023-11-01",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Remove-ElevatedAccess')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "runbookType": "PowerShell72",
+                "logVerbose": false,
+                "logProgress": false,
+                "logActivityTrace": 0
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "runtime": {
+                    "language": "PowerShell",
+                    "version": "5.1"
+                },
+                "defaultPackages": {
+                    "az": "11.2.0"
+                },
+                "description": "System-generated Runtime Environment for your Automation account with Runtime language: PowerShell & Runtime version: 5.1. It automatically populates Packages defined for PowerShell 5.1 runtime version in your Automation account. This Runtime environment is non-editable. "
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-7.1')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "runtime": {
+                    "language": "PowerShell",
+                    "version": "7.1"
+                },
+                "defaultPackages": {
+                    "az": "8.0.0"
+                },
+                "description": "System-generated Runtime Environment for your Automation account with Runtime language: PowerShell & Runtime version: 7.1. It automatically populates Packages defined for PowerShell 7.1 runtime version in your Automation account. This Runtime environment is non-editable. "
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-7.2')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "runtime": {
+                    "language": "PowerShell",
+                    "version": "7.2"
+                },
+                "defaultPackages": {
+                    "az": "11.2.0",
+                    "azure cli": "2.56.0"
+                },
+                "description": "System-generated Runtime Environment for your Automation account with Runtime language: PowerShell & Runtime version: 7.2. It automatically populates Packages defined for PowerShell 7.2 runtime version in your Automation account. This Runtime environment is non-editable. "
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Python-2.7')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "runtime": {
+                    "language": "Python",
+                    "version": "2.7"
+                },
+                "description": "System-generated Runtime Environment for your Automation account with Runtime language: Python & Runtime version: 2.7. It automatically populates Packages defined for Python 2.7 runtime version in your Automation account. This Runtime environment is non-editable. "
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Python-3.10')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "runtime": {
+                    "language": "Python",
+                    "version": "3.10"
+                },
+                "description": "System-generated Runtime Environment for your Automation account with Runtime language: Python & Runtime version: 3.10. It automatically populates Packages defined for Python 3.10 runtime version in your Automation account. This Runtime environment is non-editable. "
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/Python-3.8')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "runtime": {
+                    "language": "Python",
+                    "version": "3.8"
+                },
+                "description": "System-generated Runtime Environment for your Automation account with Runtime language: Python & Runtime version: 3.8. It automatically populates Packages defined for Python 3.8 runtime version in your Automation account. This Runtime environment is non-editable. "
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones/A",
+            "apiVersion": "2024-06-01",
+            "name": "[concat(parameters('privateDnsZones_privatelink_azure_automation_net_name'), '/d6554d80-ff46-4be7-840e-97175ced367f.webhook.we')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDnsZones_privatelink_azure_automation_net_name'))]"
+            ],
+            "properties": {
+                "metadata": {
+                    "creator": "created by private endpoint pep-aa-ElevatedAccess-we with resource guid e2ba67df-5230-47cb-99aa-4da3f091bf3e"
+                },
+                "ttl": 10,
+                "aRecords": [
+                    {
+                        "ipv4Address": "10.1.0.4"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones/SOA",
+            "apiVersion": "2024-06-01",
+            "name": "[concat(parameters('privateDnsZones_privatelink_azure_automation_net_name'), '/@')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDnsZones_privatelink_azure_automation_net_name'))]"
+            ],
+            "properties": {
+                "ttl": 3600,
+                "soaRecord": {
+                    "email": "azureprivatedns-host.microsoft.com",
+                    "expireTime": 2419200,
+                    "host": "azureprivatedns.net",
+                    "minimumTtl": 10,
+                    "refreshTime": 3600,
+                    "retryTime": 300,
+                    "serialNumber": 1
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2024-03-01",
+            "name": "[concat(parameters('virtualNetworks_vnet_logic_automation_we_hub_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_logic_automation_we_hub_name'))]"
+            ],
+            "properties": {
+                "addressPrefixes": [
+                    "10.1.0.0/27"
+                ],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "NetworkSecurityGroupEnabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/privateEndpointConnections",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/d6554d80-ff46-4be7-840e-97175ced367f-a12bd7e4-b9f2-4281-8c4f-fd647be2bccc')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]",
+                "[resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoints_pep_aa_ElevatedAccess_we_name'))]"
+            ],
+            "properties": {
+                "privateEndpoint": {
+                    "id": "[resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoints_pep_aa_ElevatedAccess_we_name'))]"
+                },
+                "privateLinkServiceConnectionState": {
+                    "status": "Approved",
+                    "description": "Auto-approved"
+                },
+                "groupIds": [
+                    "Webhook"
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/AuditPolicyDsc')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/Azure')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/Azure.Storage')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/AzureRM.Automation')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/AzureRM.Compute')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/AzureRM.Profile')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/AzureRM.Resources')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/AzureRM.Sql')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/AzureRM.Storage')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/ComputerManagementDsc')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/GPRegistryPolicyParser')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/Microsoft.PowerShell.Core')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/Microsoft.PowerShell.Diagnostics')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/Microsoft.PowerShell.Management')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/Microsoft.PowerShell.Security')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/Microsoft.PowerShell.Utility')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/Microsoft.WSMan.Management')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/Orchestrator.AssetManagement.Cmdlets')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-7.1/Orchestrator.AssetManagement.Cmdlets')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-7.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/PSDscResources')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/SecurityPolicyDsc')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/StateConfigCompositeResources')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/xDSCDomainjoin')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/xPowerShellExecutionPolicy')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/runtimeEnvironments/packages",
+            "apiVersion": "2023-05-15-preview",
+            "name": "[concat(parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), '/PowerShell-5.1/xRemoteDesktopAdmin')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts/runtimeEnvironments', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'), 'PowerShell-5.1')]",
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]"
+            ],
+            "properties": {
+                "contentLink": {}
+            }
+        },
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('workflows_LA_ElevatedAccess_we_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/connections', parameters('connections_azuremonitorlogs_name'))]",
+                "[resourceId('Microsoft.Web/connections', parameters('connections_azureautomation_name'))]"
+            ],
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "Recurrence": {
+                            "recurrence": {
+                                "interval": 2,
+                                "frequency": "Hour",
+                                "timeZone": "Romance Standard Time"
+                            },
+                            "evaluatedRecurrence": {
+                                "interval": 2,
+                                "frequency": "Hour",
+                                "timeZone": "Romance Standard Time"
+                            },
+                            "type": "Recurrence"
+                        }
+                    },
+                    "actions": {
+                        "Query_for_Elevated_Access_Event_in_Entra_Audit_Logs": {
+                            "runAfter": {},
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azuremonitorlogs']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "body": {
+                                    "query": "AuditLogs\n| where TimeGenerated >= ago(2h)\n| where Category =~ \"AzureRBACRoleManagementElevateAccess\"\n| where ActivityDisplayName =~ \"User has elevated their access to User Access Administrator for their Azure Resources\"\n| extend Actor = tostring(InitiatedBy.user.userPrincipalName)\n| extend UserId = tostring(InitiatedBy.user.id)\n| extend IPAddress = tostring(InitiatedBy.user.ipAddress) \n| project\n    TimeGenerated,\n    Actor,\n    UserId,\n    OperationName,\n    IPAddress,\n    Result,\n    LoggedByService",
+                                    "timerangetype": "3"
+                                },
+                                "path": "/queryDataV2",
+                                "queries": {
+                                    "subscriptions": "20a35571-a564-407d-ab28-a1e68c6cba9c",
+                                    "resourcegroups": "rg-monitoring-we",
+                                    "resourcetype": "Log Analytics Workspace",
+                                    "resourcename": "log-EntraAuditLogs-we"
+                                }
+                            }
+                        },
+                        "Set_var_Output": {
+                            "runAfter": {
+                                "Query_for_Elevated_Access_Event_in_Entra_Audit_Logs": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "var_Output",
+                                        "type": "string"
+                                    }
+                                ]
+                            }
+                        },
+                        "For_each": {
+                            "foreach": "@body('Query_for_Elevated_Access_Event_in_Entra_Audit_Logs')?['value']",
+                            "actions": {
+                                "Create_job_for_removing_Elevated_Access": {
+                                    "type": "ApiConnection",
+                                    "inputs": {
+                                        "host": {
+                                            "connection": {
+                                                "name": "@parameters('$connections')['azureautomation']['connectionId']"
+                                            }
+                                        },
+                                        "method": "put",
+                                        "body": {
+                                            "properties": {
+                                                "parameters": {
+                                                    "UserId": "@items('For_each')?['Actor']"
+                                                }
+                                            }
+                                        },
+                                        "path": "/subscriptions/@{encodeURIComponent('20a35571-a564-407d-ab28-a1e68c6cba9c')}/resourceGroups/@{encodeURIComponent('rg-logic-we')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('logic-ElevatedAccess-JIT-we')}/jobs",
+                                        "queries": {
+                                            "x-ms-api-version": "2015-10-31",
+                                            "runbookName": "Remove-ElevatedAccess",
+                                            "wait": true
+                                        }
+                                    }
+                                },
+                                "Get_job_output": {
+                                    "runAfter": {
+                                        "Create_job_for_removing_Elevated_Access": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "ApiConnection",
+                                    "inputs": {
+                                        "host": {
+                                            "connection": {
+                                                "name": "@parameters('$connections')['azureautomation']['connectionId']"
+                                            }
+                                        },
+                                        "method": "get",
+                                        "path": "/subscriptions/@{encodeURIComponent('20a35571-a564-407d-ab28-a1e68c6cba9c')}/resourceGroups/@{encodeURIComponent('rg-logic-we')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent('logic-ElevatedAccess-JIT-we')}/jobs/@{encodeURIComponent(body('Create_job_for_removing_Elevated_Access')?['properties']?['jobId'])}/output",
+                                        "queries": {
+                                            "x-ms-api-version": "2015-10-31"
+                                        }
+                                    }
+                                },
+                                "Condition": {
+                                    "actions": {
+                                        "Append_to_var_Output": {
+                                            "type": "AppendToStringVariable",
+                                            "inputs": {
+                                                "name": "var_Output",
+                                                "value": "\nSuccessfully removed Elevated Access for User: @{items('For_each')?['Actor']}\n"
+                                            }
+                                        }
+                                    },
+                                    "runAfter": {
+                                        "Get_job_output": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "else": {
+                                        "actions": {}
+                                    },
+                                    "expression": {
+                                        "and": [
+                                            {
+                                                "contains": [
+                                                    "@body('Get_job_output')",
+                                                    "Successfully removed Elevated Access for user"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "type": "If"
+                                }
+                            },
+                            "runAfter": {
+                                "Set_var_Output": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Foreach"
+                        },
+                        "If_no_successful_removal_-_terminate": {
+                            "actions": {
+                                "Terminate": {
+                                    "type": "Terminate",
+                                    "inputs": {
+                                        "runStatus": "Succeeded"
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "For_each": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "else": {
+                                "actions": {
+                                    "Compose_Variable_for_further_use": {
+                                        "type": "Compose",
+                                        "inputs": "@variables('var_Output')"
+                                    }
+                                }
+                            },
+                            "expression": {
+                                "and": [
+                                    {
+                                        "equals": [
+                                            "@length(variables('var_Output'))",
+                                            "@int(0)"
+                                        ]
+                                    }
+                                ]
+                            },
+                            "type": "If"
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "azuremonitorlogs": {
+                                "id": "/subscriptions/20a35571-a564-407d-ab28-a1e68c6cba9c/providers/Microsoft.Web/locations/westeurope/managedApis/azuremonitorlogs",
+                                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('connections_azuremonitorlogs_name'))]",
+                                "connectionName": "azuremonitorlogs",
+                                "connectionProperties": {
+                                    "authentication": {
+                                        "type": "ManagedServiceIdentity"
+                                    }
+                                }
+                            },
+                            "azureautomation": {
+                                "id": "/subscriptions/20a35571-a564-407d-ab28-a1e68c6cba9c/providers/Microsoft.Web/locations/westeurope/managedApis/azureautomation",
+                                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('connections_azureautomation_name'))]",
+                                "connectionName": "azureautomation",
+                                "connectionProperties": {
+                                    "authentication": {
+                                        "type": "ManagedServiceIdentity"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+            "apiVersion": "2024-06-01",
+            "name": "[concat(parameters('privateDnsZones_privatelink_azure_automation_net_name'), '/1739999752752')]",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDnsZones_privatelink_azure_automation_net_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_logic_automation_we_hub_name'))]"
+            ],
+            "properties": {
+                "registrationEnabled": false,
+                "resolutionPolicy": "Default",
+                "virtualNetwork": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_logic_automation_we_hub_name'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints",
+            "apiVersion": "2024-03-01",
+            "name": "[parameters('privateEndpoints_pep_aa_ElevatedAccess_we_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_logic_automation_we_hub_name'), 'default')]"
+            ],
+            "properties": {
+                "privateLinkServiceConnections": [
+                    {
+                        "name": "[parameters('privateEndpoints_pep_aa_ElevatedAccess_we_name')]",
+                        "id": "[concat(resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoints_pep_aa_ElevatedAccess_we_name')), concat('/privateLinkServiceConnections/', parameters('privateEndpoints_pep_aa_ElevatedAccess_we_name')))]",
+                        "properties": {
+                            "privateLinkServiceId": "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccounts_logic_ElevatedAccess_JIT_we_name'))]",
+                            "groupIds": [
+                                "Webhook"
+                            ],
+                            "privateLinkServiceConnectionState": {
+                                "status": "Approved",
+                                "description": "Auto-approved",
+                                "actionsRequired": "None"
+                            }
+                        }
+                    }
+                ],
+                "manualPrivateLinkServiceConnections": [],
+                "subnet": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_logic_automation_we_hub_name'), 'default')]"
+                },
+                "ipConfigurations": [],
+                "customDnsConfigs": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+            "apiVersion": "2024-03-01",
+            "name": "[concat(parameters('privateEndpoints_pep_aa_ElevatedAccess_we_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoints_pep_aa_ElevatedAccess_we_name'))]",
+                "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDnsZones_privatelink_azure_automation_net_name'))]"
+            ],
+            "properties": {
+                "privateDnsZoneConfigs": [
+                    {
+                        "name": "privatelink-azure-automation-net",
+                        "properties": {
+                            "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', parameters('privateDnsZones_privatelink_azure_automation_net_name'))]"
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

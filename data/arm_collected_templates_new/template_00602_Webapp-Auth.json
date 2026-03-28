@@ -1,0 +1,141 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sites_MCSC_Authorization_name": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "cosmosDBAccountName": {
+            "type": "string",
+            "defaultValue": "missingchildrendata2",
+            "metadata": {
+                "description": "mcsc-supporting-api"
+            }
+        },
+        "TWITTER_CONSUMER_KEY": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "TWITTER_CONSUMER_SECRET": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "ROOT": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "APP_INSIGHTS_KEY": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "IG_VERIFY_TOKEN": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "FACEBOOK_CONSUMER_KEY": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "FACEBOOK_CONSUMER_SECRET": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "INSTAGRAM_CONSUMER_KEY": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "INSTAGRAM_CONSUMER_SECRET": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "PORTAL_APP_INSIGHTS_KEY": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "WEBSITE_NODE_DEFAULT_VERSION": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "repoURL": {
+            "type": "string",
+            "defaultValue": "https://github.com/Missing-Children-Society-Canada/authorization"
+        },
+        "branch": {
+            "type": "string",
+            "defaultValue": "master"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Web/Sites",
+            "apiVersion": "2015-08-01",
+            "name": "[parameters('sites_MCSC_Authorization_name')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "name": "[parameters('sites_MCSC_Authorization_name')]",
+                "siteConfig": {
+                    "phpVersion": "off",
+                    "appSettings": [
+                        {
+                            "Name": "DOC_DB",
+                            "Value": "[concat('https://', parameters('cosmosDBAccountName'), '.documents.azure.com:443')]"
+                        },
+                        {
+                            "Name": "AUTH_KEY",
+                            "Value": "[concat(listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', parameters('cosmosDBAccountName')), '2015-04-08').primaryMasterKey)]"
+                        },
+                        {
+                            "Name": "TWITTER_CONSUMER_KEY",
+                            "Value": "[parameters('TWITTER_CONSUMER_KEY')]"
+                        },
+                        {
+                            "Name": "TWITTER_CONSUMER_SECRET",
+                            "Value": "[parameters('TWITTER_CONSUMER_SECRET')]"
+                        },
+                        {
+                            "Name": "ROOT",
+                            "Value": "[parameters('ROOT')]"
+                        },
+                        {
+                            "Name": "APP_INSIGHTS_KEY",
+                            "Value": "[parameters('APP_INSIGHTS_KEY')]"
+                        },
+                        {
+                            "Name": "WEBSITE_NODE_DEFAULT_VERSION",
+                            "Value": "[parameters('WEBSITE_NODE_DEFAULT_VERSION')]"
+                        },
+                        {
+                            "Name": "IG_VERIFY_TOKEN",
+                            "Value": "[parameters('IG_VERIFY_TOKEN')]"
+                        },
+                        {
+                            "Name": "FACEBOOK_CONSUMER_KEY",
+                            "Value": "[parameters('FACEBOOK_CONSUMER_KEY')]"
+                        },
+                        {
+                            "Name": "FACEBOOK_CONSUMER_SECRET",
+                            "Value": "[parameters('FACEBOOK_CONSUMER_SECRET')]"
+                        },
+                        {
+                            "Name": "INSTAGRAM_CONSUMER_KEY",
+                            "Value": "[parameters('INSTAGRAM_CONSUMER_KEY')]"
+                        },
+                        {
+                            "Name": "INSTAGRAM_CONSUMER_SECRET",
+                            "Value": "[parameters('INSTAGRAM_CONSUMER_SECRET')]"
+                        },
+                        {
+                            "Name": "PORTAL_APP_INSIGHTS_KEY",
+                            "Value": "[parameters('PORTAL_APP_INSIGHTS_KEY')]"
+                        }
+                    ],
+                    "RepoUrl": "[parameters('repoURL')]",
+                    "branch": "[parameters('branch')]",
+                    "IsManualIntegration": true
+                }
+            }
+        }
+    ]
+}

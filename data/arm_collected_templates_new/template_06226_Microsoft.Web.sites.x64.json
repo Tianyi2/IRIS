@@ -1,0 +1,104 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string",
+            "metadata": {
+                "description": "Must be a unique website name: *****.azurewebsites.net"
+            }
+        },
+        "hostingPlanName": {
+            "type": "string"
+        },
+        "serverFarmResourceGroup": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]"
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue" : {}
+        },
+        "appSettings": {
+            "type": "array",
+            "defaultValue": [
+                {
+                    "name": "dummy",
+                    "value": ""
+                }
+            ],
+            "metadata": {
+                "description": "name/value pairs to apply as app settings. Leave the default value if don't want to add anything. Needs at least 1 item."
+            }
+        }
+    },
+    "variables": {
+        "hiddenLink": {
+            "[concat('hidden-related:', subscription().id, '/resourcegroups/', parameters('serverFarmResourceGroup'), '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "empty"
+        },
+        "t" : "[union(parameters('tags'), variables('hiddenLink'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/sites",
+            "name": "[parameters('name')]",
+            "apiVersion": "2016-08-01",
+            "location": "[resourceGroup().location]",
+            "tags": "[variables('t')]",
+            "properties": {
+                "siteConfig": {
+                    "copy": [
+                        {
+                            "name": "appSettings",
+                            "count": "[length(parameters('appSettings'))]",
+                            "input": {
+                                "name": "[parameters('appSettings')[copyIndex('appSettings')].name]",
+                                "value": "[parameters('appSettings')[copyIndex('appSettings')].value]",
+                                "slotSetting": "[parameters('appSettings')[copyIndex('appSettings')].slotSetting]"
+                            }
+                        }
+                    ],
+                    "metadata": [
+                        {
+                            "name": "CURRENT_STACK",
+                            "value": "dotnetcore"
+                        }
+                    ],
+                    "phpVersion": "",
+                    "pythonVersion": "",
+                    "use32BitWorkerProcess": false,
+                    "webSocketsEnabled": false,
+                    "alwaysOn": true,
+                    "javaVersion": "",
+                    "http20Enabled": true,
+                    "minTlsVersion": "1.2",
+                    "ftpsState": "FtpsOnly",
+                    "remoteDebuggingVersion": "VS2019"
+                },
+                "name": "[parameters('name')]",
+                "serverFarmId": "[concat(subscription().id, '/resourcegroups/', parameters('serverFarmResourceGroup'), '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
+                "httpsOnly": true,
+                "clientAffinityEnabled": false
+            },
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "resources": [
+                {
+                    "apiVersion": "2015-08-01",
+                    "name": "IIS.Compression.SiteExtension",
+                    "type": "siteextensions",
+                    "dependsOn": [
+                        "[parameters('name')]"
+                    ]
+                }
+            ]
+        }
+    ],
+    "outputs": {
+        "site": {
+            "type": "object",
+            "value": "[reference(parameters('name'), '2016-08-01', 'Full')]"
+        }
+    }
+}

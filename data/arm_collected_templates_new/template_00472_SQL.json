@@ -1,0 +1,62 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "sqlName": {
+      "type": "string",
+      "defaultValue": "sql%UID%",
+      "metadata": {
+        "description": "The primary name of the SQL Server."
+      }
+    },
+    "sqlLocation": {
+      "type": "string",
+      "defaultValue": "%LOCATION%",
+      "metadata": {
+        "description": "SQL Location."
+      }
+    },
+    "sqlAdminName": {
+      "type": "string",
+      "defaultValue": "azsa",
+      "metadata": {
+        "description": "The SQL Server administrator name."
+      }
+    },
+    "sqlAdminPassword": {
+      "type": "securestring",
+      "defaultValue": "%PASSWORD%",
+      "metadata": {
+        "description": "The SQL Server adminstrator password."
+      }
+    },
+    "sqlTags": {
+      "type": "object",
+      "defaultValue": {
+        "Date": "%DATE%"
+      },
+      "metadata": {
+        "description": "SQL Server Tags."
+      }
+    }
+  },
+  "variables": {
+    "sqlLocation": "[if(empty(parameters('sqlLocation')), resourceGroup().location, parameters('sqlLocation'))]"
+  },
+  "resources": [
+    {
+      "name": "[parameters('sqlName')]",
+      "type": "Microsoft.Sql/servers",
+      "location": "[variables('sqlLocation')]",
+      "tags": "[parameters('sqlTags')]",
+      "apiVersion": "2015-05-01-preview",
+      "kind": "v12.0",
+      "properties": {
+        "administratorLogin": "[parameters('sqlAdminName')]",
+        "administratorLoginPassword": "[parameters('sqlAdminPassword')]",
+        "version": "12.0"
+      }
+    }
+  ],
+  "outputs": {}
+}

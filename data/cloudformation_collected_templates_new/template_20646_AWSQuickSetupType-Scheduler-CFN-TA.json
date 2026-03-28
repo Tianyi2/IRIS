@@ -1,0 +1,521 @@
+{
+  "schemaVersion": "1.0",
+  "templateBody": {
+    "Description": "(SO00121) - The CloudFormation template for Resource Scheduler Quick Setup",
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+      "TargetTagKey": {
+        "Type": "String",
+        "Description": "TagKey for identifying instances"
+      },
+      "TargetTagValue": {
+        "Description": "TagValue for identifying instances",
+        "Type": "String"
+      },
+      "ICalendarString": {
+        "Description": "iCal string format to create Change Calendar resource",
+        "Type": "String"
+      },
+      "QSConfigurationId": {
+        "Type": "String",
+        "Description": "(Required) Unique identifier of the deployed configuration"
+      },
+      "QSType": {
+        "Type": "String",
+        "AllowedValues": [
+          "LA",
+          "TA"
+        ],
+        "Default": "TA",
+        "Description": "(Required) Specifies whether the Quick Setup applies to the local account or an AWS organization."
+      },
+      "QSAttachConfigurationPolicy": {
+        "Type": "String",
+        "Default": "false",
+        "AllowedValues": [
+          "true",
+          "false"
+        ],
+        "Description": "(Optional) Whether to attach Configuration permissions policy which sets boundaries of what configuration can do."
+      }
+    },
+    "Metadata": {
+      "AWS::CloudFormation::Interface": {
+        "ParameterGroups": [
+          {
+            "Label": {
+              "default": "Tags for identifying instances"
+            },
+            "Parameters": [
+              "TargetTagKey",
+              "TargetTagValue"
+            ]
+          },
+          {
+            "Label": {
+              "default": "ICalendarString"
+            },
+            "Parameters": [
+              "ICalendarString"
+            ]
+          },
+          {
+            "Label": {
+              "default": "Unique Identifier"
+            },
+            "Parameters": [
+              "QSConfigurationId"
+            ]
+          }
+        ],
+        "ParameterLabels": {
+          "TargetTagKey": {
+            "default": "TagKey used to identify instances"
+          },
+          "TargetTagValue": {
+            "default": "Tag value used to identify instances"
+          },
+          "QSConfigurationId": {
+            "default": "Unique identifier of the deployed configuration."
+          },
+          "ICalendarString": {
+            "default": "iCal string format to create Change Calendar resource"
+          }
+        }
+      }
+    },
+    "Mappings": {
+      "Artifact": {
+        "Name": {
+          "StartEC2InstancesAssociationName": "StartEC2Instances",
+          "StopEC2InstancesAssociationName": "StopEC2Instances",
+          "StartEC2InstancesDocumentName": "AWSQuickSetupType-Scheduler-ApplyInstanceState",
+          "StopEC2InstancesDocumentName": "AWSQuickSetupType-Scheduler-ApplyInstanceState",
+          "StartStateManagerAssociationDocumentName": "AWSQuickSetupType-Scheduler-ChangeCalendarState",
+          "ChangeCalendarDocumentName": "AWSQuickSetup-ChangeCalendar"
+        }
+      }
+    },
+    "Conditions": {
+      "ShouldAttachConfigurationPolicy": {
+        "Fn::Equals": [
+          {
+            "Ref": "QSAttachConfigurationPolicy"
+          },
+          "true"
+        ]
+      }
+    },
+    "Resources": {
+      "ChangeCalendarDocument": {
+        "Type": "AWS::SSM::Document",
+        "Properties": {
+          "DocumentType": "ChangeCalendar",
+          "UpdateMethod": "NewVersion",
+          "Name": {
+            "Fn::Sub": [
+              "${DocumentName}-${UniqueID}",
+              {
+                "DocumentName": {
+                  "Fn::FindInMap": [
+                    "Artifact",
+                    "Name",
+                    "ChangeCalendarDocumentName"
+                  ]
+                },
+                "UniqueID": {
+                  "Ref": "QSConfigurationId"
+                }
+              }
+            ]
+          },
+          "Content": {
+            "Ref": "ICalendarString"
+          },
+          "DocumentFormat": "TEXT"
+        }
+      },
+      "StartAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "AssociationName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-Scheduler-StartEC2Instances-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "Name": {
+            "Fn::FindInMap": [
+              "Artifact",
+              "Name",
+              "StartEC2InstancesDocumentName"
+            ]
+          },
+          "Parameters": {
+            "InstanceState": [
+              "start"
+            ],
+            "TagKey": [
+              {
+                "Fn::Sub": "tag:${TargetTagKey}"
+              }
+            ],
+            "TagValue": [
+              {
+                "Ref": "TargetTagValue"
+              }
+            ],
+            "AutomationAssumeRole": [
+              {
+                "Fn::GetAtt": [
+                  "ConfigurationAutomationRoleV2",
+                  "Arn"
+                ]
+              }
+            ],
+            "ChangeCalendarName": [
+              {
+                "Ref": "ChangeCalendarDocument"
+              }
+            ],
+            "ExpectedCalendarState": [
+              "OPEN"
+            ]
+          }
+        },
+        "DependsOn": [
+          "ConfigurationAutomationRoleV2"
+        ]
+      },
+      "StopAssociation": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "AssociationName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-Scheduler-StopEC2Instances-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "Name": {
+            "Fn::FindInMap": [
+              "Artifact",
+              "Name",
+              "StopEC2InstancesDocumentName"
+            ]
+          },
+          "Parameters": {
+            "InstanceState": [
+              "stop"
+            ],
+            "TagKey": [
+              {
+                "Fn::Sub": "tag:${TargetTagKey}"
+              }
+            ],
+            "TagValue": [
+              {
+                "Ref": "TargetTagValue"
+              }
+            ],
+            "AutomationAssumeRole": [
+              {
+                "Fn::GetAtt": [
+                  "ConfigurationAutomationRoleV2",
+                  "Arn"
+                ]
+              }
+            ],
+            "ChangeCalendarName": [
+              {
+                "Ref": "ChangeCalendarDocument"
+              }
+            ],
+            "ExpectedCalendarState": [
+              "CLOSED"
+            ]
+          }
+        },
+        "DependsOn": [
+          "ConfigurationAutomationRoleV2"
+        ]
+      },
+      "StartEC2InstancesEventRule": {
+        "Type": "AWS::Events::Rule",
+        "Properties": {
+          "Name": {
+            "Fn::Join": [
+              "",
+              [
+                "AWSQuickSetup-Scheduler-StartEC2Rule-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "Description": "This rule will start the custom ssm document to start ec2 instances",
+          "EventPattern": {
+            "source": [
+              "aws.ssm"
+            ],
+            "detail-type": [
+              "Calendar State Change"
+            ],
+            "resources": [
+              {
+                "Fn::Sub": "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:document/${ChangeCalendarDocument}"
+              }
+            ],
+            "detail": {
+              "state": [
+                "OPEN"
+              ]
+            }
+          },
+          "State": "ENABLED",
+          "Targets": [
+            {
+              "Arn": {
+                "Fn::Sub": [
+                  "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:automation-definition/${DocumentName}:$DEFAULT",
+                  {
+                    "DocumentName": {
+                      "Fn::FindInMap": [
+                        "Artifact",
+                        "Name",
+                        "StartStateManagerAssociationDocumentName"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "Id": "Target0",
+              "Input": {
+                "Fn::Sub": [
+                  "{\"AssociationIDs\":[\"${AssociationIDs}\"],\"AutomationAssumeRole\":[\"${AutomationAssumeRole}\"]}",
+                  {
+                    "AssociationIDs": {
+                      "Fn::GetAtt": [
+                        "StartAssociation",
+                        "AssociationId"
+                      ]
+                    },
+                    "AutomationAssumeRole": {
+                      "Fn::GetAtt": [
+                        "ConfigurationAutomationRoleV2",
+                        "Arn"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "RoleArn": {
+                "Fn::GetAtt": [
+                  "EventRoleToInvokeSSMV2",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "StopEC2InstancesEventRule": {
+        "Type": "AWS::Events::Rule",
+        "Properties": {
+          "Name": {
+            "Fn::Join": [
+              "",
+              [
+                "AWSQuickSetup-Scheduler-StopEC2Rule-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "Description": "This rule will start the custom ssm document to stop ec2 instances",
+          "EventPattern": {
+            "source": [
+              "aws.ssm"
+            ],
+            "detail-type": [
+              "Calendar State Change"
+            ],
+            "resources": [
+              {
+                "Fn::Sub": "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:document/${ChangeCalendarDocument}"
+              }
+            ],
+            "detail": {
+              "state": [
+                "CLOSED"
+              ]
+            }
+          },
+          "State": "ENABLED",
+          "Targets": [
+            {
+              "Arn": {
+                "Fn::Sub": [
+                  "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:automation-definition/${DocumentName}:$DEFAULT",
+                  {
+                    "DocumentName": {
+                      "Fn::FindInMap": [
+                        "Artifact",
+                        "Name",
+                        "StartStateManagerAssociationDocumentName"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "Id": "Target0",
+              "Input": {
+                "Fn::Sub": [
+                  "{\"AssociationIDs\":[\"${AssociationIDs}\"],\"AutomationAssumeRole\":[\"${AutomationAssumeRole}\"]}",
+                  {
+                    "AssociationIDs": {
+                      "Fn::GetAtt": [
+                        "StopAssociation",
+                        "AssociationId"
+                      ]
+                    },
+                    "AutomationAssumeRole": {
+                      "Fn::GetAtt": [
+                        "ConfigurationAutomationRoleV2",
+                        "Arn"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "RoleArn": {
+                "Fn::GetAtt": [
+                  "EventRoleToInvokeSSMV2",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "EventRoleToInvokeSSMV2": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "RoleName": {
+            "Fn::Sub": "AWS-QuickSetup-Scheduler-TriggerRole-V2-${QSConfigurationId}_${AWS::Region}"
+          },
+          "AssumeRolePolicyDocument": {
+            "Statement": [
+              {
+                "Action": "sts:AssumeRole",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "events.amazonaws.com"
+                },
+                "Condition": {
+                  "StringEquals": {
+                    "aws:SourceAccount": {
+                      "Fn::Sub": "${AWS::AccountId}"
+                    }
+                  }
+                }
+              }
+            ],
+            "Version": "2012-10-17"
+          },
+          "Path": "/",
+          "ManagedPolicyArns": [
+            {
+              "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AWSQuickSetupStartSSMAssociationsExecutionPolicy"
+            }
+          ]
+        }
+      },
+      "SystemAssociationForEnablingExplorer": {
+        "Type": "AWS::SSM::Association",
+        "Properties": {
+          "Name": "AWS-EnableExplorer",
+          "AssociationName": {
+            "Fn::Join": [
+              "",
+              [
+                "AWS-QuickSetup-Scheduler-EnableExplorer-",
+                {
+                  "Ref": "QSConfigurationId"
+                }
+              ]
+            ]
+          },
+          "Parameters": {
+            "AutomationAssumeRole": [
+              {
+                "Fn::GetAtt": [
+                  "ConfigurationAutomationRoleV2",
+                  "Arn"
+                ]
+              }
+            ],
+            "OpsDataSources": [
+              "Association,EC2"
+            ]
+          }
+        },
+        "DependsOn": [
+          "ConfigurationAutomationRoleV2"
+        ]
+      },
+      "ConfigurationAutomationRoleV2": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "RoleName": {
+            "Fn::Sub": "AWS-QuickSetup-Scheduler-ConfigRole-V2-${QSConfigurationId}_${AWS::Region}"
+          },
+          "AssumeRolePolicyDocument": {
+            "Statement": [
+              {
+                "Action": "sts:AssumeRole",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "ssm.amazonaws.com"
+                },
+                "Condition": {
+                  "StringEquals": {
+                    "aws:SourceAccount": {
+                      "Fn::Sub": "${AWS::AccountId}"
+                    }
+                  },
+                  "ArnLike": {
+                    "aws:SourceArn": {
+                      "Fn::Sub": "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:automation-execution/*"
+                    }
+                  }
+                }
+              }
+            ],
+            "Version": "2012-10-17"
+          },
+          "Path": "/",
+          "ManagedPolicyArns": [
+            {
+              "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AWSQuickSetupStartStopInstancesExecutionPolicy"
+            },
+            {
+              "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AWSSystemsManagerEnableExplorerExecutionPolicy"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

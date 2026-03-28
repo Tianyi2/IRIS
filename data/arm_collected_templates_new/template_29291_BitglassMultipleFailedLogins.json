@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/7c570bfc-9f20-490e-80e8-b898c7ce4bda')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/7c570bfc-9f20-490e-80e8-b898c7ce4bda')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "High",
+        "name": "Bitglass - Multiple failed logins",
+        "description": "'Detects multiple failed logins.'\n",
+        "query": "let threshold = 10;\nBitglass\n| where EventType =~ 'access'\n| where EventResultDetails =~ 'Failed login attempt.'\n| summarize count() by User, bin(TimeGenerated, 10m)\n| where count_ >= threshold\n| extend AccountCustomEntity = User\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "AccountCustomEntity",
+                "identifier": "Name"
+              }
+            ],
+            "entityType": "Account"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "CredentialAccess"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

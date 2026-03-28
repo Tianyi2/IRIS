@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "AzOps"
+    }
+  },
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "dab9f356-d3af-50f8-883d-1863aa1c23d3",
+      "apiVersion": "2022-04-01",
+      "properties": {
+        "principalId": "ddbaf483-113d-45de-881c-3823fc9479ad",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7",
+        "scope": "/providers/Microsoft.Management/managementGroups/saturn-connectivity"
+      }
+    }
+  ],
+  "outputs": {}
+}

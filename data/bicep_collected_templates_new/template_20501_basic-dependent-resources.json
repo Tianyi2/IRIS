@@ -1,0 +1,204 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "14349527206955552926"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure region of the deployment"
+      }
+    },
+    "aiServicesName": {
+      "type": "string",
+      "metadata": {
+        "description": "AI services name"
+      }
+    },
+    "keyvaultName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Key Vault"
+      }
+    },
+    "modelName": {
+      "type": "string",
+      "metadata": {
+        "description": "Model name for deployment"
+      }
+    },
+    "modelFormat": {
+      "type": "string",
+      "metadata": {
+        "description": "Model format for deployment"
+      }
+    },
+    "modelVersion": {
+      "type": "string",
+      "metadata": {
+        "description": "Model version for deployment"
+      }
+    },
+    "modelSkuName": {
+      "type": "string",
+      "metadata": {
+        "description": "Model deployment SKU name"
+      }
+    },
+    "modelCapacity": {
+      "type": "int",
+      "metadata": {
+        "description": "Model deployment capacity"
+      }
+    },
+    "modelLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "Model/AI Resource deployment location"
+      }
+    },
+    "aiServiceAccountResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The AI Service Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created."
+      }
+    },
+    "storageName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the storage account"
+      }
+    },
+    "noZRSRegions": {
+      "type": "array",
+      "defaultValue": [
+        "southindia",
+        "westus"
+      ]
+    },
+    "sku": {
+      "type": "object",
+      "defaultValue": "[if(contains(parameters('noZRSRegions'), parameters('location')), createObject('name', 'Standard_GRS'), createObject('name', 'Standard_ZRS'))]"
+    }
+  },
+  "variables": {
+    "storageNameCleaned": "[replace(parameters('storageName'), '-', '')]",
+    "aiServiceExists": "[not(equals(parameters('aiServiceAccountResourceId'), ''))]",
+    "aiServiceParts": "[split(parameters('aiServiceAccountResourceId'), '/')]"
+  },
+  "resources": [
+    {
+      "condition": "[not(variables('aiServiceExists'))]",
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2024-10-01",
+      "name": "[parameters('aiServicesName')]",
+      "location": "[parameters('modelLocation')]",
+      "sku": {
+        "name": "S0"
+      },
+      "kind": "AIServices",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "customSubDomainName": "[toLower(format('{0}', toLower(parameters('aiServicesName'))))]",
+        "apiProperties": {
+          "statisticsEnabled": false
+        },
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    {
+      "condition": "[not(variables('aiServiceExists'))]",
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "2024-10-01",
+      "name": "[format('{0}/{1}', parameters('aiServicesName'), parameters('modelName'))]",
+      "sku": {
+        "capacity": "[parameters('modelCapacity')]",
+        "name": "[parameters('modelSkuName')]"
+      },
+      "properties": {
+        "model": {
+          "name": "[parameters('modelName')]",
+          "format": "[parameters('modelFormat')]",
+          "version": "[parameters('modelVersion')]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('aiServicesName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-05-01",
+      "name": "[variables('storageNameCleaned')]",
+      "location": "[parameters('location')]",
+      "kind": "StorageV2",
+      "sku": "[parameters('sku')]",
+      "properties": {
+        "minimumTlsVersion": "TLS1_2",
+        "allowBlobPublicAccess": false,
+        "publicNetworkAccess": "Enabled",
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "Allow",
+          "virtualNetworkRules": []
+        },
+        "allowSharedKeyAccess": false
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2022-07-01",
+      "name": "[parameters('keyvaultName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "tenantId": "[subscription().tenantId]",
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "enableSoftDelete": true,
+        "enabledForTemplateDeployment": true,
+        "accessPolicies": []
+      }
+    }
+  ],
+  "outputs": {
+    "aiServicesName": {
+      "type": "string",
+      "value": "[if(variables('aiServiceExists'), variables('aiServiceParts')[8], parameters('aiServicesName'))]"
+    },
+    "aiservicesID": {
+      "type": "string",
+      "value": "[if(variables('aiServiceExists'), extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('aiServiceParts')[2], variables('aiServiceParts')[4]), 'Microsoft.CognitiveServices/accounts', variables('aiServiceParts')[8]), resourceId('Microsoft.CognitiveServices/accounts', parameters('aiServicesName')))]"
+    },
+    "aiservicesTarget": {
+      "type": "string",
+      "value": "[if(variables('aiServiceExists'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('aiServiceParts')[2], variables('aiServiceParts')[4]), 'Microsoft.CognitiveServices/accounts', variables('aiServiceParts')[8]), '2024-10-01').endpoint, reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('aiServicesName')), '2024-10-01').endpoint)]"
+    },
+    "aiServiceAccountResourceGroupName": {
+      "type": "string",
+      "value": "[if(variables('aiServiceExists'), variables('aiServiceParts')[4], resourceGroup().name)]"
+    },
+    "aiServiceAccountSubscriptionId": {
+      "type": "string",
+      "value": "[if(variables('aiServiceExists'), variables('aiServiceParts')[2], subscription().subscriptionId)]"
+    },
+    "storageId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageNameCleaned'))]"
+    },
+    "keyvaultId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+    }
+  }
+}

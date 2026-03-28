@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "name": "aks-uai",
+      "apiVersion": "2018-11-30",
+      "location": "[resourceGroup().location]",
+      "tags": {},
+      "properties": {
+        "tenantId": "360d509d-82f2-42d5-9446-fbf417d9139c",
+        "principalId": "0b01e229-55f9-4ce5-80b8-cda2c07d98c5",
+        "clientId": "82aff52c-1788-42db-bbdd-d120869c15f2"
+      }
+    }
+  ],
+  "outputs": {}
+}

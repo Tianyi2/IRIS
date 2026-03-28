@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/80e4db30-5636-4fbd-8816-24c3ded8d243')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/80e4db30-5636-4fbd-8816-24c3ded8d243')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "name": "GCP IAM - New Authentication Token for Service Account",
+        "description": "'Detects when new authentication token is created for service account.'\n",
+        "query": "GCP_IAM\n| where PayloadMethodname in ('GenerateAccessToken', 'google.iam.admin.v1.GenerateAccessToken')\n| extend result = parse_json(todynamic(PayloadAuthorizationinfo))[0]['granted']\n| where result =~ 'true'\n| extend service_account = extract(@'serviceAccounts\\/(.*?)@', 1, PayloadResponseName)\n| project-away result\n| extend AccountName = tostring(split(service_account, \"@\")[0]), AccountUPNSuffix = tostring(split(service_account, \"@\")[1])\n",
+        "status": "Available",
+        "queryFrequency": "1h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "service_account",
+                "identifier": "FullName"
+              },
+              {
+                "columnName": "AccountName",
+                "identifier": "Name"
+              },
+              {
+                "columnName": "AccountUPNSuffix",
+                "identifier": "UPNSuffix"
+              }
+            ],
+            "entityType": "Account"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SrcIpAddr",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "LateralMovement"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "1h"
+      }
+    }
+  ]
+}

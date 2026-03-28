@@ -1,0 +1,67 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/c048fa06-0d50-4626-ae82-a6cea812d9c4')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/c048fa06-0d50-4626-ae82-a6cea812d9c4')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "P7D",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "severity": "High",
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Mimecast Targeted Threat Protection - Impersonation Protect",
+        "description": "'Detects a maliciously tagged impersonation.'\n",
+        "suppressionDuration": "5h",
+        "query": "MimecastTTPImpersonation\n| where ['Tagged Malicious'] == true\n| extend SenderAddress = ['Sender Address'],\n  SenderIPAddress = ['Sender IP Address'],\n  RecipientAddress = ['Recipient Address']\n",
+        "status": "Available",
+        "queryFrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "SenderAddress",
+                "identifier": "Sender"
+              },
+              {
+                "columnName": "SenderIPAddress",
+                "identifier": "SenderIP"
+              },
+              {
+                "columnName": "RecipientAddress",
+                "identifier": "Recipient"
+              }
+            ],
+            "entityType": "MailMessage"
+          }
+        ],
+        "suppressionEnabled": false,
+        "triggerOperator": "gt",
+        "tactics": [
+          "Exfiltration",
+          "Collection",
+          "Discovery"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "30m"
+      }
+    }
+  ]
+}

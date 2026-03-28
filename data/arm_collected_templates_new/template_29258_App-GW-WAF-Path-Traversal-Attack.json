@@ -1,0 +1,56 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/b6c3a8a6-d22c-4882-9c57-abc01690938b')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/b6c3a8a6-d22c-4882-9c57-abc01690938b')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "High",
+        "name": "App GW WAF - Path Traversal Attack",
+        "description": "'Identifies a match for a Path Traversal based attack in the App Gateway WAF logs. The threshold value in the query can be changed as per your infrastructure's requirements.\nReferences: https://owasp.org/www-community/attacks/Path_Traversal'\n",
+        "query": "let Threshold = 3;  \nAGWFirewallLogs\n| where Action == \"Matched\"\n| where Message has \"Path Traversal Attack\"\n| project TransactionId, Hostname, RequestUri, TimeGenerated, ClientIp, Message, DetailedMessage, DetailedData\n| join kind = inner(\nAGWFirewallLogs\n| where Action == \"Blocked\") on TransactionId\n| extend Uri = strcat(Hostname,RequestUri)\n| summarize StartTime = min(TimeGenerated), EndTime = max(TimeGenerated), TransactionID = make_set(TransactionId,100), Message = make_set(Message,100), Detail_Message = make_set(DetailedMessage,100), Detail_Data = make_set(DetailedData,100), Total_TransactionId = dcount(TransactionId) by ClientIp, Uri, Action\n| where Total_TransactionId >= Threshold\n",
+        "status": "Available",
+        "queryFrequency": "6h",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Uri",
+                "identifier": "Url"
+              }
+            ],
+            "entityType": "URL"
+          },
+          {
+            "fieldMappings": [
+              {
+                "columnName": "ClientIp",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "DefenseEvasion",
+          "Execution",
+          "InitialAccess",
+          "PrivilegeEscalation",
+          "Discovery"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "6h"
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.OperationsManagement/solutions",
+      "name": "Security(bugbash-la-dddbadc2-9d31-43f4-a7e3-ae83c9da646a)",
+      "apiVersion": "2015-11-01-preview",
+      "location": "[resourceGroup().location]",
+      "tags": null,
+      "properties": {
+        "workspaceResourceId": "/subscriptions/dddbadc2-9d31-43f4-a7e3-ae83c9da646a/resourcegroups/bugbash-mgmt/providers/Microsoft.OperationalInsights/workspaces/bugbash-la-dddbadc2-9d31-43f4-a7e3-ae83c9da646a",
+        "provisioningState": "Succeeded",
+        "creationTime": "Fri, 19 Mar 2021 16:38:53 GMT",
+        "lastModifiedTime": "Fri, 19 Mar 2021 16:38:53 GMT",
+        "containedResources": [
+          "/subscriptions/dddbadc2-9d31-43f4-a7e3-ae83c9da646a/resourcegroups/bugbash-mgmt/providers/Microsoft.OperationalInsights/workspaces/bugbash-la-dddbadc2-9d31-43f4-a7e3-ae83c9da646a/views/Security(bugbash-la-dddbadc2-9d31-43f4-a7e3-ae83c9da646a)"
+        ]
+      }
+    }
+  ],
+  "outputs": {}
+}

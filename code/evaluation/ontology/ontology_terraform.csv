@@ -1,0 +1,49 @@
+ontology_id,ontology_name,category,language,source
+tf_1,terraform,section,TF,https://developer.hashicorp.com/terraform/language/terraform
+tf_2,provider,section,TF,https://developer.hashicorp.com/terraform/language/providers/configuration
+tf_3,resource,section,TF,https://developer.hashicorp.com/terraform/language/resources/syntax
+tf_4,data,section,TF,https://developer.hashicorp.com/terraform/language/data-sources
+tf_5,variable,section,TF,https://developer.hashicorp.com/terraform/language/values/variables
+tf_6,output,section,TF,https://developer.hashicorp.com/terraform/language/values/outputs
+tf_7,locals,section,TF,https://developer.hashicorp.com/terraform/language/values/locals
+tf_8,module,section,TF,https://developer.hashicorp.com/terraform/language/modules/syntax
+tf_9,resource.name,section attribute,TF,https://developer.hashicorp.com/terraform/language/syntax/configuration
+tf_10,terraform.required_version,section attribute,TF,https://developer.hashicorp.com/terraform/language/terraform#terraform-required_version
+tf_11,terraform.required_providers,section attribute,TF,https://developer.hashicorp.com/terraform/language/terraform#terraform-required_providers
+tf_12,terraform.backend,section attribute,TF,https://developer.hashicorp.com/terraform/language/terraform#terraform-backend
+tf_13,terraform.cloud,section attribute,TF,https://developer.hashicorp.com/terraform/language/terraform#terraform-cloud
+tf_14,provider.alias,section attribute,TF,https://developer.hashicorp.com/terraform/language/providers/configuration#alias-multiple-provider-configurations
+tf_15,resource.Type,section attribute,TF,https://developer.hashicorp.com/terraform/language/resources/syntax
+tf_16,resource.depends_on,section attribute,TF,https://developer.hashicorp.com/terraform/language/meta-arguments/depends_on
+tf_17,resource.count,section attribute,TF,https://developer.hashicorp.com/terraform/language/meta-arguments/count
+tf_18,resource.for_each,section attribute,TF,https://developer.hashicorp.com/terraform/language/meta-arguments/for_each
+tf_19,resource.provider,section attribute,TF,https://developer.hashicorp.com/terraform/language/meta-arguments/resource-provider
+tf_20,resource.lifecycle,section attribute,TF,https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle
+tf_21,data.Type,section attribute,TF,https://developer.hashicorp.com/terraform/language/data-sources
+tf_22,data.depends_on,section attribute,TF,https://developer.hashicorp.com/terraform/language/meta-arguments/depends_on
+tf_23,data.count,section attribute,TF,https://developer.hashicorp.com/terraform/language/meta-arguments/count
+tf_24,data.for_each,section attribute,TF,https://developer.hashicorp.com/terraform/language/meta-arguments/for_each
+tf_25,data.provider,section attribute,TF,https://developer.hashicorp.com/terraform/language/meta-arguments/resource-provider
+tf_26,data.lifecycle,section attribute,TF,https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle
+tf_27,variable.type,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/variables#type-constraints
+tf_28,variable.default,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/variables#default-values
+tf_29,variable.description,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/variables#input-variable-documentation
+tf_30,variable.sensitive,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/variables#suppressing-values-in-cli-output
+tf_31,variable.nullable,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/variables#disallowing-null-input-values
+tf_32,variable.validation,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/variables#custom-validation-rules
+tf_33,output.value,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/outputs
+tf_34,output.description,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/outputs
+tf_35,output.sensitive,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/outputs
+tf_36,output.depends_on,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/outputs
+tf_37,output.precondition,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/outputs
+tf_38,module.source,section attribute,TF,https://developer.hashicorp.com/terraform/language/modules/syntax#source
+tf_39,module.version,section attribute,TF,https://developer.hashicorp.com/terraform/language/modules/syntax#version
+tf_40,module.count,section attribute,TF,https://developer.hashicorp.com/terraform/language/meta-arguments/count
+tf_41,module.for_each,section attribute,TF,https://developer.hashicorp.com/terraform/language/meta-arguments/for_each
+tf_42,module.providers,section attribute,TF,https://developer.hashicorp.com/terraform/language/meta-arguments/module-providers
+tf_43,module.depends_on,section attribute,TF,https://developer.hashicorp.com/terraform/language/meta-arguments/depends_on
+tf_44,output.name,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/outputs
+tf_45,data.name,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/locals
+tf_46,variable.name,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/variables
+tf_47,locals.name,section attribute,TF,https://developer.hashicorp.com/terraform/language/values/locals
+tf_48,module.name,section attribute,TF,https://developer.hashicorp.com/terraform/language/modules/syntax

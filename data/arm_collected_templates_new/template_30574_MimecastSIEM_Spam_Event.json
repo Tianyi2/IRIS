@@ -1,0 +1,72 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/df1b9377-5c29-4928-872f-9934a6b4f611')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/df1b9377-5c29-4928-872f-9934a6b4f611')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "1d",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "enabled": true,
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "name": "Mimecast Secure Email Gateway - Spam Event Thread",
+        "description": "Detects threat from spam event thread protection logs",
+        "suppressionDuration": "5h",
+        "query": "MimecastSIEM_CL| where mimecastEventId_s==\"mail_spameventthread\"",
+        "queryFrequency": "5m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "Sender_s",
+                "identifier": "Sender"
+              },
+              {
+                "columnName": "Recipient_s",
+                "identifier": "Recipient"
+              },
+              {
+                "columnName": "Subject_s",
+                "identifier": "Subject"
+              }
+            ],
+            "entityType": "MailMessage"
+          }
+        ],
+        "suppressionEnabled": false,
+        "severity": "Low",
+        "triggerOperator": "gt",
+        "triggerThreshold": 0,
+        "tactics": [
+          "Discovery"
+        ],
+        "customDetails": {
+          "SourceIP": "SourceIP",
+          "headerFrom": "headerFrom_s",
+          "SenderDomain": "SenderDomain_s",
+          "Route": "Route_s",
+          "MsgId_s": "MsgId_s"
+        },
+        "queryPeriod": "15m"
+      }
+    }
+  ]
+}

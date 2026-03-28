@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/cab7396a-9a18-45e7-b685-945e8bf825cb')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/cab7396a-9a18-45e7-b685-945e8bf825cb')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Veeam ONE Unusual Job Duration (Veeam Backup for Microsoft 365)",
+        "description": "Detects Veeam Backup for Microsoft 365 jobs with unusual execution duration.",
+        "query": "VeeamOneTriggeredAlarms_CL | where PredefinedAlarmId == 381",
+        "status": "Available",
+        "queryFrequency": "3h",
+        "triggerOperator": "gt",
+        "tactics": [],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "Comment": "Comment",
+          "TriggeredTime": "TriggeredTime",
+          "ObjectType": "ObjectType",
+          "Description": "Description",
+          "ObjectName": "ObjectName",
+          "Name": "Name",
+          "VoneHostName": "VoneHostName",
+          "TriggeredAlarmId": "TriggeredAlarmId",
+          "PredefinedAlarmId": "PredefinedAlarmId",
+          "ObjectId": "ObjectId",
+          "Status": "Status"
+        },
+        "queryPeriod": "3h"
+      }
+    }
+  ]
+}

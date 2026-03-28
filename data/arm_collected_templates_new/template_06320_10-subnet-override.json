@@ -1,0 +1,75 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "devTestLabsName": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "vnetName": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "primarySubnetName": {
+            "type": "string",
+            "defaultValue": ""
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "type": "microsoft.devtestlab/labs/virtualnetworks",
+            "apiVersion": "2018-09-15",
+            "name": "[concat(parameters('devTestLabsName'), '/', parameters('vnetName'))]",
+            "properties": {
+                "allowedSubnets": [
+                    {
+                        "resourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('primarySubnetName'))]",
+                        "labSubnetName": "[parameters('primarySubnetName')]",
+                        "allowPublicIp": "Deny"
+                    }
+                ],
+                "externalProviderResourceId": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+                "subnetOverrides": [
+                    {
+                        "resourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('primarySubnetName'))]",
+                        "labSubnetName": "[parameters('primarySubnetName')]",
+                        "useInVmCreationPermission": "Allow",
+                        "usePublicIpAddressPermission": "Deny",
+                        "sharedPublicIpAddressConfiguration": {
+                            "allowedPorts": [
+                                {
+                                    "transportProtocol": "Tcp",
+                                    "backendPort": 3389
+                                },
+                                {
+                                    "transportProtocol": "Tcp",
+                                    "backendPort": 22
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "resourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), 'AzureBastionSubnet')]",
+                        "labSubnetName": "AzureBastionSubnet",
+                        "useInVmCreationPermission": "Deny",
+                        "usePublicIpAddressPermission": "Deny",
+                        "sharedPublicIpAddressConfiguration": {
+                            "allowedPorts": [
+                                {
+                                    "transportProtocol": "Tcp",
+                                    "backendPort": 3389
+                                },
+                                {
+                                    "transportProtocol": "Tcp",
+                                    "backendPort": 22
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

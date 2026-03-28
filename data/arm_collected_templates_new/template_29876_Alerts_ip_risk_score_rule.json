@@ -1,0 +1,68 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/1e7c8d9f-1d42-42b3-b6ce-12a637e05f16')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/1e7c8d9f-1d42-42b3-b6ce-12a637e05f16')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "incidentConfiguration": {
+          "alertDetailsOverride": null,
+          "alertDisplayNameFormat": "Risk Score Increased for IP {{IPRS_IP}}",
+          "alertDescriptionFormat": "The risk score for IP {{IPRS_IP}} has increased. Previous score {{IPRS_OldScore}}. New score {{IPRS_NewScore}}. This may represent newly observed malicious activity or updated threat intelligence.\n",
+          "groupingConfiguration": {
+            "enabled": false,
+            "matchingMethod": "AllEntities",
+            "lookbackDuration": "PT5H",
+            "reopenClosedIncident": false
+          },
+          "createIncident": true
+        },
+        "enabled": true,
+        "severity": "Low",
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Cyble Vision Alerts IP Risk Score",
+        "description": "'Triggers when the risk score for a monitored IP increases significantly. This may indicate new malicious behavior or updated threat intelligence classification.'\n",
+        "query": "Alerts_ip_risk_score  \n| where Service == \"ip_risk_score\" \n| extend MappedSeverity = Severity\n",
+        "status": "Available",
+        "queryfrequency": "30m",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "IPRS_IP",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "GreaterThan",
+        "tactics": [
+          "Reconnaissance"
+        ],
+        "triggerThreshold": 0,
+        "customDetails": {
+          "MappedSeverity": "Severity",
+          "IPRS_IP": "IPRS_IP",
+          "AlertID": "AlertID",
+          "IPRS_NewScore": "IPRS_NewScore",
+          "IPRS_OldScore": "IPRS_OldScore",
+          "Service": "Service",
+          "Status": "Status"
+        },
+        "queryPeriod": "30m"
+      }
+    }
+  ]
+}

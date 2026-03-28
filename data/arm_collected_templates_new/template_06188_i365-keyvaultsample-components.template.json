@@ -1,0 +1,139 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resgrp-loc": {
+      "type": "string"
+    },
+    "storage-name": {
+      "type": "string"
+    },
+    "storage-tier": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    "storage-keyvault-secret" : {
+      "type":"string",
+      "defaultValue": "storagenamesecret"
+    },
+    "keyvault-name": {
+      "type": "string",
+      "metadata": {
+        "description": "The Key Vault name."
+      }
+    },
+    "keyvault-tier": {
+      "type": "string",
+      "defaultValue": "Standard",
+      "allowedValues": [
+        "Standard",
+        "standard",
+        "Premium",
+        "premium"
+      ],
+      "metadata": {
+        "description": "SKU for the Key Vault."
+      }
+    },
+    "keyvault-accesspolicy": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "The Key Vault access policies, the policy will be reset to this configuration.."
+      }
+    },
+    "keyvault-enabledfordeployment": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "keyvault-enabledfortemplatedeployment": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "keyvault-enabledfordiskencryption": {
+      "type": "bool",
+      "defaultValue": true
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "sku": {
+          "name": "[parameters('storage-tier')]"
+      },
+      "kind": "Storage",
+      "name": "[parameters('storage-name')]",
+      "apiVersion": "2018-07-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+          "displayName": "[parameters('storage-name')]"
+      },
+      "scale": null,
+      "properties": {
+          "networkAcls": {
+              "bypass": "AzureServices",
+              "virtualNetworkRules": [],
+              "ipRules": [],
+              "defaultAction": "Allow"
+          },
+          "supportsHttpsTrafficOnly": true,
+          "encryption": {
+              "services": {
+                  "file": {
+                      "enabled": true
+                  },
+                  "blob": {
+                      "enabled": true
+                  }
+              },
+              "keySource": "Microsoft.Storage"
+          }
+      },
+      "dependsOn": []
+    },
+    {
+      "apiVersion": "2015-06-01",
+      "name": "[parameters('keyvault-name')]",
+      "location": "[resourceGroup().location]",
+      "type": "Microsoft.KeyVault/vaults",
+      "properties": {
+        "enabledForDeployment": "[parameters('keyvault-enabledfordeployment')]",
+        "enabledForTemplateDeployment": "[parameters('keyvault-enabledfortemplatedeployment')]",
+        "enabledForDiskEncryption": "[parameters('keyvault-enabledfordiskencryption')]",
+        "accessPolicies": "[parameters('keyvault-accesspolicy')]",
+        "tenantId": "[subscription().tenantId]",
+        "sku": {
+          "name": "[parameters('keyvault-tier')]",
+          "family": "A"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyvault-name'), '/', parameters('storage-keyvault-secret'))]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',  parameters('storage-name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storage-name')), '2016-01-01').keys[0].value)]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.KeyVault/vaults/', parameters('keyvault-name'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', parameters('storage-name'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "storage-connection-string": {
+      "type": "string",
+      "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',  parameters('storage-name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storage-name')), '2016-01-01').keys[0].value)]"
+    }
+  }
+}

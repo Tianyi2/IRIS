@@ -1,0 +1,61 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "Parameters": {
+    "Workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/84037130-a623-46c2-9144-0c0955ac4112')]",
+      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/84037130-a623-46c2-9144-0c0955ac4112')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2021-03-01-preview",
+      "properties": {
+        "severity": "Medium",
+        "eventGroupingSettings": {
+          "aggregationKind": "AlertPerResult"
+        },
+        "name": "Acronis - Login from Abnormal IP - Low Occurrence",
+        "description": "Suspicious login from an IP address observed up to two times in the last two weeks.",
+        "alertDetailsOverride": {
+          "alertDisplayNameFormat": "Acronis - Login from Abnormal IP ({{initiator_ip}}) - Low Occurrence ({{LoginCount}})",
+          "alertDynamicProperties": []
+        },
+        "query": "CommonSecurityLog\n| where DeviceVendor == \"Acronis audit\"\n| extend initiator_ip = tostring(parse_json(DeviceCustomString1).initiator_ip)\n| summarize LoginCount = count() by initiator_ip\n| where LoginCount <= 2\n| order by LoginCount asc\n",
+        "incidentConfiguration": {
+          "groupingConfiguration": {
+            "enabled": true,
+            "matchingMethod": "Selected",
+            "lookbackDuration": "P7D",
+            "groupByEntities": [
+              "IP"
+            ],
+            "reopenClosedIncident": true
+          },
+          "createIncident": true
+        },
+        "queryFrequency": "1d",
+        "entityMappings": [
+          {
+            "fieldMappings": [
+              {
+                "columnName": "initiator_ip",
+                "identifier": "Address"
+              }
+            ],
+            "entityType": "IP"
+          }
+        ],
+        "triggerOperator": "gt",
+        "tactics": [
+          "InitialAccess"
+        ],
+        "triggerThreshold": 0,
+        "queryPeriod": "14d"
+      }
+    }
+  ]
+}
