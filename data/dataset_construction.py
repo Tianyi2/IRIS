@@ -6,14 +6,24 @@ import time
 import math
 import base64
 import hashlib
+import importlib.util
 import pandas as pd
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
-import sys
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from sensitive import GITHUB_TOKEN
 from search_queries import PERMISSIVE_LICENSES, LANGUAGE_CONFIG
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SENSITIVE_PATH = os.path.join(PROJECT_ROOT, "code", "config", "sensitive.py")
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
+
+# Load token from local config file when available; fall back to env var.
+if os.path.exists(SENSITIVE_PATH):
+    spec = importlib.util.spec_from_file_location("sensitive", SENSITIVE_PATH)
+    if spec and spec.loader:
+        sensitive_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(sensitive_module)
+        GITHUB_TOKEN = getattr(sensitive_module, "GITHUB_TOKEN", GITHUB_TOKEN)
 
 
 class IaCDatasetPipeline:

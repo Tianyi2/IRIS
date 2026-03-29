@@ -16,7 +16,7 @@ from parsers.cloudformation_parser import CloudFormationParser
 from parsers.terraform_parser import TerraformParser
 from parsers.arm_parser import ARMParser
 from analysis.dependency_graph import DependencyGraph
-from parsers.bicep_parser import BicepParser
+# from parsers.bicep_parser import BicepParser   # The abandoned parser for Bicep
 from parsers.bicep_pycep_parser import BicepPycepParser
 
 INPUT_CSV_ENCODING = 'latin-1'
