@@ -1,0 +1,13 @@
+# Folder Structure
+- `analysis\`: folder to store the smell detection implementations
+- `config\`: folder to store configuration and sensitive information. Please update the sensitive.py in the folder to run data collection and LLM evaluation.
+- `evaluation\`: folder to store the evaluation related code and result.
+    - `cloudformation_fail_valdiation\`: stores the validation on the cloudformation failed to parse templates.
+    - `llm\`: stores prompt and code for LLM evaluation
+    - `ontology\`: stores IR construct, IaC ontologies, and the mapping information.
+    - `result\`: the evaluation result on the GitHub collected dataset for the four IaC languages.
+    - `static_analysis_tools\`: stores the code to execute analysis of existing static analysis tools (linters & security scanners)
+- `helper\`: folder to store helper script for parsers.
+- `parsers\`: folder to store the parsers for intermediate representation conversion.
+- `results\`: folder to store the result when run parsers.
+- `main.py`: use this script to run the evaluation (i.e., run smell detection tasks on the 150k templates collected from GitHub).
