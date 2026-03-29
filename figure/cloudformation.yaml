@@ -3,7 +3,7 @@ Parameters:
   Environment:
     Type: String
     AllowedValues: [dev, prod]
-  BackupRetention:                          # SMELL 1
+  BackupRetention:                          # SMELL 3 - Unused parameter
     Type: Number
     Default: 7
 Conditions:
@@ -17,7 +17,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: 0.0.0.0/0                # SMELL 2
+          CidrIp: 0.0.0.0/0                # SMELL 1 - Unrestricted IP address
   Database:
     Type: AWS::RDS::DBInstance
     Condition: IsProduction
@@ -25,11 +25,11 @@ Resources:
       Engine: mysql
       DBInstanceClass: db.t3.micro
       MasterUsername: admin
-      MasterUserPassword: Admin123!         # SMELL 3
+      MasterUserPassword: Admin123!         # SMELL 4 - Hardcoded password
       VPCSecurityGroups:
         - !GetAtt DbSecurityGroup.GroupId
   DbCpuAlarm:
-    Type: AWS::CloudWatch::Alarm            # SMELL 4
+    Type: AWS::CloudWatch::Alarm            # SMELL 2 - Cascading Provision Failure
     Properties:
       Namespace: AWS/RDS
       MetricName: CPUUtilization

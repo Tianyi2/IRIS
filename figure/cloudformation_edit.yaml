@@ -5,11 +5,14 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       SecurityGroupIngress:
-        - CidrIp: 0.0.0.0/0              # SMELL 1
+        - CidrIp: 0.0.0.0/0              # SMELL 1 - Unrestricted IP address
   Database:
     Type: AWS::RDS::DBInstance
     Condition: IsProduction
-  DbCpuAlarm:                            # SMELL 2
+    Properties:
+      VPCSecurityGroups:
+        - !GetAtt DbSecurityGroup.GroupId
+  DbCpuAlarm:                            # SMELL 2 - Cascading Provision Failure
     Type: AWS::CloudWatch::Alarm
     Properties:
       Dimensions:
